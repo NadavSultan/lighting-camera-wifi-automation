@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/luminaire-catalog.schema.json",
+  "title": "Luminaire catalog",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "luminaires"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" }, "catalog_id": { "type": "string" },
+    "luminaires": { "type": "array", "items": { "$ref": "#/$defs/luminaire" } }
+  },
+  "$defs": {
+    "source": { "type": "object", "additionalProperties": false, "required": ["file", "page", "section"], "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] } } },
+    "traceable": { "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"], "properties": { "value": {}, "unit": { "type": ["string", "null"] }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" }, "authoritative_reference": { "type": "string" } } },
+    "luminaire": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "manufacturer", "product_family", "model", "variant", "fixture_type_compatibility", "nominal_wattage", "luminous_flux", "cct", "photometric_file", "recommended_mounting_height", "optic", "specification_status", "notes"],
+      "properties": {
+        "id": { "type": "string" }, "manufacturer": { "$ref": "#/$defs/traceable" }, "product_family": { "$ref": "#/$defs/traceable" }, "model": { "$ref": "#/$defs/traceable" }, "variant": { "$ref": "#/$defs/traceable" },
+        "fixture_type_compatibility": { "$ref": "#/$defs/traceable" }, "nominal_wattage": { "$ref": "#/$defs/traceable" }, "luminous_flux": { "$ref": "#/$defs/traceable" }, "cct": { "$ref": "#/$defs/traceable" },
+        "photometric_file": { "$ref": "#/$defs/traceable" }, "recommended_mounting_height": { "$ref": "#/$defs/traceable" }, "optic": { "$ref": "#/$defs/traceable" },
+        "specification_status": { "enum": ["verified", "needs_confirmation", "incomplete"] }, "notes": { "type": "string" }
+      }
+    }
+  }
+}

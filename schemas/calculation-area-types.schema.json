@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/calculation-area-types.schema.json",
+  "title": "Calculation area types",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "defaults", "statistics", "area_types"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" }, "catalog_id": { "type": "string" },
+    "defaults": { "type": "object", "additionalProperties": false, "required": ["calculation_plane_height", "grid_spacing_x", "grid_spacing_y", "clip_points_to_polygon", "statistics_per_polygon"], "properties": { "calculation_plane_height": { "$ref": "#/$defs/traceable" }, "grid_spacing_x": { "$ref": "#/$defs/traceable" }, "grid_spacing_y": { "$ref": "#/$defs/traceable" }, "clip_points_to_polygon": { "$ref": "#/$defs/traceable" }, "statistics_per_polygon": { "$ref": "#/$defs/traceable" } } },
+    "statistics": { "type": "array", "minItems": 5, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label", "unit", "formula"], "properties": { "id": { "type": "string" }, "label": { "type": "string" }, "unit": { "type": ["string", "null"] }, "formula": { "type": ["string", "null"] } } } },
+    "area_types": { "type": "array", "minItems": 4, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label", "target_average_illuminance", "target_uniformity"], "properties": { "id": { "enum": ["road", "sidewalk", "parking", "other"] }, "label": { "type": "string" }, "target_average_illuminance": { "$ref": "#/$defs/traceable" }, "target_uniformity": { "$ref": "#/$defs/traceable" } } } }
+  },
+  "$defs": {
+    "source": { "type": "object", "additionalProperties": false, "required": ["file", "page", "section"], "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] } } },
+    "traceable": { "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"], "properties": { "value": {}, "unit": { "type": ["string", "null"] }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" } } }
+  }
+}

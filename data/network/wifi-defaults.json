@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "wifi-defaults",
+  "model_type": "conceptual_circle",
+  "coverage_radius": { "value": 30, "unit": "m", "status": "engineering_assumption", "source": { "file": null, "page": null, "section": "Session brief section 7 - Wi-Fi assumptions" }, "confidence": "medium", "notes": "Conceptual planning radius only; not an RF prediction or verified coverage distance." },
+  "fixture_applicability": {
+    "LITE": { "value": false, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 7 - Wi-Fi assumptions" }, "confidence": "high", "notes": "LITE fixtures have no Wi-Fi coverage circle." },
+    "WIFI": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 7 - Wi-Fi assumptions" }, "confidence": "high", "notes": "The conceptual circle applies to WIFI fixtures." },
+    "SMART": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 7 - Wi-Fi assumptions" }, "confidence": "high", "notes": "The conceptual circle applies to SMART fixtures." }
+  },
+  "excluded_factors": ["trees", "buildings", "terrain", "antenna_pattern", "antenna_mounting_height", "frequency_band", "interference", "channel_planning", "client_density", "required_throughput", "construction_materials", "seasonal_foliage", "backhaul_limitations"],
+  "disclaimer": "This circle is a conceptual visualization default. It must not be presented as verified RF coverage or used as a performance guarantee."
+}

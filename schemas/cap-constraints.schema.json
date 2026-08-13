@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/cap-constraints.schema.json",
+  "title": "CAP constraints",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "terminology_note", "product", "constraints"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" }, "catalog_id": { "type": "string" }, "terminology_note": { "type": "string" },
+    "product": { "type": "object", "additionalProperties": false, "required": ["manufacturer", "product_name", "model", "hardware_version", "document_revision", "intended_function", "ordering_variants"], "properties": { "manufacturer": { "$ref": "#/$defs/traceable" }, "product_name": { "$ref": "#/$defs/traceable" }, "model": { "$ref": "#/$defs/traceable" }, "hardware_version": { "$ref": "#/$defs/traceable" }, "document_revision": { "$ref": "#/$defs/traceable" }, "intended_function": { "$ref": "#/$defs/traceable" }, "ordering_variants": { "$ref": "#/$defs/traceable" } } },
+    "constraints": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manufacturer_specifications", "company_provided_requirements", "derived_values", "engineering_assumptions", "missing_information"],
+      "properties": {
+        "manufacturer_specifications": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+        "company_provided_requirements": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+        "derived_values": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+        "engineering_assumptions": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+        "missing_information": { "type": "array", "items": { "$ref": "#/$defs/constraint" } }
+      }
+    }
+  },
+  "$defs": {
+    "source": { "type": "object", "additionalProperties": false, "required": ["file", "page", "section", "field_or_topic"], "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] }, "field_or_topic": { "type": ["string", "null"] } } },
+    "traceable": { "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"], "properties": { "value": {}, "unit": { "type": ["string", "null"] }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" } } },
+    "constraint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "category", "value", "unit", "status", "source", "confidence", "notes"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": { "enum": ["compatibility", "capacity", "range", "radio", "mesh", "backhaul", "power", "mounting", "environment", "antenna", "performance", "redundancy", "topology", "installation", "certification"] },
+        "value": {}, "unit": { "type": ["string", "null"] },
+        "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] },
+        "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" }
+      }
+    }
+  }
+}

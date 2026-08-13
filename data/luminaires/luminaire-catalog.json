@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "luminaire-catalog",
+  "luminaires": [
+    {
+      "id": "luminaire-phoenix1-100w-d01",
+      "manufacturer": { "value": "JUGANU", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "[MANUFAC]" }, "confidence": "high", "notes": "IES keyword." },
+      "product_family": { "value": "PHOENIX1", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed from the internal luminaire catalog number." },
+      "model": { "value": "JLED-SL-100W-PHOENIX1-40-D01", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Internal IES luminaire identifier." },
+      "variant": { "value": "100W-40-D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Identifier suffix retained without interpreting 40 as CCT." },
+      "fixture_type_compatibility": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No source maps this luminaire to LITE, WIFI, or SMART." },
+      "nominal_wattage": { "value": 100, "unit": "W", "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "LM-63 numeric header / input watts" }, "confidence": "high", "notes": "IES input watts; authoritative value is in the IES inventory.", "authoritative_reference": "data/luminaires/ies-inventory.json#/ies_files/ies-phoenix1-100w-d01/input_watts" },
+      "luminous_flux": { "value": null, "unit": "lm", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "The IES uses -1 lumens per lamp for absolute photometry; this is not a luminous-flux value." },
+      "cct": { "value": null, "unit": "K", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "The model token 40 is not interpreted as 4000 K without a datasheet." },
+      "photometric_file": { "value": "JLED-SL-100W-PHOENIX1-40-D01.ies", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "filename and [LUMINAIRE]" }, "confidence": "high", "notes": "Filename and internal model agree." },
+      "recommended_mounting_height": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No luminaire datasheet or design standard was supplied." },
+      "optic": { "value": "D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-100W-PHOENIX1-40-D01.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed suffix; optical meaning remains undocumented." },
+      "specification_status": "incomplete",
+      "notes": "IES metadata is available; flux, CCT, mounting height, and fixture-type compatibility require a luminaire datasheet or approved mapping."
+    },
+    {
+      "id": "luminaire-phoenix1-120w-d01",
+      "manufacturer": { "value": "JUGANU", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "[MANUFAC]" }, "confidence": "high", "notes": "IES keyword." },
+      "product_family": { "value": "PHOENIX1", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed from the internal luminaire catalog number." },
+      "model": { "value": "JLED-SL-120W-PHOENIX1-40-D01", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Internal IES luminaire identifier." },
+      "variant": { "value": "120W-40-D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Identifier suffix retained without interpreting 40 as CCT." },
+      "fixture_type_compatibility": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No source maps this luminaire to LITE, WIFI, or SMART." },
+      "nominal_wattage": { "value": 120, "unit": "W", "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "LM-63 numeric header / input watts" }, "confidence": "high", "notes": "IES input watts; authoritative value is in the IES inventory.", "authoritative_reference": "data/luminaires/ies-inventory.json#/ies_files/ies-phoenix1-120w-d01/input_watts" },
+      "luminous_flux": { "value": null, "unit": "lm", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "The IES uses -1 lumens per lamp for absolute photometry; this is not a luminous-flux value." },
+      "cct": { "value": null, "unit": "K", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "The model token 40 is not interpreted as 4000 K without a datasheet." },
+      "photometric_file": { "value": "JLED-SL-120W-PHOENIX1-40-D01.IES", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "filename and [LUMINAIRE]" }, "confidence": "high", "notes": "Filename and internal model agree." },
+      "recommended_mounting_height": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No luminaire datasheet or design standard was supplied." },
+      "optic": { "value": "D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-SL-120W-PHOENIX1-40-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed suffix; optical meaning remains undocumented." },
+      "specification_status": "incomplete",
+      "notes": "IES metadata is available; flux, CCT, mounting height, and fixture-type compatibility require a luminaire datasheet or approved mapping."
+    },
+    {
+      "id": "luminaire-solitaire-50w-d01",
+      "manufacturer": { "value": "JUGANU", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "[MANUFAC]" }, "confidence": "high", "notes": "IES keyword." },
+      "product_family": { "value": "SOLITAIRE", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed from the internal luminaire catalog number." },
+      "model": { "value": "JLED-GL-60W-SOLITAIRE-D01", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Internal IES identifier; conflicts with the 050W filename and 50 W numeric header." },
+      "variant": { "value": "D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Optic suffix only; wattage naming is unresolved." },
+      "fixture_type_compatibility": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No source maps this luminaire to LITE, WIFI, or SMART." },
+      "nominal_wattage": { "value": 50, "unit": "W", "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "LM-63 numeric header / input watts" }, "confidence": "high", "notes": "IES numeric header and filename agree at 50 W, while [LUMINAIRE] contains 60W; authoritative parsed value is in the IES inventory.", "authoritative_reference": "data/luminaires/ies-inventory.json#/ies_files/ies-solitaire-50w-d01/input_watts" },
+      "luminous_flux": { "value": null, "unit": "lm", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "Absolute photometry sentinel does not state luminaire flux." },
+      "cct": { "value": null, "unit": "K", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No CCT value is present." },
+      "photometric_file": { "value": "JLED-GL-050W-SOLITAIRE 3B-D01.IES", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "filename" }, "confidence": "medium", "notes": "Association is provisional because the internal model wattage conflicts with the filename/header." },
+      "recommended_mounting_height": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No luminaire datasheet or design standard was supplied." },
+      "optic": { "value": "D01", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D01.IES", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed suffix; optical meaning remains undocumented." },
+      "specification_status": "needs_confirmation",
+      "notes": "Confirm whether the product is a 50 W or 60 W variant and obtain the matching datasheet."
+    },
+    {
+      "id": "luminaire-solitaire-50w-d02",
+      "manufacturer": { "value": "JUGANU", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "[MANUFAC]" }, "confidence": "high", "notes": "IES keyword." },
+      "product_family": { "value": "SOLITAIRE", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed from the internal luminaire catalog number." },
+      "model": { "value": "JLED-GL-60W-SOLITAIRE-D02", "unit": null, "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Internal IES identifier; conflicts with the 050W filename and 50 W numeric header." },
+      "variant": { "value": "D02", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Optic suffix only; wattage naming is unresolved." },
+      "fixture_type_compatibility": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No source maps this luminaire to LITE, WIFI, or SMART." },
+      "nominal_wattage": { "value": 50, "unit": "W", "status": "manufacturer_specification", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "LM-63 numeric header / input watts" }, "confidence": "high", "notes": "IES numeric header and filename agree at 50 W, while [LUMINAIRE] contains 60W; authoritative parsed value is in the IES inventory.", "authoritative_reference": "data/luminaires/ies-inventory.json#/ies_files/ies-solitaire-50w-d02/input_watts" },
+      "luminous_flux": { "value": null, "unit": "lm", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "Absolute photometry sentinel does not state luminaire flux." },
+      "cct": { "value": null, "unit": "K", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No CCT value is present." },
+      "photometric_file": { "value": "JLED-GL-050W-SOLITAIRE 3B-D02.ies", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "filename" }, "confidence": "low", "notes": "Association is provisional because the internal model wattage conflicts and the numeric dimensions are negative." },
+      "recommended_mounting_height": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No luminaire datasheet or design standard was supplied." },
+      "optic": { "value": "D02", "unit": null, "status": "derived_value", "source": { "file": "Input/Lighting/JLED-GL-050W-SOLITAIRE 3B-D02.ies", "page": null, "section": "[LUMINAIRE]" }, "confidence": "high", "notes": "Parsed suffix; optical meaning remains undocumented." },
+      "specification_status": "needs_confirmation",
+      "notes": "Confirm wattage/model mapping and interpretation of negative LM-63 dimensions before photometric use."
+    }
+  ]
+}

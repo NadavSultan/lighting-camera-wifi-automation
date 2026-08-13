@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-13. Independent Phase 1 validation is complete and passed after six confirmed defects were fixed. Scope remains frozen at Phase 1. Phase 2 has not started and is not authorized.
+Last updated: 2026-08-13. Independent Phase 1 validation remains complete and passing. The Engineering Data & Specifications package is now complete: source-audited catalogs, schemas, conventions, assumptions/open questions, and automated validation are checked in without implementing Phase 2 application behavior. Phase 2 UI, geometry, calculation, coverage, and recommendation features have not started and remain unauthorized.
 
 ## Completed features
 
@@ -22,13 +22,18 @@ Last updated: 2026-08-13. Independent Phase 1 validation is complete and passed 
 - Finite coordinate validation and inline KML IconStyle colour resolution.
 - Checked-in Pydantic-derived project JSON Schema and OpenAPI contract.
 - Inventory and review notes for the supplied KML, four IES files, camera workbook, and CAP datasheet.
+- Traceable fixture-type, camera/lens, luminaire/IES, conceptual Wi-Fi, CAP-constraint, and calculation-area catalogs with Draft 2020-12 JSON Schemas.
+- Independent IES reparsing and hash validation for all four complete LM-63-2002 Type C files.
+- CAP datasheet extraction that separates manufacturer maxima from design requirements and explicitly preserves missing recommendation inputs.
+- Camera convention and catalog records that leave the JL-LN037 87-degree/90-degree horizontal-FOV conflict unresolved rather than choosing silently.
+- Engineering assumption and open-question registers organized by future phase and responsible source/owner.
 
 ## Incomplete features
 
 These are intentionally outside Phase 1 and must not be treated as defects in this handoff:
 
-- Luminaire and IES catalogs or assignments.
-- Camera catalog, multiple-camera configuration, FOV geometry, and analytics-quality modelling.
+- Application integration and assignment workflows for the new luminaire, IES, and camera catalogs.
+- Multiple-camera configuration, FOV geometry, and analytics-quality modelling.
 - Conceptual Wi-Fi circles, gap/overlap analysis, and boundary coverage statistics.
 - Calculation-area drawing, grids, IES parsing, photometric calculations, statistics, and heat maps.
 - CAP constraint model, recommendations, topology, and revalidation.
@@ -58,7 +63,8 @@ See `docs/phase-1-validation-report.md` for finding evidence and the full valida
 
 Final independent validation on 2026-08-13:
 
-- Backend: `22 passed`; one non-failing Starlette deprecation warning.
+- Engineering data validator: passed all seven catalog/schema pairs, source/reference checks, IES reparsing, domain invariants, and all seven supplied-source hashes.
+- Backend: `23 passed`; one non-failing Starlette deprecation warning. The additional test executes the engineering-data validator.
 - Frontend rendered-output suite: `2 passed`, `0 failed`.
 - TypeScript: zero errors.
 - ESLint: zero errors or warnings.
@@ -69,6 +75,9 @@ Final independent validation on 2026-08-13:
 The repeatable command set is:
 
 ```powershell
+Set-Location .
+.\.venv\Scripts\python.exe .\scripts\validate_engineering_data.py
+
 Set-Location .\backend
 ..\.venv\Scripts\python.exe -m pytest
 
@@ -78,6 +87,20 @@ pnpm run typecheck
 pnpm run lint
 pnpm run build
 ```
+
+## Current engineering-data limits
+
+- No standalone luminaire datasheets were supplied; flux, CCT, mounting height, fixture compatibility, and optic definitions remain unknown.
+- Solitaire D01/D02 filenames and input-watt fields indicate 50 W while their internal IES luminaire identifiers contain `60W`; D02 also contains negative width/length values.
+- The JL-LN037 workbook reports 87 degrees horizontal FOV while the company brief reports 90 degrees.
+- Camera quantity, fixture-relative mounting geometry, azimuth, and analytics remain unknown.
+- CAP fixture/node applicability, recommended design range/load/hops, antenna/LOS, band selection, redundancy, and site power/backhaul rules remain unknown.
+- Wi-Fi remains a 30 m conceptual-circle assumption, not verified RF coverage.
+- Approved lighting targets and deterministic grid-origin/boundary rules remain missing.
+
+## Exact next session
+
+Run an **Engineering Data Acceptance Review and Phase 2 Catalog Integration Planning** session. Review the JL-LN037 and Solitaire conflicts with product owners, approve the catalog/schema contracts and authoritative-source rules, then obtain explicit authorization before integrating catalogs into the application. Do not begin FOV geometry, Wi-Fi analysis, photometric calculations, or CAP recommendations in that session unless separately authorized by the applicable later-phase gate.
 
 ## Current run commands
 

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/camera-catalog.schema.json",
+  "title": "Camera catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "camera_models", "lenses", "smart_fixture_integration"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "catalog_id": { "type": "string", "minLength": 1 },
+    "camera_models": { "type": "array", "items": { "$ref": "#/$defs/camera" } },
+    "lenses": { "type": "array", "items": { "$ref": "#/$defs/lens" } },
+    "smart_fixture_integration": { "$ref": "#/$defs/integration" }
+  },
+  "$defs": {
+    "source": {
+      "type": "object", "additionalProperties": false, "required": ["file", "page", "section"],
+      "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] } }
+    },
+    "traceable": {
+      "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"],
+      "properties": {
+        "value": {}, "unit": { "type": ["string", "null"] },
+        "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] },
+        "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" }
+      }
+    },
+    "camera": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "manufacturer", "camera_family", "camera_model", "sensor_manufacturer", "sensor", "sensor_type", "sensor_size", "resolution_width", "resolution_height", "megapixel_count", "aspect_ratio", "lens_ids", "specification_status", "engineering_notes"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "manufacturer": { "$ref": "#/$defs/traceable" }, "camera_family": { "$ref": "#/$defs/traceable" }, "camera_model": { "$ref": "#/$defs/traceable" },
+        "sensor_manufacturer": { "$ref": "#/$defs/traceable" }, "sensor": { "$ref": "#/$defs/traceable" }, "sensor_type": { "$ref": "#/$defs/traceable" }, "sensor_size": { "$ref": "#/$defs/traceable" },
+        "resolution_width": { "$ref": "#/$defs/traceable" }, "resolution_height": { "$ref": "#/$defs/traceable" }, "megapixel_count": { "$ref": "#/$defs/traceable" }, "aspect_ratio": { "$ref": "#/$defs/traceable" },
+        "lens_ids": { "type": "array", "items": { "type": "string" } }, "specification_status": { "enum": ["verified", "needs_confirmation", "incomplete"] }, "engineering_notes": { "type": "string" }
+      }
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"],
+      "properties": { "value": { "type": "number" }, "unit": { "const": "deg" }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" } }
+    },
+    "lens": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "camera_id", "lens_identifier", "focal_length", "horizontal_fov", "vertical_fov", "horizontal_fov_candidates", "specification_status", "engineering_notes"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "camera_id": { "type": "string" }, "lens_identifier": { "$ref": "#/$defs/traceable" }, "focal_length": { "$ref": "#/$defs/traceable" },
+        "horizontal_fov": { "$ref": "#/$defs/traceable" }, "vertical_fov": { "$ref": "#/$defs/traceable" }, "horizontal_fov_candidates": { "type": "array", "items": { "$ref": "#/$defs/candidate" } },
+        "specification_status": { "enum": ["verified", "needs_confirmation", "incomplete"] }, "engineering_notes": { "type": "string" }
+      }
+    },
+    "integration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["default_downward_angle", "allowed_downward_angle_min", "allowed_downward_angle_max", "camera_quantity_per_smart_fixture", "camera_mounting_position", "mounting_offset_x", "mounting_offset_y", "mounting_offset_z", "supported_analytics"],
+      "properties": {
+        "default_downward_angle": { "$ref": "#/$defs/traceable" }, "allowed_downward_angle_min": { "$ref": "#/$defs/traceable" }, "allowed_downward_angle_max": { "$ref": "#/$defs/traceable" },
+        "camera_quantity_per_smart_fixture": { "$ref": "#/$defs/traceable" }, "camera_mounting_position": { "$ref": "#/$defs/traceable" }, "mounting_offset_x": { "$ref": "#/$defs/traceable" }, "mounting_offset_y": { "$ref": "#/$defs/traceable" }, "mounting_offset_z": { "$ref": "#/$defs/traceable" }, "supported_analytics": { "$ref": "#/$defs/traceable" }
+      }
+    }
+  }
+}

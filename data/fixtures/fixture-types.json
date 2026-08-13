@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "fixture-types",
+  "fixture_types": [
+    {
+      "id": "LITE",
+      "display_name": "LITE",
+      "provides_lighting": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "LITE provides lighting." },
+      "provides_wifi": { "value": false, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "LITE does not provide Wi-Fi." },
+      "integrated_cameras": { "value": false, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "LITE does not include cameras." },
+      "camera_quantity_min": { "value": 0, "unit": "camera", "status": "derived_value", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "Derived from the explicit absence of cameras." },
+      "cap_network_participation": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No supplied source defines whether a LITE fixture is a JNET1 node." }
+    },
+    {
+      "id": "WIFI",
+      "display_name": "WIFI",
+      "provides_lighting": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "WIFI provides lighting." },
+      "provides_wifi": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "WIFI provides Wi-Fi." },
+      "integrated_cameras": { "value": false, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "WIFI does not include cameras." },
+      "camera_quantity_min": { "value": 0, "unit": "camera", "status": "derived_value", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "Derived from the explicit absence of cameras." },
+      "cap_network_participation": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No supplied source defines whether a WIFI fixture is a JNET1 node." }
+    },
+    {
+      "id": "SMART",
+      "display_name": "SMART",
+      "provides_lighting": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "SMART provides lighting." },
+      "provides_wifi": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "SMART provides Wi-Fi." },
+      "integrated_cameras": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "SMART includes one or more integrated cameras." },
+      "camera_quantity_min": { "value": 1, "unit": "camera", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "high", "notes": "The exact quantity is unresolved; only the minimum is specified." },
+      "cap_network_participation": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": "Session brief section 3 - Fixture-type definitions" }, "confidence": "none", "notes": "SMART may participate in CAP-related topology, but applicability is not defined." }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/ies-inventory.schema.json",
+  "title": "IES inventory",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "ies_files"],
+  "properties": { "schema_version": { "const": "1.0.0" }, "catalog_id": { "type": "string" }, "ies_files": { "type": "array", "items": { "$ref": "#/$defs/ies" } } },
+  "$defs": {
+    "source": { "type": "object", "additionalProperties": false, "required": ["file", "page", "section"], "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] } } },
+    "traceable": { "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"], "properties": { "value": {}, "unit": { "type": ["string", "null"] }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" } } },
+    "dimensions": { "type": "object", "additionalProperties": false, "required": ["width", "length", "height"], "properties": { "width": { "$ref": "#/$defs/traceable" }, "length": { "$ref": "#/$defs/traceable" }, "height": { "$ref": "#/$defs/traceable" } } },
+    "ies": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "filename", "file_hash_sha256", "ies_standard_version", "tilt", "test_report_id", "photometric_identifier", "manufacturer", "luminaire_catalog_number", "luminaire_description", "lamp_description", "number_of_lamps", "lumens_per_lamp", "absolute_photometry", "candela_multiplier", "vertical_angle_count", "horizontal_angle_count", "vertical_angle_range", "horizontal_angle_range", "photometric_type", "units_type", "dimensions", "ballast_factor", "future_use_factor", "input_watts", "symmetry_classification", "parse_warnings", "parse_errors", "associated_luminaire_id"],
+      "properties": {
+        "id": { "type": "string" }, "filename": { "type": "string" }, "file_hash_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "ies_standard_version": { "$ref": "#/$defs/traceable" }, "tilt": { "$ref": "#/$defs/traceable" }, "test_report_id": { "$ref": "#/$defs/traceable" }, "photometric_identifier": { "$ref": "#/$defs/traceable" },
+        "manufacturer": { "$ref": "#/$defs/traceable" }, "luminaire_catalog_number": { "$ref": "#/$defs/traceable" }, "luminaire_description": { "$ref": "#/$defs/traceable" }, "lamp_description": { "$ref": "#/$defs/traceable" },
+        "number_of_lamps": { "$ref": "#/$defs/traceable" }, "lumens_per_lamp": { "$ref": "#/$defs/traceable" }, "absolute_photometry": { "$ref": "#/$defs/traceable" }, "candela_multiplier": { "$ref": "#/$defs/traceable" },
+        "vertical_angle_count": { "$ref": "#/$defs/traceable" }, "horizontal_angle_count": { "$ref": "#/$defs/traceable" }, "vertical_angle_range": { "$ref": "#/$defs/traceable" }, "horizontal_angle_range": { "$ref": "#/$defs/traceable" },
+        "photometric_type": { "$ref": "#/$defs/traceable" }, "units_type": { "$ref": "#/$defs/traceable" }, "dimensions": { "$ref": "#/$defs/dimensions" }, "ballast_factor": { "$ref": "#/$defs/traceable" }, "future_use_factor": { "$ref": "#/$defs/traceable" }, "input_watts": { "$ref": "#/$defs/traceable" },
+        "symmetry_classification": { "$ref": "#/$defs/traceable" }, "parse_warnings": { "type": "array", "items": { "type": "string" } }, "parse_errors": { "type": "array", "items": { "type": "string" } }, "associated_luminaire_id": { "type": "string" }
+      }
+    }
+  }
+}

@@ -23,7 +23,7 @@ All four files declare `IESNA:LM-63-2002`, `TILT=NONE`, one lamp, 73 vertical an
 | JLED-GL-050W-SOLITAIRE 3B-D01.IES | JLED-GL-60W-SOLITAIRE-D01 | 50 | Filename, internal model, and watts conflict |
 | JLED-GL-050W-SOLITAIRE 3B-D02.ies | JLED-GL-60W-SOLITAIRE-D02 | 50 | Filename, internal model, and watts conflict; negative dimensions require review |
 
-The photometric coordinate/orientation interpretation and verified luminaire mapping remain required Phase 2/5 inputs.
+The files are now represented in `data/luminaires/ies-inventory.json` and `data/luminaires/luminaire-catalog.json`. Photometric coordinate/orientation approval and verified luminaire mapping remain required Phase 2/5 inputs.
 
 ## Camera workbook
 
@@ -33,7 +33,7 @@ The photometric coordinate/orientation interpretation and verified luminaire map
 - JL-LN042: 3.9 mm; real FOV 69 degrees horizontal / 54 degrees vertical.
 - JL-LN037: 3.56 mm; real FOV 87 degrees horizontal / 68 degrees vertical (the request states 90/68; this discrepancy requires confirmation).
 
-Camera quantity per fixture, mounting offsets, model naming, analytics criteria, and authoritative 87 versus 90 degree FOV are unresolved.
+The workbook rows are now represented in `data/cameras/camera-catalog.json`. Camera quantity per fixture, mounting offsets, model naming, analytics criteria, and authoritative 87 versus 90 degree FOV remain unresolved.
 
 ## CAP datasheet
 
@@ -53,4 +53,4 @@ Missing or ambiguous for recommendation logic:
 - Line-of-sight, antenna pattern/height, mounting separation, interference margin, and region-specific legal band.
 - Required redundancy, overlap, acceptable hop target, load/latency target, preferred/prohibited locations, electrical/backhaul availability, and field version applicability.
 
-No CAP constraints are encoded or used in Phase 1.
+Traceable source-backed constraints and explicit missing information are now encoded in `data/network/cap-constraints.json`. No CAP recommendation logic is implemented or used in Phase 1.

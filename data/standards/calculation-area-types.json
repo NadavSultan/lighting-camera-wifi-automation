@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "calculation-area-types",
+  "defaults": {
+    "calculation_plane_height": { "value": 0, "unit": "m", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 8 - Calculation-area definitions" }, "confidence": "high", "notes": "Height above the selected engineering datum." },
+    "grid_spacing_x": { "value": 2, "unit": "m", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 8 - Calculation-area definitions" }, "confidence": "high", "notes": "Default projected-grid spacing in the local X direction." },
+    "grid_spacing_y": { "value": 2, "unit": "m", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 8 - Calculation-area definitions" }, "confidence": "high", "notes": "Default projected-grid spacing in the local Y direction." },
+    "clip_points_to_polygon": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 8 - Calculation-area definitions" }, "confidence": "high", "notes": "Only calculation points inside or on the polygon boundary are retained." },
+    "statistics_per_polygon": { "value": true, "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 8 - Calculation-area definitions" }, "confidence": "high", "notes": "Statistics are reported independently for each polygon." }
+  },
+  "statistics": [
+    { "id": "average_illuminance", "label": "Average illuminance", "unit": "lx", "formula": "sum(E) / point_count" },
+    { "id": "minimum_illuminance", "label": "Minimum illuminance", "unit": "lx", "formula": "min(E)" },
+    { "id": "maximum_illuminance", "label": "Maximum illuminance", "unit": "lx", "formula": "max(E)" },
+    { "id": "uniformity_min_avg", "label": "Uniformity Emin / Eavg", "unit": "ratio", "formula": "minimum_illuminance / average_illuminance" },
+    { "id": "calculation_point_count", "label": "Number of calculation points", "unit": "point", "formula": "count(E)" }
+  ],
+  "area_types": [
+    { "id": "road", "label": "Road", "target_average_illuminance": { "value": null, "unit": "lx", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." }, "target_uniformity": { "value": null, "unit": "ratio", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." } },
+    { "id": "sidewalk", "label": "Sidewalk", "target_average_illuminance": { "value": null, "unit": "lx", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." }, "target_uniformity": { "value": null, "unit": "ratio", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." } },
+    { "id": "parking", "label": "Parking", "target_average_illuminance": { "value": null, "unit": "lx", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." }, "target_uniformity": { "value": null, "unit": "ratio", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." } },
+    { "id": "other", "label": "Other", "target_average_illuminance": { "value": null, "unit": "lx", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." }, "target_uniformity": { "value": null, "unit": "ratio", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No approved project standard or explicit target was supplied." } }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "camera-catalog",
+  "camera_models": [
+    {
+      "id": "camera-imx477",
+      "manufacturer": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "The workbook name references Juganu, but no camera-manufacturer field is present in the sheet." },
+      "camera_family": { "value": "IMX477", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A9:A11" }, "confidence": "high", "notes": "Shared family token in all three camera/lens row names." },
+      "camera_model": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No distinct camera enclosure/model identifier is supplied." },
+      "sensor_manufacturer": { "value": "Sony", "unit": null, "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera catalog" }, "confidence": "high", "notes": "Provided in the engineering session brief; not independently stated in the workbook." },
+      "sensor": { "value": "IMX477", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A9:A11" }, "confidence": "high", "notes": "Sensor identifier embedded in each row name and confirmed by the session brief." },
+      "sensor_type": { "value": "CMOS", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!C9:C11" }, "confidence": "high", "notes": "Workbook value." },
+      "sensor_size": { "value": "1/2.3 inch", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!D9:D11" }, "confidence": "high", "notes": "Workbook value retained as a nominal format designation." },
+      "resolution_width": { "value": 4056, "unit": "px", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!E9:E11" }, "confidence": "high", "notes": "Exact workbook value." },
+      "resolution_height": { "value": 3040, "unit": "px", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!F9:F11" }, "confidence": "high", "notes": "Exact workbook value." },
+      "megapixel_count": { "value": 12, "unit": "MP", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera catalog" }, "confidence": "high", "notes": "Nominal megapixel class. The 4056 x 3040 pixel dimensions imply 12.33024 million pixels, but that derived value is not substituted for the stated 12 MP class." },
+      "aspect_ratio": { "value": "4:3", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!G9:G11" }, "confidence": "high", "notes": "Workbook and session brief agree." },
+      "lens_ids": ["lens-jl-ln039", "lens-jl-ln042", "lens-jl-ln037"],
+      "specification_status": "needs_confirmation",
+      "engineering_notes": "Sensor and pixel fields are source-backed. Camera manufacturer/model remain unknown, and JL-LN037 has an unresolved horizontal-FOV conflict."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "lens-jl-ln039",
+      "camera_id": "camera-imx477",
+      "lens_identifier": { "value": "JL-LN039", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A9" }, "confidence": "high", "notes": "Identifier parsed from the workbook row name." },
+      "focal_length": { "value": 6, "unit": "mm", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!K9" }, "confidence": "high", "notes": "Workbook focal length." },
+      "horizontal_fov": { "value": 52, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!O9" }, "confidence": "high", "notes": "Workbook Real angles / Horizontal; agrees with the session brief." },
+      "vertical_fov": { "value": 40, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!Q9" }, "confidence": "high", "notes": "Workbook Real angles / Vertical; agrees with the session brief." },
+      "horizontal_fov_candidates": [],
+      "specification_status": "verified",
+      "engineering_notes": "No supplied-source discrepancy identified."
+    },
+    {
+      "id": "lens-jl-ln042",
+      "camera_id": "camera-imx477",
+      "lens_identifier": { "value": "JL-LN042", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A10" }, "confidence": "high", "notes": "Identifier parsed from the workbook row name." },
+      "focal_length": { "value": 3.9, "unit": "mm", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!K10" }, "confidence": "high", "notes": "Workbook focal length." },
+      "horizontal_fov": { "value": 69, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!O10" }, "confidence": "high", "notes": "Workbook Real angles / Horizontal; agrees with the session brief." },
+      "vertical_fov": { "value": 54, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!Q10" }, "confidence": "high", "notes": "Workbook Real angles / Vertical; agrees with the session brief." },
+      "horizontal_fov_candidates": [],
+      "specification_status": "verified",
+      "engineering_notes": "No supplied-source discrepancy identified."
+    },
+    {
+      "id": "lens-jl-ln037",
+      "camera_id": "camera-imx477",
+      "lens_identifier": { "value": "JL-LN037", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A11" }, "confidence": "high", "notes": "Identifier parsed from the workbook row name." },
+      "focal_length": { "value": 3.56, "unit": "mm", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!K11" }, "confidence": "high", "notes": "Workbook focal length." },
+      "horizontal_fov": { "value": null, "unit": "deg", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "Active engineering value is intentionally unset because supplied sources conflict." },
+      "vertical_fov": { "value": 68, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!Q11" }, "confidence": "high", "notes": "Workbook and session brief agree." },
+      "horizontal_fov_candidates": [
+        { "value": 87, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!O11" }, "confidence": "high", "notes": "Workbook Real angles / Horizontal." },
+        { "value": 90, "unit": "deg", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera catalog" }, "confidence": "high", "notes": "Session brief requested FOV combination." }
+      ],
+      "specification_status": "needs_confirmation",
+      "engineering_notes": "Resolve 87 degrees versus 90 degrees with the camera/lens owner before camera geometry is implemented."
+    }
+  ],
+  "smart_fixture_integration": {
+    "default_downward_angle": { "value": 35, "unit": "deg_from_horizontal_down", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera mounting convention" }, "confidence": "high", "notes": "Optical axis is tilted 35 degrees downward from horizontal." },
+    "allowed_downward_angle_min": { "value": 0, "unit": "deg_from_horizontal_down", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera mounting convention" }, "confidence": "high", "notes": "Zero degrees means horizontal." },
+    "allowed_downward_angle_max": { "value": 90, "unit": "deg_from_horizontal_down", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera mounting convention" }, "confidence": "high", "notes": "Ninety degrees means vertically downward." },
+    "camera_quantity_per_smart_fixture": { "value": null, "unit": "camera", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "SMART requires at least one camera, but the exact configurable quantity is not supplied." },
+    "camera_mounting_position": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No fixture-relative mounting position is supplied." },
+    "mounting_offset_x": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No local X offset is supplied." },
+    "mounting_offset_y": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No local Y offset is supplied." },
+    "mounting_offset_z": { "value": null, "unit": "m", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No vertical offset is supplied." },
+    "supported_analytics": { "value": null, "unit": null, "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "No analytics capabilities or performance criteria are supplied." }
+  }
+}

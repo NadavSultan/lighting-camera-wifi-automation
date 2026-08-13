@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/wifi-defaults.schema.json",
+  "title": "Conceptual Wi-Fi defaults",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "model_type", "coverage_radius", "fixture_applicability", "excluded_factors", "disclaimer"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" }, "catalog_id": { "type": "string" }, "model_type": { "const": "conceptual_circle" },
+    "coverage_radius": { "$ref": "#/$defs/traceable" },
+    "fixture_applicability": { "type": "object", "additionalProperties": false, "required": ["LITE", "WIFI", "SMART"], "properties": { "LITE": { "$ref": "#/$defs/traceable" }, "WIFI": { "$ref": "#/$defs/traceable" }, "SMART": { "$ref": "#/$defs/traceable" } } },
+    "excluded_factors": { "type": "array", "minItems": 12, "items": { "type": "string" }, "uniqueItems": true }, "disclaimer": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "source": { "type": "object", "additionalProperties": false, "required": ["file", "page", "section"], "properties": { "file": { "type": ["string", "null"] }, "page": { "type": ["integer", "string", "null"] }, "section": { "type": ["string", "null"] } } },
+    "traceable": { "type": "object", "additionalProperties": false, "required": ["value", "unit", "status", "source", "confidence", "notes"], "properties": { "value": {}, "unit": { "type": ["string", "null"] }, "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] }, "source": { "$ref": "#/$defs/source" }, "confidence": { "enum": ["high", "medium", "low", "none"] }, "notes": { "type": "string" } } }
+  }
+}

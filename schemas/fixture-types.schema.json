@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighting-camera-wifi-automation.local/schemas/fixture-types.schema.json",
+  "title": "Fixture type definitions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "fixture_types"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "catalog_id": { "type": "string", "minLength": 1 },
+    "fixture_types": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/fixtureType" }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "page", "section"],
+      "properties": {
+        "file": { "type": ["string", "null"] },
+        "page": { "type": ["integer", "string", "null"] },
+        "section": { "type": ["string", "null"] }
+      }
+    },
+    "traceable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "status", "source", "confidence", "notes"],
+      "properties": {
+        "value": {},
+        "unit": { "type": ["string", "null"] },
+        "status": { "enum": ["manufacturer_specification", "company_provided_requirement", "engineering_assumption", "derived_value", "unknown"] },
+        "source": { "$ref": "#/$defs/source" },
+        "confidence": { "enum": ["high", "medium", "low", "none"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "fixtureType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "provides_lighting", "provides_wifi", "integrated_cameras", "camera_quantity_min", "cap_network_participation"],
+      "properties": {
+        "id": { "enum": ["LITE", "WIFI", "SMART"] },
+        "display_name": { "type": "string" },
+        "provides_lighting": { "$ref": "#/$defs/traceable" },
+        "provides_wifi": { "$ref": "#/$defs/traceable" },
+        "integrated_cameras": { "$ref": "#/$defs/traceable" },
+        "camera_quantity_min": { "$ref": "#/$defs/traceable" },
+        "cap_network_participation": { "$ref": "#/$defs/traceable" }
+      }
+    }
+  }
+}
