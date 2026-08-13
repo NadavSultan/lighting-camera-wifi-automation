@@ -236,7 +236,7 @@ export function EngineeringWorkspace() {
       </div>
 
       <footer className="statusbar"><span className="status-item"><span className="status-dot" />API-backed local project</span><span>CRS: {project?.projected_crs ?? "pending import"}</span><span>Source: {project?.source_crs ?? "WGS84"}</span><span>Edits: {project ? Object.keys(project.pole_edits).length : 0}</span><span className="status-message">{busy ? "Working…" : status}</span></footer>
-      {error && <div className="toast" role="alert" onClick={() => setError(null)}>{error}</div>}
+      {error && <button type="button" className="toast" aria-live="assertive" onClick={() => setError(null)}>{error}</button>}
     </main>
   );
 }

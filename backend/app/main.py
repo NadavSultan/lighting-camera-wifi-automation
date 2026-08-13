@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from app.models import HealthResponse, Project, ProjectSummary
-from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project
+from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
 from app.services.store import ProjectNotFoundError, ProjectStore
 
 
@@ -70,8 +70,9 @@ def create_app(store: ProjectStore | None = None) -> FastAPI:
     @app.post("/api/projects/open", response_model=Project)
     def open_project(project: Project) -> Project:
         try:
+            validate_embedded_source(project)
             return project_store.save(project)
-        except ValueError as exc:
+        except (KmlImportError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/projects/{project_id}/export/kml")

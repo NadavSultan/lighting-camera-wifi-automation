@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Annotated, Any, Literal
@@ -46,14 +49,28 @@ class ProjectWarning(StrictModel):
 
 
 class SourceFile(StrictModel):
-    filename: str
+    filename: Annotated[str, Field(min_length=1, pattern=r"^[^/\\]+$")]
     media_type: Literal["application/vnd.google-earth.kml+xml", "application/vnd.google-earth.kmz"]
-    sha256: str
-    size_bytes: int
+    sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    size_bytes: Annotated[int, Field(ge=1, le=50 * 1024 * 1024)]
     imported_at: datetime
     source_crs: Literal["EPSG:4326"] = "EPSG:4326"
     kml_entry: str | None = None
     content_base64: str = Field(description="Exact uploaded bytes for portable local project reopen/export")
+
+    @model_validator(mode="after")
+    def validate_embedded_content(self) -> "SourceFile":
+        if self.filename in {".", ".."}:
+            raise ValueError("source filename must be a safe basename")
+        try:
+            content = base64.b64decode(self.content_base64, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError("source content_base64 is not valid Base64") from exc
+        if len(content) != self.size_bytes:
+            raise ValueError("source size_bytes does not match embedded content")
+        if hashlib.sha256(content).hexdigest() != self.sha256:
+            raise ValueError("source sha256 does not match embedded content")
+        return self
 
 
 class SourcePole(StrictModel):
@@ -156,6 +173,8 @@ class Project(StrictModel):
         if self.mode is OperatingMode.PROPOSED_LAYOUT and not self.proposed_layout_authorized:
             raise ValueError("proposed-layout mode requires explicit authorization")
         source_ids = {pole.id for pole in self.source.poles}
+        if len(source_ids) != len(self.source.poles):
+            raise ValueError("source pole IDs must be unique")
         unknown = set(self.pole_edits) - source_ids
         if unknown:
             raise ValueError(f"pole edits reference unknown source poles: {sorted(unknown)}")

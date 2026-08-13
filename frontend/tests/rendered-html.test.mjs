@@ -24,12 +24,15 @@ test("server-renders the Phase 1 engineering workspace", async () => {
 test("keeps Phase 1 controls explicit and future engines gated", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
   const types = await readFile(new URL("../app/lib/types.ts", import.meta.url), "utf8");
+  const api = await readFile(new URL("../app/lib/api.ts", import.meta.url), "utf8");
   const packageJson = await readFile(new URL("../package.json", import.meta.url), "utf8");
   assert.match(workspace, /Draw Calculation Area/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /disabled title="Phase 6/);
   assert.match(workspace, /Restore source\/default values/);
   assert.match(types, /location_edit_authorized/);
+  assert.match(api, /Array\.isArray\(detail\)/);
+  assert.match(api, /messages\.join\("; "\)/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

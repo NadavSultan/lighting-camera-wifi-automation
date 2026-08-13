@@ -23,24 +23,31 @@ class ProjectStore:
         return self.root / project_id
 
     def save(self, project: Project) -> Project:
-        project.updated_at = utc_now()
         directory = self._directory(project.id)
+        target = directory / "project.json"
+        if target.exists():
+            existing_project = Project.model_validate_json(target.read_text(encoding="utf-8"))
+            if existing_project.source != project.source:
+                raise ValueError("Original customer source data is immutable for an existing project")
+
+        source_target: Path | None = None
+        source_content: bytes | None = None
+        if project.source.file is not None:
+            source_target = directory / "sources" / project.source.file.filename
+            source_content = base64.b64decode(project.source.file.content_base64, validate=True)
+            if source_target.exists() and source_target.read_bytes() != source_content:
+                raise ValueError("An immutable source file would be overwritten with different content")
+
+        project.updated_at = utc_now()
         directory.mkdir(parents=True, exist_ok=True)
+        if source_target is not None and source_content is not None and not source_target.exists():
+            source_target.parent.mkdir(exist_ok=True)
+            source_target.write_bytes(source_content)
+
         target = directory / "project.json"
         temporary = directory / "project.json.tmp"
         temporary.write_text(project.model_dump_json(indent=2), encoding="utf-8")
         temporary.replace(target)
-        if project.source.file is not None:
-            source_dir = directory / "sources"
-            source_dir.mkdir(exist_ok=True)
-            source_target = source_dir / project.source.file.filename
-            content = base64.b64decode(project.source.file.content_base64, validate=True)
-            if source_target.exists():
-                existing = source_target.read_bytes()
-                if existing != content:
-                    raise ValueError("An immutable source file would be overwritten with different content")
-            else:
-                source_target.write_bytes(content)
         return project
 
     def load(self, project_id: str) -> Project:

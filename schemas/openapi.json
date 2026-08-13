@@ -800,6 +800,8 @@
         "properties": {
           "filename": {
             "type": "string",
+            "minLength": 1,
+            "pattern": "^[^/\\\\]+$",
             "title": "Filename"
           },
           "media_type": {
@@ -812,10 +814,13 @@
           },
           "sha256": {
             "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
             "title": "Sha256"
           },
           "size_bytes": {
             "type": "integer",
+            "maximum": 52428800.0,
+            "minimum": 1.0,
             "title": "Size Bytes"
           },
           "imported_at": {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import math
 import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -133,3 +134,102 @@ def test_sample_customer_file_inventory() -> None:
         ("Lighting and Camera (8)",),
         ("Environmental, Lighting and Camera (2)",),
     }
+
+
+def test_nested_folders_extended_data_and_style_map_are_preserved() -> None:
+    nested = b"""<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document><name>Nested</name>
+    <Style id="normal"><IconStyle><color>ff112233</color></IconStyle></Style>
+    <Style id="highlight"><IconStyle><color>ff445566</color></IconStyle></Style>
+    <StyleMap id="mapped"><Pair><key>normal</key><styleUrl>#normal</styleUrl></Pair><Pair><key>highlight</key><styleUrl>#highlight</styleUrl></Pair></StyleMap>
+    <Folder><name>Outer</name><Folder><name>Inner</name>
+      <Placemark><name>Nested pole</name><styleUrl>#mapped</styleUrl>
+        <ExtendedData><Data name="asset"><value>A&amp;B</value></Data><SchemaData><SimpleData name="circuit">C-7</SimpleData></SchemaData></ExtendedData>
+        <Point><coordinates>-80.123456789012,25.765432109876,4.5</coordinates></Point>
+      </Placemark>
+    </Folder></Folder>
+  </Document>
+</kml>"""
+
+    project = import_project("nested.kml", nested)
+    pole = project.source.poles[0]
+
+    assert pole.folder_path == ["Outer", "Inner"]
+    assert pole.extended_data == {"asset": "A&B", "circuit": "C-7"}
+    assert pole.source_style_url == "#mapped"
+    assert pole.source_style_color == "ff112233"
+    assert pole.raw_coordinates == "-80.123456789012,25.765432109876,4.5"
+    assert pole.longitude == -80.123456789012
+    assert pole.latitude == 25.765432109876
+
+
+def test_duplicate_coordinates_are_warned_and_duplicate_placemark_ids_remain_editable() -> None:
+    duplicate_ids = b"""<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+      <Placemark id="same"><name>One</name><Point><coordinates>-80.1,25.7</coordinates></Point></Placemark>
+      <Placemark id="same"><name>Two</name><Point><coordinates>-80.1,25.7</coordinates></Point></Placemark>
+    </Document></kml>"""
+
+    project = import_project("duplicates.kml", duplicate_ids)
+
+    assert len({pole.id for pole in project.source.poles}) == 2
+    assert all(pole.source_placemark_id == "same" for pole in project.source.poles)
+    assert any(warning.code == "duplicate_coordinate" for warning in project.warnings)
+    assert any(warning.code == "duplicate_placemark_id" for warning in project.warnings)
+
+
+def test_partially_valid_unsupported_and_empty_kml_behavior() -> None:
+    partial = b"""<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+      <Placemark><name>Valid</name><Point><coordinates>-80.1,25.7</coordinates></Point></Placemark>
+      <Placemark><name>Malformed</name><Point><coordinates>oops</coordinates></Point></Placemark>
+      <Placemark><name>Polygon</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-80,25 -80,26 -81,25 -80,25</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+    </Document></kml>"""
+    project = import_project("partial.kml", partial)
+    assert [pole.name for pole in project.source.poles] == ["Valid"]
+    assert project.source.unsupported_geometry_count == 1
+    assert {warning.code for warning in project.warnings} >= {"malformed_coordinate", "unsupported_geometry"}
+
+    empty = b'<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Empty</name></Document></kml>'
+    with pytest.raises(KmlImportError, match="No valid Point"):
+        import_project("empty.kml", empty)
+
+
+def test_kmz_supporting_resources_and_export_reimport_preserve_coordinates() -> None:
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("doc.kml", SIMPLE_KML)
+        archive.writestr("icons/pole.png", b"not-a-real-png-but-preserved")
+        archive.writestr("metadata/readme.txt", "supporting resource")
+    content = stream.getvalue()
+    project = import_project("resources.kmz", content)
+    assert project.source.file is not None
+    assert project.source.file.content_base64
+
+    exported = export_updated_kml(project)
+    reopened = import_project("resources-updated.kml", exported)
+    assert [(pole.longitude, pole.latitude, pole.altitude_m) for pole in reopened.source.poles] == [
+        (pole.longitude, pole.latitude, pole.altitude_m) for pole in project.source.poles
+    ]
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        assert archive.read("icons/pole.png") == b"not-a-real-png-but-preserved"
+
+
+def test_non_finite_altitude_is_rejected_as_malformed() -> None:
+    invalid_altitude = SIMPLE_KML.replace(b"-80.1,25.7,3.25", b"-80.1,25.7,nan")
+    project = import_project("invalid-altitude.kml", invalid_altitude)
+
+    assert len(project.source.poles) == 1
+    assert all(pole.name != "Pole A" for pole in project.source.poles)
+    assert any(warning.code == "malformed_coordinate" for warning in project.warnings)
+    assert all(pole.altitude_m is None or math.isfinite(pole.altitude_m) for pole in project.source.poles)
+
+
+def test_inline_icon_style_color_is_resolved() -> None:
+    inline = b"""<kml xmlns="http://www.opengis.net/kml/2.2"><Document><Placemark>
+      <name>Inline style</name><Style><IconStyle><color>ffabcdef</color></IconStyle></Style>
+      <Point><coordinates>-80.1,25.7</coordinates></Point>
+    </Placemark></Document></kml>"""
+
+    project = import_project("inline.kml", inline)
+
+    assert project.source.poles[0].source_style_color == "ffabcdef"

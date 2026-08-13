@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-13. Scope is frozen at Phase 1. Phase 2 has not started and is not authorized by this handoff.
+Last updated: 2026-08-13. Independent Phase 1 validation is complete and passed after six confirmed defects were fixed. Scope remains frozen at Phase 1. Phase 2 has not started and is not authorized.
 
 ## Completed features
 
@@ -17,6 +17,9 @@ Last updated: 2026-08-13. Scope is frozen at Phase 1. Phase 2 has not started an
 - Folder/all-poles bulk fixture assignment, undo/redo, layer toggles, and restoration of source/default values.
 - Separate source and edit layers; coordinate edits require an explicit backend authorization flag and are not exposed by the Phase 1 UI.
 - Atomic filesystem project persistence and immutable archived source copies.
+- Embedded-source hash, size, safe-filename, and source-record verification when portable project JSON is opened.
+- Unique internal pole IDs, with warnings and preserved source IDs when customer KML repeats a Placemark ID.
+- Finite coordinate validation and inline KML IconStyle colour resolution.
 - Checked-in Pydantic-derived project JSON Schema and OpenAPI contract.
 - Inventory and review notes for the supplied KML, four IES files, camera workbook, and CAP datasheet.
 
@@ -33,18 +36,37 @@ These are intentionally outside Phase 1 and must not be treated as defects in th
 - CSV/XLSX/KMZ/PDF and later-phase engineering report outputs.
 - UI actions for manual pole coordinate changes, addition, or deletion. The backend model can represent explicitly authorized coordinate edits, but the Phase 1 UI keeps coordinates locked.
 
-## Known bugs and limitations
+## Independent validation result
 
-- No known Phase 1 correctness bug is open at handoff.
+- Result: **PASS after fixes**. No confirmed Phase 1 correctness defect remains open.
+- Findings fixed: one Critical source-integrity/persistence defect, one High duplicate-ID defect, two Medium defects (non-finite coordinates and a failing frontend lint gate), and two Low defects (structured API error display and inline-style metadata).
+- The requested simple, nested-folder, ExtendedData, Style/StyleMap, duplicate, malformed/partial, unsupported-geometry, empty, and resource-bearing KMZ cases are now covered by repeatable backend tests.
+- Live production UI validation passed for the supplied 74-pole KML: map workspace load, per-pole SMART/height/notes edits, 10-pole WIFI bulk assignment, undo/redo, save, export, and portable JSON reopen.
+- Source input, embedded source, and archived source SHA-256 values matched. Updated-KML reimport retained 74 poles with zero coordinate mismatches and preserved fixture metadata in ExtendedData.
+
+See `docs/phase-1-validation-report.md` for finding evidence and the full validation matrix.
+
+## Known limitations
+
 - The OpenStreetMap background requires internet access; pole/project data remain local.
 - The production build reports an advisory client chunk larger than 500 kB because MapLibre is bundled with the workspace. Build output is valid.
 - Automated rendered-output tests verify the server-rendered shell and phase gating; they do not click through MapLibre canvas interactions.
-- Browser automation in the originating Codex environment was blocked by a local profile filesystem permission, so live service health/import/export and rendered HTML were used in addition to automated tests. This is an environment limitation, not a confirmed application defect.
 - FastAPI's current `TestClient` emits a Starlette deprecation warning about future `httpx2` migration; all tests pass.
+- Updated KML is an interchange/export artifact. Reimport preserves coordinates and `lcwa_*` ExtendedData, but does not recreate `pole_edits`; portable project JSON is the supported lossless reopen format.
 
 ## Tests and build results
 
-Handoff validation must be recorded in `docs/phase-1-completion-report.md`. The expected complete command set is:
+Final independent validation on 2026-08-13:
+
+- Backend: `22 passed`; one non-failing Starlette deprecation warning.
+- Frontend rendered-output suite: `2 passed`, `0 failed`.
+- TypeScript: zero errors.
+- ESLint: zero errors or warnings.
+- Production build: successful across client, server, RSC, and SSR; one non-failing MapLibre chunk-size advisory.
+- Fresh backend startup on validation port 8010: health returned `{"status":"ok","phase":1,"version":"0.1.0"}`.
+- Fresh production frontend startup on the documented port 3000: HTTP 200 and the expected application title.
+
+The repeatable command set is:
 
 ```powershell
 Set-Location .\backend
@@ -90,4 +112,4 @@ For a new machine/session without dependencies, follow `README.md` first.
 
 ## Exact next recommended task
 
-Run a fresh-session **Phase 1 acceptance review only**. Read the files required by `AGENTS.md`, start both services, and use `Input/Miracle_Mile_Lighting_Poles.kml` to manually verify import, pole selection, per-pole LITE/WIFI/SMART and height edits, bulk assignment, undo/redo, save, project JSON export/reopen, source restoration, and updated KML export. Record acceptance findings without implementing fixes unless explicitly requested. Obtain explicit user approval before proposing or starting Phase 2.
+Review `docs/phase-1-validation-report.md` and decide whether to formally accept Phase 1. Do not propose or begin Phase 2 until the user explicitly authorizes it after reviewing this validation result.

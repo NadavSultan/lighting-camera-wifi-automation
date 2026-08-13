@@ -299,6 +299,8 @@
       "additionalProperties": false,
       "properties": {
         "filename": {
+          "minLength": 1,
+          "pattern": "^[^/\\\\]+$",
           "title": "Filename",
           "type": "string"
         },
@@ -311,10 +313,13 @@
           "type": "string"
         },
         "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
           "title": "Sha256",
           "type": "string"
         },
         "size_bytes": {
+          "maximum": 52428800,
+          "minimum": 1,
           "title": "Size Bytes",
           "type": "integer"
         },

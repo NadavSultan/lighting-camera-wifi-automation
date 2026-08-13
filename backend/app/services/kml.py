@@ -171,6 +171,7 @@ def import_project(filename: str, content: bytes, project_name: str | None = Non
     warnings: list[ProjectWarning] = []
     poles: list[SourcePole] = []
     unsupported = 0
+    used_pole_ids: set[str] = set()
 
     for index, (placemark, folder_path) in enumerate(_folder_placemarks(document, [])):
         point = placemark.find("k:Point", NS)
@@ -192,6 +193,8 @@ def import_project(filename: str, content: bytes, project_name: str | None = Non
             lon = float(parts[0])
             lat = float(parts[1])
             altitude = float(parts[2]) if len(parts) > 2 and parts[2] != "" else None
+            if not math.isfinite(lon) or not math.isfinite(lat) or (altitude is not None and not math.isfinite(altitude)):
+                raise ValueError("coordinate contains a non-finite number")
             if not (-180 <= lon <= 180 and -90 <= lat <= 90):
                 raise ValueError("coordinate is outside WGS84 bounds")
         except ValueError as exc:
@@ -211,8 +214,23 @@ def import_project(filename: str, content: bytes, project_name: str | None = Non
         name = placemark.findtext("k:name", default=f"Pole {len(poles) + 1}", namespaces=NS)
         source_id = placemark.get("id")
         identity = "\x1f".join([payload.filename, *folder_path, name, first_coordinate, str(index)])
-        pole_id = source_id or f"pole-{hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]}"
+        generated_id = f"pole-{hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]}"
+        pole_id = source_id or generated_id
+        if pole_id in used_pole_ids:
+            if source_id:
+                warnings.append(ProjectWarning(
+                    code="duplicate_placemark_id",
+                    message=f"Placemark ID '{source_id}' is duplicated; a unique internal pole ID was assigned without changing the source.",
+                    details={"source_placemark_id": source_id, "placemark_index": index},
+                ))
+            pole_id = generated_id
+            collision = 2
+            while pole_id in used_pole_ids:
+                pole_id = f"{generated_id}-{collision}"
+                collision += 1
+        used_pole_ids.add(pole_id)
         style_url = placemark.findtext("k:styleUrl", default="", namespaces=NS).strip() or None
+        inline_style_color = placemark.findtext("k:Style/k:IconStyle/k:color", default="", namespaces=NS).strip() or None
         poles.append(SourcePole(
             id=pole_id,
             sequence_index=index,
@@ -222,7 +240,7 @@ def import_project(filename: str, content: bytes, project_name: str | None = Non
             description=placemark.findtext("k:description", default="", namespaces=NS),
             extended_data=_extended_data(placemark),
             source_style_url=style_url,
-            source_style_color=style_colors.get(style_url or ""),
+            source_style_color=inline_style_color or style_colors.get(style_url or ""),
             longitude=lon,
             latitude=lat,
             altitude_m=altitude,
@@ -263,6 +281,25 @@ def import_project(filename: str, content: bytes, project_name: str | None = Non
         warnings=warnings,
         source_references={"customer_layout": payload.filename},
     )
+
+
+def validate_embedded_source(project: Project) -> None:
+    source_file = project.source.file
+    if source_file is None:
+        if project.source.poles:
+            raise KmlImportError("Project has source poles but no embedded customer file")
+        return
+    content = base64.b64decode(source_file.content_base64, validate=True)
+    reparsed = import_project(source_file.filename, content)
+    if source_file.media_type != reparsed.source.file.media_type or source_file.kml_entry != reparsed.source.file.kml_entry:
+        raise KmlImportError("Embedded customer file metadata does not match its KML/KMZ content")
+    if (
+        project.source.document_name != reparsed.source.document_name
+        or project.source.poles != reparsed.source.poles
+        or project.source.unsupported_geometry_count != reparsed.source.unsupported_geometry_count
+        or project.projected_crs != reparsed.projected_crs
+    ):
+        raise KmlImportError("Original customer source records do not match the embedded KML/KMZ")
 
 
 def _append_coordinate_warnings(poles: list[SourcePole], projected_crs: str | None, warnings: list[ProjectWarning]) -> None:
