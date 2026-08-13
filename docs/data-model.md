@@ -1,0 +1,54 @@
+# Data model
+
+## Layer separation
+
+| Layer | Phase 1 representation | Mutation policy |
+|---|---|---|
+| Original customer data | `source.poles` and immutable uploaded file | Never overwritten |
+| User-edited data | `pole_edits`, keyed by stable source pole ID | Explicit edits only; source values remain available |
+| Calculated data | `calculated_layers` | Empty in Phase 1 |
+| Recommended data | `recommended_layers` | Empty in Phase 1; no pole or CAP generation |
+| Exported data | Generated response plus export event | Never treated as source |
+
+## Pole identity
+
+The importer preserves a KML Placemark `id` when present. Otherwise it creates a deterministic ID from the source filename, folder path, placemark name, exact coordinate text, and document order. The original name, description, folder path, style URL, resolved KML colour, ExtendedData, raw coordinate text, and numeric coordinate are retained.
+
+## User edits
+
+`PoleEdit` contains optional overrides for display name, external pole ID, fixture type, height, active status, notes, and location. Location changes require `location_edit_authorized=true`; the UI does not expose location editing in Phase 1. Removing an edit restores all source/default values.
+
+## Effective values
+
+The effective pole is a view, not stored replacement data:
+
+- name: edited name or source name
+- fixture type: edited type or project default (`LITE`)
+- height: edited height or project default (unset until supplied)
+- active: edited state or `true`
+- coordinate: authorized edited coordinate or exact source coordinate
+
+## Project integrity metadata
+
+Every project records source filename, SHA-256 hash, import timestamp, source CRS, selected projected CRS, software/schema version, mode, defaults, warnings, edits, assumptions, source catalog references, and calculation/recommendation placeholders.
+
+The formal JSON Schema is `schemas/project.schema.json` and is generated from the Pydantic `Project` model. HTTP input/output and error-response contracts are published in `schemas/openapi.json`.
+
+## Phase 1 invariants
+
+- `mode` is `existing-poles`; `proposed-layout_authorized` remains false.
+- A `PoleEdit` key must identify a source pole and must match its `pole_id`.
+- Longitude and latitude edits must be supplied together and require `location_edit_authorized=true`.
+- The Phase 1 UI never emits coordinate edits.
+- Unknown fields are rejected by the backend models.
+- Original uploaded bytes are SHA-256 identified and cannot be silently replaced at the same stored project path.
+
+## Versioning and regeneration
+
+The current schema version is `1.0.0` and software version is `0.1.0`. Regenerate both checked-in contracts from the backend directory with:
+
+```powershell
+..\.venv\Scripts\python.exe .\scripts\export_schema.py
+```
+
+Any future schema change requires an explicit migration/compatibility decision before the version is changed.

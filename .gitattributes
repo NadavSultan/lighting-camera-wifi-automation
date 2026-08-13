@@ -1,0 +1,3 @@
+# Supplied engineering references are immutable source artifacts. Disable text
+# normalization so checkout preserves their exact bytes on every platform.
+Input/** binary

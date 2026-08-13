@@ -1,0 +1,628 @@
+{
+  "$defs": {
+    "FixtureType": {
+      "enum": [
+        "LITE",
+        "WIFI",
+        "SMART"
+      ],
+      "title": "FixtureType",
+      "type": "string"
+    },
+    "LayerState": {
+      "additionalProperties": false,
+      "properties": {
+        "original_customer_poles": {
+          "default": true,
+          "title": "Original Customer Poles",
+          "type": "boolean"
+        },
+        "lite_fixtures": {
+          "default": true,
+          "title": "Lite Fixtures",
+          "type": "boolean"
+        },
+        "wifi_fixtures": {
+          "default": true,
+          "title": "Wifi Fixtures",
+          "type": "boolean"
+        },
+        "smart_fixtures": {
+          "default": true,
+          "title": "Smart Fixtures",
+          "type": "boolean"
+        },
+        "camera_fov": {
+          "default": false,
+          "title": "Camera Fov",
+          "type": "boolean"
+        },
+        "wifi_coverage": {
+          "default": false,
+          "title": "Wifi Coverage",
+          "type": "boolean"
+        },
+        "calculation_areas": {
+          "default": false,
+          "title": "Calculation Areas",
+          "type": "boolean"
+        },
+        "calculation_points": {
+          "default": false,
+          "title": "Calculation Points",
+          "type": "boolean"
+        },
+        "lighting_heat_map": {
+          "default": false,
+          "title": "Lighting Heat Map",
+          "type": "boolean"
+        },
+        "cap_locations": {
+          "default": false,
+          "title": "Cap Locations",
+          "type": "boolean"
+        },
+        "cap_connections": {
+          "default": false,
+          "title": "Cap Connections",
+          "type": "boolean"
+        },
+        "warnings": {
+          "default": true,
+          "title": "Warnings",
+          "type": "boolean"
+        }
+      },
+      "title": "LayerState",
+      "type": "object"
+    },
+    "OperatingMode": {
+      "enum": [
+        "existing-poles",
+        "proposed-layout"
+      ],
+      "title": "OperatingMode",
+      "type": "string"
+    },
+    "PoleEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "pole_id": {
+          "title": "Pole Id",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "external_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "External Id"
+        },
+        "fixture_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FixtureType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "height_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height M"
+        },
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active"
+        },
+        "engineering_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engineering Notes"
+        },
+        "longitude": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Longitude"
+        },
+        "latitude": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latitude"
+        },
+        "location_edit_authorized": {
+          "default": false,
+          "title": "Location Edit Authorized",
+          "type": "boolean"
+        },
+        "modified_at": {
+          "format": "date-time",
+          "title": "Modified At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pole_id"
+      ],
+      "title": "PoleEdit",
+      "type": "object"
+    },
+    "ProjectDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "fixture_type": {
+          "$ref": "#/$defs/FixtureType",
+          "default": "LITE"
+        },
+        "pole_height_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pole Height M"
+        },
+        "maintenance_factor": {
+          "default": 0.8,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Maintenance Factor",
+          "type": "number"
+        },
+        "calculation_plane_height_m": {
+          "default": 0.0,
+          "title": "Calculation Plane Height M",
+          "type": "number"
+        },
+        "wifi_radius_m": {
+          "default": 30.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Wifi Radius M",
+          "type": "number"
+        },
+        "camera_downward_angle_deg": {
+          "default": 35.0,
+          "maximum": 90,
+          "minimum": 0,
+          "title": "Camera Downward Angle Deg",
+          "type": "number"
+        }
+      },
+      "title": "ProjectDefaults",
+      "type": "object"
+    },
+    "ProjectWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/WarningSeverity",
+          "default": "warning"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "pole_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Pole Ids",
+          "type": "array"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ProjectWarning",
+      "type": "object"
+    },
+    "SourceFile": {
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "application/vnd.google-earth.kml+xml",
+            "application/vnd.google-earth.kmz"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "imported_at": {
+          "format": "date-time",
+          "title": "Imported At",
+          "type": "string"
+        },
+        "source_crs": {
+          "const": "EPSG:4326",
+          "default": "EPSG:4326",
+          "title": "Source Crs",
+          "type": "string"
+        },
+        "kml_entry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kml Entry"
+        },
+        "content_base64": {
+          "description": "Exact uploaded bytes for portable local project reopen/export",
+          "title": "Content Base64",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "imported_at",
+        "content_base64"
+      ],
+      "title": "SourceFile",
+      "type": "object"
+    },
+    "SourceLayer": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceFile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "document_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Document Name"
+        },
+        "poles": {
+          "items": {
+            "$ref": "#/$defs/SourcePole"
+          },
+          "title": "Poles",
+          "type": "array"
+        },
+        "unsupported_geometry_count": {
+          "default": 0,
+          "title": "Unsupported Geometry Count",
+          "type": "integer"
+        }
+      },
+      "title": "SourceLayer",
+      "type": "object"
+    },
+    "SourcePole": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence_index": {
+          "title": "Sequence Index",
+          "type": "integer"
+        },
+        "source_placemark_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Placemark Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "folder_path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Folder Path",
+          "type": "array"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "extended_data": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Extended Data",
+          "type": "object"
+        },
+        "source_style_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Style Url"
+        },
+        "source_style_color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Style Color"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        },
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "altitude_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Altitude M"
+        },
+        "raw_coordinates": {
+          "title": "Raw Coordinates",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sequence_index",
+        "name",
+        "longitude",
+        "latitude",
+        "raw_coordinates"
+      ],
+      "title": "SourcePole",
+      "type": "object"
+    },
+    "WarningSeverity": {
+      "enum": [
+        "info",
+        "warning",
+        "error"
+      ],
+      "title": "WarningSeverity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "software_version": {
+      "default": "0.1.0",
+      "title": "Software Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "default": "Untitled lighting project",
+      "title": "Name",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "mode": {
+      "$ref": "#/$defs/OperatingMode",
+      "default": "existing-poles"
+    },
+    "proposed_layout_authorized": {
+      "default": false,
+      "title": "Proposed Layout Authorized",
+      "type": "boolean"
+    },
+    "source_crs": {
+      "const": "EPSG:4326",
+      "default": "EPSG:4326",
+      "title": "Source Crs",
+      "type": "string"
+    },
+    "projected_crs": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Projected Crs"
+    },
+    "defaults": {
+      "$ref": "#/$defs/ProjectDefaults"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceLayer"
+    },
+    "pole_edits": {
+      "additionalProperties": {
+        "$ref": "#/$defs/PoleEdit"
+      },
+      "title": "Pole Edits",
+      "type": "object"
+    },
+    "layer_state": {
+      "$ref": "#/$defs/LayerState"
+    },
+    "warnings": {
+      "items": {
+        "$ref": "#/$defs/ProjectWarning"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "calculated_layers": {
+      "additionalProperties": true,
+      "title": "Calculated Layers",
+      "type": "object"
+    },
+    "recommended_layers": {
+      "additionalProperties": true,
+      "title": "Recommended Layers",
+      "type": "object"
+    },
+    "source_references": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Source References",
+      "type": "object"
+    }
+  },
+  "title": "Project",
+  "type": "object"
+}

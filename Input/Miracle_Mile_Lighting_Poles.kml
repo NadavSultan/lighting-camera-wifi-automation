@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>Miracle Mile Lighting Poles</name>
+  <description>Lighting poles exported from the City of Coral Gables ArcGIS map. Coordinates are WGS84.</description>
+  <Style id="choice0">
+    <IconStyle>
+      <color>ff53851e</color>
+      <colorMode>normal</colorMode>
+      <scale>1.2</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>0</scale></LabelStyle>
+    <BalloonStyle><text><![CDATA[<b>$[name]</b><br/>$[description]]]></text></BalloonStyle>
+  </Style>
+  <Style id="other">
+    <IconStyle>
+      <color>ff9642c4</color>
+      <colorMode>normal</colorMode>
+      <scale>1.2</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>0</scale></LabelStyle>
+    <BalloonStyle><text><![CDATA[<b>$[name]</b><br/>$[description]]]></text></BalloonStyle>
+  </Style>
+  <Style id="choice1">
+    <IconStyle>
+      <color>ff0dbfd9</color>
+      <colorMode>normal</colorMode>
+      <scale>1.2</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>0</scale></LabelStyle>
+    <BalloonStyle><text><![CDATA[<b>$[name]</b><br/>$[description]]]></text></BalloonStyle>
+  </Style>
+  <Style id="choice3">
+    <IconStyle>
+      <color>ff007fd9</color>
+      <colorMode>normal</colorMode>
+      <scale>1.2</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>0</scale></LabelStyle>
+    <BalloonStyle><text><![CDATA[<b>$[name]</b><br/>$[description]]]></text></BalloonStyle>
+  </Style>
+  <Style id="choice4">
+    <IconStyle>
+      <color>fff1b600</color>
+      <colorMode>normal</colorMode>
+      <scale>1.2</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>0</scale></LabelStyle>
+    <BalloonStyle><text><![CDATA[<b>$[name]</b><br/>$[description]]]></text></BalloonStyle>
+  </Style>
+  <Folder>
+    <name>Cobra Head (40)</name>
+    <Placemark>
+      <name>Cobra Head 7</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 7<br/><b>Latitude:</b> 25.74920999<br/><b>Longitude:</b> -80.26234411]]></description>
+      <Point><coordinates>-80.26234411,25.74920999,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 9</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 9<br/><b>Latitude:</b> 25.7492344197943<br/><b>Longitude:</b> -80.2620595703376]]></description>
+      <Point><coordinates>-80.2620595703376,25.7492344197943,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 11</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 11<br/><b>Latitude:</b> 25.7492778397446<br/><b>Longitude:</b> -80.2616983651909]]></description>
+      <Point><coordinates>-80.2616983651909,25.7492778397446,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 15</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 15<br/><b>Latitude:</b> 25.7494617045838<br/><b>Longitude:</b> -80.2583511631317]]></description>
+      <Point><coordinates>-80.2583511631317,25.7494617045838,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 16</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 16<br/><b>Latitude:</b> 25.7494677636682<br/><b>Longitude:</b> -80.25807134805]]></description>
+      <Point><coordinates>-80.25807134805,25.7494677636682,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 17</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 17<br/><b>Latitude:</b> 25.7494765453485<br/><b>Longitude:</b> -80.2577957510737]]></description>
+      <Point><coordinates>-80.2577957510737,25.7494765453485,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 19</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 19<br/><b>Latitude:</b> 25.7494939819158<br/><b>Longitude:</b> -80.2575265243437]]></description>
+      <Point><coordinates>-80.2575265243437,25.7494939819158,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 20</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 20<br/><b>Latitude:</b> 25.749511249352<br/><b>Longitude:</b> -80.2572492509868]]></description>
+      <Point><coordinates>-80.2572492509868,25.749511249352,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 21</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 21<br/><b>Latitude:</b> 25.7495357341875<br/><b>Longitude:</b> -80.256980359533]]></description>
+      <Point><coordinates>-80.256980359533,25.7495357341875,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 24</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 24<br/><b>Latitude:</b> 25.7495580809865<br/><b>Longitude:</b> -80.2563379704739]]></description>
+      <Point><coordinates>-80.2563379704739,25.7495580809865,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 25</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 25<br/><b>Latitude:</b> 25.7495788937173<br/><b>Longitude:</b> -80.2560650557067]]></description>
+      <Point><coordinates>-80.2560650557067,25.7495788937173,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 26</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 26<br/><b>Latitude:</b> 25.7496099436782<br/><b>Longitude:</b> -80.2558680610729]]></description>
+      <Point><coordinates>-80.2558680610729,25.7496099436782,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 27</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 27<br/><b>Latitude:</b> 25.7495971941998<br/><b>Longitude:</b> -80.2558144014588]]></description>
+      <Point><coordinates>-80.2558144014588,25.7495971941998,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 28</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 28<br/><b>Latitude:</b> 25.7496090920822<br/><b>Longitude:</b> -80.2555862813974]]></description>
+      <Point><coordinates>-80.2555862813974,25.7496090920822,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 29</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 29<br/><b>Latitude:</b> 25.7496199634917<br/><b>Longitude:</b> -80.2553046494507]]></description>
+      <Point><coordinates>-80.2553046494507,25.7496199634917,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 33</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 33<br/><b>Latitude:</b> 25.7498753188298<br/><b>Longitude:</b> -80.255347564795]]></description>
+      <Point><coordinates>-80.255347564795,25.7498753188298,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 34</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 34<br/><b>Latitude:</b> 25.7498564405475<br/><b>Longitude:</b> -80.2556379139209]]></description>
+      <Point><coordinates>-80.2556379139209,25.7498564405475,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 35</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 35<br/><b>Latitude:</b> 25.749853331922<br/><b>Longitude:</b> -80.2559641947455]]></description>
+      <Point><coordinates>-80.2559641947455,25.749853331922,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 36</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 36<br/><b>Latitude:</b> 25.7498265200831<br/><b>Longitude:</b> -80.256319865563]]></description>
+      <Point><coordinates>-80.256319865563,25.7498265200831,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 39</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 39<br/><b>Latitude:</b> 25.7497875033206<br/><b>Longitude:</b> -80.2569946425985]]></description>
+      <Point><coordinates>-80.2569946425985,25.7497875033206,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 40</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 40<br/><b>Latitude:</b> 25.7497784504125<br/><b>Longitude:</b> -80.2572723850395]]></description>
+      <Point><coordinates>-80.2572723850395,25.7497784504125,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 41</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 41<br/><b>Latitude:</b> 25.7497476481239<br/><b>Longitude:</b> -80.2575600519565]]></description>
+      <Point><coordinates>-80.2575600519565,25.7497476481239,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 42</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 42<br/><b>Latitude:</b> 25.7497407568636<br/><b>Longitude:</b> -80.2580954879311]]></description>
+      <Point><coordinates>-80.2580954879311,25.7497407568636,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 43</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 43<br/><b>Latitude:</b> 25.7497231234144<br/><b>Longitude:</b> -80.2583657916152]]></description>
+      <Point><coordinates>-80.2583657916152,25.7497231234144,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 49</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 49<br/><b>Latitude:</b> 25.7496571316121<br/><b>Longitude:</b> -80.2592203393369]]></description>
+      <Point><coordinates>-80.2592203393369,25.7496571316121,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 50</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 50<br/><b>Latitude:</b> 25.7496441103545<br/><b>Longitude:</b> -80.2594923245485]]></description>
+      <Point><coordinates>-80.2594923245485,25.7496441103545,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 51</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 51<br/><b>Latitude:</b> 25.7496341808647<br/><b>Longitude:</b> -80.2597380056768]]></description>
+      <Point><coordinates>-80.2597380056768,25.7496341808647,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 52</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 52<br/><b>Latitude:</b> 25.7496227054893<br/><b>Longitude:</b> -80.2599780633838]]></description>
+      <Point><coordinates>-80.2599780633838,25.7496227054893,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 53</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 53<br/><b>Latitude:</b> 25.749608814244<br/><b>Longitude:</b> -80.2602493017705]]></description>
+      <Point><coordinates>-80.2602493017705,25.749608814244,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 57</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 57<br/><b>Latitude:</b> 25.7495586849539<br/><b>Longitude:</b> -80.261072404662]]></description>
+      <Point><coordinates>-80.261072404662,25.7495586849539,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 59</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 59<br/><b>Latitude:</b> 25.749525107931<br/><b>Longitude:</b> -80.2615759064791]]></description>
+      <Point><coordinates>-80.2615759064791,25.749525107931,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 60</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 60<br/><b>Latitude:</b> 25.7495194270613<br/><b>Longitude:</b> -80.2618130644968]]></description>
+      <Point><coordinates>-80.2618130644968,25.7495194270613,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 62</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 62<br/><b>Latitude:</b> 25.7494928524805<br/><b>Longitude:</b> -80.2620812505277]]></description>
+      <Point><coordinates>-80.2620812505277,25.7494928524805,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 63</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 63<br/><b>Latitude:</b> 25.7494765240893<br/><b>Longitude:</b> -80.2623542518245]]></description>
+      <Point><coordinates>-80.2623542518245,25.7494765240893,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 67</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 67<br/><b>Latitude:</b> 25.7494003201434<br/><b>Longitude:</b> -80.2592099457771]]></description>
+      <Point><coordinates>-80.2592099457771,25.7494003201434,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 71</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 71<br/><b>Latitude:</b> 25.7493755685216<br/><b>Longitude:</b> -80.2594768501777]]></description>
+      <Point><coordinates>-80.2594768501777,25.7493755685216,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 73</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 73<br/><b>Latitude:</b> 25.7493623953613<br/><b>Longitude:</b> -80.2597209065942]]></description>
+      <Point><coordinates>-80.2597209065942,25.7493623953613,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 74</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 74<br/><b>Latitude:</b> 25.7493539398023<br/><b>Longitude:</b> -80.2599569409878]]></description>
+      <Point><coordinates>-80.2599569409878,25.7493539398023,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 77</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 77<br/><b>Latitude:</b> 25.7497539547727<br/><b>Longitude:</b> -80.2578372681606]]></description>
+      <Point><coordinates>-80.2578372681606,25.7497539547727,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Cobra Head 78</name>
+      <styleUrl>#choice0</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Cobra Head<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 78<br/><b>Latitude:</b> 25.7493142663577<br/><b>Longitude:</b> -80.2610679889193]]></description>
+      <Point><coordinates>-80.2610679889193,25.7493142663577,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>Other (14)</name>
+    <Placemark>
+      <name>Other 5</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> decorative cobrahead<br/><b>ArcGIS Object ID:</b> 5<br/><b>Latitude:</b> 25.7491623586885<br/><b>Longitude:</b> -80.2627880119207]]></description>
+      <Point><coordinates>-80.2627880119207,25.7491623586885,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 13</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 13<br/><b>Latitude:</b> 25.7493038104047<br/><b>Longitude:</b> -80.2608025073798]]></description>
+      <Point><coordinates>-80.2608025073798,25.7493038104047,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 14</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 14<br/><b>Latitude:</b> 25.7494387732035<br/><b>Longitude:</b> -80.2585112303285]]></description>
+      <Point><coordinates>-80.2585112303285,25.7494387732035,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 22</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 22<br/><b>Latitude:</b> 25.7495499942696<br/><b>Longitude:</b> -80.2568080276038]]></description>
+      <Point><coordinates>-80.2568080276038,25.7495499942696,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 23</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 23<br/><b>Latitude:</b> 25.7495649653622<br/><b>Longitude:</b> -80.2565962720017]]></description>
+      <Point><coordinates>-80.2565962720017,25.7495649653622,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 31</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Arch<br/><b>ArcGIS Object ID:</b> 31<br/><b>Latitude:</b> 25.7496635206059<br/><b>Longitude:</b> -80.2548386156343]]></description>
+      <Point><coordinates>-80.2548386156343,25.7496635206059,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 37</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 37<br/><b>Latitude:</b> 25.749810816963<br/><b>Longitude:</b> -80.2566175907637]]></description>
+      <Point><coordinates>-80.2566175907637,25.749810816963,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 38</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 38<br/><b>Latitude:</b> 25.7497779768422<br/><b>Longitude:</b> -80.256821665346]]></description>
+      <Point><coordinates>-80.256821665346,25.7497779768422,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 44</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 44<br/><b>Latitude:</b> 25.7496938950918<br/><b>Longitude:</b> -80.2585249766497]]></description>
+      <Point><coordinates>-80.2585249766497,25.7496938950918,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 45</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 45<br/><b>Latitude:</b> 25.7496912253668<br/><b>Longitude:</b> -80.2587635863897]]></description>
+      <Point><coordinates>-80.2587635863897,25.7496912253668,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 55</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead/traffic light pole<br/><b>ArcGIS Object ID:</b> 55<br/><b>Latitude:</b> 25.7495857251986<br/><b>Longitude:</b> -80.2606177905864]]></description>
+      <Point><coordinates>-80.2606177905864,25.7495857251986,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 56</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> North Sidewalk<br/><b>Other type:</b> Cobrahead\traffic light pole<br/><b>ArcGIS Object ID:</b> 56<br/><b>Latitude:</b> 25.7495732784<br/><b>Longitude:</b> -80.2608220705578]]></description>
+      <Point><coordinates>-80.2608220705578,25.7495732784,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 65</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead\traffic light pole<br/><b>ArcGIS Object ID:</b> 65<br/><b>Latitude:</b> 25.7494219430645<br/><b>Longitude:</b> -80.2587635039892]]></description>
+      <Point><coordinates>-80.2587635039892,25.7494219430645,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Other 76</name>
+      <styleUrl>#other</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Other<br/><b>Location on street:</b> South Sidewalk<br/><b>Other type:</b> Cobrahead\traffic light pole<br/><b>ArcGIS Object ID:</b> 76<br/><b>Latitude:</b> 25.7493146818421<br/><b>Longitude:</b> -80.2605805545838]]></description>
+      <Point><coordinates>-80.2605805545838,25.7493146818421,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>Decorative (10)</name>
+    <Placemark>
+      <name>Decorative 2</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> South Sidewalk<br/><b>Other details:</b> 4<br/><b>ArcGIS Object ID:</b> 2<br/><b>Latitude:</b> 25.7492085476313<br/><b>Longitude:</b> -80.26243069]]></description>
+      <Point><coordinates>-80.26243069,25.7492085476313,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 8</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> North Sidewalk<br/><b>Other details:</b> 10
+<br/><b>ArcGIS Object ID:</b> 8<br/><b>Latitude:</b> 25.7494316972252<br/><b>Longitude:</b> -80.2624671750143]]></description>
+      <Point><coordinates>-80.2624671750143,25.7494316972252,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 10</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> South Sidewalk<br/><b>Other details:</b> 5 poles here<br/><b>ArcGIS Object ID:</b> 10<br/><b>Latitude:</b> 25.7492765378705<br/><b>Longitude:</b> -80.2616580950179]]></description>
+      <Point><coordinates>-80.2616580950179,25.7492765378705,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 18</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> South Sidewalk<br/><b>Other details:</b> 5 poles here<br/><b>ArcGIS Object ID:</b> 18<br/><b>Latitude:</b> 25.7494810509621<br/><b>Longitude:</b> -80.2576542645481]]></description>
+      <Point><coordinates>-80.2576542645481,25.7494810509621,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 61</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> North Sidewalk<br/><b>Other details:</b> 6 poles here<br/><b>ArcGIS Object ID:</b> 61<br/><b>Latitude:</b> 25.749510555614<br/><b>Longitude:</b> -80.2616729390902]]></description>
+      <Point><coordinates>-80.2616729390902,25.749510555614,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 72</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 72<br/><b>Latitude:</b> 25.7493811183826<br/><b>Longitude:</b> -80.259664580205]]></description>
+      <Point><coordinates>-80.259664580205,25.7493811183826,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 79</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> Median<br/><b>Other details:</b> 4 poles here<br/><b>ArcGIS Object ID:</b> 79<br/><b>Latitude:</b> 25.7493936341935<br/><b>Longitude:</b> -80.2616728212827]]></description>
+      <Point><coordinates>-80.2616728212827,25.7493936341935,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 80</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> Median<br/><b>Other details:</b> 4 poles here<br/><b>ArcGIS Object ID:</b> 80<br/><b>Latitude:</b> 25.7495071801829<br/><b>Longitude:</b> -80.2596732344627]]></description>
+      <Point><coordinates>-80.2596732344627,25.7495071801829,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 81</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> Median<br/><b>Other details:</b> 4 poles here<br/><b>ArcGIS Object ID:</b> 81<br/><b>Latitude:</b> 25.7496243498666<br/><b>Longitude:</b> -80.2576468255526]]></description>
+      <Point><coordinates>-80.2576468255526,25.7496243498666,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Decorative 82</name>
+      <styleUrl>#choice1</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Decorative<br/><b>Location on street:</b> Median<br/><b>Other details:</b> 4 poles here<br/><b>ArcGIS Object ID:</b> 82<br/><b>Latitude:</b> 25.7497246083702<br/><b>Longitude:</b> -80.2558725442898]]></description>
+      <Point><coordinates>-80.2558725442898,25.7497246083702,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>Lighting and Camera (8)</name>
+    <Placemark>
+      <name>Lighting and Camera 4</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 4<br/><b>Latitude:</b> 25.7492148508233<br/><b>Longitude:</b> -80.2625171566487]]></description>
+      <Point><coordinates>-80.2625171566487,25.7492148508233,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 12</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 12<br/><b>Latitude:</b> 25.7492965627792<br/><b>Longitude:</b> -80.2613557129891]]></description>
+      <Point><coordinates>-80.2613557129891,25.7492965627792,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 32</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 32<br/><b>Latitude:</b> 25.7498784611578<br/><b>Longitude:</b> -80.2551142126106]]></description>
+      <Point><coordinates>-80.2551142126106,25.7498784611578,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 48</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 48<br/><b>Latitude:</b> 25.7496813832134<br/><b>Longitude:</b> -80.2589387073903]]></description>
+      <Point><coordinates>-80.2589387073903,25.7496813832134,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 54</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 54<br/><b>Latitude:</b> 25.749599150768<br/><b>Longitude:</b> -80.260438397506]]></description>
+      <Point><coordinates>-80.260438397506,25.749599150768,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 58</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 58<br/><b>Latitude:</b> 25.749543585766<br/><b>Longitude:</b> -80.261350348571]]></description>
+      <Point><coordinates>-80.261350348571,25.749543585766,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 66</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 66<br/><b>Latitude:</b> 25.7494136176747<br/><b>Longitude:</b> -80.2589232456673]]></description>
+      <Point><coordinates>-80.2589232456673,25.7494136176747,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Lighting and Camera 75</name>
+      <styleUrl>#choice3</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Lighting and Camera<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 75<br/><b>Latitude:</b> 25.7493297810591<br/><b>Longitude:</b> -80.2602251618894]]></description>
+      <Point><coordinates>-80.2602251618894,25.7493297810591,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>Environmental, Lighting and Camera (2)</name>
+    <Placemark>
+      <name>Environmental, Lighting and Camera 30</name>
+      <styleUrl>#choice4</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Environmental, Lighting and Camera<br/><b>Location on street:</b> South Sidewalk<br/><b>ArcGIS Object ID:</b> 30<br/><b>Latitude:</b> 25.7496549935822<br/><b>Longitude:</b> -80.2550484984898]]></description>
+      <Point><coordinates>-80.2550484984898,25.7496549935822,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Environmental, Lighting and Camera 64</name>
+      <styleUrl>#choice4</styleUrl>
+      <description><![CDATA[<b>Pole type:</b> Environmental, Lighting and Camera<br/><b>Location on street:</b> North Sidewalk<br/><b>ArcGIS Object ID:</b> 64<br/><b>Latitude:</b> 25.7494711096373<br/><b>Longitude:</b> -80.2625476196202]]></description>
+      <Point><coordinates>-80.2625476196202,25.7494711096373,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+</Document>
+</kml>

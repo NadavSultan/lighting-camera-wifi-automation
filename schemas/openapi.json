@@ -1,0 +1,1054 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lighting Camera WiFi Automation API",
+    "description": "Phase 1 local project and KML/KMZ workflow. Existing-pole mode only.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "List Projects",
+        "operationId": "list_projects_api_projects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Projects Api Projects Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Project",
+        "operationId": "create_project_api_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_project_api_projects_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}": {
+      "get": {
+        "summary": "Get Project",
+        "operationId": "get_project_api_projects__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Save Project",
+        "operationId": "save_project_api_projects__project_id__put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/import": {
+      "post": {
+        "summary": "Import Kml Or Kmz",
+        "operationId": "import_kml_or_kmz_api_projects_import_post",
+        "parameters": [
+          {
+            "name": "X-Filename",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Filename"
+            }
+          },
+          {
+            "name": "X-Project-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Project-Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "contentMediaType": "application/octet-stream",
+                "maxLength": 52428800,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/open": {
+      "post": {
+        "summary": "Open Project",
+        "operationId": "open_project_api_projects_open_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/export/kml": {
+      "get": {
+        "summary": "Export Kml",
+        "operationId": "export_kml_api_projects__project_id__export_kml_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_create_project_api_projects_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "Untitled lighting project"
+          }
+        },
+        "type": "object",
+        "title": "Body_create_project_api_projects_post"
+      },
+      "FixtureType": {
+        "type": "string",
+        "enum": [
+          "LITE",
+          "WIFI",
+          "SMART"
+        ],
+        "title": "FixtureType"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          },
+          "phase": {
+            "type": "integer",
+            "const": 1,
+            "title": "Phase",
+            "default": 1
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "LayerState": {
+        "properties": {
+          "original_customer_poles": {
+            "type": "boolean",
+            "title": "Original Customer Poles",
+            "default": true
+          },
+          "lite_fixtures": {
+            "type": "boolean",
+            "title": "Lite Fixtures",
+            "default": true
+          },
+          "wifi_fixtures": {
+            "type": "boolean",
+            "title": "Wifi Fixtures",
+            "default": true
+          },
+          "smart_fixtures": {
+            "type": "boolean",
+            "title": "Smart Fixtures",
+            "default": true
+          },
+          "camera_fov": {
+            "type": "boolean",
+            "title": "Camera Fov",
+            "default": false
+          },
+          "wifi_coverage": {
+            "type": "boolean",
+            "title": "Wifi Coverage",
+            "default": false
+          },
+          "calculation_areas": {
+            "type": "boolean",
+            "title": "Calculation Areas",
+            "default": false
+          },
+          "calculation_points": {
+            "type": "boolean",
+            "title": "Calculation Points",
+            "default": false
+          },
+          "lighting_heat_map": {
+            "type": "boolean",
+            "title": "Lighting Heat Map",
+            "default": false
+          },
+          "cap_locations": {
+            "type": "boolean",
+            "title": "Cap Locations",
+            "default": false
+          },
+          "cap_connections": {
+            "type": "boolean",
+            "title": "Cap Connections",
+            "default": false
+          },
+          "warnings": {
+            "type": "boolean",
+            "title": "Warnings",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LayerState"
+      },
+      "OperatingMode": {
+        "type": "string",
+        "enum": [
+          "existing-poles",
+          "proposed-layout"
+        ],
+        "title": "OperatingMode"
+      },
+      "PoleEdit": {
+        "properties": {
+          "pole_id": {
+            "type": "string",
+            "title": "Pole Id"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "fixture_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FixtureType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height M"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "engineering_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engineering Notes"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": -90.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "location_edit_authorized": {
+            "type": "boolean",
+            "title": "Location Edit Authorized",
+            "default": false
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pole_id"
+        ],
+        "title": "PoleEdit"
+      },
+      "Project": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "default": "1.0.0"
+          },
+          "software_version": {
+            "type": "string",
+            "title": "Software Version",
+            "default": "0.1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "Untitled lighting project"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/OperatingMode",
+            "default": "existing-poles"
+          },
+          "proposed_layout_authorized": {
+            "type": "boolean",
+            "title": "Proposed Layout Authorized",
+            "default": false
+          },
+          "source_crs": {
+            "type": "string",
+            "const": "EPSG:4326",
+            "title": "Source Crs",
+            "default": "EPSG:4326"
+          },
+          "projected_crs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projected Crs"
+          },
+          "defaults": {
+            "$ref": "#/components/schemas/ProjectDefaults"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceLayer"
+          },
+          "pole_edits": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PoleEdit"
+            },
+            "type": "object",
+            "title": "Pole Edits"
+          },
+          "layer_state": {
+            "$ref": "#/components/schemas/LayerState"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectWarning"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          },
+          "calculated_layers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Calculated Layers"
+          },
+          "recommended_layers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Recommended Layers"
+          },
+          "source_references": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Source References"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Project"
+      },
+      "ProjectDefaults": {
+        "properties": {
+          "fixture_type": {
+            "$ref": "#/components/schemas/FixtureType",
+            "default": "LITE"
+          },
+          "pole_height_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pole Height M"
+          },
+          "maintenance_factor": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Maintenance Factor",
+            "default": 0.8
+          },
+          "calculation_plane_height_m": {
+            "type": "number",
+            "title": "Calculation Plane Height M",
+            "default": 0.0
+          },
+          "wifi_radius_m": {
+            "type": "number",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Wifi Radius M",
+            "default": 30.0
+          },
+          "camera_downward_angle_deg": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": 0.0,
+            "title": "Camera Downward Angle Deg",
+            "default": 35.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ProjectDefaults"
+      },
+      "ProjectSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/OperatingMode"
+          },
+          "pole_count": {
+            "type": "integer",
+            "title": "Pole Count"
+          },
+          "warning_count": {
+            "type": "integer",
+            "title": "Warning Count"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "mode",
+          "pole_count",
+          "warning_count",
+          "updated_at"
+        ],
+        "title": "ProjectSummary"
+      },
+      "ProjectWarning": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/WarningSeverity",
+            "default": "warning"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "pole_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pole Ids"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ProjectWarning"
+      },
+      "SourceFile": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "media_type": {
+            "type": "string",
+            "enum": [
+              "application/vnd.google-earth.kml+xml",
+              "application/vnd.google-earth.kmz"
+            ],
+            "title": "Media Type"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "imported_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Imported At"
+          },
+          "source_crs": {
+            "type": "string",
+            "const": "EPSG:4326",
+            "title": "Source Crs",
+            "default": "EPSG:4326"
+          },
+          "kml_entry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kml Entry"
+          },
+          "content_base64": {
+            "type": "string",
+            "title": "Content Base64",
+            "description": "Exact uploaded bytes for portable local project reopen/export"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filename",
+          "media_type",
+          "sha256",
+          "size_bytes",
+          "imported_at",
+          "content_base64"
+        ],
+        "title": "SourceFile"
+      },
+      "SourceLayer": {
+        "properties": {
+          "file": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceFile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "document_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Name"
+          },
+          "poles": {
+            "items": {
+              "$ref": "#/components/schemas/SourcePole"
+            },
+            "type": "array",
+            "title": "Poles"
+          },
+          "unsupported_geometry_count": {
+            "type": "integer",
+            "title": "Unsupported Geometry Count",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SourceLayer"
+      },
+      "SourcePole": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sequence_index": {
+            "type": "integer",
+            "title": "Sequence Index"
+          },
+          "source_placemark_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Placemark Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "folder_path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Folder Path"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "extended_data": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Extended Data"
+          },
+          "source_style_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Style Url"
+          },
+          "source_style_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Style Color"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "altitude_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude M"
+          },
+          "raw_coordinates": {
+            "type": "string",
+            "title": "Raw Coordinates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "sequence_index",
+          "name",
+          "longitude",
+          "latitude",
+          "raw_coordinates"
+        ],
+        "title": "SourcePole"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WarningSeverity": {
+        "type": "string",
+        "enum": [
+          "info",
+          "warning",
+          "error"
+        ],
+        "title": "WarningSeverity"
+      }
+    }
+  }
+}
