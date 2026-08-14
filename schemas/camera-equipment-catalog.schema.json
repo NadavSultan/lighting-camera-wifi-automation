@@ -1,0 +1,237 @@
+{
+  "$defs": {
+    "CameraModel": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "manufacturer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manufacturer"
+        },
+        "sensor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sensor"
+        },
+        "resolution_width_px": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolution Width Px"
+        },
+        "resolution_height_px": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolution Height Px"
+        },
+        "compatible_lens_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Compatible Lens Ids",
+          "type": "array"
+        },
+        "technical_properties": {
+          "additionalProperties": true,
+          "title": "Technical Properties",
+          "type": "object"
+        },
+        "source_reference_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Reference Id"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "display_name"
+      ],
+      "title": "CameraModel",
+      "type": "object"
+    },
+    "LensConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "focal_length_mm": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Focal Length Mm"
+        },
+        "horizontal_fov_deg": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Horizontal Fov Deg"
+        },
+        "vertical_fov_deg": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vertical Fov Deg"
+        },
+        "compatible_camera_model_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Compatible Camera Model Ids",
+          "type": "array"
+        },
+        "technical_properties": {
+          "additionalProperties": true,
+          "title": "Technical Properties",
+          "type": "object"
+        },
+        "source_reference_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Reference Id"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "display_name"
+      ],
+      "title": "LensConfiguration",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "catalog_id": {
+      "default": "camera-equipment-catalog",
+      "title": "Catalog Id",
+      "type": "string"
+    },
+    "camera_models": {
+      "items": {
+        "$ref": "#/$defs/CameraModel"
+      },
+      "title": "Camera Models",
+      "type": "array"
+    },
+    "lenses": {
+      "items": {
+        "$ref": "#/$defs/LensConfiguration"
+      },
+      "title": "Lenses",
+      "type": "array"
+    }
+  },
+  "required": [
+    "camera_models",
+    "lenses"
+  ],
+  "title": "CameraEquipmentCatalog",
+  "type": "object"
+}

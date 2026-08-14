@@ -1,0 +1,278 @@
+{
+  "$defs": {
+    "CameraMountingSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "relative_azimuth_deg": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Relative Azimuth Deg",
+          "type": "number"
+        },
+        "downward_tilt_deg": {
+          "default": 35.0,
+          "maximum": 90,
+          "minimum": 0,
+          "title": "Downward Tilt Deg",
+          "type": "number"
+        },
+        "camera_model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Camera Model Id"
+        },
+        "lens_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lens Id"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "display_name",
+        "relative_azimuth_deg"
+      ],
+      "title": "CameraMountingSlot",
+      "type": "object"
+    },
+    "CameraMountingTemplateRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "title": "Notes",
+          "type": "string"
+        },
+        "slots": {
+          "items": {
+            "$ref": "#/$defs/CameraMountingSlot"
+          },
+          "title": "Slots",
+          "type": "array"
+        }
+      },
+      "required": [
+        "revision",
+        "created_at",
+        "slots"
+      ],
+      "title": "CameraMountingTemplateRevision",
+      "type": "object"
+    },
+    "FixtureCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "lighting": {
+          "title": "Lighting",
+          "type": "boolean"
+        },
+        "wifi": {
+          "title": "Wifi",
+          "type": "boolean"
+        },
+        "cameras": {
+          "title": "Cameras",
+          "type": "boolean"
+        },
+        "camera_slot_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Camera Slot Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lighting",
+        "wifi",
+        "cameras"
+      ],
+      "title": "FixtureCapabilities",
+      "type": "object"
+    },
+    "FixtureModel": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "fixture_family": {
+          "title": "Fixture Family",
+          "type": "string"
+        },
+        "capability_variant": {
+          "$ref": "#/$defs/FixtureType"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/FixtureCapabilities"
+        },
+        "manufacturer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manufacturer"
+        },
+        "model_metadata": {
+          "additionalProperties": true,
+          "title": "Model Metadata",
+          "type": "object"
+        },
+        "electrical_properties": {
+          "additionalProperties": true,
+          "title": "Electrical Properties",
+          "type": "object"
+        },
+        "photometric_properties": {
+          "additionalProperties": true,
+          "title": "Photometric Properties",
+          "type": "object"
+        },
+        "compatible_ies_file_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Compatible Ies File Ids",
+          "type": "array"
+        },
+        "default_ies_file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Ies File Id"
+        },
+        "mounting_template_revisions": {
+          "items": {
+            "$ref": "#/$defs/CameraMountingTemplateRevision"
+          },
+          "title": "Mounting Template Revisions",
+          "type": "array"
+        },
+        "current_mounting_template_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Mounting Template Revision"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "display_name",
+        "fixture_family",
+        "capability_variant",
+        "capabilities"
+      ],
+      "title": "FixtureModel",
+      "type": "object"
+    },
+    "FixtureType": {
+      "enum": [
+        "LITE",
+        "WIFI",
+        "SMART"
+      ],
+      "title": "FixtureType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "catalog_id": {
+      "default": "fixture-model-catalog",
+      "title": "Catalog Id",
+      "type": "string"
+    },
+    "fixture_models": {
+      "items": {
+        "$ref": "#/$defs/FixtureModel"
+      },
+      "title": "Fixture Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "fixture_models"
+  ],
+  "title": "FixtureModelCatalog",
+  "type": "object"
+}

@@ -1,6 +1,6 @@
 # Lighting Camera WiFi Automation
 
-Local Phase 1 map-centred engineering application for importing customer KML/KMZ pole layouts, preserving source coordinates and metadata, assigning LITE/WIFI/SMART fixture types, recording pole height/status/notes edits, saving/reopening project JSON, and exporting updated KML.
+Local Phase 2 map-centred engineering application for importing customer KML/KMZ pole layouts, preserving source coordinates and metadata, managing fixture/IES/camera catalogs, assigning specific fixture models, configuring SMART camera slots, applying explicit-field bulk changes, saving/reopening project JSON, and exporting updated KML.
 
 ## Run locally
 
@@ -40,4 +40,4 @@ pnpm run build
 
 ## Scope and safety
 
-Existing-pole mode is the only Phase 1 operating mode. No proposed poles are created and no customer coordinates are moved, corrected, or overwritten. Camera geometry, Wi-Fi analysis, IES calculations, and CAP recommendation are gated behind later reviewed phases.
+Existing-pole mode remains mandatory. No proposed poles are created and no customer coordinates are moved, corrected, or overwritten. Phase 2 stores camera mounting orientation but does not calculate/render FOV, Wi-Fi coverage, illuminance, CAP recommendations, or automatic pole placement.

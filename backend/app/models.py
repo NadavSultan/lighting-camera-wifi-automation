@@ -11,8 +11,8 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-SCHEMA_VERSION = "1.0.0"
-SOFTWARE_VERSION = "0.1.0"
+SCHEMA_VERSION = "2.0.0"
+SOFTWARE_VERSION = "0.2.0"
 
 
 def utc_now() -> datetime:
@@ -104,6 +104,7 @@ class PoleEdit(StrictModel):
     height_m: Annotated[float | None, Field(gt=0, le=100)] = None
     active: bool | None = None
     engineering_notes: str | None = None
+    fixture_configuration: PoleFixtureConfiguration | None = None
     longitude: Annotated[float | None, Field(ge=-180, le=180)] = None
     latitude: Annotated[float | None, Field(ge=-90, le=90)] = None
     location_edit_authorized: bool = False
@@ -129,6 +130,34 @@ class ProjectDefaults(StrictModel):
     camera_downward_angle_deg: Annotated[float, Field(ge=0, le=90)] = 35.0
 
 
+class PoleCameraOverride(StrictModel):
+    slot_id: str
+    camera_model_id: str | None = None
+    lens_id: str | None = None
+    enabled: bool | None = None
+    relative_azimuth_deg: Annotated[float | None, Field(ge=-180, le=180)] = None
+    downward_tilt_deg: Annotated[float | None, Field(ge=0, le=90)] = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class PoleFixtureConfiguration(StrictModel):
+    fixture_model_id: str
+    fixture_model_revision: Annotated[int, Field(ge=1)]
+    mounting_template_revision: Annotated[int | None, Field(ge=1)] = None
+    ies_file_id: str | None = None
+    fixture_azimuth_deg: Annotated[float, Field(ge=0, lt=360)] = 0.0
+    lighting_properties: dict[str, Any] = Field(default_factory=dict)
+    wifi_configuration: dict[str, Any] | None = None
+    camera_overrides: dict[str, PoleCameraOverride] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_override_keys(self) -> "PoleFixtureConfiguration":
+        for key, override in self.camera_overrides.items():
+            if key != override.slot_id:
+                raise ValueError(f"camera override key {key!r} does not match slot_id")
+        return self
+
+
 class LayerState(StrictModel):
     original_customer_poles: bool = True
     lite_fixtures: bool = True
@@ -145,7 +174,7 @@ class LayerState(StrictModel):
 
 
 class Project(StrictModel):
-    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.0.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -167,6 +196,7 @@ class Project(StrictModel):
     calculated_layers: dict[str, Any] = Field(default_factory=dict)
     recommended_layers: dict[str, Any] = Field(default_factory=dict)
     source_references: dict[str, str] = Field(default_factory=dict)
+    legacy_fixture_assignments_require_model_selection: bool = True
 
     @model_validator(mode="after")
     def enforce_phase_one_policy(self) -> "Project":
@@ -195,5 +225,24 @@ class ProjectSummary(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    phase: Literal[1] = 1
+    phase: Literal[2] = 2
     version: str = SOFTWARE_VERSION
+
+
+def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Migrate a portable Phase 1 project without guessing a fixture family."""
+    version = payload.get("schema_version", "1.0.0")
+    if version == SCHEMA_VERSION:
+        return payload
+    if version != "1.0.0":
+        raise ValueError(f"Unsupported project schema version: {version}")
+    migrated = dict(payload)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["software_version"] = SOFTWARE_VERSION
+    migrated["legacy_fixture_assignments_require_model_selection"] = True
+    assumptions = list(migrated.get("assumptions", []))
+    notice = "Phase 1 fixture classifications were preserved; fixture family/model selection remains explicit."
+    if notice not in assumptions:
+        assumptions.append(notice)
+    migrated["assumptions"] = assumptions
+    return migrated

@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 backend/data/projects/
+backend/data/catalogs/
 frontend/node_modules/
 frontend/.next/
 frontend/dist/

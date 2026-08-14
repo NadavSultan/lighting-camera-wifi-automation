@@ -44,6 +44,7 @@ export interface PoleEdit {
   height_m?: number | null;
   active?: boolean | null;
   engineering_notes?: string | null;
+  fixture_configuration?: PoleFixtureConfiguration | null;
   longitude?: number | null;
   latitude?: number | null;
   location_edit_authorized: boolean;
@@ -51,7 +52,7 @@ export interface PoleEdit {
 }
 
 export interface Project {
-  schema_version: "1.0.0";
+  schema_version: "2.0.0";
   software_version: string;
   id: string;
   name: string;
@@ -82,7 +83,65 @@ export interface Project {
   calculated_layers: Record<string, unknown>;
   recommended_layers: Record<string, unknown>;
   source_references: Record<string, string>;
+  legacy_fixture_assignments_require_model_selection: boolean;
 }
+
+export interface PoleCameraOverride {
+  slot_id: string;
+  camera_model_id?: string | null;
+  lens_id?: string | null;
+  enabled?: boolean | null;
+  relative_azimuth_deg?: number | null;
+  downward_tilt_deg?: number | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PoleFixtureConfiguration {
+  fixture_model_id: string;
+  fixture_model_revision: number;
+  mounting_template_revision: number | null;
+  ies_file_id: string | null;
+  fixture_azimuth_deg: number;
+  lighting_properties: Record<string, unknown>;
+  wifi_configuration: Record<string, unknown> | null;
+  camera_overrides: Record<string, PoleCameraOverride>;
+}
+
+export interface CameraMountingSlot {
+  id: string;
+  display_name: string;
+  relative_azimuth_deg: number;
+  downward_tilt_deg: number;
+  camera_model_id: string | null;
+  lens_id: string | null;
+  enabled: boolean;
+  metadata: Record<string, unknown>;
+}
+
+export interface FixtureModel {
+  id: string;
+  display_name: string;
+  fixture_family: string;
+  capability_variant: FixtureType;
+  capabilities: { lighting: boolean; wifi: boolean; cameras: boolean; camera_slot_count: number };
+  manufacturer: string | null;
+  model_metadata: Record<string, unknown>;
+  electrical_properties: Record<string, unknown>;
+  photometric_properties: Record<string, unknown>;
+  compatible_ies_file_ids: string[];
+  default_ies_file_id: string | null;
+  mounting_template_revisions: Array<{ revision: number; created_at: string; notes: string; slots: CameraMountingSlot[] }>;
+  current_mounting_template_revision: number | null;
+  active: boolean;
+  revision: number;
+}
+
+export interface FixtureModelCatalog { schema_version: "1.0.0"; catalog_id: string; fixture_models: FixtureModel[] }
+export interface CameraModel { id: string; display_name: string; manufacturer: string | null; sensor: string | null; resolution_width_px: number | null; resolution_height_px: number | null; compatible_lens_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
+export interface LensConfiguration { id: string; display_name: string; focal_length_mm: number | null; horizontal_fov_deg: number | null; vertical_fov_deg: number | null; compatible_camera_model_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
+export interface CameraEquipmentCatalog { schema_version: "1.0.0"; catalog_id: string; camera_models: CameraModel[]; lenses: LensConfiguration[] }
+export interface IesFileRecord { id: string; original_filename: string; sha256: string; uploaded_at: string; ies_format_version: string; parsed_metadata: Record<string, unknown>; validation_status: "valid" | "invalid" | "unsupported"; validation_errors: string[]; active: boolean; revision: number }
+export interface IesLibrary { schema_version: "1.0.0"; catalog_id: string; files: IesFileRecord[]; fixture_associations: Array<{ ies_file_id: string; fixture_model_id: string; active: boolean }> }
 
 export interface EffectivePole extends SourcePole {
   displayName: string;
@@ -92,6 +151,7 @@ export interface EffectivePole extends SourcePole {
   active: boolean;
   engineeringNotes: string;
   modified: boolean;
+  fixtureConfiguration: PoleFixtureConfiguration | null;
 }
 
 export function effectivePole(project: Project, pole: SourcePole): EffectivePole {
@@ -105,5 +165,6 @@ export function effectivePole(project: Project, pole: SourcePole): EffectivePole
     active: edit?.active ?? true,
     engineeringNotes: edit?.engineering_notes ?? "",
     modified: Boolean(edit),
+    fixtureConfiguration: edit?.fixture_configuration ?? null,
   };
 }

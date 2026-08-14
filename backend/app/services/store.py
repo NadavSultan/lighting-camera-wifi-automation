@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-from app.models import Project, ProjectSummary, utc_now
+from app.models import Project, ProjectSummary, migrate_project_payload, utc_now
 
 
 class ProjectNotFoundError(FileNotFoundError):
@@ -26,7 +26,7 @@ class ProjectStore:
         directory = self._directory(project.id)
         target = directory / "project.json"
         if target.exists():
-            existing_project = Project.model_validate_json(target.read_text(encoding="utf-8"))
+            existing_project = Project.model_validate(migrate_project_payload(json.loads(target.read_text(encoding="utf-8"))))
             if existing_project.source != project.source:
                 raise ValueError("Original customer source data is immutable for an existing project")
 
@@ -54,7 +54,7 @@ class ProjectStore:
         target = self._directory(project_id) / "project.json"
         if not target.exists():
             raise ProjectNotFoundError(project_id)
-        return Project.model_validate_json(target.read_text(encoding="utf-8"))
+        return Project.model_validate(migrate_project_payload(json.loads(target.read_text(encoding="utf-8"))))
 
     def list(self) -> list[ProjectSummary]:
         if not self.root.exists():
@@ -62,7 +62,7 @@ class ProjectStore:
         summaries: list[ProjectSummary] = []
         for path in self.root.glob("*/project.json"):
             try:
-                project = Project.model_validate_json(path.read_text(encoding="utf-8"))
+                project = Project.model_validate(migrate_project_payload(json.loads(path.read_text(encoding="utf-8"))))
             except Exception:
                 continue
             summaries.append(ProjectSummary(

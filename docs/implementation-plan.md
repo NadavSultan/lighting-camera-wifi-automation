@@ -13,13 +13,16 @@ Status: complete, tested, and frozen for acceptance review. No Phase 2 work is a
 
 ## Phase 2 - fixture, IES, and camera catalogs
 
-Status: not started. Do not begin until a later user explicitly approves Phase 2 after the Phase 1 acceptance task recorded in `docs/current-status.md`.
+Status: complete, tested, and accepted on 2026-08-14.
 
-- Import and normalize the supplied IES metadata and camera workbook.
-- Add configurable catalogs, verified fixture-to-IES relationships, bulk/folder assignment, and per-pole overrides.
+- Added operational fixture-model, IES, and camera/lens catalogs while retaining the approved Phase 1 reference catalogs.
+- Added validated IES upload/parsing, explicit fixture associations, bulk/folder assignment, and per-pole overrides.
+- Added immutable Phoenix 1 SMART ±70-degree and Solitaire SMART ±60-degree mounting-template revisions with positive downward tilt.
 - Resolve source discrepancies before use (for example, two `050W` filenames identify a `60W` luminaire internally).
 
 ## Phase 3 - camera geometry
+
+Status: not started and not authorized.
 
 - Flat-terrain ground-FOV projection, independent cameras, azimuth handles, overlap and priority areas.
 - Keep geometric FOV distinct from analytics-quality coverage and add pixel-density data structures.
@@ -48,4 +51,4 @@ Status: not started. Do not begin until a later user explicitly approves Phase 2
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The immediate gate is a fresh-session Phase 1 acceptance review: start the two local services, run the supplied Miracle Mile import/edit/save/reopen/export workflow in the UI, record any acceptance findings, and obtain explicit approval. Input discrepancies may be clarified during that review, but catalog implementation remains out of scope until Phase 2 is authorized.
+The immediate gate is closed: Phase 2 is accepted. A future session may begin Phase 3 only after new explicit authorization and approval of the required physical camera offsets, lens assignments, and terrain assumptions. No later phase was started in the Phase 2 session.

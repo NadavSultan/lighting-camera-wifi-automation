@@ -1,9 +1,11 @@
 "use client";
 
-import { type ChangeEvent, type CSSProperties, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { EngineeringMap } from "./EngineeringMap";
-import { createProject, downloadProjectJson, downloadUpdatedKml, importProjectFile, openProject, saveProject } from "../lib/api";
-import { effectivePole, type EffectivePole, type FixtureType, type PoleEdit, type Project } from "../lib/types";
+import { CatalogManager } from "./CatalogManager";
+import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
+import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, saveProject } from "../lib/api";
+import { effectivePole, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -30,11 +32,31 @@ export function EngineeringWorkspace() {
   const [past, setPast] = useState<Project[]>([]);
   const [future, setFuture] = useState<Project[]>([]);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("Ready - Phase 1 existing-pole workflow");
+  const [status, setStatus] = useState("Ready - Phase 2 existing-pole configuration workflow");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
+  const [bulkModelId, setBulkModelId] = useState("");
+  const [bulkHeight, setBulkHeight] = useState("");
+  const [bulkAzimuth, setBulkAzimuth] = useState("");
+  const [bulkIesId, setBulkIesId] = useState("");
+  const [bulkWifiNotes, setBulkWifiNotes] = useState("");
+  const [bulkCameraId, setBulkCameraId] = useState("");
+  const [bulkLensId, setBulkLensId] = useState("");
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [fixtureCatalog, setFixtureCatalog] = useState<FixtureModelCatalog | null>(null);
+  const [cameraCatalog, setCameraCatalog] = useState<CameraEquipmentCatalog | null>(null);
+  const [iesLibrary, setIesLibrary] = useState<IesLibrary | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    void refreshCatalogs().catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load Phase 2 catalogs"));
+  }, []);
+
+  async function refreshCatalogs() {
+    const [fixtures, cameras, ies] = await Promise.all([getFixtureCatalog(), getCameraCatalog(), getIesLibrary()]);
+    setFixtureCatalog(fixtures); setCameraCatalog(cameras); setIesLibrary(ies);
+  }
 
   const effectivePoles = useMemo(() => project?.source.poles.map((pole) => effectivePole(project, pole)) ?? [], [project]);
   const selected = useMemo<EffectivePole | null>(() => effectivePoles.find((pole) => pole.id === selectedId) ?? null, [effectivePoles, selectedId]);
@@ -138,16 +160,54 @@ export function EngineeringWorkspace() {
     setStatus("Restored all source/default values for the selected pole");
   }
 
-  function applyBulkFixture(fixture: FixtureType) {
+  function applyBulkConfiguration() {
     if (!project) return;
     const targets = effectivePoles.filter((pole) => bulkFolder === "all" || (pole.folder_path.join(" / ") || "Unfiled") === bulkFolder);
+    const selectedModel = fixtureCatalog?.fixture_models.find((item) => item.id === bulkModelId && item.active);
+    const models = targets.map((pole) => selectedModel ?? fixtureCatalog?.fixture_models.find((item) => item.id === pole.fixtureConfiguration?.fixture_model_id));
+    const needsConfiguration = Boolean(bulkIesId || bulkAzimuth || bulkWifiNotes || bulkCameraId || bulkLensId);
+    if (needsConfiguration && models.some((item) => !item)) { setError("Every selected pole needs an explicit fixture model before applying configuration fields"); return; }
+    if (bulkWifiNotes && models.some((item) => !item?.capabilities.wifi)) { setError("Wi-Fi bulk configuration is allowed only when every selected fixture supports Wi-Fi"); return; }
+    if ((bulkCameraId || bulkLensId) && models.some((item) => !item?.capabilities.cameras)) { setError("Camera and lens bulk configuration is allowed only when every selected fixture is SMART"); return; }
+    if (bulkIesId && models.some((model) => !iesLibrary?.fixture_associations.some((item) => item.active && item.ies_file_id === bulkIesId && item.fixture_model_id === model?.id))) { setError("The selected IES file is not explicitly associated with every target fixture model"); return; }
     mutateProject((draft) => {
-      for (const pole of targets) {
+      for (const [index, pole] of targets.entries()) {
         const current = draft.pole_edits[pole.id] ?? { pole_id: pole.id, location_edit_authorized: false };
-        draft.pole_edits[pole.id] = { ...current, fixture_type: fixture, modified_at: new Date().toISOString() };
+        const model = models[index];
+        let config = current.fixture_configuration;
+        if (selectedModel && config?.fixture_model_id !== selectedModel.id) config = { fixture_model_id: selectedModel.id, fixture_model_revision: selectedModel.revision, mounting_template_revision: selectedModel.current_mounting_template_revision, ies_file_id: selectedModel.default_ies_file_id, fixture_azimuth_deg: 0, lighting_properties: {}, wifi_configuration: selectedModel.capabilities.wifi ? {} : null, camera_overrides: {} };
+        if (config) {
+          if (bulkIesId) config.ies_file_id = bulkIesId;
+          if (bulkAzimuth) config.fixture_azimuth_deg = Number(bulkAzimuth);
+          if (bulkWifiNotes) config.wifi_configuration = { ...(config.wifi_configuration ?? {}), notes: bulkWifiNotes };
+          if (bulkCameraId || bulkLensId) {
+            const template = model?.mounting_template_revisions.find((item) => item.revision === config?.mounting_template_revision);
+            for (const slot of template?.slots ?? []) {
+              const override = config.camera_overrides[slot.id] ?? { slot_id: slot.id, metadata: {} };
+              if (bulkCameraId) override.camera_model_id = bulkCameraId;
+              if (bulkLensId) override.lens_id = bulkLensId;
+              config.camera_overrides[slot.id] = override;
+            }
+          }
+        }
+        draft.pole_edits[pole.id] = { ...current, fixture_type: selectedModel?.capability_variant ?? current.fixture_type, height_m: bulkHeight ? Number(bulkHeight) : current.height_m, fixture_configuration: config, modified_at: new Date().toISOString() };
       }
     });
-    setStatus(`Assigned ${fixture} to ${targets.length} pole${targets.length === 1 ? "" : "s"}; source coordinates unchanged`);
+    setStatus(`Applied only the selected Phase 2 fields to ${targets.length} pole${targets.length === 1 ? "" : "s"}; source coordinates unchanged`);
+  }
+
+  function assignFixtureModel(poleId: string, modelId: string) {
+    const model = fixtureCatalog?.fixture_models.find((item) => item.id === modelId && item.active);
+    if (!model) return;
+    updatePole(poleId, {
+      fixture_type: model.capability_variant,
+      fixture_configuration: {
+        fixture_model_id: model.id, fixture_model_revision: model.revision,
+        mounting_template_revision: model.current_mounting_template_revision,
+        ies_file_id: model.default_ies_file_id, fixture_azimuth_deg: 0,
+        lighting_properties: {}, wifi_configuration: model.capabilities.wifi ? {} : null, camera_overrides: {},
+      },
+    });
   }
 
   function toggleLayer(key: LayerKey, enabled: boolean) {
@@ -180,6 +240,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={undo} disabled={!past.length}>Undo</button>
           <button className="tool-button" onClick={redo} disabled={!future.length}>Redo</button>
           <span className="toolbar-divider" />
+          <button className="tool-button" onClick={() => setCatalogOpen(true)}>Catalogs</button>
           <button className="tool-button" disabled title="Phase 5 after Phase 1 review">Draw Calculation Area</button>
           <button className="tool-button" disabled title="Phase 5 after validated IES conventions">Calculate Lighting</button>
           <button className="tool-button" disabled title="Phase 6 after CAP constraints are clarified">Recommend CAP</button>
@@ -201,14 +262,18 @@ export function EngineeringWorkspace() {
                 <div className="counts-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((fixture) => <div className={`count-card ${fixture.toLowerCase()}`} key={fixture}><span>{fixture}</span><strong>{counts[fixture]}</strong></div>)}</div>
               </section>
               <section className="section">
-                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 1</span></div>
+                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 2</span></div>
                 {LAYERS.map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || Boolean(layer.phase)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Bulk assignment</h3></div>
                 <div className="field full"><label htmlFor="bulk-folder">Target folder</label><select id="bulk-folder" value={bulkFolder} onChange={(event) => setBulkFolder(event.target.value)} disabled={!project}><option value="all">All imported poles</option>{folders.map((folder) => <option key={folder}>{folder}</option>)}</select></div>
-                <div className="bulk-row" style={{ marginTop: 8 }}><button className="quiet-button" disabled={!project} onClick={() => applyBulkFixture("LITE")}>Set LITE</button><button className="quiet-button" disabled={!project} onClick={() => applyBulkFixture("WIFI")}>Set WIFI</button></div>
-                <button className="quiet-button" style={{ marginTop: 7, width: "100%" }} disabled={!project} onClick={() => applyBulkFixture("SMART")}>Set SMART</button>
+                <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-model">Explicit fixture model</label><select id="bulk-model" value={bulkModelId} onChange={(event) => setBulkModelId(event.target.value)} disabled={!project}><option value="">Choose model…</option>{fixtureCatalog?.fixture_models.filter((item) => item.active).map((model) => <option value={model.id} key={model.id}>{model.display_name}</option>)}</select></div>
+                <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-height">Height (m)</label><input id="bulk-height" type="number" min="0.1" max="100" value={bulkHeight} placeholder="Unchanged" onChange={(event) => setBulkHeight(event.target.value)} /></div><div className="field"><label htmlFor="bulk-azimuth">Azimuth (°)</label><input id="bulk-azimuth" type="number" min="0" max="359.999" value={bulkAzimuth} placeholder="Unchanged" onChange={(event) => setBulkAzimuth(event.target.value)} /></div></div>
+                <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-ies">IES file</label><select id="bulk-ies" value={bulkIesId} onChange={(event) => setBulkIesId(event.target.value)}><option value="">Unchanged</option>{iesLibrary?.files.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.original_filename}</option>)}</select></div>
+                <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-wifi">Wi-Fi notes</label><input id="bulk-wifi" value={bulkWifiNotes} placeholder="Unchanged" onChange={(event) => setBulkWifiNotes(event.target.value)} /></div>
+                <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-camera">SMART camera</label><select id="bulk-camera" value={bulkCameraId} onChange={(event) => setBulkCameraId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.camera_models.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div><div className="field"><label htmlFor="bulk-lens">SMART lens</label><select id="bulk-lens" value={bulkLensId} onChange={(event) => setBulkLensId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.lenses.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div></div>
+                <button className="quiet-button" style={{ marginTop: 7, width: "100%" }} disabled={!project || !(bulkModelId || bulkHeight || bulkAzimuth || bulkIesId || bulkWifiNotes || bulkCameraId || bulkLensId)} onClick={applyBulkConfiguration}>Apply selected fields</button>
                 <p className="helper">Assignments create edit overlays. Folder names are never interpreted automatically.</p>
               </section>
               <section className="section">
@@ -221,7 +286,7 @@ export function EngineeringWorkspace() {
 
         <section className="map-stage" aria-label="Engineering map workspace">
           <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
-          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 1 displays and classifies existing poles only. No locations are generated or moved.</span></div>
+          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 2 configures existing poles only. No locations are generated or moved.</span></div>
           {!project?.source.poles.length && <div className="map-overlay map-empty"><span className="eyebrow">Phase 1 · Existing-pole foundation</span><h1>Start with the customer’s pole layout</h1><p>Import a KML or KMZ to validate and display authoritative pole coordinates. Your changes remain separate and reversible.</p><button className="primary-button" onClick={() => importRef.current?.click()} disabled={busy}>Import KML/KMZ</button></div>}
         </section>
 
@@ -229,7 +294,7 @@ export function EngineeringWorkspace() {
           {rightCollapsed ? <CollapsedRail label="Properties" symbol="‹" onClick={() => setRightCollapsed(false)} /> : (
             <div className="panel-scroll">
               <div className="panel-titlebar"><h2>Properties</h2><button className="icon-button" onClick={() => setRightCollapsed(true)} aria-label="Collapse properties inspector">›</button></div>
-              {selected && project ? <PoleInspector pole={selected} project={project} onChange={(patch) => updatePole(selected.id, patch)} onRestore={() => restorePole(selected.id)} /> : <section className="section"><h3>No pole selected</h3><p className="empty-copy">Click an imported pole to inspect source data and apply a separate engineering override.</p></section>}
+              {selected && project ? <Phase2PoleInspector pole={selected} project={project} fixtureCatalog={fixtureCatalog} cameraCatalog={cameraCatalog} iesLibrary={iesLibrary} onAssignModel={(modelId) => assignFixtureModel(selected.id, modelId)} onChange={(patch) => updatePole(selected.id, patch)} onRestore={() => restorePole(selected.id)} /> : <section className="section"><h3>No pole selected</h3><p className="empty-copy">Click an imported pole to inspect source data and apply a separate engineering override.</p></section>}
             </div>
           )}
         </aside>
@@ -237,6 +302,7 @@ export function EngineeringWorkspace() {
 
       <footer className="statusbar"><span className="status-item"><span className="status-dot" />API-backed local project</span><span>CRS: {project?.projected_crs ?? "pending import"}</span><span>Source: {project?.source_crs ?? "WGS84"}</span><span>Edits: {project ? Object.keys(project.pole_edits).length : 0}</span><span className="status-message">{busy ? "Working…" : status}</span></footer>
       {error && <button type="button" className="toast" aria-live="assertive" onClick={() => setError(null)}>{error}</button>}
+      {catalogOpen && fixtureCatalog && cameraCatalog && iesLibrary && <CatalogManager fixtures={fixtureCatalog} cameras={cameraCatalog} ies={iesLibrary} onClose={() => setCatalogOpen(false)} onRefresh={refreshCatalogs} onError={setError} />}
     </main>
   );
 }
@@ -245,7 +311,7 @@ function CollapsedRail({ label, symbol, onClick }: { label: string; symbol: stri
   return <div className="collapsed-rail"><button className="icon-button" onClick={onClick} aria-label={`Expand ${label}`}>{symbol}</button><span className="collapsed-label">{label}</span></div>;
 }
 
-function PoleInspector({ pole, project, onChange, onRestore }: { pole: EffectivePole; project: Project; onChange: (patch: Partial<PoleEdit>) => void; onRestore: () => void }) {
+export function LegacyPhaseOnePoleInspector({ pole, project, onChange, onRestore }: { pole: EffectivePole; project: Project; onChange: (patch: Partial<PoleEdit>) => void; onRestore: () => void }) {
   return <>
     <section className="section">
       <div className="section-heading"><h3>Selected pole</h3>{pole.modified && <span className="phase-tag" style={{ color: "var(--accent)" }}>Modified</span>}</div>

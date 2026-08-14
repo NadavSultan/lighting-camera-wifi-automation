@@ -16,7 +16,7 @@ The importer preserves a KML Placemark `id` when present. Otherwise it creates a
 
 ## User edits
 
-`PoleEdit` contains optional overrides for display name, external pole ID, fixture type, height, active status, notes, and location. Location changes require `location_edit_authorized=true`; the UI does not expose location editing in Phase 1. Removing an edit restores all source/default values.
+`PoleEdit` retains Phase 1 fields and may contain a Phase 2 `fixture_configuration`. That configuration references a stable fixture model and pinned catalog/template revisions, an explicitly associated IES file, fixture azimuth, capability-specific settings, and slot-keyed camera override deltas. Location changes still require `location_edit_authorized=true`; the UI never exposes them.
 
 ## Effective values
 
@@ -45,7 +45,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current schema version is `1.0.0` and software version is `0.1.0`. Regenerate both checked-in contracts from the backend directory with:
+The current project schema version is `2.0.0` and software version is `0.2.0`. Phase 1 JSON (`1.0.0`) migrates without family inference: coordinates and edits are preserved, `fixture_configuration` remains unset, and explicit model selection is required. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

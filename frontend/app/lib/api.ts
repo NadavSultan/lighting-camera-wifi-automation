@@ -1,4 +1,4 @@
-import type { Project } from "./types";
+import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -59,6 +59,38 @@ export function openProject(project: Project) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(project),
   });
+}
+
+export function getFixtureCatalog() { return api<FixtureModelCatalog>("/api/catalogs/fixtures"); }
+export function getCameraCatalog() { return api<CameraEquipmentCatalog>("/api/catalogs/cameras"); }
+export function getIesLibrary() { return api<IesLibrary>("/api/catalogs/ies"); }
+export function saveFixtureModel(model: FixtureModel) {
+  return api<FixtureModel>(`/api/catalogs/fixtures/${encodeURIComponent(model.id)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(model) });
+}
+export function addFixtureTemplateRevision(fixtureId: string, revision: FixtureModel["mounting_template_revisions"][number]) {
+  return api<FixtureModel>(`/api/catalogs/fixtures/${encodeURIComponent(fixtureId)}/template-revisions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(revision) });
+}
+export function saveCameraModel(model: CameraModel) {
+  return api<CameraModel>(`/api/catalogs/cameras/${encodeURIComponent(model.id)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(model) });
+}
+export function saveLens(lens: LensConfiguration) {
+  return api<LensConfiguration>(`/api/catalogs/lenses/${encodeURIComponent(lens.id)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lens) });
+}
+export function uploadIes(file: File) {
+  return api<IesFileRecord>("/api/catalogs/ies/upload", { method: "POST", headers: { "Content-Type": "application/octet-stream", "X-Filename": file.name }, body: file });
+}
+export function setIesActive(iesId: string, active: boolean) {
+  return api<IesFileRecord>(`/api/catalogs/ies/${encodeURIComponent(iesId)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+}
+export function associateIes(iesId: string, fixtureId: string) {
+  return api(`/api/catalogs/ies/${encodeURIComponent(iesId)}/fixtures/${encodeURIComponent(fixtureId)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active: true }) });
+}
+export async function removeIesAssociation(iesId: string, fixtureId: string) {
+  const response = await fetch(`${API_URL}/api/catalogs/ies/${encodeURIComponent(iesId)}/fixtures/${encodeURIComponent(fixtureId)}`, { method: "DELETE" });
+  if (!response.ok) throw new Error(`IES association removal failed: ${response.statusText}`);
+}
+export function setDefaultIes(fixtureId: string, iesId: string) {
+  return api<FixtureModel>(`/api/catalogs/fixtures/${encodeURIComponent(fixtureId)}/default-ies/${encodeURIComponent(iesId)}`, { method: "PUT" });
 }
 
 export async function downloadUpdatedKml(project: Project) {

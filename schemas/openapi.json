@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Lighting Camera WiFi Automation API",
-    "description": "Phase 1 local project and KML/KMZ workflow. Existing-pole mode only.",
-    "version": "0.1.0"
+    "description": "Phase 2 local fixture, IES, camera, and existing-pole configuration workflow.",
+    "version": "0.2.0"
   },
   "paths": {
     "/api/health": {
@@ -243,7 +243,9 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Project"
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Payload"
               }
             }
           },
@@ -256,6 +258,610 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/poles/bulk": {
+      "patch": {
+        "summary": "Bulk Configure Poles",
+        "operationId": "bulk_configure_poles_api_projects__project_id__poles_bulk_patch",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkPoleConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/fixtures": {
+      "get": {
+        "summary": "Get Fixture Catalog",
+        "operationId": "get_fixture_catalog_api_catalogs_fixtures_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixtureModelCatalog"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/fixtures/{fixture_id}": {
+      "put": {
+        "summary": "Upsert Fixture",
+        "operationId": "upsert_fixture_api_catalogs_fixtures__fixture_id__put",
+        "parameters": [
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fixture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FixtureModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixtureModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/fixtures/{fixture_id}/template-revisions": {
+      "post": {
+        "summary": "Add Template Revision",
+        "operationId": "add_template_revision_api_catalogs_fixtures__fixture_id__template_revisions_post",
+        "parameters": [
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fixture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CameraMountingTemplateRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixtureModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/cameras": {
+      "get": {
+        "summary": "Get Camera Catalog",
+        "operationId": "get_camera_catalog_api_catalogs_cameras_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CameraEquipmentCatalog"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/cameras/{camera_id}": {
+      "put": {
+        "summary": "Upsert Camera",
+        "operationId": "upsert_camera_api_catalogs_cameras__camera_id__put",
+        "parameters": [
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Camera Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CameraModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CameraModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Camera",
+        "operationId": "delete_camera_api_catalogs_cameras__camera_id__delete",
+        "parameters": [
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Camera Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/lenses/{lens_id}": {
+      "put": {
+        "summary": "Upsert Lens",
+        "operationId": "upsert_lens_api_catalogs_lenses__lens_id__put",
+        "parameters": [
+          {
+            "name": "lens_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lens Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LensConfiguration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LensConfiguration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Lens",
+        "operationId": "delete_lens_api_catalogs_lenses__lens_id__delete",
+        "parameters": [
+          {
+            "name": "lens_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lens Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/ies": {
+      "get": {
+        "summary": "Get Ies Library",
+        "operationId": "get_ies_library_api_catalogs_ies_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IesLibrary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/ies/upload": {
+      "post": {
+        "summary": "Upload Ies",
+        "operationId": "upload_ies_api_catalogs_ies_upload_post",
+        "parameters": [
+          {
+            "name": "X-Filename",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Filename"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "contentMediaType": "application/octet-stream",
+                "maxLength": 20971520,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IesFileRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/ies/{ies_id}": {
+      "patch": {
+        "summary": "Set Ies Active",
+        "operationId": "set_ies_active_api_catalogs_ies__ies_id__patch",
+        "parameters": [
+          {
+            "name": "ies_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ies Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_set_ies_active_api_catalogs_ies__ies_id__patch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IesFileRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}": {
+      "put": {
+        "summary": "Associate Ies",
+        "operationId": "associate_ies_api_catalogs_ies__ies_id__fixtures__fixture_id__put",
+        "parameters": [
+          {
+            "name": "ies_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ies Id"
+            }
+          },
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fixture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_associate_ies_api_catalogs_ies__ies_id__fixtures__fixture_id__put"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IesFixtureAssociation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Ies Association",
+        "operationId": "remove_ies_association_api_catalogs_ies__ies_id__fixtures__fixture_id__delete",
+        "parameters": [
+          {
+            "name": "ies_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ies Id"
+            }
+          },
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fixture Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalogs/fixtures/{fixture_id}/default-ies/{ies_id}": {
+      "put": {
+        "summary": "Set Default Ies",
+        "operationId": "set_default_ies_api_catalogs_fixtures__fixture_id__default_ies__ies_id__put",
+        "parameters": [
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fixture Id"
+            }
+          },
+          {
+            "name": "ies_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ies Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixtureModel"
                 }
               }
             }
@@ -313,6 +919,17 @@
   },
   "components": {
     "schemas": {
+      "Body_associate_ies_api_catalogs_ies__ies_id__fixtures__fixture_id__put": {
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Body_associate_ies_api_catalogs_ies__ies_id__fixtures__fixture_id__put"
+      },
       "Body_create_project_api_projects_post": {
         "properties": {
           "name": {
@@ -323,6 +940,559 @@
         },
         "type": "object",
         "title": "Body_create_project_api_projects_post"
+      },
+      "Body_set_ies_active_api_catalogs_ies__ies_id__patch": {
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "active"
+        ],
+        "title": "Body_set_ies_active_api_catalogs_ies__ies_id__patch"
+      },
+      "BulkPoleConfigurationPatch": {
+        "properties": {
+          "fixture_model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Model Id"
+          },
+          "ies_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ies File Id"
+          },
+          "pole_height_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pole Height M"
+          },
+          "fixture_azimuth_deg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMaximum": 360.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Azimuth Deg"
+          },
+          "lighting_properties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lighting Properties"
+          },
+          "wifi_configuration": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wifi Configuration"
+          },
+          "camera_model_by_slot": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model By Slot"
+          },
+          "lens_by_slot": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens By Slot"
+          },
+          "camera_enabled_by_slot": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Enabled By Slot"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BulkPoleConfigurationPatch"
+      },
+      "BulkPoleConfigurationRequest": {
+        "properties": {
+          "pole_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Pole Ids"
+          },
+          "patch": {
+            "$ref": "#/components/schemas/BulkPoleConfigurationPatch"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pole_ids",
+          "patch"
+        ],
+        "title": "BulkPoleConfigurationRequest"
+      },
+      "CameraEquipmentCatalog": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "default": "1.0.0"
+          },
+          "catalog_id": {
+            "type": "string",
+            "title": "Catalog Id",
+            "default": "camera-equipment-catalog"
+          },
+          "camera_models": {
+            "items": {
+              "$ref": "#/components/schemas/CameraModel"
+            },
+            "type": "array",
+            "title": "Camera Models"
+          },
+          "lenses": {
+            "items": {
+              "$ref": "#/components/schemas/LensConfiguration"
+            },
+            "type": "array",
+            "title": "Lenses"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "camera_models",
+          "lenses"
+        ],
+        "title": "CameraEquipmentCatalog"
+      },
+      "CameraModel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "sensor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sensor"
+          },
+          "resolution_width_px": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Width Px"
+          },
+          "resolution_height_px": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Height Px"
+          },
+          "compatible_lens_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Compatible Lens Ids"
+          },
+          "technical_properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Technical Properties"
+          },
+          "source_reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Id"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision",
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "display_name"
+        ],
+        "title": "CameraModel"
+      },
+      "CameraMountingSlot": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "relative_azimuth_deg": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Relative Azimuth Deg"
+          },
+          "downward_tilt_deg": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": 0.0,
+            "title": "Downward Tilt Deg",
+            "default": 35.0
+          },
+          "camera_model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Id"
+          },
+          "lens_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "display_name",
+          "relative_azimuth_deg"
+        ],
+        "title": "CameraMountingSlot"
+      },
+      "CameraMountingTemplateRevision": {
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": ""
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/CameraMountingSlot"
+            },
+            "type": "array",
+            "title": "Slots"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision",
+          "created_at",
+          "slots"
+        ],
+        "title": "CameraMountingTemplateRevision"
+      },
+      "FixtureCapabilities": {
+        "properties": {
+          "lighting": {
+            "type": "boolean",
+            "title": "Lighting"
+          },
+          "wifi": {
+            "type": "boolean",
+            "title": "Wifi"
+          },
+          "cameras": {
+            "type": "boolean",
+            "title": "Cameras"
+          },
+          "camera_slot_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Camera Slot Count",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "lighting",
+          "wifi",
+          "cameras"
+        ],
+        "title": "FixtureCapabilities"
+      },
+      "FixtureModel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "fixture_family": {
+            "type": "string",
+            "title": "Fixture Family"
+          },
+          "capability_variant": {
+            "$ref": "#/components/schemas/FixtureType"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/FixtureCapabilities"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "model_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Model Metadata"
+          },
+          "electrical_properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Electrical Properties"
+          },
+          "photometric_properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Photometric Properties"
+          },
+          "compatible_ies_file_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Compatible Ies File Ids"
+          },
+          "default_ies_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Ies File Id"
+          },
+          "mounting_template_revisions": {
+            "items": {
+              "$ref": "#/components/schemas/CameraMountingTemplateRevision"
+            },
+            "type": "array",
+            "title": "Mounting Template Revisions"
+          },
+          "current_mounting_template_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Mounting Template Revision"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision",
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "display_name",
+          "fixture_family",
+          "capability_variant",
+          "capabilities"
+        ],
+        "title": "FixtureModel"
+      },
+      "FixtureModelCatalog": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "default": "1.0.0"
+          },
+          "catalog_id": {
+            "type": "string",
+            "title": "Catalog Id",
+            "default": "fixture-model-catalog"
+          },
+          "fixture_models": {
+            "items": {
+              "$ref": "#/components/schemas/FixtureModel"
+            },
+            "type": "array",
+            "title": "Fixture Models"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fixture_models"
+        ],
+        "title": "FixtureModelCatalog"
       },
       "FixtureType": {
         "type": "string",
@@ -356,19 +1526,249 @@
           },
           "phase": {
             "type": "integer",
-            "const": 1,
+            "const": 2,
             "title": "Phase",
-            "default": 1
+            "default": 2
           },
           "version": {
             "type": "string",
             "title": "Version",
-            "default": "0.1.0"
+            "default": "0.2.0"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "title": "HealthResponse"
+      },
+      "IesFileRecord": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          },
+          "ies_format_version": {
+            "type": "string",
+            "title": "Ies Format Version"
+          },
+          "original_content_base64": {
+            "type": "string",
+            "title": "Original Content Base64"
+          },
+          "parsed_metadata": {
+            "$ref": "#/components/schemas/IesParsedMetadata"
+          },
+          "validation_status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "invalid",
+              "unsupported"
+            ],
+            "title": "Validation Status"
+          },
+          "validation_errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Validation Errors"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision",
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "original_filename",
+          "sha256",
+          "uploaded_at",
+          "ies_format_version",
+          "original_content_base64",
+          "parsed_metadata",
+          "validation_status"
+        ],
+        "title": "IesFileRecord"
+      },
+      "IesFixtureAssociation": {
+        "properties": {
+          "ies_file_id": {
+            "type": "string",
+            "title": "Ies File Id"
+          },
+          "fixture_model_id": {
+            "type": "string",
+            "title": "Fixture Model Id"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ies_file_id",
+          "fixture_model_id"
+        ],
+        "title": "IesFixtureAssociation"
+      },
+      "IesLibrary": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "default": "1.0.0"
+          },
+          "catalog_id": {
+            "type": "string",
+            "title": "Catalog Id",
+            "default": "ies-library"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/IesFileRecord"
+            },
+            "type": "array",
+            "title": "Files"
+          },
+          "fixture_associations": {
+            "items": {
+              "$ref": "#/components/schemas/IesFixtureAssociation"
+            },
+            "type": "array",
+            "title": "Fixture Associations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "IesLibrary"
+      },
+      "IesParsedMetadata": {
+        "properties": {
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "luminaire_catalog_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Luminaire Catalog Number"
+          },
+          "lamp_count": {
+            "type": "integer",
+            "title": "Lamp Count"
+          },
+          "input_watts": {
+            "type": "number",
+            "title": "Input Watts"
+          },
+          "photometric_type": {
+            "type": "string",
+            "const": "C",
+            "title": "Photometric Type"
+          },
+          "units": {
+            "type": "string",
+            "enum": [
+              "m",
+              "ft"
+            ],
+            "title": "Units"
+          },
+          "vertical_angle_count": {
+            "type": "integer",
+            "title": "Vertical Angle Count"
+          },
+          "horizontal_angle_count": {
+            "type": "integer",
+            "title": "Horizontal Angle Count"
+          },
+          "vertical_angle_range_deg": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Vertical Angle Range Deg"
+          },
+          "horizontal_angle_range_deg": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Horizontal Angle Range Deg"
+          },
+          "candela_value_count": {
+            "type": "integer",
+            "title": "Candela Value Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "lamp_count",
+          "input_watts",
+          "photometric_type",
+          "units",
+          "vertical_angle_count",
+          "horizontal_angle_count",
+          "vertical_angle_range_deg",
+          "horizontal_angle_range_deg",
+          "candela_value_count"
+        ],
+        "title": "IesParsedMetadata"
       },
       "LayerState": {
         "properties": {
@@ -437,6 +1837,97 @@
         "type": "object",
         "title": "LayerState"
       },
+      "LensConfiguration": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "focal_length_mm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focal Length Mm"
+          },
+          "horizontal_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizontal Fov Deg"
+          },
+          "vertical_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vertical Fov Deg"
+          },
+          "compatible_camera_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Compatible Camera Model Ids"
+          },
+          "technical_properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Technical Properties"
+          },
+          "source_reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Id"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision",
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "display_name"
+        ],
+        "title": "LensConfiguration"
+      },
       "OperatingMode": {
         "type": "string",
         "enum": [
@@ -444,6 +1935,84 @@
           "proposed-layout"
         ],
         "title": "OperatingMode"
+      },
+      "PoleCameraOverride": {
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "title": "Slot Id"
+          },
+          "camera_model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Id"
+          },
+          "lens_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Id"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "relative_azimuth_deg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Azimuth Deg"
+          },
+          "downward_tilt_deg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Downward Tilt Deg"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "slot_id"
+        ],
+        "title": "PoleCameraOverride"
       },
       "PoleEdit": {
         "properties": {
@@ -518,6 +2087,16 @@
             ],
             "title": "Engineering Notes"
           },
+          "fixture_configuration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PoleFixtureConfiguration"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "longitude": {
             "anyOf": [
               {
@@ -562,18 +2141,92 @@
         ],
         "title": "PoleEdit"
       },
+      "PoleFixtureConfiguration": {
+        "properties": {
+          "fixture_model_id": {
+            "type": "string",
+            "title": "Fixture Model Id"
+          },
+          "fixture_model_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Fixture Model Revision"
+          },
+          "mounting_template_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mounting Template Revision"
+          },
+          "ies_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ies File Id"
+          },
+          "fixture_azimuth_deg": {
+            "type": "number",
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Fixture Azimuth Deg",
+            "default": 0.0
+          },
+          "lighting_properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Lighting Properties"
+          },
+          "wifi_configuration": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wifi Configuration"
+          },
+          "camera_overrides": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PoleCameraOverride"
+            },
+            "type": "object",
+            "title": "Camera Overrides"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fixture_model_id",
+          "fixture_model_revision"
+        ],
+        "title": "PoleFixtureConfiguration"
+      },
       "Project": {
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "1.0.0",
+            "const": "2.0.0",
             "title": "Schema Version",
-            "default": "1.0.0"
+            "default": "2.0.0"
           },
           "software_version": {
             "type": "string",
             "title": "Software Version",
-            "default": "0.1.0"
+            "default": "0.2.0"
           },
           "id": {
             "type": "string",
@@ -666,6 +2319,11 @@
             },
             "type": "object",
             "title": "Source References"
+          },
+          "legacy_fixture_assignments_require_model_selection": {
+            "type": "boolean",
+            "title": "Legacy Fixture Assignments Require Model Selection",
+            "default": true
           }
         },
         "additionalProperties": false,

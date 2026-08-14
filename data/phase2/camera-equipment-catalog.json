@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "camera-equipment-catalog",
+  "camera_models": [{
+    "id": "camera-imx477", "display_name": "IMX477 camera", "manufacturer": null, "sensor": "Sony IMX477",
+    "resolution_width_px": 4056, "resolution_height_px": 3040,
+    "compatible_lens_ids": ["lens-jl-ln039", "lens-jl-ln042", "lens-jl-ln037"],
+    "technical_properties": { "sensor_type": "CMOS", "sensor_size": "1/2.3 inch", "aspect_ratio": "4:3" },
+    "source_reference_id": "camera-imx477", "active": true, "revision": 1
+  }],
+  "lenses": [
+    { "id": "lens-jl-ln039", "display_name": "JL-LN039 6 mm", "focal_length_mm": 6, "horizontal_fov_deg": 52, "vertical_fov_deg": 40, "compatible_camera_model_ids": ["camera-imx477"], "technical_properties": {}, "source_reference_id": "lens-jl-ln039", "active": true, "revision": 1 },
+    { "id": "lens-jl-ln042", "display_name": "JL-LN042 3.9 mm", "focal_length_mm": 3.9, "horizontal_fov_deg": 69, "vertical_fov_deg": 54, "compatible_camera_model_ids": ["camera-imx477"], "technical_properties": {}, "source_reference_id": "lens-jl-ln042", "active": true, "revision": 1 },
+    { "id": "lens-jl-ln037", "display_name": "JL-LN037 3.56 mm", "focal_length_mm": 3.56, "horizontal_fov_deg": 87, "vertical_fov_deg": 68, "compatible_camera_model_ids": ["camera-imx477"], "technical_properties": {}, "source_reference_id": "lens-jl-ln037", "active": true, "revision": 1 }
+  ]
+}

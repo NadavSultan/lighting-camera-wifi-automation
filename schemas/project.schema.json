@@ -84,6 +84,89 @@
       "title": "OperatingMode",
       "type": "string"
     },
+    "PoleCameraOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "slot_id": {
+          "title": "Slot Id",
+          "type": "string"
+        },
+        "camera_model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Camera Model Id"
+        },
+        "lens_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lens Id"
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        },
+        "relative_azimuth_deg": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative Azimuth Deg"
+        },
+        "downward_tilt_deg": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Downward Tilt Deg"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "slot_id"
+      ],
+      "title": "PoleCameraOverride",
+      "type": "object"
+    },
     "PoleEdit": {
       "additionalProperties": false,
       "properties": {
@@ -164,6 +247,17 @@
           "default": null,
           "title": "Engineering Notes"
         },
+        "fixture_configuration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PoleFixtureConfiguration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "longitude": {
           "anyOf": [
             {
@@ -207,6 +301,83 @@
         "pole_id"
       ],
       "title": "PoleEdit",
+      "type": "object"
+    },
+    "PoleFixtureConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "fixture_model_id": {
+          "title": "Fixture Model Id",
+          "type": "string"
+        },
+        "fixture_model_revision": {
+          "minimum": 1,
+          "title": "Fixture Model Revision",
+          "type": "integer"
+        },
+        "mounting_template_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mounting Template Revision"
+        },
+        "ies_file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ies File Id"
+        },
+        "fixture_azimuth_deg": {
+          "default": 0.0,
+          "exclusiveMaximum": 360,
+          "minimum": 0,
+          "title": "Fixture Azimuth Deg",
+          "type": "number"
+        },
+        "lighting_properties": {
+          "additionalProperties": true,
+          "title": "Lighting Properties",
+          "type": "object"
+        },
+        "wifi_configuration": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wifi Configuration"
+        },
+        "camera_overrides": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PoleCameraOverride"
+          },
+          "title": "Camera Overrides",
+          "type": "object"
+        }
+      },
+      "required": [
+        "fixture_model_id",
+        "fixture_model_revision"
+      ],
+      "title": "PoleFixtureConfiguration",
       "type": "object"
     },
     "ProjectDefaults": {
@@ -524,13 +695,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
+      "const": "2.0.0",
+      "default": "2.0.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.1.0",
+      "default": "0.2.0",
       "title": "Software Version",
       "type": "string"
     },
@@ -626,6 +797,11 @@
       },
       "title": "Source References",
       "type": "object"
+    },
+    "legacy_fixture_assignments_require_model_selection": {
+      "default": true,
+      "title": "Legacy Fixture Assignments Require Model Selection",
+      "type": "boolean"
     }
   },
   "title": "Project",

@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "IesFileRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "original_filename": {
+          "title": "Original Filename",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "uploaded_at": {
+          "format": "date-time",
+          "title": "Uploaded At",
+          "type": "string"
+        },
+        "ies_format_version": {
+          "title": "Ies Format Version",
+          "type": "string"
+        },
+        "original_content_base64": {
+          "title": "Original Content Base64",
+          "type": "string"
+        },
+        "parsed_metadata": {
+          "$ref": "#/$defs/IesParsedMetadata"
+        },
+        "validation_status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "unsupported"
+          ],
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "validation_errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Errors",
+          "type": "array"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "original_filename",
+        "sha256",
+        "uploaded_at",
+        "ies_format_version",
+        "original_content_base64",
+        "parsed_metadata",
+        "validation_status"
+      ],
+      "title": "IesFileRecord",
+      "type": "object"
+    },
+    "IesFixtureAssociation": {
+      "additionalProperties": false,
+      "properties": {
+        "ies_file_id": {
+          "title": "Ies File Id",
+          "type": "string"
+        },
+        "fixture_model_id": {
+          "title": "Fixture Model Id",
+          "type": "string"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ies_file_id",
+        "fixture_model_id"
+      ],
+      "title": "IesFixtureAssociation",
+      "type": "object"
+    },
+    "IesParsedMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "manufacturer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manufacturer"
+        },
+        "luminaire_catalog_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Luminaire Catalog Number"
+        },
+        "lamp_count": {
+          "title": "Lamp Count",
+          "type": "integer"
+        },
+        "input_watts": {
+          "title": "Input Watts",
+          "type": "number"
+        },
+        "photometric_type": {
+          "const": "C",
+          "title": "Photometric Type",
+          "type": "string"
+        },
+        "units": {
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Units",
+          "type": "string"
+        },
+        "vertical_angle_count": {
+          "title": "Vertical Angle Count",
+          "type": "integer"
+        },
+        "horizontal_angle_count": {
+          "title": "Horizontal Angle Count",
+          "type": "integer"
+        },
+        "vertical_angle_range_deg": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Vertical Angle Range Deg",
+          "type": "array"
+        },
+        "horizontal_angle_range_deg": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Horizontal Angle Range Deg",
+          "type": "array"
+        },
+        "candela_value_count": {
+          "title": "Candela Value Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lamp_count",
+        "input_watts",
+        "photometric_type",
+        "units",
+        "vertical_angle_count",
+        "horizontal_angle_count",
+        "vertical_angle_range_deg",
+        "horizontal_angle_range_deg",
+        "candela_value_count"
+      ],
+      "title": "IesParsedMetadata",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "catalog_id": {
+      "default": "ies-library",
+      "title": "Catalog Id",
+      "type": "string"
+    },
+    "files": {
+      "items": {
+        "$ref": "#/$defs/IesFileRecord"
+      },
+      "title": "Files",
+      "type": "array"
+    },
+    "fixture_associations": {
+      "items": {
+        "$ref": "#/$defs/IesFixtureAssociation"
+      },
+      "title": "Fixture Associations",
+      "type": "array"
+    }
+  },
+  "title": "IesLibrary",
+  "type": "object"
+}

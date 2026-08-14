@@ -6,7 +6,7 @@ Lighting Camera WiFi Automation is a local, map-centred engineering application 
 
 ## Current repository state
 
-Phase 1 is implemented, tested, production-built, and prepared for acceptance review. The repository contains a FastAPI backend and a React/TypeScript MapLibre frontend. Existing-pole mode is mandatory and proposed-layout mode is unavailable. Phase 2 has not begun.
+Phases 1 and 2 are implemented, tested, and accepted. The repository contains a FastAPI backend and React/TypeScript MapLibre frontend with operational fixture-model, IES, camera/lens, per-pole, and bulk-configuration workflows. Existing-pole mode is mandatory and proposed-layout mode is unavailable.
 
 New sessions must start with `AGENTS.md` and `docs/current-status.md`, then follow the remaining reading order recorded in `AGENTS.md`.
 
@@ -23,7 +23,7 @@ The requested `$lighting-kml-planner` skill was not installed or discoverable du
 
 - Pole mounting heights and per-pole fixture assignments.
 - Authoritative luminaire-to-IES mapping, verified wattage/flux values, and photometric orientation conventions.
-- Camera quantities, mounting offsets, and lens assignments per SMART fixture.
+- Camera XYZ offsets and final per-pole lens assignments. The two-slot relative-azimuth templates are approved in Phase 2.
 - Project boundary and classified calculation polygons.
 - CAP applicability by fixture type, recommended operating distance, siting/backhaul/electrical constraints, required redundancy, and installation-specific band selection.
 

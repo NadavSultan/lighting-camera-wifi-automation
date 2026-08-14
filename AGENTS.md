@@ -14,7 +14,7 @@ Before planning or changing code, every future session must read these files in 
 6. `docs/data-model.md`
 7. `docs/phase-1-completion-report.md`
 
-Then inspect `git status` and preserve unrelated or user-owned changes. Phase 1 is complete and frozen for handoff. Do not begin Phase 2 unless a later user explicitly authorizes it after Phase 1 acceptance review.
+Then inspect `git status` and preserve unrelated or user-owned changes. Phase 1 is frozen. Phase 2 was explicitly authorized on 2026-08-14 and is implemented; later phases remain gated.
 
 ## Safety and engineering rules
 
@@ -37,3 +37,7 @@ Then inspect `git status` and preserve unrelated or user-owned changes. Phase 1 
 ## Phase 1 acceptance
 
 Phase 1 includes project creation, KML/KMZ import, validation, map display, per-pole fixture type/height/status/notes edits, separate edit tracking, JSON save/reopen, updated KML export, and tests. It explicitly excludes proposed pole generation, camera geometry, Wi-Fi coverage analysis, IES calculations, and CAP recommendations.
+
+## Phase 2 boundary
+
+Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; immutable SMART mounting-template revisions; specific per-pole fixture configuration; and explicit-field bulk configuration. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Do not add Phase 3 FOV projection/rendering or later calculation/recommendation engines without explicit authorization.

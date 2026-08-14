@@ -22,6 +22,18 @@ This approval covers data-contract structure and semantics only. It does not aut
 
 The existing Phase 1 application contracts remain `schemas/project.schema.json` and `schemas/openapi.json`; this review does not change them.
 
+## Approved Phase 2 operational contracts
+
+Approved by the user on 2026-08-14. These contracts are separate from and do not modify the seven frozen engineering catalogs above.
+
+| Contract | Seed data | Purpose |
+|---|---|---|
+| `schemas/fixture-model-catalog.schema.json` | `data/phase2/fixture-model-catalog.json` | Six family-plus-variant fixture models, capabilities, IES selection, and immutable mounting-template revisions. |
+| `schemas/ies-library.schema.json` | `data/phase2/ies-library.json` | Immutable original IES uploads, checksums, parsed metadata, validation state, and explicit many-to-many fixture associations. |
+| `schemas/camera-equipment-catalog.schema.json` | `data/phase2/camera-equipment-catalog.json` | Operational camera/lens CRUD, compatibility, active state, and revisions seeded from the approved reference catalog. |
+
+The application project contract is now `2.0.0`. Its migration preserves Phase 1 data and coordinates exactly, retains legacy fixture classifications, and never guesses Phoenix 1 versus Solitaire.
+
 ## Finalized contract decisions
 
 - All engineering catalog schemas use JSON Schema Draft 2020-12 and version `1.0.0`.
