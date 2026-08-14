@@ -16,8 +16,8 @@
       "megapixel_count": { "value": 12, "unit": "MP", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera catalog" }, "confidence": "high", "notes": "Nominal megapixel class. The 4056 x 3040 pixel dimensions imply 12.33024 million pixels, but that derived value is not substituted for the stated 12 MP class." },
       "aspect_ratio": { "value": "4:3", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!G9:G11" }, "confidence": "high", "notes": "Workbook and session brief agree." },
       "lens_ids": ["lens-jl-ln039", "lens-jl-ln042", "lens-jl-ln037"],
-      "specification_status": "needs_confirmation",
-      "engineering_notes": "Sensor and pixel fields are source-backed. Camera manufacturer/model remain unknown, and JL-LN037 has an unresolved horizontal-FOV conflict."
+      "specification_status": "incomplete",
+      "engineering_notes": "Sensor, pixel, and lens-FOV fields are source-backed. Camera manufacturer/model and fixture-integration details remain unknown."
     }
   ],
   "lenses": [
@@ -48,14 +48,11 @@
       "camera_id": "camera-imx477",
       "lens_identifier": { "value": "JL-LN037", "unit": null, "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!A11" }, "confidence": "high", "notes": "Identifier parsed from the workbook row name." },
       "focal_length": { "value": 3.56, "unit": "mm", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!K11" }, "confidence": "high", "notes": "Workbook focal length." },
-      "horizontal_fov": { "value": null, "unit": "deg", "status": "unknown", "source": { "file": null, "page": null, "section": null }, "confidence": "none", "notes": "Active engineering value is intentionally unset because supplied sources conflict." },
+      "horizontal_fov": { "value": 87, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!O11" }, "confidence": "high", "notes": "Workbook Real angles / Horizontal; explicitly approved by the user on 2026-08-14." },
       "vertical_fov": { "value": 68, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!Q11" }, "confidence": "high", "notes": "Workbook and session brief agree." },
-      "horizontal_fov_candidates": [
-        { "value": 87, "unit": "deg", "status": "company_provided_requirement", "source": { "file": "Input/Camera/VideoCAD Camera Models - Juganu.Xlsx", "page": null, "section": "Sheet1!O11" }, "confidence": "high", "notes": "Workbook Real angles / Horizontal." },
-        { "value": 90, "unit": "deg", "status": "company_provided_requirement", "source": { "file": null, "page": null, "section": "Session brief section 4 - Camera catalog" }, "confidence": "high", "notes": "Session brief requested FOV combination." }
-      ],
-      "specification_status": "needs_confirmation",
-      "engineering_notes": "Resolve 87 degrees versus 90 degrees with the camera/lens owner before camera geometry is implemented."
+      "horizontal_fov_candidates": [],
+      "specification_status": "verified",
+      "engineering_notes": "The user approved 87 degrees horizontal and 68 degrees vertical on 2026-08-14, resolving the earlier 87/90-degree discrepancy."
     }
   ],
   "smart_fixture_integration": {

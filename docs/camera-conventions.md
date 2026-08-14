@@ -24,12 +24,12 @@ The supplied workbook confirms three IMX477 lens rows, 4056 x 3040 pixels, 4:3 a
 |---|---:|---:|---:|---|
 | JL-LN039 | 6 mm | 52 deg | 40 deg | Workbook and brief agree |
 | JL-LN042 | 3.9 mm | 69 deg | 54 deg | Workbook and brief agree |
-| JL-LN037 | 3.56 mm | unresolved | 68 deg | Workbook says 87 deg horizontal; session brief says 90 deg |
+| JL-LN037 | 3.56 mm | 87 deg | 68 deg | Workbook-backed value approved by the user on 2026-08-14 |
 
-The JL-LN037 active horizontal FOV is deliberately null. Both candidates remain traceable in the catalog until the owner identifies the intended engineering value.
+The earlier JL-LN037 87/90-degree discrepancy is resolved. The approved active value is 87 degrees horizontal by 68 degrees vertical, matching workbook cells `Sheet1!O11:Q11`. The superseded 90-degree candidate is not an active catalog value.
 
 Camera manufacturer/enclosure model, quantity per SMART fixture, mounting position and offsets, azimuth convention, and supported analytics are unknown. The presence of a geometric FOV must never be treated as evidence of analytics-quality coverage.
 
 ## Future geometry prerequisites
 
-Phase 3 must not start camera-footprint calculations until it has an approved lens selection per camera, pole/fixture mounting height, camera quantity, local mounting axes and offsets, azimuth convention, terrain assumption, and a decision on the 87/90 degree discrepancy.
+Phase 3 must not start camera-footprint calculations until it has an approved lens selection per camera, pole/fixture mounting height, camera quantity, local mounting axes and offsets, azimuth convention, and terrain assumption.

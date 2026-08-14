@@ -29,7 +29,6 @@ No temporary CAP range, load, hop, redundancy, or fixture-compatibility assumpti
 
 ## Values requiring future validation
 
-- JL-LN037 horizontal FOV: workbook 87 degrees versus session brief 90 degrees.
 - Camera manufacturer/model, quantity, mounting position/offsets, azimuth, and analytics.
 - Solitaire 50 W filename/header versus `60W` internal luminaire identifier; D02 negative dimensions.
 - Luminaire flux, CCT, mounting height, fixture-type compatibility, and C0-plane/housing orientation.

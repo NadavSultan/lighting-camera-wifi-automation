@@ -6,7 +6,6 @@
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| Is JL-LN037 horizontal FOV 87 or 90 degrees? | Sets ground-footprint width. | Phase 3 | Data work yes; geometry no | Coverage edges and overlaps shift. | Camera/lens product owner or approved lens datasheet. |
 | What are the camera manufacturer, enclosure model, quantity per SMART fixture, and lens assignment rules? | Identifies deployable configurations and multiplicity. | Phases 2-3 | Catalog framework yes | Invalid BOM and missing/extra footprints. | Juganu product engineering/BOM. |
 | What are mounting position, local axes, XYZ offsets, and azimuth zero? | Converts optical axes to project coordinates. | Phase 3 | No geometry | Systematic footprint displacement/rotation. | Mechanical drawing and installation guide. |
 | Which analytics are supported and at what pixel-density/quality thresholds? | Separates geometric visibility from usable analytics. | Phases 3 and 7 | Geometry may continue if clearly separated | Unsupported performance claims. | Analytics product specification and acceptance criteria. |

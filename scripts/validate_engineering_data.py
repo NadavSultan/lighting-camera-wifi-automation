@@ -179,6 +179,11 @@ def validate_camera(catalogs: dict[str, Any]) -> None:
                 check(0 < angle <= 180, f"{lens['id']} {field} outside (0, 180]")
         for candidate in lens["horizontal_fov_candidates"]:
             check(0 < candidate["value"] <= 180, f"{lens['id']} candidate FOV outside (0, 180]")
+    jl_ln037 = next(lens for lens in catalog["lenses"] if lens["id"] == "lens-jl-ln037")
+    check(jl_ln037["horizontal_fov"]["value"] == 87, "JL-LN037 horizontal FOV must remain 87 degrees")
+    check(jl_ln037["vertical_fov"]["value"] == 68, "JL-LN037 vertical FOV must remain 68 degrees")
+    check(not jl_ln037["horizontal_fov_candidates"], "JL-LN037 must not retain resolved FOV candidates")
+    check(jl_ln037["specification_status"] == "verified", "JL-LN037 must remain verified")
     integration = catalog["smart_fixture_integration"]
     minimum = integration["allowed_downward_angle_min"]["value"]
     default = integration["default_downward_angle"]["value"]

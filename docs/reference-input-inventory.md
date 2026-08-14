@@ -31,9 +31,9 @@ The files are now represented in `data/luminaires/ies-inventory.json` and `data/
 
 - JL-LN039: 6 mm; real FOV 52 degrees horizontal / 40 degrees vertical.
 - JL-LN042: 3.9 mm; real FOV 69 degrees horizontal / 54 degrees vertical.
-- JL-LN037: 3.56 mm; real FOV 87 degrees horizontal / 68 degrees vertical (the request states 90/68; this discrepancy requires confirmation).
+- JL-LN037: 3.56 mm; real FOV 87 degrees horizontal / 68 degrees vertical. The user approved the workbook-backed value on 2026-08-14.
 
-The workbook rows are now represented in `data/cameras/camera-catalog.json`. Camera quantity per fixture, mounting offsets, model naming, analytics criteria, and authoritative 87 versus 90 degree FOV remain unresolved.
+The workbook rows are now represented in `data/cameras/camera-catalog.json`. Camera quantity per fixture, mounting offsets, model naming, and analytics criteria remain unresolved; the earlier 87/90-degree FOV discrepancy is closed at 87/68 degrees.
 
 ## CAP datasheet
 

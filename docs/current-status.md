@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-13. Independent Phase 1 validation remains complete and passing. The Engineering Data & Specifications package is now complete: source-audited catalogs, schemas, conventions, assumptions/open questions, and automated validation are checked in without implementing Phase 2 application behavior. Phase 2 UI, geometry, calculation, coverage, and recommendation features have not started and remain unauthorized.
+Last updated: 2026-08-14. Independent Phase 1 validation remains complete and passing. The Engineering Data & Specifications package and all seven engineering schema contracts are finalized, documented, validated, and technically approved at version `1.0.0`. JL-LN037 is finalized at 87 degrees horizontal by 68 degrees vertical. Phase 2 UI, geometry, calculation, coverage, and recommendation features have not started and remain unauthorized.
 
 ## Completed features
 
@@ -25,8 +25,9 @@ Last updated: 2026-08-13. Independent Phase 1 validation remains complete and pa
 - Traceable fixture-type, camera/lens, luminaire/IES, conceptual Wi-Fi, CAP-constraint, and calculation-area catalogs with Draft 2020-12 JSON Schemas.
 - Independent IES reparsing and hash validation for all four complete LM-63-2002 Type C files.
 - CAP datasheet extraction that separates manufacturer maxima from design requirements and explicitly preserves missing recommendation inputs.
-- Camera convention and catalog records that leave the JL-LN037 87-degree/90-degree horizontal-FOV conflict unresolved rather than choosing silently.
+- Camera convention and catalog records with the user-approved JL-LN037 87-degree horizontal by 68-degree vertical FOV.
 - Engineering assumption and open-question registers organized by future phase and responsible source/owner.
+- Approved engineering schema-contract register covering authority, traceability, nullability, units, identifiers, cross-references, and versioning.
 
 ## Incomplete features
 
@@ -72,6 +73,12 @@ Final independent validation on 2026-08-13:
 - Fresh backend startup on validation port 8010: health returned `{"status":"ok","phase":1,"version":"0.1.0"}`.
 - Fresh production frontend startup on the documented port 3000: HTTP 200 and the expected application title.
 
+Engineering schema-contract approval validation on 2026-08-14:
+
+- Seven catalog/schema pairs and all domain/source-integrity checks passed, including the fixed JL-LN037 87/68-degree invariant.
+- Backend: `23 passed`; frontend rendered-output tests: `2 passed`; TypeScript and ESLint passed cleanly.
+- Production build was not rerun because the catalogs are not application build inputs and no application/build contract changed; the previous successful build remains applicable.
+
 The repeatable command set is:
 
 ```powershell
@@ -92,7 +99,6 @@ pnpm run build
 
 - No standalone luminaire datasheets were supplied; flux, CCT, mounting height, fixture compatibility, and optic definitions remain unknown.
 - Solitaire D01/D02 filenames and input-watt fields indicate 50 W while their internal IES luminaire identifiers contain `60W`; D02 also contains negative width/length values.
-- The JL-LN037 workbook reports 87 degrees horizontal FOV while the company brief reports 90 degrees.
 - Camera quantity, fixture-relative mounting geometry, azimuth, and analytics remain unknown.
 - CAP fixture/node applicability, recommended design range/load/hops, antenna/LOS, band selection, redundancy, and site power/backhaul rules remain unknown.
 - Wi-Fi remains a 30 m conceptual-circle assumption, not verified RF coverage.
@@ -100,7 +106,7 @@ pnpm run build
 
 ## Exact next session
 
-Run an **Engineering Data Acceptance Review and Phase 2 Catalog Integration Planning** session. Review the JL-LN037 and Solitaire conflicts with product owners, approve the catalog/schema contracts and authoritative-source rules, then obtain explicit authorization before integrating catalogs into the application. Do not begin FOV geometry, Wi-Fi analysis, photometric calculations, or CAP recommendations in that session unless separately authorized by the applicable later-phase gate.
+The engineering schema-contract gate is passed with no unresolved contract decision. The exact next session, only after explicit user authorization, is **Phase 2 Catalog Integration Implementation**. Carry the Solitaire source-data conflict as an explicit warning until manufacturer clarification; do not implement FOV geometry, Wi-Fi analysis, photometric calculations, or CAP recommendations under Phase 2 authorization.
 
 ## Current run commands
 
@@ -135,4 +141,4 @@ For a new machine/session without dependencies, follow `README.md` first.
 
 ## Exact next recommended task
 
-Review `docs/phase-1-validation-report.md` and decide whether to formally accept Phase 1. Do not propose or begin Phase 2 until the user explicitly authorizes it after reviewing this validation result.
+Review `docs/schema-contracts.md` and explicitly authorize or defer **Phase 2 Catalog Integration Implementation**. The contract gate is complete; Phase 2 still must not begin without that separate authorization.

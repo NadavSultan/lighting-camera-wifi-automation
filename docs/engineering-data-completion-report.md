@@ -1,6 +1,6 @@
 # Engineering Data & Specifications completion report
 
-Completion date: 2026-08-13
+Completion date: 2026-08-13; contract approval update: 2026-08-14
 
 Scope: technical-source inventory, traceable catalogs, schemas, conventions, assumptions/open questions, and validation only. No Phase 2 application behavior, geometry, calculation, coverage, recommendation, or pole-generation feature was implemented.
 
@@ -8,7 +8,7 @@ Scope: technical-source inventory, traceable catalogs, schemas, conventions, ass
 
 **PASS.** Seven structured catalogs validate against seven Draft 2020-12 schemas. All four IES files reparse with the recorded headers and complete candela counts. All catalog source references exist, and SHA-256 checks confirm the original KML, PDF, XLSX, and four IES files remain byte-for-byte unchanged.
 
-The repository is ready for an Engineering Data Acceptance Review and, after explicit approval, Phase 2 catalog integration. It is not ready for final camera geometry, RF prediction, photometric calculation, or CAP recommendation because the open engineering inputs below remain unresolved.
+All seven engineering schema contracts are finalized, documented, validation-backed, and technically approved at version `1.0.0`; see `docs/schema-contracts.md`. The repository is ready for Phase 2 catalog integration only after separate explicit authorization. It is not ready for final camera geometry, RF prediction, photometric calculation, or CAP recommendation because the open engineering inputs below remain unresolved.
 
 ## Files inspected
 
@@ -61,7 +61,7 @@ No camera FOV conflict, luminaire wattage conflict, CAP range/load/hop target, r
 
 ## Missing information and blocking dependencies
 
-- Camera: JL-LN037 87/90 degree FOV decision; manufacturer/enclosure model; quantity; lens assignment rules; mounting axes/offsets; azimuth; analytics criteria.
+- Camera: manufacturer/enclosure model; quantity; lens assignment rules; mounting axes/offsets; azimuth; analytics criteria. JL-LN037 is resolved at 87/68 degrees.
 - Luminaire/IES: product datasheets; Solitaire orderable model/wattage mapping; flux; CCT; mounting heights; fixture compatibility; optic definitions; C0-plane/housing mapping; D02 negative-dimension interpretation; test report IDs; AGi32 validation method/tolerances.
 - Wi-Fi: actual RF bands, antennas/heights, EIRP, propagation inputs, interference/channel/client/throughput requirements, and backhaul limits.
 - CAP: node-type applicability; recommended design distance/load/hops; antenna/LOS; site band; redundancy; power/backhaul availability; siting constraints.
@@ -77,6 +77,7 @@ The full risk and ownership register is `docs/engineering-open-questions.md`.
 - `scripts/validate_engineering_data.py`
 - `backend/tests/test_engineering_data.py`
 - Seven engineering convention/assumption/open-question documents under `docs/`
+- `docs/schema-contracts.md`
 - This completion report
 
 Updated files are `backend/pyproject.toml`, `docs/current-status.md`, and `docs/reference-input-inventory.md`.
@@ -92,6 +93,8 @@ Updated files are `backend/pyproject.toml`, `docs/current-status.md`, and `docs/
 
 The frontend package wrapper initially requested non-interactive permission to reconcile `node_modules`; the exact underlying locked test, TypeScript, ESLint, and Vinext build commands were run against the existing installation and passed.
 
+Contract approval revalidation on 2026-08-14 passed the seven catalog/schema pairs, the explicit JL-LN037 87/68-degree invariant, all domain/source-integrity checks, 23 backend tests, two frontend rendered-output tests, TypeScript, and ESLint. The production build was not rerun because no application/build contract changed and the catalogs are not consumed by the build.
+
 ## Phase 2 readiness and next session
 
-The schema/catalog foundation is ready for review and application integration after explicit authorization. Source conflicts are safely represented and will not masquerade as verified values. Phase 2 should begin only with an **Engineering Data Acceptance Review and Phase 2 Catalog Integration Planning** session that approves the contracts and resolves or explicitly carries the JL-LN037 and Solitaire discrepancies. Phase 3-6 engines remain gated.
+The schema/catalog foundation is approved for application integration, with no unresolved contract decision. JL-LN037 is resolved at 87/68 degrees; the Solitaire discrepancy remains a source-data issue explicitly represented by the approved contract. Phase 2 may begin only after separate explicit authorization. Phase 3-6 engines remain gated.
