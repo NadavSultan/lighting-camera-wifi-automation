@@ -4,6 +4,8 @@ Completion date: 2026-08-14
 
 Acceptance status: **Accepted by the user on 2026-08-14**
 
+Corrective status (2026-08-15): independent integration review subsequently returned **FAIL** with Major findings IR-01 through IR-11. This historical report is retained; it is not current acceptance evidence. See the unchanged QA report and the corrective completion report for retest status.
+
 Phase 2 implementation commit: `39495cfb6d6ab9b419f79cc66a7094854b0ccd55`
 
 Scope: fixture, IES, camera/lens catalogs and existing-pole configuration only

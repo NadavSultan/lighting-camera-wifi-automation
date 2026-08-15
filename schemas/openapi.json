@@ -1101,9 +1101,9 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "1.0.0",
+            "const": "1.1.0",
             "title": "Schema Version",
-            "default": "1.0.0"
+            "default": "1.1.0"
           },
           "catalog_id": {
             "type": "string",
@@ -1123,6 +1123,20 @@
             },
             "type": "array",
             "title": "Lenses"
+          },
+          "camera_model_history": {
+            "items": {
+              "$ref": "#/components/schemas/CameraModel"
+            },
+            "type": "array",
+            "title": "Camera Model History"
+          },
+          "lens_history": {
+            "items": {
+              "$ref": "#/components/schemas/LensConfiguration"
+            },
+            "type": "array",
+            "title": "Lens History"
           }
         },
         "additionalProperties": false,
@@ -1266,6 +1280,18 @@
             ],
             "title": "Camera Model Id"
           },
+          "camera_model_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Revision"
+          },
           "lens_id": {
             "anyOf": [
               {
@@ -1276,6 +1302,18 @@
               }
             ],
             "title": "Lens Id"
+          },
+          "lens_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Revision"
           },
           "enabled": {
             "type": "boolean",
@@ -1470,9 +1508,9 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "1.0.0",
+            "const": "1.1.0",
             "title": "Schema Version",
-            "default": "1.0.0"
+            "default": "1.1.0"
           },
           "catalog_id": {
             "type": "string",
@@ -1485,6 +1523,13 @@
             },
             "type": "array",
             "title": "Fixture Models"
+          },
+          "fixture_model_history": {
+            "items": {
+              "$ref": "#/components/schemas/FixtureModel"
+            },
+            "type": "array",
+            "title": "Fixture Model History"
           }
         },
         "additionalProperties": false,
@@ -1569,7 +1614,14 @@
             "title": "Original Content Base64"
           },
           "parsed_metadata": {
-            "$ref": "#/components/schemas/IesParsedMetadata"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IesParsedMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "validation_status": {
             "type": "string",
@@ -1586,6 +1638,13 @@
             },
             "type": "array",
             "title": "Validation Errors"
+          },
+          "validation_warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Validation Warnings"
           },
           "active": {
             "type": "boolean",
@@ -1608,7 +1667,6 @@
           "uploaded_at",
           "ies_format_version",
           "original_content_base64",
-          "parsed_metadata",
           "validation_status"
         ],
         "title": "IesFileRecord"
@@ -1641,9 +1699,9 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "1.0.0",
+            "const": "1.1.0",
             "title": "Schema Version",
-            "default": "1.0.0"
+            "default": "1.1.0"
           },
           "catalog_id": {
             "type": "string",
@@ -1953,6 +2011,18 @@
             ],
             "title": "Camera Model Id"
           },
+          "camera_model_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Revision"
+          },
           "lens_id": {
             "anyOf": [
               {
@@ -1963,6 +2033,18 @@
               }
             ],
             "title": "Lens Id"
+          },
+          "lens_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Revision"
           },
           "enabled": {
             "anyOf": [
@@ -2219,9 +2301,9 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "2.0.0",
+            "const": "2.1.0",
             "title": "Schema Version",
-            "default": "2.0.0"
+            "default": "2.1.0"
           },
           "software_version": {
             "type": "string",

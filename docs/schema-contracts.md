@@ -1,6 +1,6 @@
 # Engineering data schema contracts
 
-Review date: 2026-08-14
+Review date: 2026-08-15 corrective addendum
 
 Contract version: `1.0.0`
 
@@ -24,15 +24,17 @@ The existing Phase 1 application contracts remain `schemas/project.schema.json` 
 
 ## Approved Phase 2 operational contracts
 
-Approved by the user on 2026-08-14. These contracts are separate from and do not modify the seven frozen engineering catalogs above.
+These contracts are separate from and do not modify the seven frozen engineering catalogs above. Their original pre-implementation repository provenance was missing (IR-11). The user retrospectively ratified the corrective contract scope on 2026-08-15; see `docs/phase-2-contract-ratification.md` and `docs/decision-log.md`. This does not backdate or erase the QA finding.
 
 | Contract | Seed data | Purpose |
 |---|---|---|
-| `schemas/fixture-model-catalog.schema.json` | `data/phase2/fixture-model-catalog.json` | Six family-plus-variant fixture models, capabilities, IES selection, and immutable mounting-template revisions. |
-| `schemas/ies-library.schema.json` | `data/phase2/ies-library.json` | Immutable original IES uploads, checksums, parsed metadata, validation state, and explicit many-to-many fixture associations. |
-| `schemas/camera-equipment-catalog.schema.json` | `data/phase2/camera-equipment-catalog.json` | Operational camera/lens CRUD, compatibility, active state, and revisions seeded from the approved reference catalog. |
+| `schemas/fixture-model-catalog.schema.json` | `data/phase2/fixture-model-catalog.json` | Six family-plus-variant fixture models, capabilities, IES selection, immutable complete-model history, and immutable mounting-template revisions. |
+| `schemas/ies-library.schema.json` | `data/phase2/ies-library.json` | Immutable original IES uploads, checksums, optional parsed metadata, warnings/errors, validation state, and explicit many-to-many fixture associations. |
+| `schemas/camera-equipment-catalog.schema.json` | `data/phase2/camera-equipment-catalog.json` | Operational camera/lens CRUD, immutable complete-record histories, reciprocal compatibility, active state, and revisions seeded from the approved reference catalog. |
 
-The application project contract is now `2.0.0`. Its migration preserves Phase 1 data and coordinates exactly, retains legacy fixture classifications, and never guesses Phoenix 1 versus Solitaire.
+The corrected application project contract is `2.1.0`. Its migration accepts Phase 1 `1.0.0` and initial Phase 2 `2.0.0` projects, preserves data and coordinates exactly, retains legacy fixture classifications, and never guesses Phoenix 1 versus Solitaire. The operational catalogs advance from `1.0.0` to `1.1.0`; loading an initial catalog supplies empty history collections and pins the known revision-1 template equipment without changing identities.
+
+All generated application and Phase 2 schema documents declare JSON Schema Draft 2020-12 explicitly. Corrective additions use minor-version migrations; no Phase 1 engineering catalog schema or data version changed.
 
 ## Finalized contract decisions
 

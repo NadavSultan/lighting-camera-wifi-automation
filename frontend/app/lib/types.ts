@@ -52,7 +52,7 @@ export interface PoleEdit {
 }
 
 export interface Project {
-  schema_version: "2.0.0";
+  schema_version: "2.1.0";
   software_version: string;
   id: string;
   name: string;
@@ -89,7 +89,9 @@ export interface Project {
 export interface PoleCameraOverride {
   slot_id: string;
   camera_model_id?: string | null;
+  camera_model_revision?: number | null;
   lens_id?: string | null;
+  lens_revision?: number | null;
   enabled?: boolean | null;
   relative_azimuth_deg?: number | null;
   downward_tilt_deg?: number | null;
@@ -113,7 +115,9 @@ export interface CameraMountingSlot {
   relative_azimuth_deg: number;
   downward_tilt_deg: number;
   camera_model_id: string | null;
+  camera_model_revision: number | null;
   lens_id: string | null;
+  lens_revision: number | null;
   enabled: boolean;
   metadata: Record<string, unknown>;
 }
@@ -136,12 +140,12 @@ export interface FixtureModel {
   revision: number;
 }
 
-export interface FixtureModelCatalog { schema_version: "1.0.0"; catalog_id: string; fixture_models: FixtureModel[] }
+export interface FixtureModelCatalog { schema_version: "1.1.0"; catalog_id: string; fixture_models: FixtureModel[]; fixture_model_history: FixtureModel[] }
 export interface CameraModel { id: string; display_name: string; manufacturer: string | null; sensor: string | null; resolution_width_px: number | null; resolution_height_px: number | null; compatible_lens_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
 export interface LensConfiguration { id: string; display_name: string; focal_length_mm: number | null; horizontal_fov_deg: number | null; vertical_fov_deg: number | null; compatible_camera_model_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
-export interface CameraEquipmentCatalog { schema_version: "1.0.0"; catalog_id: string; camera_models: CameraModel[]; lenses: LensConfiguration[] }
-export interface IesFileRecord { id: string; original_filename: string; sha256: string; uploaded_at: string; ies_format_version: string; parsed_metadata: Record<string, unknown>; validation_status: "valid" | "invalid" | "unsupported"; validation_errors: string[]; active: boolean; revision: number }
-export interface IesLibrary { schema_version: "1.0.0"; catalog_id: string; files: IesFileRecord[]; fixture_associations: Array<{ ies_file_id: string; fixture_model_id: string; active: boolean }> }
+export interface CameraEquipmentCatalog { schema_version: "1.1.0"; catalog_id: string; camera_models: CameraModel[]; lenses: LensConfiguration[]; camera_model_history: CameraModel[]; lens_history: LensConfiguration[] }
+export interface IesFileRecord { id: string; original_filename: string; sha256: string; uploaded_at: string; ies_format_version: string; parsed_metadata: Record<string, unknown> | null; validation_status: "valid" | "invalid" | "unsupported"; validation_errors: string[]; validation_warnings: string[]; active: boolean; revision: number }
+export interface IesLibrary { schema_version: "1.1.0"; catalog_id: string; files: IesFileRecord[]; fixture_associations: Array<{ ies_file_id: string; fixture_model_id: string; active: boolean }> }
 
 export interface EffectivePole extends SourcePole {
   displayName: string;

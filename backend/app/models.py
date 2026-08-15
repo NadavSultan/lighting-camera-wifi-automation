@@ -11,7 +11,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-SCHEMA_VERSION = "2.0.0"
+SCHEMA_VERSION = "2.1.0"
 SOFTWARE_VERSION = "0.2.0"
 
 
@@ -133,7 +133,9 @@ class ProjectDefaults(StrictModel):
 class PoleCameraOverride(StrictModel):
     slot_id: str
     camera_model_id: str | None = None
+    camera_model_revision: Annotated[int | None, Field(ge=1)] = None
     lens_id: str | None = None
+    lens_revision: Annotated[int | None, Field(ge=1)] = None
     enabled: bool | None = None
     relative_azimuth_deg: Annotated[float | None, Field(ge=-180, le=180)] = None
     downward_tilt_deg: Annotated[float | None, Field(ge=0, le=90)] = None
@@ -174,7 +176,7 @@ class LayerState(StrictModel):
 
 
 class Project(StrictModel):
-    schema_version: Literal["2.0.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.1.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -234,7 +236,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version != "1.0.0":
+    if version not in {"1.0.0", "2.0.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION

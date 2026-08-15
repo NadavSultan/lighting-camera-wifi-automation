@@ -24,7 +24,9 @@ class CameraMountingSlot(StrictModel):
     relative_azimuth_deg: Annotated[float, Field(ge=-180, le=180)]
     downward_tilt_deg: Annotated[float, Field(ge=0, le=90)] = 35.0
     camera_model_id: str | None = None
+    camera_model_revision: Annotated[int | None, Field(ge=1)] = None
     lens_id: str | None = None
+    lens_revision: Annotated[int | None, Field(ge=1)] = None
     enabled: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -92,9 +94,10 @@ class FixtureModel(StrictModel):
 
 
 class FixtureModelCatalog(StrictModel):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     catalog_id: str = "fixture-model-catalog"
     fixture_models: list[FixtureModel]
+    fixture_model_history: list[FixtureModel] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_catalog(self) -> "FixtureModelCatalog":
@@ -104,6 +107,10 @@ class FixtureModelCatalog(StrictModel):
             raise ValueError("duplicate fixture model identifiers")
         if len(pairs) != len(set(pairs)):
             raise ValueError("fixture family and capability variant combinations must be unique")
+        history_keys = [(item.id, item.revision) for item in self.fixture_model_history]
+        current_keys = {(item.id, item.revision) for item in self.fixture_models}
+        if len(history_keys) != len(set(history_keys)) or current_keys.intersection(history_keys):
+            raise ValueError("fixture model revisions must be immutable and unique")
         required = {
             "phoenix-1-lite": ("Phoenix 1", FixtureType.LITE),
             "phoenix-1-wifi": ("Phoenix 1", FixtureType.WIFI),
@@ -163,10 +170,12 @@ class LensConfiguration(StrictModel):
 
 
 class CameraEquipmentCatalog(StrictModel):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     catalog_id: str = "camera-equipment-catalog"
     camera_models: list[CameraModel]
     lenses: list[LensConfiguration]
+    camera_model_history: list[CameraModel] = Field(default_factory=list)
+    lens_history: list[LensConfiguration] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_compatibility(self) -> "CameraEquipmentCatalog":
@@ -174,6 +183,14 @@ class CameraEquipmentCatalog(StrictModel):
         lens_ids = [item.id for item in self.lenses]
         if len(camera_ids) != len(set(camera_ids)) or len(lens_ids) != len(set(lens_ids)):
             raise ValueError("duplicate camera or lens identifiers")
+        camera_history_keys = [(item.id, item.revision) for item in self.camera_model_history]
+        lens_history_keys = [(item.id, item.revision) for item in self.lens_history]
+        if len(camera_history_keys) != len(set(camera_history_keys)) or len(lens_history_keys) != len(set(lens_history_keys)):
+            raise ValueError("historical camera and lens revisions must be unique")
+        if {(item.id, item.revision) for item in self.camera_models}.intersection(camera_history_keys):
+            raise ValueError("current camera revisions cannot also be historical")
+        if {(item.id, item.revision) for item in self.lenses}.intersection(lens_history_keys):
+            raise ValueError("current lens revisions cannot also be historical")
         camera_set, lens_set = set(camera_ids), set(lens_ids)
         for camera in self.camera_models:
             if not set(camera.compatible_lens_ids).issubset(lens_set):
@@ -181,6 +198,10 @@ class CameraEquipmentCatalog(StrictModel):
         for lens in self.lenses:
             if not set(lens.compatible_camera_model_ids).issubset(camera_set):
                 raise ValueError(f"{lens.id} references an unknown camera")
+        for camera in self.camera_models:
+            derived = {lens.id for lens in self.lenses if camera.id in lens.compatible_camera_model_ids}
+            if set(camera.compatible_lens_ids) != derived:
+                raise ValueError(f"{camera.id} compatibility must be reciprocal; lens compatibility is authoritative")
         return self
 
 
@@ -205,9 +226,10 @@ class IesFileRecord(StrictModel):
     uploaded_at: datetime
     ies_format_version: str
     original_content_base64: str
-    parsed_metadata: IesParsedMetadata
+    parsed_metadata: IesParsedMetadata | None = None
     validation_status: Literal["valid", "invalid", "unsupported"]
     validation_errors: list[str] = Field(default_factory=list)
+    validation_warnings: list[str] = Field(default_factory=list)
     active: bool = True
     revision: Annotated[int, Field(ge=1)] = 1
 
@@ -221,6 +243,10 @@ class IesFileRecord(StrictModel):
             raise ValueError("IES checksum does not match original content")
         if self.validation_status == "valid" and self.validation_errors:
             raise ValueError("valid IES records cannot contain validation errors")
+        if self.validation_status == "valid" and self.parsed_metadata is None:
+            raise ValueError("valid IES records require parsed metadata")
+        if self.validation_status != "valid" and not self.validation_errors:
+            raise ValueError("invalid or unsupported IES records require validation errors")
         return self
 
 
@@ -231,7 +257,7 @@ class IesFixtureAssociation(StrictModel):
 
 
 class IesLibrary(StrictModel):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     catalog_id: str = "ies-library"
     files: list[IesFileRecord] = Field(default_factory=list)
     fixture_associations: list[IesFixtureAssociation] = Field(default_factory=list)
@@ -252,6 +278,9 @@ class IesLibrary(StrictModel):
             pair = (association.ies_file_id, association.fixture_model_id)
             if pair in pairs:
                 raise ValueError("duplicate IES fixture association")
+            record = next(item for item in self.files if item.id == association.ies_file_id)
+            if association.active and (not record.active or record.validation_status != "valid"):
+                raise ValueError("active IES associations require an active valid file")
             pairs.add(pair)
         return self
 

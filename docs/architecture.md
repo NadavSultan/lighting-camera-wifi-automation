@@ -16,9 +16,9 @@ The browser never mutates a source file. A project records source poles and user
 - `backend/app/services/store.py`: local project storage with atomic JSON writes and immutable source uploads.
 - `backend/app/main.py`: HTTP API and generated OpenAPI schema.
 - `backend/app/catalog_models.py`: authoritative Phase 2 operational catalog contracts.
-- `backend/app/services/catalogs.py`: atomic operational catalog persistence and immutable template-revision workflow.
+- `backend/app/services/catalogs.py`: atomic operational catalog persistence, immutable full-record history, and immutable template-revision workflow.
 - `backend/app/services/ies.py`: validated LM-63 upload parser; no illuminance engine.
-- `backend/app/services/configuration.py`: capability validation and explicit-field bulk configuration.
+- `backend/app/services/configuration.py`: exact revision resolution, lifecycle/capability validation, corrective pin migration, and explicit-field bulk configuration.
 - `frontend/app/components/EngineeringWorkspace.tsx`: toolbar, layer panel, MapLibre map, inspector, and status bar.
 - `frontend/app/components/CatalogManager.tsx`: fixture, IES, camera, and lens management.
 - `frontend/app/components/PoleInspector.tsx`: model-dependent per-pole lighting, Wi-Fi, and SMART camera configuration.

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { selectBulkPoleIds, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -37,6 +38,12 @@ test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
   assert.match(inspector, /Explicit model selection required/);
   assert.match(inspector, /Catalog default/);
   assert.match(inspector, /Pole override/);
+  assert.match(inspector, /Remove pole override and restore catalog default/);
+  assert.match(inspector, /camera_model_revision/);
+  assert.match(inspector, /lens_revision/);
+  assert.match(workspace, /Manually selected poles/);
+  assert.match(workspace, /Add current pole to bulk selection/);
+  assert.match(workspace, /selectBulkPoleIds/);
   assert.match(catalogs, /Upload IES/);
   assert.match(catalogs, /New template revision/);
   assert.match(types, /location_edit_authorized/);
@@ -44,4 +51,18 @@ test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
   assert.match(api, /messages\.join\("; "\)/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("manual bulk targets and slot reset implement the Phase 2 corrective workflows", () => {
+  const poles = [
+    { id: "p1", folder_path: ["North"] },
+    { id: "p2", folder_path: ["South"] },
+    { id: "p3", folder_path: ["North"] },
+  ];
+  assert.deepEqual(selectBulkPoleIds(poles, "manual", "", ["p1", "p3"]), ["p1", "p3"]);
+  assert.deepEqual(selectBulkPoleIds(poles, "folder", "North", []), ["p1", "p3"]);
+  assert.deepEqual(selectBulkPoleIds(poles, "all", "", []), ["p1", "p2", "p3"]);
+  const original = { "camera-1": { slot_id: "camera-1", lens_id: "lens-a" }, "camera-2": { slot_id: "camera-2", enabled: false } };
+  assert.deepEqual(withoutCameraOverride(original, "camera-1"), { "camera-2": original["camera-2"] });
+  assert.ok("camera-1" in original, "reset must not mutate the caller's prior project state");
 });

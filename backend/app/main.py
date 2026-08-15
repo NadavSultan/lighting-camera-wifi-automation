@@ -22,6 +22,7 @@ from app.services.catalogs import CatalogNotFoundError, CatalogStore
 from app.services.configuration import (
     BulkPoleConfigurationRequest,
     apply_bulk_configuration,
+    pin_missing_equipment_revisions,
     validate_project_configuration,
 )
 from app.services.ies import IesValidationError, parse_ies_upload
@@ -47,6 +48,32 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         allow_headers=["*"],
     )
 
+    def pin_revisions(project: Project) -> Project:
+        return pin_missing_equipment_revisions(project, catalogs.fixtures(), catalogs.cameras())
+
+    def project_references(kind: str, item_id: str) -> list[str]:
+        references: list[str] = []
+        fixture_catalog = catalogs.fixtures()
+        fixture_revisions = {(item.id, item.revision): item for item in [*fixture_catalog.fixture_models, *fixture_catalog.fixture_model_history]}
+        for summary in project_store.list():
+            project = pin_revisions(project_store.load(summary.id))
+            for pole_id, edit in project.pole_edits.items():
+                config = edit.fixture_configuration
+                if not config:
+                    continue
+                if kind == "fixture" and config.fixture_model_id == item_id:
+                    references.append(f"{project.id}/{pole_id}")
+                    continue
+                model = fixture_revisions.get((config.fixture_model_id, config.fixture_model_revision))
+                template = next((item for item in model.mounting_template_revisions if item.revision == config.mounting_template_revision), None) if model else None
+                for slot in template.slots if template else []:
+                    override = config.camera_overrides.get(slot.id)
+                    camera_id = override.camera_model_id if override and override.camera_model_id is not None else slot.camera_model_id
+                    lens_id = override.lens_id if override and override.lens_id is not None else slot.lens_id
+                    if (kind == "camera" and camera_id == item_id) or (kind == "lens" and lens_id == item_id):
+                        references.append(f"{project.id}/{pole_id}/{slot.id}")
+        return references
+
     @app.get("/api/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         return HealthResponse()
@@ -62,7 +89,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.get("/api/projects/{project_id}", response_model=Project)
     def get_project(project_id: str) -> Project:
         try:
-            return project_store.load(project_id)
+            return pin_revisions(project_store.load(project_id))
         except (ProjectNotFoundError, ValueError):
             raise HTTPException(status_code=404, detail="Project not found") from None
 
@@ -83,6 +110,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         if project.id != project_id:
             raise HTTPException(status_code=409, detail="Project ID does not match request path")
         try:
+            project = pin_revisions(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -93,7 +121,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.post("/api/projects/open", response_model=Project)
     def open_project(payload: dict = Body(...)) -> Project:
         try:
-            project = Project.model_validate(migrate_project_payload(payload))
+            project = pin_revisions(Project.model_validate(migrate_project_payload(payload)))
             validate_embedded_source(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -105,8 +133,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.patch("/api/projects/{project_id}/poles/bulk", response_model=Project)
     def bulk_configure_poles(project_id: str, request: BulkPoleConfigurationRequest) -> Project:
         try:
-            project = project_store.load(project_id)
-            updated = apply_bulk_configuration(project, request, catalogs.fixtures())
+            project = pin_revisions(project_store.load(project_id))
+            updated = apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras())
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -125,6 +153,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         if fixture_id != model.id:
             raise HTTPException(status_code=409, detail="Fixture ID does not match request path")
         try:
+            if not model.active:
+                references = project_references("fixture", fixture_id)
+                if references:
+                    raise HTTPException(status_code=409, detail=f"Fixture is assigned to stored project locations: {references}")
             return catalogs.upsert_fixture(model)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -147,6 +179,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         if camera_id != camera.id:
             raise HTTPException(status_code=409, detail="Camera ID does not match request path")
         try:
+            if not camera.active:
+                references = project_references("camera", camera_id)
+                if references:
+                    raise HTTPException(status_code=409, detail=f"Camera is assigned to stored project slots: {references}")
             return catalogs.upsert_camera(camera)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -166,6 +202,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         if lens_id != lens.id:
             raise HTTPException(status_code=409, detail="Lens ID does not match request path")
         try:
+            if not lens.active:
+                references = project_references("lens", lens_id)
+                if references:
+                    raise HTTPException(status_code=409, detail=f"Lens is assigned to stored project slots: {references}")
             return catalogs.upsert_lens(lens)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -191,7 +231,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     ):
         try:
             return catalogs.add_ies(parse_ies_upload(x_filename, payload))
-        except (IesValidationError, ValidationError, ValueError) as exc:
+        except IesValidationError as exc:
+            record = catalogs.add_ies(exc.record) if exc.record is not None else None
+            raise HTTPException(status_code=422, detail={"message": str(exc), "record": record.model_dump(mode="json") if record else None}) from exc
+        except (ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.patch("/api/catalogs/ies/{ies_id}", response_model=IesFileRecord)
@@ -200,6 +243,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             return catalogs.set_ies_active(ies_id, active)
         except CatalogNotFoundError:
             raise HTTPException(status_code=404, detail="IES file not found") from None
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.put("/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}", response_model=IesFixtureAssociation)
     def associate_ies(ies_id: str, fixture_id: str, active: bool = Body(default=True, embed=True)) -> IesFixtureAssociation:

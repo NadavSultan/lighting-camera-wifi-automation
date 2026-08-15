@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from copy import deepcopy
 from pathlib import Path
 
 from app.catalog_models import (
@@ -52,13 +53,15 @@ class CatalogStore:
         catalog = self.fixtures()
         index = next((i for i, item in enumerate(catalog.fixture_models) if item.id == model.id), None)
         if index is None:
+            if model.revision != 1:
+                raise ValueError("new fixture models must start at revision 1")
             catalog.fixture_models.append(model)
         else:
             existing = catalog.fixture_models[index]
             if model.mounting_template_revisions != existing.mounting_template_revisions:
                 raise ValueError("mounting templates can change only through an explicit template-revision action")
-            if model.revision <= existing.revision:
-                model.revision = existing.revision + 1
+            model.revision = existing.revision + 1
+            catalog.fixture_model_history.append(deepcopy(existing))
             catalog.fixture_models[index] = model
         validated = FixtureModelCatalog.model_validate(catalog.model_dump())
         self.save_fixtures(validated)
@@ -73,6 +76,7 @@ class CatalogStore:
             raise ValueError("camera mounting templates are allowed only for SMART fixtures")
         if revision.revision != max(item.revision for item in model.mounting_template_revisions) + 1:
             raise ValueError("template revision must be the next immutable revision")
+        catalog.fixture_model_history.append(deepcopy(model))
         model.mounting_template_revisions.append(revision)
         model.current_mounting_template_revision = revision.revision
         model.revision += 1
@@ -81,11 +85,16 @@ class CatalogStore:
 
     def upsert_camera(self, camera: CameraModel) -> CameraModel:
         catalog = self.cameras()
+        camera.compatible_lens_ids = [lens.id for lens in catalog.lenses if camera.id in lens.compatible_camera_model_ids]
         index = next((i for i, item in enumerate(catalog.camera_models) if item.id == camera.id), None)
         if index is None:
+            if camera.revision != 1:
+                raise ValueError("new camera models must start at revision 1")
             catalog.camera_models.append(camera)
         else:
-            camera.revision = max(camera.revision, catalog.camera_models[index].revision + 1)
+            existing = catalog.camera_models[index]
+            camera.revision = existing.revision + 1
+            catalog.camera_model_history.append(deepcopy(existing))
             catalog.camera_models[index] = camera
         self.save_cameras(CameraEquipmentCatalog.model_validate(catalog.model_dump()))
         return camera
@@ -104,10 +113,20 @@ class CatalogStore:
         catalog = self.cameras()
         index = next((i for i, item in enumerate(catalog.lenses) if item.id == lens.id), None)
         if index is None:
+            if lens.revision != 1:
+                raise ValueError("new lenses must start at revision 1")
             catalog.lenses.append(lens)
         else:
-            lens.revision = max(lens.revision, catalog.lenses[index].revision + 1)
+            existing = catalog.lenses[index]
+            lens.revision = existing.revision + 1
+            catalog.lens_history.append(deepcopy(existing))
             catalog.lenses[index] = lens
+        for camera in catalog.camera_models:
+            derived = [item.id for item in catalog.lenses if camera.id in item.compatible_camera_model_ids]
+            if camera.compatible_lens_ids != derived:
+                catalog.camera_model_history.append(deepcopy(camera))
+                camera.compatible_lens_ids = derived
+                camera.revision += 1
         self.save_cameras(CameraEquipmentCatalog.model_validate(catalog.model_dump()))
         return lens
 
@@ -134,6 +153,8 @@ class CatalogStore:
         record = next((item for item in library.files if item.id == ies_id), None)
         if record is None:
             raise CatalogNotFoundError(ies_id)
+        if active and record.validation_status != "valid":
+            raise ValueError("only valid IES files can be activated")
         record.active = active
         record.revision += 1
         if not active:
@@ -144,6 +165,7 @@ class CatalogStore:
             changed = False
             for model in fixtures.fixture_models:
                 if model.default_ies_file_id == ies_id:
+                    fixtures.fixture_model_history.append(deepcopy(model))
                     model.default_ies_file_id = None
                     model.revision += 1
                     changed = True
@@ -157,6 +179,11 @@ class CatalogStore:
         if association.fixture_model_id not in fixture_ids:
             raise ValueError("IES association references an unknown fixture model")
         library = self.ies()
+        record = next((item for item in library.files if item.id == association.ies_file_id), None)
+        if record is None:
+            raise ValueError("IES association references an unknown file")
+        if association.active and (not record.active or record.validation_status != "valid"):
+            raise ValueError("active IES association requires an active valid file")
         existing = next((item for item in library.fixture_associations if (item.ies_file_id, item.fixture_model_id) == (association.ies_file_id, association.fixture_model_id)), None)
         if existing:
             existing.active = association.active
@@ -174,6 +201,7 @@ class CatalogStore:
         fixtures = self.fixtures()
         model = next((item for item in fixtures.fixture_models if item.id == fixture_id), None)
         if model and model.default_ies_file_id == ies_id:
+            fixtures.fixture_model_history.append(deepcopy(model))
             model.default_ies_file_id = None
             model.compatible_ies_file_ids = [value for value in model.compatible_ies_file_ids if value != ies_id]
             model.revision += 1
@@ -182,12 +210,16 @@ class CatalogStore:
 
     def set_default_ies(self, fixture_id: str, ies_id: str) -> FixtureModel:
         library = self.ies()
+        record = next((item for item in library.files if item.id == ies_id), None)
+        if record is None or not record.active or record.validation_status != "valid":
+            raise ValueError("default IES requires an active valid file")
         if not any(item.active and item.ies_file_id == ies_id and item.fixture_model_id == fixture_id for item in library.fixture_associations):
             raise ValueError("default IES requires an active explicit fixture association")
         catalog = self.fixtures()
         model = next((item for item in catalog.fixture_models if item.id == fixture_id), None)
         if model is None:
             raise CatalogNotFoundError(fixture_id)
+        catalog.fixture_model_history.append(deepcopy(model))
         if ies_id not in model.compatible_ies_file_ids:
             model.compatible_ies_file_ids.append(ies_id)
         model.default_ies_file_id = ies_id
@@ -198,7 +230,18 @@ class CatalogStore:
     def _read(self, filename: str) -> dict:
         path = self.root / filename
         source = path if path.exists() else self.seed_root / filename
-        return json.loads(source.read_text(encoding="utf-8"))
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        if payload.get("schema_version") == "1.0.0":
+            payload["schema_version"] = "1.1.0"
+            if filename == "fixture-model-catalog.json":
+                for model in payload.get("fixture_models", []):
+                    for template in model.get("mounting_template_revisions", []):
+                        for slot in template.get("slots", []):
+                            if slot.get("camera_model_id") and slot.get("camera_model_revision") is None:
+                                slot["camera_model_revision"] = 1
+                            if slot.get("lens_id") and slot.get("lens_revision") is None:
+                                slot["lens_revision"] = 1
+        return payload
 
     def _write(self, filename: str, payload: dict) -> None:
         self.root.mkdir(parents=True, exist_ok=True)

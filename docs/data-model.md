@@ -16,7 +16,17 @@ The importer preserves a KML Placemark `id` when present. Otherwise it creates a
 
 ## User edits
 
-`PoleEdit` retains Phase 1 fields and may contain a Phase 2 `fixture_configuration`. That configuration references a stable fixture model and pinned catalog/template revisions, an explicitly associated IES file, fixture azimuth, capability-specific settings, and slot-keyed camera override deltas. Location changes still require `location_edit_authorized=true`; the UI never exposes them.
+`PoleEdit` retains Phase 1 fields and may contain a Phase 2 `fixture_configuration`. That configuration references a stable fixture model and pinned complete model/template revision, an explicitly associated IES file, fixture azimuth, capability-specific settings, and slot-keyed camera override deltas. Camera and lens assignments also pin their exact operational revisions. Location changes still require `location_edit_authorized=true`; the UI never exposes them.
+
+Operational fixture, camera, and lens catalogs retain the current record plus immutable previous complete records keyed by `(id, revision)`. Historical lookup is used for assigned poles; current active state controls whether a new save/assignment is allowed. Lens `compatible_camera_model_ids` is the authoritative compatibility relation and the camera-side list is derived and reciprocity-validated.
+
+## Phase 2 transition and lifecycle policy
+
+- Choosing a different fixture model is an explicit replacement of the pole's capability-specific configuration baseline. The new current fixture/template revision is pinned, its explicit default IES (if any) is used, and incompatible prior Wi-Fi/camera overrides are not carried across models.
+- Updating a catalog record never changes an assigned pole. The user must select **Explicitly adopt current catalog/template revision** or make a new equipment selection.
+- Removing one camera-slot override deletes only that pole's delta and restores the pinned template values. Restoring the whole pole remains a separate action.
+- API deactivation of equipment referenced by stored projects returns `409 Conflict`. If administrative filesystem changes nevertheless leave a project referencing inactive equipment, save/open validation returns a readable `422` error rather than mutating or crashing the project.
+- Bulk patch values omitted or explicitly `null` mean unchanged. Bulk clearing is intentionally not implicit; a specific per-pole or override-reset action is required.
 
 ## Effective values
 
@@ -45,7 +55,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.0.0` and software version is `0.2.0`. Phase 1 JSON (`1.0.0`) migrates without family inference: coordinates and edits are preserved, `fixture_configuration` remains unset, and explicit model selection is required. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.1.0` and software version is `0.2.0`. Phase 1 JSON (`1.0.0`) and initial Phase 2 JSON (`2.0.0`) migrate without family inference: coordinates and edits are preserved, legacy `fixture_configuration` content remains explicit, and missing camera/lens pins are resolved to the current corrective-baseline revision on open/save. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

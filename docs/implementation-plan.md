@@ -13,10 +13,11 @@ Status: complete, tested, and frozen for acceptance review. No Phase 2 work is a
 
 ## Phase 2 - fixture, IES, and camera catalogs
 
-Status: complete, tested, and accepted on 2026-08-14.
+Status: corrective implementation complete on 2026-08-15; independent QA retest pending after the recorded FAIL.
 
 - Added operational fixture-model, IES, and camera/lens catalogs while retaining the approved Phase 1 reference catalogs.
-- Added validated IES upload/parsing, explicit fixture associations, bulk/folder assignment, and per-pole overrides.
+- Added validated IES upload/parsing, explicit fixture associations, all/folder/manual bulk assignment, and removable per-pole overrides.
+- Corrected IR-01 through IR-11 with immutable complete-record histories, exact equipment revision pins, safe lifecycle validation, hardened IES semantics, reciprocal compatibility, and repository-owned retrospective ratification.
 - Added immutable Phoenix 1 SMART ±70-degree and Solitaire SMART ±60-degree mounting-template revisions with positive downward tilt.
 - Resolve source discrepancies before use (for example, two `050W` filenames identify a `60W` luminaire internally).
 
@@ -51,4 +52,4 @@ Status: not started and not authorized.
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The immediate gate is closed: Phase 2 is accepted. A future session may begin Phase 3 only after new explicit authorization and approval of the required physical camera offsets, lens assignments, and terrain assumptions. No later phase was started in the Phase 2 session.
+The immediate gate is closed: Phase 2 awaits independent corrective QA retesting. Phase 3 may not begin in this session and still requires new explicit authorization plus approved physical camera offsets, lens assignments, and terrain assumptions.

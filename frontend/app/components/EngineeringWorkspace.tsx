@@ -6,6 +6,7 @@ import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
 import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, saveProject } from "../lib/api";
 import { effectivePole, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
+import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -35,6 +36,8 @@ export function EngineeringWorkspace() {
   const [status, setStatus] = useState("Ready - Phase 2 existing-pole configuration workflow");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
+  const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");
+  const [bulkManualPoleIds, setBulkManualPoleIds] = useState<string[]>([]);
   const [bulkModelId, setBulkModelId] = useState("");
   const [bulkHeight, setBulkHeight] = useState("");
   const [bulkAzimuth, setBulkAzimuth] = useState("");
@@ -92,7 +95,7 @@ export function EngineeringWorkspace() {
   async function handleNew() {
     await runAction(async () => {
       const next = await createProject();
-      setProject(next); setPast([]); setFuture([]); setSelectedId(null);
+      setProject(next); setPast([]); setFuture([]); setSelectedId(null); setBulkManualPoleIds([]);
       setStatus("New local project created - import a customer KML or KMZ");
     });
   }
@@ -103,7 +106,7 @@ export function EngineeringWorkspace() {
     if (!file) return;
     await runAction(async () => {
       const next = await importProjectFile(file);
-      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null);
+      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]);
       setStatus(`Imported ${next.source.poles.length} authoritative customer poles from ${file.name}`);
     });
   }
@@ -115,7 +118,7 @@ export function EngineeringWorkspace() {
     await runAction(async () => {
       const parsed = JSON.parse(await file.text()) as Project;
       const next = await openProject(parsed);
-      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null);
+      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]);
       setStatus(`Reopened ${next.name} from project JSON`);
     });
   }
@@ -162,9 +165,12 @@ export function EngineeringWorkspace() {
 
   function applyBulkConfiguration() {
     if (!project) return;
-    const targets = effectivePoles.filter((pole) => bulkFolder === "all" || (pole.folder_path.join(" / ") || "Unfiled") === bulkFolder);
+    const targetIds = new Set(selectBulkPoleIds(effectivePoles, bulkTargetMode, bulkFolder, bulkManualPoleIds));
+    const targets = effectivePoles.filter((pole) => targetIds.has(pole.id));
+    if (!targets.length) { setError("Select at least one target pole for the bulk operation"); return; }
     const selectedModel = fixtureCatalog?.fixture_models.find((item) => item.id === bulkModelId && item.active);
-    const models = targets.map((pole) => selectedModel ?? fixtureCatalog?.fixture_models.find((item) => item.id === pole.fixtureConfiguration?.fixture_model_id));
+    const fixtureRevisions = [...(fixtureCatalog?.fixture_models ?? []), ...(fixtureCatalog?.fixture_model_history ?? [])];
+    const models = targets.map((pole) => selectedModel ?? fixtureRevisions.find((item) => item.id === pole.fixtureConfiguration?.fixture_model_id && item.revision === pole.fixtureConfiguration.fixture_model_revision));
     const needsConfiguration = Boolean(bulkIesId || bulkAzimuth || bulkWifiNotes || bulkCameraId || bulkLensId);
     if (needsConfiguration && models.some((item) => !item)) { setError("Every selected pole needs an explicit fixture model before applying configuration fields"); return; }
     if (bulkWifiNotes && models.some((item) => !item?.capabilities.wifi)) { setError("Wi-Fi bulk configuration is allowed only when every selected fixture supports Wi-Fi"); return; }
@@ -184,8 +190,8 @@ export function EngineeringWorkspace() {
             const template = model?.mounting_template_revisions.find((item) => item.revision === config?.mounting_template_revision);
             for (const slot of template?.slots ?? []) {
               const override = config.camera_overrides[slot.id] ?? { slot_id: slot.id, metadata: {} };
-              if (bulkCameraId) override.camera_model_id = bulkCameraId;
-              if (bulkLensId) override.lens_id = bulkLensId;
+              if (bulkCameraId) { const camera = cameraCatalog?.camera_models.find((item) => item.id === bulkCameraId); override.camera_model_id = bulkCameraId; override.camera_model_revision = camera?.revision ?? null; }
+              if (bulkLensId) { const lens = cameraCatalog?.lenses.find((item) => item.id === bulkLensId); override.lens_id = bulkLensId; override.lens_revision = lens?.revision ?? null; }
               config.camera_overrides[slot.id] = override;
             }
           }
@@ -267,14 +273,16 @@ export function EngineeringWorkspace() {
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Bulk assignment</h3></div>
-                <div className="field full"><label htmlFor="bulk-folder">Target folder</label><select id="bulk-folder" value={bulkFolder} onChange={(event) => setBulkFolder(event.target.value)} disabled={!project}><option value="all">All imported poles</option>{folders.map((folder) => <option key={folder}>{folder}</option>)}</select></div>
+                <div className="field full"><label htmlFor="bulk-target-mode">Target poles</label><select id="bulk-target-mode" value={bulkTargetMode} onChange={(event) => setBulkTargetMode(event.target.value as "all" | "folder" | "manual")} disabled={!project}><option value="all">All imported poles</option><option value="folder">One source folder</option><option value="manual">Manually selected poles</option></select></div>
+                {bulkTargetMode === "folder" && <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-folder">Target folder</label><select id="bulk-folder" value={bulkFolder} onChange={(event) => setBulkFolder(event.target.value)} disabled={!project}>{folders.map((folder) => <option key={folder}>{folder}</option>)}</select></div>}
+                {bulkTargetMode === "manual" && <div className="future-card" style={{ marginTop: 8 }}><strong>{bulkManualPoleIds.length} manually selected</strong><br />Click a pole on the map, then add or remove it here.<button type="button" className="quiet-button restore-button" disabled={!selectedId} onClick={() => selectedId && setBulkManualPoleIds((ids) => ids.includes(selectedId) ? ids.filter((id) => id !== selectedId) : [...ids, selectedId])}>{selectedId && bulkManualPoleIds.includes(selectedId) ? "Remove current pole from bulk selection" : "Add current pole to bulk selection"}</button>{bulkManualPoleIds.length > 0 && <button type="button" className="quiet-button restore-button" onClick={() => setBulkManualPoleIds([])}>Clear manual selection</button>}</div>}
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-model">Explicit fixture model</label><select id="bulk-model" value={bulkModelId} onChange={(event) => setBulkModelId(event.target.value)} disabled={!project}><option value="">Choose model…</option>{fixtureCatalog?.fixture_models.filter((item) => item.active).map((model) => <option value={model.id} key={model.id}>{model.display_name}</option>)}</select></div>
                 <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-height">Height (m)</label><input id="bulk-height" type="number" min="0.1" max="100" value={bulkHeight} placeholder="Unchanged" onChange={(event) => setBulkHeight(event.target.value)} /></div><div className="field"><label htmlFor="bulk-azimuth">Azimuth (°)</label><input id="bulk-azimuth" type="number" min="0" max="359.999" value={bulkAzimuth} placeholder="Unchanged" onChange={(event) => setBulkAzimuth(event.target.value)} /></div></div>
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-ies">IES file</label><select id="bulk-ies" value={bulkIesId} onChange={(event) => setBulkIesId(event.target.value)}><option value="">Unchanged</option>{iesLibrary?.files.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.original_filename}</option>)}</select></div>
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-wifi">Wi-Fi notes</label><input id="bulk-wifi" value={bulkWifiNotes} placeholder="Unchanged" onChange={(event) => setBulkWifiNotes(event.target.value)} /></div>
                 <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-camera">SMART camera</label><select id="bulk-camera" value={bulkCameraId} onChange={(event) => setBulkCameraId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.camera_models.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div><div className="field"><label htmlFor="bulk-lens">SMART lens</label><select id="bulk-lens" value={bulkLensId} onChange={(event) => setBulkLensId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.lenses.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div></div>
                 <button className="quiet-button" style={{ marginTop: 7, width: "100%" }} disabled={!project || !(bulkModelId || bulkHeight || bulkAzimuth || bulkIesId || bulkWifiNotes || bulkCameraId || bulkLensId)} onClick={applyBulkConfiguration}>Apply selected fields</button>
-                <p className="helper">Assignments create edit overlays. Folder names are never interpreted automatically.</p>
+                <p className="helper">Assignments create edit overlays. Manual selections, all-pole targeting, and folder targeting are explicit; folder names are never interpreted automatically.</p>
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Validation</h3><span className="helper">{activeWarnings} warnings</span></div>
