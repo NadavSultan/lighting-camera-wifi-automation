@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 camera geometry is explicitly authorized and in progress; Phase 4 and later work remains unauthorized.
+Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 camera geometry implementation is complete and awaiting independent integration review and QA; Phase 4 and later work remains unauthorized and unstarted.
 
 ## Completed
 
@@ -36,4 +36,4 @@ Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Implement and validate Phase 3 camera-ground geometry only under the approved fixed-mounting, explicit-lens, flat-ground, projected-CRS contract. Stop after the Phase 3 completion report and recommend an independent session “92 – Phase 3 Integration Review & QA”. Do not begin Phase 4.
+Return commit `c8814587d08731cbb5e125d644b6a55f67483d48` and `docs/phase-3-completion-report.md` to independent session “92 – Phase 3 Integration Review & QA”. Do not begin Phase 4.

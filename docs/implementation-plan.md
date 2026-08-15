@@ -23,7 +23,7 @@ Status: complete and formally closed on 2026-08-15 after independent **UNCONDITI
 
 ## Phase 3 - camera geometry
 
-Status: explicitly authorized and in progress on 2026-08-15.
+Status: implementation complete on 2026-08-15; independent integration review and QA pending.
 
 - Flat-terrain ground-FOV projection for two immutable fixed-mount camera slots on SMART fixtures, with fixture-level azimuth editing and map rotation.
 - Explicit compatible lens selection, per-slot enable state, deterministic warnings, revision-aware provenance, overlap metrics, and persisted priority-area intersection summaries.
