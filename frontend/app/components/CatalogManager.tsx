@@ -3,6 +3,7 @@
 import { type ChangeEvent, useRef, useState } from "react";
 import { addFixtureTemplateRevision, associateIes, removeIesAssociation, saveCameraModel, saveFixtureModel, saveLens, setDefaultIes, setIesActive, uploadIes } from "../lib/api";
 import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, FixtureType, IesLibrary, LensConfiguration } from "../lib/types";
+import { uploadIesAndRefresh } from "../lib/phase2-workflows.mjs";
 
 interface Props {
   fixtures: FixtureModelCatalog;
@@ -64,7 +65,14 @@ export function CatalogManager({ fixtures, cameras, ies, onClose, onRefresh, onE
   async function handleIes(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (file) await action(() => uploadIes(file));
+    if (!file) return;
+    const result = await uploadIesAndRefresh(() => uploadIes(file), onRefresh);
+    if (result.error) {
+      setIesId("");
+      onError(result.error instanceof Error ? result.error.message : "IES upload was rejected");
+      return;
+    }
+    await onRefresh();
   }
 
   const usableIes = ies.files.filter((item) => item.active && item.validation_status === "valid");

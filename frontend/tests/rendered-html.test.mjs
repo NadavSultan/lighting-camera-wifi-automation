@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { selectBulkPoleIds, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
+import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -47,10 +47,26 @@ test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
   assert.match(catalogs, /Upload IES/);
   assert.match(catalogs, /New template revision/);
   assert.match(types, /location_edit_authorized/);
-  assert.match(api, /Array\.isArray\(detail\)/);
-  assert.match(api, /messages\.join\("; "\)/);
+  assert.match(api, /formatApiErrorDetail/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("NIR-01 refreshes and reports a rejected retained IES record without raw JSON", async () => {
+  const retainedRecord = { id: "ies-bad", validation_status: "unsupported", active: false, validation_errors: ["Unsupported IES format"] };
+  const detail = { message: "Unsupported IES format; LM-63-1995 or LM-63-2002 is required", record: retainedRecord };
+  assert.equal(formatApiErrorDetail(detail), detail.message);
+  assert.doesNotMatch(formatApiErrorDetail(detail), /"record"|"validation_status"/);
+  let refreshCount = 0;
+  const rejection = new Error(formatApiErrorDetail(detail));
+  const result = await uploadIesAndRefresh(async () => { throw rejection; }, async () => { refreshCount += 1; });
+  assert.equal(refreshCount, 1);
+  assert.equal(result.value, null);
+  assert.equal(result.error, rejection);
+  const catalog = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
+  assert.match(catalog, /setIesId\(""\)/);
+  assert.match(catalog, /disabled=\{!file\.active && file\.validation_status !== "valid"\}/);
+  assert.match(catalog, /usableIes/);
 });
 
 test("manual bulk targets and slot reset implement the Phase 2 corrective workflows", () => {

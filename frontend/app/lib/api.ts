@@ -1,4 +1,5 @@
 import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project } from "./types";
+import { formatApiErrorDetail } from "./phase2-workflows.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -8,25 +9,13 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     let message = `${response.status} ${response.statusText}`;
     try {
       const body = (await response.json()) as { detail?: unknown };
-      if (body.detail) message = formatErrorDetail(body.detail);
+      if (body.detail) message = formatApiErrorDetail(body.detail);
     } catch {
       // Keep the HTTP status when the response is not JSON.
     }
     throw new Error(message);
   }
   return response.json() as Promise<T>;
-}
-
-function formatErrorDetail(detail: unknown): string {
-  if (typeof detail === "string") return detail;
-  if (Array.isArray(detail)) {
-    const messages = detail.map((item) => {
-      if (item && typeof item === "object" && "msg" in item) return String(item.msg);
-      return JSON.stringify(item);
-    });
-    return messages.join("; ");
-  }
-  return JSON.stringify(detail);
 }
 
 export function createProject(name = "Untitled lighting project") {
