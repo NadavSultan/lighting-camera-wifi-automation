@@ -28,6 +28,9 @@ class CameraMountingSlot(StrictModel):
     lens_id: str | None = None
     lens_revision: Annotated[int | None, Field(ge=1)] = None
     enabled: bool = True
+    origin_offset_x_m: Literal[0.0] = 0.0
+    origin_offset_y_m: Literal[0.0] = 0.0
+    origin_offset_z_m: Literal[0.0] = 0.0
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -35,6 +38,7 @@ class CameraMountingTemplateRevision(StrictModel):
     revision: Annotated[int, Field(ge=1)]
     created_at: datetime
     notes: str = ""
+    geometry_contract_version: Literal["fixed-zero-origin-1.0.0"] | None = None
     slots: list[CameraMountingSlot]
 
     @model_validator(mode="after")
@@ -94,7 +98,7 @@ class FixtureModel(StrictModel):
 
 
 class FixtureModelCatalog(StrictModel):
-    schema_version: Literal["1.1.0"] = "1.1.0"
+    schema_version: Literal["1.2.0"] = "1.2.0"
     catalog_id: str = "fixture-model-catalog"
     fixture_models: list[FixtureModel]
     fixture_model_history: list[FixtureModel] = Field(default_factory=list)
@@ -140,6 +144,10 @@ class FixtureModelCatalog(StrictModel):
             raise ValueError(f"invalid mounting geometry for {model.display_name}")
         if any(slot.downward_tilt_deg != 35 for slot in template.slots):
             raise ValueError(f"{model.display_name} cameras require 35 degree downward tilt")
+        if template.geometry_contract_version != "fixed-zero-origin-1.0.0":
+            raise ValueError(f"{model.display_name} current template requires the approved fixed mounting contract")
+        if any((slot.origin_offset_x_m, slot.origin_offset_y_m, slot.origin_offset_z_m) != (0, 0, 0) for slot in template.slots):
+            raise ValueError(f"{model.display_name} cameras require zero XYZ origin offsets")
 
 
 class CameraModel(StrictModel):

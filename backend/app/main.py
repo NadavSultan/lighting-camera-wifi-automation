@@ -25,6 +25,7 @@ from app.services.configuration import (
     pin_missing_equipment_revisions,
     validate_project_configuration,
 )
+from app.services.camera_geometry import calculate_camera_geometry
 from app.services.ies import IesValidationError, parse_ies_upload
 from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
 from app.services.store import ProjectNotFoundError, ProjectStore
@@ -35,14 +36,15 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.2.0",
-        description="Phase 2 local fixture, IES, camera, and existing-pole configuration workflow.",
+        version="0.3.0",
+        description="Phase 3 fixed-mount camera ground geometry and existing-pole configuration workflow.",
     )
     app.state.project_store = project_store
     app.state.catalog_store = catalogs
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
+        allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -50,6 +52,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
 
     def pin_revisions(project: Project) -> Project:
         return pin_missing_equipment_revisions(project, catalogs.fixtures(), catalogs.cameras())
+
+    def recalculate(project: Project) -> Project:
+        project.camera_geometry = calculate_camera_geometry(project, catalogs.fixtures(), catalogs.cameras())
+        return project
 
     def project_references(kind: str, item_id: str) -> list[str]:
         references: list[str] = []
@@ -89,7 +95,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.get("/api/projects/{project_id}", response_model=Project)
     def get_project(project_id: str) -> Project:
         try:
-            return pin_revisions(project_store.load(project_id))
+            return recalculate(pin_revisions(project_store.load(project_id)))
         except (ProjectNotFoundError, ValueError):
             raise HTTPException(status_code=404, detail="Project not found") from None
 
@@ -101,7 +107,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     ) -> Project:
         try:
             project = import_project(x_filename, payload, x_project_name)
-            return project_store.save(project)
+            return project_store.save(recalculate(project))
         except (KmlImportError, ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -114,7 +120,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
-            return project_store.save(project)
+            return project_store.save(recalculate(project))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -126,7 +132,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
-            return project_store.save(project)
+            return project_store.save(recalculate(project))
         except (KmlImportError, ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -138,9 +144,22 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
-            return project_store.save(updated)
+            return project_store.save(recalculate(updated))
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/camera-geometry/recalculate", response_model=Project)
+    def recalculate_project_camera_geometry(project_id: str, project: Project) -> Project:
+        if project.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            project = pin_revisions(project)
+            errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
+            if errors:
+                raise ValueError("; ".join(errors))
+            return recalculate(project)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 

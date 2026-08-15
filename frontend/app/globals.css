@@ -106,6 +106,19 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .restore-button { margin-top: 10px; }
 .camera-slot { margin-top: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #0c141c; }
 .camera-slot + .camera-slot { margin-top: 10px; }
+.camera-provenance { margin-top: 9px; color: #9fb0c1; font-size: 9px; line-height: 1.55; font-variant-numeric: tabular-nums; }
+.azimuth-handle { width: 18px; height: 18px; border: 3px solid #071018; border-radius: 50%; background: #5de2c2; box-shadow: 0 0 0 2px #d7fff5, 0 3px 12px #000; cursor: grab; }
+.azimuth-handle:active { cursor: grabbing; }
+.priority-row { margin-top: 8px; padding: 9px; border: 1px solid #59451d; border-radius: 7px; background: #19160e; }
+.priority-row strong, .priority-row span { display: block; }
+.priority-row strong { font-size: 10px; }
+.priority-row span { margin: 4px 0 7px; color: #e6bd66; font-size: 9px; }
+.priority-row .quiet-button { min-height: 27px; margin-right: 5px; padding-inline: 8px; }
+.geometry-metrics { margin-top: 9px; padding: 9px; border: 1px solid var(--line); border-radius: 7px; background: #0d151e; }
+.geometry-metrics strong, .geometry-metrics span, .geometry-metrics small { display: block; }
+.geometry-metrics strong { color: #d9e2ec; font-size: 10px; }
+.geometry-metrics span { margin-top: 4px; color: #f5a6d0; font-size: 9px; }
+.geometry-metrics small { margin-top: 5px; color: var(--muted); font-size: 8px; line-height: 1.4; }
 .catalog-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgb(3 8 13 / 78%); backdrop-filter: blur(5px); }
 .catalog-dialog { width: min(1180px, 100%); max-height: calc(100vh - 48px); overflow: hidden; border: 1px solid #3a4e60; border-radius: 12px; background: var(--panel); box-shadow: 0 24px 80px rgb(0 0 0 / 55%); }
 .catalog-header { min-height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 10px 18px; border-bottom: 1px solid var(--line); }

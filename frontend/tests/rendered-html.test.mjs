@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
+import { closePriorityRing, fixtureAzimuthFromHandle, normalizeFixtureAzimuth } from "../app/lib/phase3-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -10,7 +11,7 @@ async function render() {
   return worker.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the Phase 2 engineering workspace", async () => {
+test("server-renders the Phase 3 engineering workspace", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
@@ -23,14 +24,14 @@ test("server-renders the Phase 2 engineering workspace", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
-test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
+test("exposes Phase 3 camera geometry while keeping later engines gated", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
   const inspector = await readFile(new URL("../app/components/PoleInspector.tsx", import.meta.url), "utf8");
   const catalogs = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
   const types = await readFile(new URL("../app/lib/types.ts", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/lib/api.ts", import.meta.url), "utf8");
   const packageJson = await readFile(new URL("../package.json", import.meta.url), "utf8");
-  assert.match(workspace, /Draw Calculation Area/);
+  assert.match(workspace, /Draw Priority Area/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /disabled title="Phase 6/);
   assert.match(inspector, /Restore source\/default values/);
@@ -41,6 +42,11 @@ test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
   assert.match(inspector, /Remove pole override and restore catalog default/);
   assert.match(inspector, /camera_model_revision/);
   assert.match(inspector, /lens_revision/);
+  assert.match(inspector, /Inherited relative azimuth/);
+  assert.match(inspector, /Inherited downward tilt/);
+  assert.match(inspector, /Explicitly reset orientation to immutable template/);
+  assert.doesNotMatch(inspector, /onChange=\{\(event\) => updateSlot\(slot\.id, \{ relative_azimuth_deg/);
+  assert.doesNotMatch(inspector, /onChange=\{\(event\) => updateSlot\(slot\.id, \{ downward_tilt_deg/);
   assert.match(workspace, /Manually selected poles/);
   assert.match(workspace, /Add current pole to bulk selection/);
   assert.match(workspace, /selectBulkPoleIds/);
@@ -48,6 +54,9 @@ test("exposes Phase 2 catalogs while keeping later engines gated", async () => {
   assert.match(catalogs, /New template revision/);
   assert.match(types, /location_edit_authorized/);
   assert.match(api, /formatApiErrorDetail/);
+  assert.match(api, /recalculateCameraGeometry/);
+  assert.match(workspace, /camera_overlap/);
+  assert.match(workspace, /priority_area_summaries/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
@@ -81,4 +90,14 @@ test("manual bulk targets and slot reset implement the Phase 2 corrective workfl
   const original = { "camera-1": { slot_id: "camera-1", lens_id: "lens-a" }, "camera-2": { slot_id: "camera-2", enabled: false } };
   assert.deepEqual(withoutCameraOverride(original, "camera-1"), { "camera-2": original["camera-2"] });
   assert.ok("camera-1" in original, "reset must not mutate the caller's prior project state");
+});
+
+test("Phase 3 fixture rotation and priority-area helpers are deterministic", () => {
+  assert.equal(normalizeFixtureAzimuth(-70), 290);
+  assert.equal(normalizeFixtureAzimuth(430), 70);
+  assert.equal(fixtureAzimuthFromHandle(-80, 25, -80, 25.001), 0);
+  assert.ok(Math.abs(fixtureAzimuthFromHandle(-80, 25, -79.999, 25) - 90) < 1e-9);
+  const vertices = [[-80, 25], [-79.999, 25], [-79.999, 25.001]];
+  assert.deepEqual(closePriorityRing(vertices), [...vertices, vertices[0]]);
+  assert.throws(() => closePriorityRing(vertices.slice(0, 2)), /three vertices/);
 });

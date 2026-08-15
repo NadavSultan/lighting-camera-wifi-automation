@@ -52,7 +52,7 @@ export interface PoleEdit {
 }
 
 export interface Project {
-  schema_version: "2.1.0";
+  schema_version: "2.2.0";
   software_version: string;
   id: string;
   name: string;
@@ -79,11 +79,30 @@ export interface Project {
   pole_edits: Record<string, PoleEdit>;
   layer_state: Record<string, boolean>;
   warnings: ProjectWarning[];
+  priority_areas: PriorityArea[];
+  camera_geometry: CameraGeometryLayer;
   assumptions: string[];
   calculated_layers: Record<string, unknown>;
   recommended_layers: Record<string, unknown>;
   source_references: Record<string, string>;
   legacy_fixture_assignments_require_model_selection: boolean;
+}
+
+export interface PriorityArea { id: string; name: string; wgs84_coordinates: Array<[number, number]>; created_at: string; modified_at: string }
+export interface CameraFootprintResult {
+  pole_id: string; fixture_model_id: string; fixture_model_revision: number; mounting_template_revision: number;
+  camera_slot_id: string; camera_model_id: string | null; camera_model_revision: number | null; lens_id: string | null; lens_revision: number | null;
+  fixture_height_m: number | null; fixture_azimuth_deg: number; template_relative_azimuth_deg: number; fixed_downward_tilt_deg: number;
+  camera_absolute_azimuth_deg: number; origin_offset_xyz_m: [0, 0, 0]; projected_crs: string | null; geometry_model_version: "flat-ground-pinhole-1.0.0";
+  enabled: boolean; valid: boolean; warnings: string[]; assumptions: string[]; projected_coordinates_m: Array<[number, number]> | null;
+  wgs84_coordinates: Array<[number, number]> | null; footprint_area_m2: number | null;
+  pixel_density: { method: "not-calculated"; value: null; units: null; reason: string };
+}
+export interface CameraGeometryLayer {
+  geometry_model_version: "flat-ground-pinhole-1.0.0"; calculated_at: string | null; projected_crs: string | null;
+  footprints: CameraFootprintResult[];
+  overlaps: Array<{ footprint_a: string; footprint_b: string; intersection_area_m2: number; wgs84_coordinates: Array<Array<[number, number]>> }>;
+  priority_area_summaries: Array<{ priority_area_id: string; priority_area_name: string; area_m2: number; covered_area_m2: number; covered_percentage: number; intersecting_footprint_ids: string[]; warnings: string[]; assumption: string }>;
 }
 
 export interface PoleCameraOverride {
@@ -119,6 +138,9 @@ export interface CameraMountingSlot {
   lens_id: string | null;
   lens_revision: number | null;
   enabled: boolean;
+  origin_offset_x_m: 0;
+  origin_offset_y_m: 0;
+  origin_offset_z_m: 0;
   metadata: Record<string, unknown>;
 }
 
@@ -134,13 +156,13 @@ export interface FixtureModel {
   photometric_properties: Record<string, unknown>;
   compatible_ies_file_ids: string[];
   default_ies_file_id: string | null;
-  mounting_template_revisions: Array<{ revision: number; created_at: string; notes: string; slots: CameraMountingSlot[] }>;
+  mounting_template_revisions: Array<{ revision: number; created_at: string; notes: string; geometry_contract_version: "fixed-zero-origin-1.0.0" | null; slots: CameraMountingSlot[] }>;
   current_mounting_template_revision: number | null;
   active: boolean;
   revision: number;
 }
 
-export interface FixtureModelCatalog { schema_version: "1.1.0"; catalog_id: string; fixture_models: FixtureModel[]; fixture_model_history: FixtureModel[] }
+export interface FixtureModelCatalog { schema_version: "1.2.0"; catalog_id: string; fixture_models: FixtureModel[]; fixture_model_history: FixtureModel[] }
 export interface CameraModel { id: string; display_name: string; manufacturer: string | null; sensor: string | null; resolution_width_px: number | null; resolution_height_px: number | null; compatible_lens_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
 export interface LensConfiguration { id: string; display_name: string; focal_length_mm: number | null; horizontal_fov_deg: number | null; vertical_fov_deg: number | null; compatible_camera_model_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
 export interface CameraEquipmentCatalog { schema_version: "1.1.0"; catalog_id: string; camera_models: CameraModel[]; lenses: LensConfiguration[]; camera_model_history: CameraModel[]; lens_history: LensConfiguration[] }

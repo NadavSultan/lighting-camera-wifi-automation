@@ -241,6 +241,24 @@ class CatalogStore:
                                 slot["camera_model_revision"] = 1
                             if slot.get("lens_id") and slot.get("lens_revision") is None:
                                 slot["lens_revision"] = 1
+        if filename == "fixture-model-catalog.json" and payload.get("schema_version") == "1.1.0":
+            payload["schema_version"] = "1.2.0"
+            for model in payload.get("fixture_models", []):
+                if not model.get("capabilities", {}).get("cameras"):
+                    continue
+                templates = model.get("mounting_template_revisions", [])
+                if any(template.get("geometry_contract_version") == "fixed-zero-origin-1.0.0" for template in templates):
+                    continue
+                previous = deepcopy(model)
+                next_revision = max(template["revision"] for template in templates) + 1
+                fixed = deepcopy(next(template for template in templates if template["revision"] == model["current_mounting_template_revision"]))
+                fixed.update({"revision": next_revision, "created_at": "2026-08-15T00:00:00Z", "notes": "Approved Phase 3 immutable fixed mount: zero XYZ optical-center offsets and fixed template orientation.", "geometry_contract_version": "fixed-zero-origin-1.0.0"})
+                for slot in fixed["slots"]:
+                    slot.update({"origin_offset_x_m": 0.0, "origin_offset_y_m": 0.0, "origin_offset_z_m": 0.0})
+                model["mounting_template_revisions"].append(fixed)
+                model["current_mounting_template_revision"] = next_revision
+                model["revision"] = int(model.get("revision", 1)) + 1
+                payload.setdefault("fixture_model_history", []).append(previous)
         return payload
 
     def _write(self, filename: str, payload: dict) -> None:

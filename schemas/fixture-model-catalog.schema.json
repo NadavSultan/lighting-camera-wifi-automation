@@ -80,6 +80,24 @@
           "title": "Enabled",
           "type": "boolean"
         },
+        "origin_offset_x_m": {
+          "const": 0.0,
+          "default": 0.0,
+          "title": "Origin Offset X M",
+          "type": "number"
+        },
+        "origin_offset_y_m": {
+          "const": 0.0,
+          "default": 0.0,
+          "title": "Origin Offset Y M",
+          "type": "number"
+        },
+        "origin_offset_z_m": {
+          "const": 0.0,
+          "default": 0.0,
+          "title": "Origin Offset Z M",
+          "type": "number"
+        },
         "metadata": {
           "additionalProperties": true,
           "title": "Metadata",
@@ -111,6 +129,19 @@
           "default": "",
           "title": "Notes",
           "type": "string"
+        },
+        "geometry_contract_version": {
+          "anyOf": [
+            {
+              "const": "fixed-zero-origin-1.0.0",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geometry Contract Version"
         },
         "slots": {
           "items": {
@@ -279,8 +310,8 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.1.0",
-      "default": "1.1.0",
+      "const": "1.2.0",
+      "default": "1.2.0",
       "title": "Schema Version",
       "type": "string"
     },

@@ -19,9 +19,11 @@ The browser never mutates a source file. A project records source poles and user
 - `backend/app/services/catalogs.py`: atomic operational catalog persistence, immutable full-record history, and immutable template-revision workflow.
 - `backend/app/services/ies.py`: validated LM-63 upload parser; no illuminance engine.
 - `backend/app/services/configuration.py`: exact revision resolution, lifecycle/capability validation, corrective pin migration, and explicit-field bulk configuration.
+- `backend/app/services/camera_geometry.py`: deterministic projected-CRS frustum/ground intersection, overlap unions, priority-area intersections, and complete calculation provenance.
 - `frontend/app/components/EngineeringWorkspace.tsx`: toolbar, layer panel, MapLibre map, inspector, and status bar.
 - `frontend/app/components/CatalogManager.tsx`: fixture, IES, camera, and lens management.
 - `frontend/app/components/PoleInspector.tsx`: model-dependent per-pole lighting, Wi-Fi, and SMART camera configuration.
+- `frontend/app/components/EngineeringMap.tsx`: Phase 3 camera/overlap/priority layers and the fixture-level azimuth handle; no camera-level direction controls.
 - `frontend/app/lib/api.ts`: typed backend transport and local file downloads.
 - `schemas/project.schema.json`: repository-owned machine-readable project schema.
 - `schemas/openapi.json`: generated HTTP contract for session-to-session API continuity.
@@ -60,6 +62,10 @@ The MapLibre base layer uses OpenStreetMap raster tiles. Pole data and editing r
 
 The frontend retains the bundled Sites/Vinext worker scaffold for local development and production compilation. D1/database helpers are not used by Phase 1.
 
+## Phase 3 calculation flow
+
+SMART user configuration and immutable pinned catalog/template revisions feed a pure geometry service. The service transforms the authoritative source pole coordinate into the project-selected projected CRS, intersects four pinhole-frustum boundary rays with local Z=0, and stores projected and WGS84 result rings in `camera_geometry`. Overlap and priority-area metrics use Shapely in projected metres. Recalculation never writes source poles or user assignments.
+
 ## Future phase seams
 
-Phase 2 stores catalog and mounting orientation inputs only. Camera FOV, conceptual Wi-Fi coverage, lighting calculations, and CAP recommendation engines are not implemented or enabled.
+Pixel density has a revision-aware `not-calculated` result seam. Conceptual Wi-Fi coverage, lighting calculations, CAP recommendations, reporting, and proposed/automatic pole workflows are not implemented or enabled.

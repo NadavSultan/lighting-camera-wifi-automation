@@ -32,3 +32,23 @@
 - Date: 2026-08-15
 - Status: binding
 - Decision: corrective work ends at operational catalogs and existing-pole configuration. Camera ground projection/FOV, RF coverage, illuminance, CAP recommendations, automatic pole placement, and Phase 3 or later behavior remain excluded.
+
+## DL-006 — Phase 2 closure and Phase 3 authorization
+
+- Date: 2026-08-15
+- Status: approved
+- Decision: the independent NIR-01 final retest grants Phase 2 an **UNCONDITIONAL PASS** and formal closure. The user separately authorizes Phase 3 camera geometry. Phase 4 and later work remains excluded.
+- Evidence: `phase-2-nir-01-final-retest-report.md`; the earlier FAIL and conditional retest reports remain unchanged historical evidence.
+
+## DL-007 — Phase 3 fixed camera mounting and ground model
+
+- Date: 2026-08-15
+- Status: approved
+- Decision: each SMART camera optical center is the fixture mounting/reference origin with immutable offsets X=0 m, Y=0 m, Z=0 m. Optical-center height equals configured pole/fixture height. Phoenix 1 SMART slots remain -70/+70 degrees and Solitaire SMART slots -60/+60 degrees, both at fixed 35 degrees below horizontal. Only fixture azimuth rotates both cameras; per-camera azimuth and tilt are not editable.
+- Calculation frame: the project-selected local projected CRS in metres, flat horizontal ground at Z=0, symmetric rectilinear pinhole frustum, catalog H/V FOV, no distortion, terrain, occlusion, refraction, or obstacles.
+
+## DL-008 — Phase 3 explicit lens and legacy-override safety
+
+- Date: 2026-08-15
+- Status: approved
+- Decision: there is no default lens. An enabled slot calculates only with an explicit compatible pinned camera/lens revision and valid height/template. Legacy per-pole relative-azimuth or downward-tilt override bytes remain persisted but block calculation until the user explicitly resets that slot to the immutable template; new angle overrides are not accepted by the Phase 3 UI.

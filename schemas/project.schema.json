@@ -1,6 +1,355 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
+    "CameraFootprintResult": {
+      "additionalProperties": false,
+      "properties": {
+        "pole_id": {
+          "title": "Pole Id",
+          "type": "string"
+        },
+        "fixture_model_id": {
+          "title": "Fixture Model Id",
+          "type": "string"
+        },
+        "fixture_model_revision": {
+          "title": "Fixture Model Revision",
+          "type": "integer"
+        },
+        "mounting_template_revision": {
+          "title": "Mounting Template Revision",
+          "type": "integer"
+        },
+        "camera_slot_id": {
+          "title": "Camera Slot Id",
+          "type": "string"
+        },
+        "camera_model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Camera Model Id"
+        },
+        "camera_model_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Camera Model Revision"
+        },
+        "lens_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lens Id"
+        },
+        "lens_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lens Revision"
+        },
+        "fixture_height_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fixture Height M"
+        },
+        "fixture_azimuth_deg": {
+          "title": "Fixture Azimuth Deg",
+          "type": "number"
+        },
+        "template_relative_azimuth_deg": {
+          "title": "Template Relative Azimuth Deg",
+          "type": "number"
+        },
+        "fixed_downward_tilt_deg": {
+          "title": "Fixed Downward Tilt Deg",
+          "type": "number"
+        },
+        "camera_absolute_azimuth_deg": {
+          "title": "Camera Absolute Azimuth Deg",
+          "type": "number"
+        },
+        "origin_offset_xyz_m": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "const": 0.0,
+              "type": "number"
+            },
+            {
+              "const": 0.0,
+              "type": "number"
+            },
+            {
+              "const": 0.0,
+              "type": "number"
+            }
+          ],
+          "title": "Origin Offset Xyz M",
+          "type": "array"
+        },
+        "projected_crs": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Projected Crs"
+        },
+        "geometry_model_version": {
+          "const": "flat-ground-pinhole-1.0.0",
+          "default": "flat-ground-pinhole-1.0.0",
+          "title": "Geometry Model Version",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "projected_coordinates_m": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Projected Coordinates M"
+        },
+        "wgs84_coordinates": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wgs84 Coordinates"
+        },
+        "footprint_area_m2": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Footprint Area M2"
+        },
+        "pixel_density": {
+          "$ref": "#/$defs/PixelDensityStatus"
+        }
+      },
+      "required": [
+        "pole_id",
+        "fixture_model_id",
+        "fixture_model_revision",
+        "mounting_template_revision",
+        "camera_slot_id",
+        "camera_model_id",
+        "camera_model_revision",
+        "lens_id",
+        "lens_revision",
+        "fixture_height_m",
+        "fixture_azimuth_deg",
+        "template_relative_azimuth_deg",
+        "fixed_downward_tilt_deg",
+        "camera_absolute_azimuth_deg",
+        "projected_crs",
+        "enabled",
+        "valid"
+      ],
+      "title": "CameraFootprintResult",
+      "type": "object"
+    },
+    "CameraGeometryLayer": {
+      "additionalProperties": false,
+      "properties": {
+        "geometry_model_version": {
+          "const": "flat-ground-pinhole-1.0.0",
+          "default": "flat-ground-pinhole-1.0.0",
+          "title": "Geometry Model Version",
+          "type": "string"
+        },
+        "calculated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calculated At"
+        },
+        "projected_crs": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Projected Crs"
+        },
+        "footprints": {
+          "items": {
+            "$ref": "#/$defs/CameraFootprintResult"
+          },
+          "title": "Footprints",
+          "type": "array"
+        },
+        "overlaps": {
+          "items": {
+            "$ref": "#/$defs/CameraOverlapResult"
+          },
+          "title": "Overlaps",
+          "type": "array"
+        },
+        "priority_area_summaries": {
+          "items": {
+            "$ref": "#/$defs/PriorityAreaCoverageSummary"
+          },
+          "title": "Priority Area Summaries",
+          "type": "array"
+        }
+      },
+      "title": "CameraGeometryLayer",
+      "type": "object"
+    },
+    "CameraOverlapResult": {
+      "additionalProperties": false,
+      "properties": {
+        "footprint_a": {
+          "title": "Footprint A",
+          "type": "string"
+        },
+        "footprint_b": {
+          "title": "Footprint B",
+          "type": "string"
+        },
+        "intersection_area_m2": {
+          "title": "Intersection Area M2",
+          "type": "number"
+        },
+        "wgs84_coordinates": {
+          "items": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "title": "Wgs84 Coordinates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "footprint_a",
+        "footprint_b",
+        "intersection_area_m2"
+      ],
+      "title": "CameraOverlapResult",
+      "type": "object"
+    },
     "FixtureType": {
       "enum": [
         "LITE",
@@ -34,8 +383,18 @@
           "type": "boolean"
         },
         "camera_fov": {
-          "default": false,
+          "default": true,
           "title": "Camera Fov",
+          "type": "boolean"
+        },
+        "camera_overlap": {
+          "default": true,
+          "title": "Camera Overlap",
+          "type": "boolean"
+        },
+        "priority_areas": {
+          "default": true,
+          "title": "Priority Areas",
           "type": "boolean"
         },
         "wifi_coverage": {
@@ -84,6 +443,34 @@
       ],
       "title": "OperatingMode",
       "type": "string"
+    },
+    "PixelDensityStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "not-calculated",
+          "default": "not-calculated",
+          "title": "Method",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value",
+          "type": "null"
+        },
+        "units": {
+          "default": null,
+          "title": "Units",
+          "type": "null"
+        },
+        "reason": {
+          "default": "Architecture reserved; no trustworthy Phase 3 pixel-density calculation is approved.",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "title": "PixelDensityStatus",
+      "type": "object"
     },
     "PoleCameraOverride": {
       "additionalProperties": false,
@@ -407,6 +794,103 @@
       "title": "PoleFixtureConfiguration",
       "type": "object"
     },
+    "PriorityArea": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "wgs84_coordinates": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 4,
+          "title": "Wgs84 Coordinates",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "modified_at": {
+          "format": "date-time",
+          "title": "Modified At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "wgs84_coordinates"
+      ],
+      "title": "PriorityArea",
+      "type": "object"
+    },
+    "PriorityAreaCoverageSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "priority_area_id": {
+          "title": "Priority Area Id",
+          "type": "string"
+        },
+        "priority_area_name": {
+          "title": "Priority Area Name",
+          "type": "string"
+        },
+        "area_m2": {
+          "title": "Area M2",
+          "type": "number"
+        },
+        "covered_area_m2": {
+          "title": "Covered Area M2",
+          "type": "number"
+        },
+        "covered_percentage": {
+          "title": "Covered Percentage",
+          "type": "number"
+        },
+        "intersecting_footprint_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intersecting Footprint Ids",
+          "type": "array"
+        },
+        "assumption": {
+          "default": "Geometric flat-ground intersection only; percentage is not analytics quality.",
+          "title": "Assumption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "priority_area_id",
+        "priority_area_name",
+        "area_m2",
+        "covered_area_m2",
+        "covered_percentage",
+        "intersecting_footprint_ids"
+      ],
+      "title": "PriorityAreaCoverageSummary",
+      "type": "object"
+    },
     "ProjectDefaults": {
       "additionalProperties": false,
       "properties": {
@@ -722,13 +1206,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.1.0",
-      "default": "2.1.0",
+      "const": "2.2.0",
+      "default": "2.2.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.2.0",
+      "default": "0.3.0",
       "title": "Software Version",
       "type": "string"
     },
@@ -800,6 +1284,16 @@
       },
       "title": "Warnings",
       "type": "array"
+    },
+    "priority_areas": {
+      "items": {
+        "$ref": "#/$defs/PriorityArea"
+      },
+      "title": "Priority Areas",
+      "type": "array"
+    },
+    "camera_geometry": {
+      "$ref": "#/$defs/CameraGeometryLayer"
     },
     "assumptions": {
       "items": {

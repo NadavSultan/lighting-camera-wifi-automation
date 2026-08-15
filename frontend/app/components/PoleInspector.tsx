@@ -28,6 +28,16 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
     updateConfig({ camera_overrides: withoutCameraOverride(config.camera_overrides, slotId) });
   }
 
+  function resetLegacyOrientation(slotId: string) {
+    if (!config) return;
+    const current = config.camera_overrides[slotId];
+    if (!current) return;
+    const fixedMountOverride = { ...current };
+    delete fixedMountOverride.relative_azimuth_deg;
+    delete fixedMountOverride.downward_tilt_deg;
+    updateConfig({ camera_overrides: { ...config.camera_overrides, [slotId]: fixedMountOverride } });
+  }
+
   return <>
     <section className="section">
       <div className="section-heading"><h3>Selected pole</h3>{pole.modified && <span className="phase-tag modified-tag">Modified</span>}</div>
@@ -63,17 +73,22 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
         const cameraId = override?.camera_model_id ?? slot.camera_model_id ?? "";
         const lensId = override?.lens_id ?? slot.lens_id ?? "";
         const enabled = override?.enabled ?? slot.enabled;
+        const footprint = project.camera_geometry.footprints.find((item) => item.pole_id === pole.id && item.camera_slot_id === slot.id);
+        const hasLegacyOrientation = override?.relative_azimuth_deg != null || override?.downward_tilt_deg != null;
         return <div className="camera-slot" key={slot.id}><div className="section-heading"><h3>{slot.display_name}</h3><span className="helper">{override ? "Pole override" : "Catalog default"}</span></div><div className="form-grid">
           <div className="field"><label htmlFor={`${slot.id}-camera`}>Camera</label><select id={`${slot.id}-camera`} value={cameraId} onChange={(event) => { const selectedCamera = cameraCatalog?.camera_models.find((item) => item.id === event.target.value); updateSlot(slot.id, { camera_model_id: selectedCamera?.id ?? null, camera_model_revision: selectedCamera?.revision ?? null }); }}><option value="">Unassigned</option>{cameraCatalog?.camera_models.filter((item) => item.active).map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></div>
           <div className="field"><label htmlFor={`${slot.id}-lens`}>Lens</label><select id={`${slot.id}-lens`} value={lensId} onChange={(event) => { const selectedLens = cameraCatalog?.lenses.find((item) => item.id === event.target.value); updateSlot(slot.id, { lens_id: selectedLens?.id ?? null, lens_revision: selectedLens?.revision ?? null }); }}><option value="">Unassigned</option>{cameraCatalog?.lenses.filter((item) => item.active && (!cameraId || item.compatible_camera_model_ids.includes(cameraId))).map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></div>
-          <div className="field"><label htmlFor={`${slot.id}-azimuth`}>Relative azimuth (°)</label><input id={`${slot.id}-azimuth`} type="number" min="-180" max="180" value={override?.relative_azimuth_deg ?? slot.relative_azimuth_deg} onChange={(event) => updateSlot(slot.id, { relative_azimuth_deg: Number(event.target.value) })} /></div>
-          <div className="field"><label htmlFor={`${slot.id}-tilt`}>Downward tilt (°)</label><input id={`${slot.id}-tilt`} type="number" min="0" max="90" value={override?.downward_tilt_deg ?? slot.downward_tilt_deg} onChange={(event) => updateSlot(slot.id, { downward_tilt_deg: Number(event.target.value) })} /></div>
+          <div className="field"><label htmlFor={`${slot.id}-fixed-azimuth`}>Inherited relative azimuth</label><input id={`${slot.id}-fixed-azimuth`} disabled value={`${slot.relative_azimuth_deg}° fixed`} /></div>
+          <div className="field"><label htmlFor={`${slot.id}-fixed-tilt`}>Inherited downward tilt</label><input id={`${slot.id}-fixed-tilt`} disabled value={`${slot.downward_tilt_deg}° below horizontal`} /></div>
           <label className="toggle-line"><input type="checkbox" checked={enabled} onChange={(event) => updateSlot(slot.id, { enabled: event.target.checked })} />Camera enabled</label>
-        </div>{override && <button type="button" className="quiet-button restore-button" onClick={() => removeSlotOverride(slot.id)}>Remove pole override and restore catalog default</button>}</div>;
+        </div><div className="camera-provenance">Template r{template.revision} · {template.geometry_contract_version ?? "legacy mounting contract"} · origin X/Y/Z {slot.origin_offset_x_m}/{slot.origin_offset_y_m}/{slot.origin_offset_z_m} m<br />Camera {cameraId || "missing"} r{override?.camera_model_revision ?? slot.camera_model_revision ?? "?"} · Lens {lensId || "missing"} r{override?.lens_revision ?? slot.lens_revision ?? "?"}<br />Absolute azimuth {footprint?.camera_absolute_azimuth_deg ?? "—"}° · footprint {footprint?.valid ? `${footprint.footprint_area_m2?.toFixed(1)} m²` : "not calculated"}</div>
+        {hasLegacyOrientation && <div className="warning-card error">Legacy per-pole direction/tilt bytes are preserved and block FOV calculation.<button type="button" className="quiet-button restore-button" onClick={() => resetLegacyOrientation(slot.id)}>Explicitly reset orientation to immutable template</button></div>}
+        {footprint?.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}
+        {override && <button type="button" className="quiet-button restore-button" onClick={() => removeSlotOverride(slot.id)}>Remove pole override and restore catalog default</button>}</div>;
       })}
-      <p className="helper">Downward tilt is positive below horizontal. FOV rendering remains deferred to Phase 3.</p>
+      <p className="helper">Both cameras rotate only with fixture azimuth. Camera direction and tilt are immutable catalog geometry. Footprints are flat-ground geometric results, not analytics-quality claims.</p>
     </section>}
     {model && !model.capabilities.cameras && <section className="section"><div className="future-card">This {model.capability_variant} model has no camera capability. Camera controls are intentionally unavailable.</div></section>}
-    <section className="section"><div className="future-card"><strong>Later engines remain gated.</strong><br />No illuminance, camera FOV, Wi-Fi coverage, CAP recommendation, or automatic pole placement is performed in Phase 2.</div><p className="helper">Conceptual Wi-Fi default retained: {project.defaults.wifi_radius_m} m.</p></section>
+    <section className="section"><div className="future-card"><strong>Later engines remain gated.</strong><br />No illuminance, Wi-Fi coverage, CAP recommendation, reporting, or automatic pole placement is performed in Phase 3.</div><p className="helper">Conceptual Wi-Fi default retained: {project.defaults.wifi_radius_m} m.</p></section>
   </>;
 }

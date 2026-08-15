@@ -4,14 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lighting-camera-wifi-automation-backend"
-version = "0.2.0"
-description = "Local Phase 2 fixture, IES, camera, and existing-pole configuration service"
+version = "0.3.0"
+description = "Local Phase 3 camera-geometry and existing-pole engineering service"
 requires-python = ">=3.12"
 dependencies = [
   "defusedxml>=0.7.1,<1",
   "fastapi>=0.116,<1",
   "pydantic>=2.11,<3",
   "pyproj>=3.7,<4",
+  "shapely>=2.1,<3",
   "uvicorn[standard]>=0.35,<1",
 ]
 

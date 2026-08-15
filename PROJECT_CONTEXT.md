@@ -6,7 +6,7 @@ Lighting Camera WiFi Automation is a local, map-centred engineering application 
 
 ## Current repository state
 
-Phases 1 and 2 are implemented, tested, and accepted. The repository contains a FastAPI backend and React/TypeScript MapLibre frontend with operational fixture-model, IES, camera/lens, per-pole, and bulk-configuration workflows. Existing-pole mode is mandatory and proposed-layout mode is unavailable.
+Phases 1 and 2 are accepted; Phase 3 camera geometry is implemented under active completion validation. The FastAPI and React/TypeScript MapLibre application includes operational catalogs, fixed SMART mounting templates, per-pole/bulk configuration, projected flat-ground camera footprints, overlap metrics, and persisted priority areas. Existing-pole mode is mandatory and proposed-layout mode is unavailable.
 
 New sessions must start with `AGENTS.md` and `docs/current-status.md`, then follow the remaining reading order recorded in `AGENTS.md`.
 
@@ -14,7 +14,7 @@ New sessions must start with `AGENTS.md` and `docs/current-status.md`, then foll
 
 - `Input/Miracle_Mile_Lighting_Poles.kml`: 74 valid WGS84 point placemarks in five folders; no exact coordinate or name duplicates found during initial inventory.
 - `Input/Lighting/`: four LM-63-2002 IES files. Photometric implementation is deferred to Phase 5.
-- `Input/Camera/VideoCAD Camera Models - Juganu.Xlsx`: three IMX477 camera/lens records. Catalog implementation is deferred to Phase 2.
+- `Input/Camera/VideoCAD Camera Models - Juganu.Xlsx`: three pinned IMX477-compatible camera/lens records used by the operational catalog and Phase 3 geometry.
 - `Input/CAP/CAP datasheet.pdf`: Juganu JNET1 Gateway data sheet Rev 1.2. CAP implementation is deferred to Phase 6.
 
 The requested `$lighting-kml-planner` skill was not installed or discoverable during Phase 1. No application code depends on it.
@@ -23,7 +23,7 @@ The requested `$lighting-kml-planner` skill was not installed or discoverable du
 
 - Pole mounting heights and per-pole fixture assignments.
 - Authoritative luminaire-to-IES mapping, verified wattage/flux values, and photometric orientation conventions.
-- Camera XYZ offsets and final per-pole lens assignments. The two-slot relative-azimuth templates are approved in Phase 2.
+- Final per-pole lens assignments remain explicit. The Phase 3 MVP approves zero XYZ camera-origin offsets and fixed two-slot template orientation.
 - Project boundary and classified calculation polygons.
 - CAP applicability by fixture type, recommended operating distance, siting/backhaul/electrical constraints, required redundancy, and installation-specific band selection.
 

@@ -2,7 +2,7 @@
 
 ## Phase 1 - project and KML/KMZ foundation
 
-Status: complete, tested, and frozen for acceptance review. No Phase 2 work is authorized by the current handoff.
+Status: complete, tested, accepted, and frozen.
 
 - Safe KML/KMZ import and immutable source archival.
 - Preserve point metadata, folder hierarchy, styles, descriptions, ExtendedData, and exact coordinates.
@@ -13,7 +13,7 @@ Status: complete, tested, and frozen for acceptance review. No Phase 2 work is a
 
 ## Phase 2 - fixture, IES, and camera catalogs
 
-Status: corrective implementation complete on 2026-08-15; independent QA retest pending after the recorded FAIL.
+Status: complete and formally closed on 2026-08-15 after independent **UNCONDITIONAL PASS**.
 
 - Added operational fixture-model, IES, and camera/lens catalogs while retaining the approved Phase 1 reference catalogs.
 - Added validated IES upload/parsing, explicit fixture associations, all/folder/manual bulk assignment, and removable per-pole overrides.
@@ -23,10 +23,11 @@ Status: corrective implementation complete on 2026-08-15; independent QA retest 
 
 ## Phase 3 - camera geometry
 
-Status: not started and not authorized.
+Status: explicitly authorized and in progress on 2026-08-15.
 
-- Flat-terrain ground-FOV projection, independent cameras, azimuth handles, overlap and priority areas.
-- Keep geometric FOV distinct from analytics-quality coverage and add pixel-density data structures.
+- Flat-terrain ground-FOV projection for two immutable fixed-mount camera slots on SMART fixtures, with fixture-level azimuth editing and map rotation.
+- Explicit compatible lens selection, per-slot enable state, deterministic warnings, revision-aware provenance, overlap metrics, and persisted priority-area intersection summaries.
+- Keep geometric FOV and pixel-density architecture distinct from analytics-quality coverage; no recognition, LPR, or compliance thresholds.
 
 ## Phase 4 - conceptual Wi-Fi
 
@@ -52,4 +53,4 @@ Status: not started and not authorized.
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The immediate gate is closed: Phase 2 awaits independent corrective QA retesting. Phase 3 may not begin in this session and still requires new explicit authorization plus approved physical camera offsets, lens assignments, and terrain assumptions.
+The Phase 2 gate is closed with an independent unconditional pass. Phase 3 is authorized under approved zero XYZ origin offsets, an explicit per-slot lens requirement, and a flat local ground plane. Phase 4 remains gated.

@@ -6,7 +6,7 @@
 |---|---|---|
 | Original customer data | `source.poles` and immutable uploaded file | Never overwritten |
 | User-edited data | `pole_edits`, keyed by stable source pole ID | Explicit edits only; source values remain available |
-| Calculated data | `calculated_layers` | Empty in Phase 1 |
+| Calculated data | `camera_geometry` and `calculated_layers` | Reproducible derived results only; never a source or user-assignment mutation |
 | Recommended data | `recommended_layers` | Empty in Phase 1; no pole or CAP generation |
 | Exported data | Generated response plus export event | Never treated as source |
 
@@ -19,6 +19,8 @@ The importer preserves a KML Placemark `id` when present. Otherwise it creates a
 `PoleEdit` retains Phase 1 fields and may contain a Phase 2 `fixture_configuration`. That configuration references a stable fixture model and pinned complete model/template revision, an explicitly associated IES file, fixture azimuth, capability-specific settings, and slot-keyed camera override deltas. Camera and lens assignments also pin their exact operational revisions. Location changes still require `location_edit_authorized=true`; the UI never exposes them.
 
 Operational fixture, camera, and lens catalogs retain the current record plus immutable previous complete records keyed by `(id, revision)`. Historical lookup is used for assigned poles; current active state controls whether a new save/assignment is allowed. Lens `compatible_camera_model_ids` is the authoritative compatibility relation and the camera-side list is derived and reciprocity-validated.
+
+Phase 3 retains legacy `relative_azimuth_deg` and `downward_tilt_deg` override fields solely for lossless migration. Their presence blocks that slot's calculation until explicit reset. New UI editing is limited to fixture azimuth, camera/lens revision selection, and enabled state. `priority_areas` is project-specific user data in WGS84; projected copies are transient calculation inputs. `camera_geometry` contains per-slot provenance, warnings, projected/WGS84 rings, overlaps, priority summaries, and an explicit pixel-density `not-calculated` state.
 
 ## Phase 2 transition and lifecycle policy
 
@@ -55,7 +57,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.1.0` and software version is `0.2.0`. Phase 1 JSON (`1.0.0`) and initial Phase 2 JSON (`2.0.0`) migrate without family inference: coordinates and edits are preserved, legacy `fixture_configuration` content remains explicit, and missing camera/lens pins are resolved to the current corrective-baseline revision on open/save. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.2.0` and software version is `0.3.0`. Phase 1 JSON (`1.0.0`), initial Phase 2 JSON (`2.0.0`), and corrective Phase 2 JSON (`2.1.0`) migrate without family inference or coordinate change. Legacy camera orientation override bytes remain explicit. The fixture operational contract advances additively to `1.2.0` for the fixed-zero-origin template contract; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

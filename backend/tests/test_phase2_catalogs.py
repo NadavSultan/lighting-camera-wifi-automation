@@ -167,7 +167,7 @@ def test_overrides_are_separate_non_smart_rejected_and_templates_are_pinned(tmp_
     )
     template_before = catalogs.fixtures().model_dump()
     config = project.pole_edits[pole_id].fixture_configuration
-    assert config is not None and config.mounting_template_revision == 1
+    assert config is not None and config.mounting_template_revision == 2
     config.camera_overrides["camera-1"] = PoleCameraOverride(slot_id="camera-1", relative_azimuth_deg=-65, lens_id="lens-jl-ln039")
     assert catalogs.fixtures().model_dump() == template_before
 
@@ -176,9 +176,9 @@ def test_overrides_are_separate_non_smart_rejected_and_templates_are_pinned(tmp_
     assert old is not None
     catalogs.add_template_revision(
         model.id,
-        CameraMountingTemplateRevision(revision=2, created_at="2026-08-14T12:00:00Z", notes="Explicit revision", slots=copy.deepcopy(old.slots)),
+        CameraMountingTemplateRevision(revision=3, created_at="2026-08-14T12:00:00Z", notes="Explicit revision", geometry_contract_version="fixed-zero-origin-1.0.0", slots=copy.deepcopy(old.slots)),
     )
-    assert config.mounting_template_revision == 1
+    assert config.mounting_template_revision == 2
 
     lite_config = PoleFixtureConfiguration(
         fixture_model_id="phoenix-1-lite", fixture_model_revision=1,
@@ -197,7 +197,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     phase_one.pop("legacy_fixture_assignments_require_model_selection")
     phase_one["pole_edits"][pole.id] = {"pole_id": pole.id, "fixture_type": "SMART", "location_edit_authorized": False}
     migrated = Project.model_validate(migrate_project_payload(json.loads(json.dumps(phase_one))))
-    assert migrated.schema_version == "2.1.0"
+    assert migrated.schema_version == "2.2.0"
     assert migrated.legacy_fixture_assignments_require_model_selection is True
     assert migrated.pole_edits[pole.id].fixture_type.value == "SMART"
     assert migrated.pole_edits[pole.id].fixture_configuration is None
@@ -207,7 +207,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     initial_phase_two = migrated.model_dump(mode="json")
     initial_phase_two["schema_version"] = "2.0.0"
     remigrated = Project.model_validate(migrate_project_payload(initial_phase_two))
-    assert remigrated.schema_version == "2.1.0"
+    assert remigrated.schema_version == "2.2.0"
     assert remigrated.source == migrated.source
 
 
@@ -229,7 +229,7 @@ def test_initial_phase_two_catalog_contracts_migrate_to_corrective_minor_version
             payload.pop("lens_history")
         (legacy_root / name).write_text(json.dumps(payload))
     migrated_store = CatalogStore(legacy_root, SEEDS)
-    assert migrated_store.fixtures().schema_version == "1.1.0"
+    assert migrated_store.fixtures().schema_version == "1.2.0"
     assert migrated_store.cameras().schema_version == "1.1.0"
     assert migrated_store.ies().schema_version == "1.1.0"
     smart = next(item for item in migrated_store.fixtures().fixture_models if item.id == "phoenix-1-smart")
@@ -301,7 +301,7 @@ def test_ir01_catalog_updates_preserve_immutable_revisions_and_exact_pins(tmp_pa
     fixture = next(item for item in catalogs.fixtures().fixture_models if item.id == "phoenix-1-lite")
     fixture.display_name = "Phoenix corrected label"
     catalogs.upsert_fixture(fixture)
-    assert [(item.id, item.revision, item.display_name) for item in catalogs.fixtures().fixture_model_history] == [("phoenix-1-lite", 1, "Phoenix 1 LITE")]
+    assert ("phoenix-1-lite", 1, "Phoenix 1 LITE") in [(item.id, item.revision, item.display_name) for item in catalogs.fixtures().fixture_model_history]
     camera = next(item for item in catalogs.cameras().camera_models if item.id == "camera-imx477")
     camera.display_name = "Updated camera"
     catalogs.upsert_camera(camera)
@@ -315,7 +315,7 @@ def test_ir01_catalog_updates_preserve_immutable_revisions_and_exact_pins(tmp_pa
     pole_id = project.source.poles[0].id
     project = apply_bulk_configuration(project, BulkPoleConfigurationRequest(pole_ids=[pole_id], patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-smart", lens_by_slot={"camera-1": "lens-jl-ln039"})), catalogs.fixtures(), catalogs.cameras())
     config = project.pole_edits[pole_id].fixture_configuration
-    assert config and config.fixture_model_revision == 1
+    assert config and config.fixture_model_revision == 2
     assert config.camera_overrides["camera-1"].lens_revision == 2
     assert validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies()) == []
 

@@ -11,8 +11,8 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-SCHEMA_VERSION = "2.1.0"
-SOFTWARE_VERSION = "0.2.0"
+SCHEMA_VERSION = "2.2.0"
+SOFTWARE_VERSION = "0.3.0"
 
 
 def utc_now() -> datetime:
@@ -165,7 +165,9 @@ class LayerState(StrictModel):
     lite_fixtures: bool = True
     wifi_fixtures: bool = True
     smart_fixtures: bool = True
-    camera_fov: bool = False
+    camera_fov: bool = True
+    camera_overlap: bool = True
+    priority_areas: bool = True
     wifi_coverage: bool = False
     calculation_areas: bool = False
     calculation_points: bool = False
@@ -175,8 +177,89 @@ class LayerState(StrictModel):
     warnings: bool = True
 
 
+class PriorityArea(StrictModel):
+    id: str
+    name: Annotated[str, Field(min_length=1, max_length=120)]
+    wgs84_coordinates: Annotated[list[tuple[float, float]], Field(min_length=4)]
+    created_at: datetime = Field(default_factory=utc_now)
+    modified_at: datetime = Field(default_factory=utc_now)
+
+    @model_validator(mode="after")
+    def validate_polygon(self) -> "PriorityArea":
+        if self.wgs84_coordinates[0] != self.wgs84_coordinates[-1]:
+            raise ValueError("priority-area polygon must be closed")
+        if len(set(self.wgs84_coordinates[:-1])) < 3:
+            raise ValueError("priority-area polygon requires three distinct vertices")
+        for longitude, latitude in self.wgs84_coordinates:
+            if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
+                raise ValueError("priority-area coordinate is outside WGS84 bounds")
+        return self
+
+
+class PixelDensityStatus(StrictModel):
+    method: Literal["not-calculated"] = "not-calculated"
+    value: None = None
+    units: None = None
+    reason: str = "Architecture reserved; no trustworthy Phase 3 pixel-density calculation is approved."
+
+
+class CameraFootprintResult(StrictModel):
+    pole_id: str
+    fixture_model_id: str
+    fixture_model_revision: int
+    mounting_template_revision: int
+    camera_slot_id: str
+    camera_model_id: str | None
+    camera_model_revision: int | None
+    lens_id: str | None
+    lens_revision: int | None
+    fixture_height_m: float | None
+    fixture_azimuth_deg: float
+    template_relative_azimuth_deg: float
+    fixed_downward_tilt_deg: float
+    camera_absolute_azimuth_deg: float
+    origin_offset_xyz_m: tuple[Literal[0.0], Literal[0.0], Literal[0.0]] = (0.0, 0.0, 0.0)
+    projected_crs: str | None
+    geometry_model_version: Literal["flat-ground-pinhole-1.0.0"] = "flat-ground-pinhole-1.0.0"
+    enabled: bool
+    valid: bool
+    warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    projected_coordinates_m: list[tuple[float, float]] | None = None
+    wgs84_coordinates: list[tuple[float, float]] | None = None
+    footprint_area_m2: float | None = None
+    pixel_density: PixelDensityStatus = Field(default_factory=PixelDensityStatus)
+
+
+class CameraOverlapResult(StrictModel):
+    footprint_a: str
+    footprint_b: str
+    intersection_area_m2: float
+    wgs84_coordinates: list[list[tuple[float, float]]] = Field(default_factory=list)
+
+
+class PriorityAreaCoverageSummary(StrictModel):
+    priority_area_id: str
+    priority_area_name: str
+    area_m2: float
+    covered_area_m2: float
+    covered_percentage: float
+    intersecting_footprint_ids: list[str]
+    warnings: list[str] = Field(default_factory=list)
+    assumption: str = "Geometric flat-ground intersection only; percentage is not analytics quality."
+
+
+class CameraGeometryLayer(StrictModel):
+    geometry_model_version: Literal["flat-ground-pinhole-1.0.0"] = "flat-ground-pinhole-1.0.0"
+    calculated_at: datetime | None = None
+    projected_crs: str | None = None
+    footprints: list[CameraFootprintResult] = Field(default_factory=list)
+    overlaps: list[CameraOverlapResult] = Field(default_factory=list)
+    priority_area_summaries: list[PriorityAreaCoverageSummary] = Field(default_factory=list)
+
+
 class Project(StrictModel):
-    schema_version: Literal["2.1.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.2.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -191,6 +274,8 @@ class Project(StrictModel):
     pole_edits: dict[str, PoleEdit] = Field(default_factory=dict)
     layer_state: LayerState = Field(default_factory=LayerState)
     warnings: list[ProjectWarning] = Field(default_factory=list)
+    priority_areas: list[PriorityArea] = Field(default_factory=list)
+    camera_geometry: CameraGeometryLayer = Field(default_factory=CameraGeometryLayer)
     assumptions: list[str] = Field(default_factory=lambda: [
         "Existing-pole mode is active; no pole locations are generated or optimized.",
         "Customer KML/KMZ coordinates are authoritative and stored in WGS84.",
@@ -227,7 +312,7 @@ class ProjectSummary(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    phase: Literal[2] = 2
+    phase: Literal[3] = 3
     version: str = SOFTWARE_VERSION
 
 
@@ -236,12 +321,18 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["software_version"] = SOFTWARE_VERSION
     migrated["legacy_fixture_assignments_require_model_selection"] = True
+    migrated.setdefault("priority_areas", [])
+    migrated.setdefault("camera_geometry", {})
+    layer_state = dict(migrated.get("layer_state", {}))
+    layer_state.setdefault("camera_overlap", True)
+    layer_state.setdefault("priority_areas", True)
+    migrated["layer_state"] = layer_state
     assumptions = list(migrated.get("assumptions", []))
     notice = "Phase 1 fixture classifications were preserved; fixture family/model selection remains explicit."
     if notice not in assumptions:

@@ -18,11 +18,15 @@ For each imported project, Phase 1 chooses the UTM zone containing the median pr
 
 The supplied Miracle Mile project resolves to WGS84 / UTM zone 17N (`EPSG:32617`). The selected CRS is stored in project metadata and used for duplicate-distance and geographic-outlier checks. A later phase may allow an engineer to override it for sites crossing UTM boundaries or requiring a local grid.
 
-## Orientation conventions reserved for later phases
+## Phase 3 camera frame and orientation
 
 - Azimuth: degrees clockwise from true north; 0 north, 90 east, 180 south, 270 west.
 - Luminaire tilt: must be defined with the selected photometric orientation before Phase 5. No rotation order is assumed in Phase 1.
-- Camera downward angle: degrees below horizontal; 0 horizontal, 35 default downward, 90 vertically downward. It is not measured from vertical.
+- Camera downward angle: degrees below horizontal; 0 horizontal and 90 vertically downward. Phase 3 SMART templates fix this at 35 degrees; it is not a user-editable camera field.
+- Projected axes are X east, Y north, Z up. Camera azimuth is clockwise from true north and normalized to `[0,360)`.
+- Camera forward is `(sin(a) cos(t), cos(a) cos(t), -sin(t))`; camera right is `(cos(a), -sin(a), 0)`; image up is `(-sin(a) sin(t), -cos(a) sin(t), cos(t))`.
+- Each Phase 3 camera optical center uses approved offsets `(0,0,0)` at projected source-pole X/Y and configured fixture height Z. Fixture azimuth rotates the fixture and both fixed camera slots together.
+- Ground footprints, overlaps, and priority intersections use projected metres and square metres. WGS84 output rings exist only for map display/interchange.
 
 ## Validation
 

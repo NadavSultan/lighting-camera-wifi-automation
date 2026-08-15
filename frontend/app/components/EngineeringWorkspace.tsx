@@ -4,18 +4,21 @@ import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useSt
 import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
-import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, saveProject } from "../lib/api";
+import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
 import { effectivePole, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
+import { closePriorityRing } from "../lib/phase3-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
-type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
+type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
 const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: number }> = [
   { key: "original_customer_poles", label: "Original customer poles", color: "#8795a4" },
   { key: "lite_fixtures", label: "LITE fixtures", color: "var(--lite)" },
   { key: "wifi_fixtures", label: "WIFI fixtures", color: "var(--wifi)" },
   { key: "smart_fixtures", label: "SMART fixtures", color: "var(--smart)" },
-  { key: "camera_fov", label: "Camera FOV polygons", color: "#8b5cf6", phase: 3 },
+  { key: "camera_fov", label: "Camera 1 / Camera 2 FOV", color: "#8b5cf6" },
+  { key: "camera_overlap", label: "Camera footprint overlap", color: "#ec4899" },
+  { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },
   { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 4 },
   { key: "calculation_areas", label: "Calculation areas", color: "#fb923c", phase: 5 },
   { key: "calculation_points", label: "Calculation points", color: "#e2e8f0", phase: 5 },
@@ -33,7 +36,7 @@ export function EngineeringWorkspace() {
   const [past, setPast] = useState<Project[]>([]);
   const [future, setFuture] = useState<Project[]>([]);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("Ready - Phase 2 existing-pole configuration workflow");
+  const [status, setStatus] = useState("Ready - Phase 3 fixed-mount camera geometry workflow");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
   const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");
@@ -49,12 +52,31 @@ export function EngineeringWorkspace() {
   const [fixtureCatalog, setFixtureCatalog] = useState<FixtureModelCatalog | null>(null);
   const [cameraCatalog, setCameraCatalog] = useState<CameraEquipmentCatalog | null>(null);
   const [iesLibrary, setIesLibrary] = useState<IesLibrary | null>(null);
+  const [drawingPriorityArea, setDrawingPriorityArea] = useState(false);
+  const [priorityDraft, setPriorityDraft] = useState<Array<[number, number]>>([]);
+  const [priorityAreaName, setPriorityAreaName] = useState("Priority area");
+  const [selectedPriorityAreaId, setSelectedPriorityAreaId] = useState<string | null>(null);
+  const geometrySignatureRef = useRef("");
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void refreshCatalogs().catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load Phase 2 catalogs"));
   }, []);
+
+  useEffect(() => {
+    if (!project || !fixtureCatalog || !cameraCatalog) return;
+    const signature = JSON.stringify({ id: project.id, projected_crs: project.projected_crs, defaults: project.defaults.pole_height_m, pole_edits: project.pole_edits, priority_areas: project.priority_areas });
+    if (geometrySignatureRef.current === signature) return;
+    geometrySignatureRef.current = signature;
+    const timer = window.setTimeout(() => {
+      void recalculateCameraGeometry(project).then((calculated) => {
+        if (geometrySignatureRef.current !== signature) return;
+        setProject((current) => current?.id === calculated.id ? { ...current, camera_geometry: calculated.camera_geometry } : current);
+      }).catch((caught) => setError(caught instanceof Error ? caught.message : "Camera geometry calculation failed"));
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [project, fixtureCatalog, cameraCatalog]);
 
   async function refreshCatalogs() {
     const [fixtures, cameras, ies] = await Promise.all([getFixtureCatalog(), getCameraCatalog(), getIesLibrary()]);
@@ -221,6 +243,33 @@ export function EngineeringWorkspace() {
     mutateProject((draft) => { draft.layer_state[key] = enabled; });
   }
 
+  function startPriorityArea(areaId?: string) {
+    const area = project?.priority_areas.find((item) => item.id === areaId);
+    setSelectedPriorityAreaId(area?.id ?? null);
+    setPriorityAreaName(area?.name ?? `Priority area ${(project?.priority_areas.length ?? 0) + 1}`);
+    setPriorityDraft(area ? area.wgs84_coordinates.slice(0, -1) : []);
+    setDrawingPriorityArea(true);
+    setStatus(area ? "Editing priority-area geometry; click replacement vertices on the map" : "Drawing priority area; click at least three map vertices");
+  }
+
+  function finishPriorityArea() {
+    if (!project || priorityDraft.length < 3) { setError("A priority area requires at least three vertices"); return; }
+    const now = new Date().toISOString();
+    const closed = closePriorityRing(priorityDraft);
+    mutateProject((draft) => {
+      const index = selectedPriorityAreaId ? draft.priority_areas.findIndex((item) => item.id === selectedPriorityAreaId) : -1;
+      if (index >= 0) draft.priority_areas[index] = { ...draft.priority_areas[index], name: priorityAreaName.trim() || "Priority area", wgs84_coordinates: closed, modified_at: now };
+      else draft.priority_areas.push({ id: crypto.randomUUID(), name: priorityAreaName.trim() || "Priority area", wgs84_coordinates: closed, created_at: now, modified_at: now });
+    });
+    setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null);
+    setStatus("Priority area saved as project user data; projected intersection summary recalculating");
+  }
+
+  function deletePriorityArea(areaId: string) {
+    mutateProject((draft) => { draft.priority_areas = draft.priority_areas.filter((item) => item.id !== areaId); });
+    setSelectedPriorityAreaId(null); setStatus("Priority area deleted; source poles and coordinates unchanged");
+  }
+
   function exportBoth() {
     if (!project) return;
     void runAction(async () => {
@@ -247,7 +296,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={redo} disabled={!future.length}>Redo</button>
           <span className="toolbar-divider" />
           <button className="tool-button" onClick={() => setCatalogOpen(true)}>Catalogs</button>
-          <button className="tool-button" disabled title="Phase 5 after Phase 1 review">Draw Calculation Area</button>
+          <button className="tool-button" onClick={() => startPriorityArea()} disabled={!project || drawingPriorityArea}>Draw Priority Area</button>
           <button className="tool-button" disabled title="Phase 5 after validated IES conventions">Calculate Lighting</button>
           <button className="tool-button" disabled title="Phase 6 after CAP constraints are clarified">Recommend CAP</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>
@@ -268,8 +317,15 @@ export function EngineeringWorkspace() {
                 <div className="counts-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((fixture) => <div className={`count-card ${fixture.toLowerCase()}`} key={fixture}><span>{fixture}</span><strong>{counts[fixture]}</strong></div>)}</div>
               </section>
               <section className="section">
-                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 2</span></div>
+                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 3</span></div>
                 {LAYERS.map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || Boolean(layer.phase)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
+                <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>
+              </section>
+              <section className="section">
+                <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
+                {drawingPriorityArea && <div className="warning-card info"><div className="field full"><label htmlFor="priority-name">Area name</label><input id="priority-name" value={priorityAreaName} onChange={(event) => setPriorityAreaName(event.target.value)} /></div><p>{priorityDraft.length} vertices. Click the map to add points.</p><button className="quiet-button" onClick={finishPriorityArea}>Save polygon</button><button className="quiet-button" onClick={() => { setDrawingPriorityArea(false); setPriorityDraft([]); }}>Cancel</button></div>}
+                {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityArea(area.id)}>Edit</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
+                {!project?.priority_areas.length && <p className="helper">Draw project-specific polygons to summarize geometric camera intersections.</p>}
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Bulk assignment</h3></div>
@@ -293,8 +349,8 @@ export function EngineeringWorkspace() {
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
-          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 2 configures existing poles only. No locations are generated or moved.</span></div>
+          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: Number(azimuth.toFixed(3)) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
+          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 3 calculates from existing poles only. No locations are generated or moved.</span></div>
           {!project?.source.poles.length && <div className="map-overlay map-empty"><span className="eyebrow">Phase 1 · Existing-pole foundation</span><h1>Start with the customer’s pole layout</h1><p>Import a KML or KMZ to validate and display authoritative pole coordinates. Your changes remain separate and reversible.</p><button className="primary-button" onClick={() => importRef.current?.click()} disabled={busy}>Import KML/KMZ</button></div>}
         </section>
 
