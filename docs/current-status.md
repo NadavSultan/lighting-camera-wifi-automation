@@ -37,3 +37,5 @@ Last updated: 2026-08-15. Phase 1 remains frozen. The Phase 2 corrective impleme
 ## Next gate
 
 Return Phase 2 to independent QA for retesting against IR-01 through IR-11. Do not begin Phase 3 camera-ground-geometry work.
+
+Corrective traceability and validation evidence are recorded in `docs/phase-2-corrective-completion-report.md`.
