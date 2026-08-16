@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
-import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
+import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -116,4 +116,31 @@ test("Phase 3 fixture rotation and priority-area helpers are deterministic", () 
   assert.throws(() => validateAndClosePriorityRing([[0, 0], [1, 1], [2, 2]]), /degenerate/);
   assert.equal(formatEngineeringAzimuth(51.888999999999996), "51.889");
   assert.equal(formatEngineeringAzimuth(360), "0");
+});
+
+test("P3-IR-05 keeps rounded display and map-handle azimuths in the normalized range", async () => {
+  const cases = [
+    [359.9999, "0", 0],
+    [-0.0001, "0", 0],
+    [360, "0", 0],
+    [720, "0", 0],
+    [721.23456, "1.235", 1.235],
+    [-1, "359", 359],
+    [51.888999999999996, "51.889", 51.889],
+  ];
+  for (const [input, expected, expectedNumber] of cases) {
+    assert.equal(formatEngineeringAzimuth(input), expected);
+    const rounded = roundNormalizedFixtureAzimuth(input);
+    assert.equal(rounded, expectedNumber);
+    assert.ok(rounded >= 0 && rounded < 360, `${input} rounded outside [0, 360): ${rounded}`);
+  }
+  const eastOfNorth = fixtureAzimuthFromHandle(-80, 25, -80 + 1e-12, 25.001);
+  const westOfNorth = fixtureAzimuthFromHandle(-80, 25, -80 - 1e-12, 25.001);
+  assert.equal(eastOfNorth, 0);
+  assert.equal(westOfNorth, 0);
+  assert.ok(eastOfNorth >= 0 && eastOfNorth < 360);
+  assert.ok(westOfNorth >= 0 && westOfNorth < 360);
+  const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /fixture_azimuth_deg: roundNormalizedFixtureAzimuth\(azimuth\)/);
+  assert.doesNotMatch(workspace, /fixture_azimuth_deg: Number\(azimuth\.toFixed\(3\)\)/);
 });

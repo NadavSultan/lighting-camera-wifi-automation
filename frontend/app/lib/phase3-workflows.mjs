@@ -1,12 +1,19 @@
 export function normalizeFixtureAzimuth(value) {
-  const normalized = ((value % 360) + 360) % 360;
+  const remainder = value % 360;
+  const normalized = remainder < 0 ? remainder + 360 : remainder;
   return Object.is(normalized, -0) ? 0 : normalized;
+}
+
+export function roundNormalizedFixtureAzimuth(value, precision = 3) {
+  if (!Number.isFinite(value)) return Number.NaN;
+  const rounded = Number(normalizeFixtureAzimuth(value).toFixed(precision));
+  return normalizeFixtureAzimuth(rounded);
 }
 
 export function fixtureAzimuthFromHandle(poleLongitude, poleLatitude, handleLongitude, handleLatitude) {
   const east = (handleLongitude - poleLongitude) * Math.cos(poleLatitude * Math.PI / 180);
   const north = handleLatitude - poleLatitude;
-  return normalizeFixtureAzimuth(Math.atan2(east, north) * 180 / Math.PI);
+  return roundNormalizedFixtureAzimuth(Math.atan2(east, north) * 180 / Math.PI);
 }
 
 function orientation(a, b, c) {
@@ -59,5 +66,5 @@ export function renamePriorityArea(area, name, modifiedAt) {
 
 export function formatEngineeringAzimuth(value) {
   if (!Number.isFinite(value)) return "—";
-  return normalizeFixtureAzimuth(value).toFixed(3).replace(/\.?0+$/, "");
+  return roundNormalizedFixtureAzimuth(value).toFixed(3).replace(/\.?0+$/, "");
 }

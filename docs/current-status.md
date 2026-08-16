@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Independent Phase 3 QA returned **FAIL** with P3-IR-01 through P3-IR-06; the user authorized the bounded corrective implementation. All six corrections and the real rendered workflow are complete and ready for independent corrective retest. Phase 4 and later work remains unauthorized and unstarted.
+Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. The independent Phase 3 corrective retest returned **PASS WITH CONDITIONS**: P3-IR-01, P3-IR-02, P3-IR-03, P3-IR-04, and P3-IR-06 are closed; the remaining P3-IR-05 north-boundary rounding defect has now received a final focused correction and local verification. Phase 3 is not declared approved and awaits an additional independent focused QA retest. Phase 4 and later work remains unauthorized and unstarted.
 
 ## Completed
 
@@ -23,12 +23,13 @@ Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independen
 - Generated project schema/OpenAPI are regenerated and exact in-memory freshness tested.
 - Enabled-camera warnings are globally visible and represented on the map under the Warnings layer.
 - Footprints persist exact H/V FOV and mounting geometry-contract version; UI azimuths use deterministic engineering formatting.
+- Final P3-IR-05 correction normalizes after three-decimal rounding so display and intentional map-handle edits can never produce `360`; authoritative backend values are not rewritten by presentation formatting.
 
 ## Validation
 
 - Backend: 85 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
-- Frontend rendered/workflow suite (5 tests), strict TypeScript, and ESLint: passed.
+- Frontend rendered/workflow suite (6 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
 - The final focused NIR-01 retest closed the sole remaining condition with no new findings; `docs/phase-2-nir-01-final-retest-report.md` is the controlling Phase 2 gate evidence.
@@ -43,4 +44,4 @@ Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Return implementation commit `acd14aac431b4737192333f085dfec1b8ce93311` and `docs/phase-3-corrective-completion-report.md` for independent Phase 3 corrective retest. Do not begin Phase 4.
+Return the final focused P3-IR-05 implementation commit and `docs/phase-3-final-corrective-completion-report.md` for an additional independent focused QA retest. Do not declare Phase 3 approved and do not begin Phase 4.
