@@ -20,7 +20,7 @@ The importer preserves a KML Placemark `id` when present. Otherwise it creates a
 
 Operational fixture, camera, and lens catalogs retain the current record plus immutable previous complete records keyed by `(id, revision)`. Historical lookup is used for assigned poles; current active state controls whether a new save/assignment is allowed. Lens `compatible_camera_model_ids` is the authoritative compatibility relation and the camera-side list is derived and reciprocity-validated.
 
-Phase 3 retains legacy `relative_azimuth_deg` and `downward_tilt_deg` override fields solely for lossless migration. Their presence blocks that slot's calculation until explicit reset. New UI editing is limited to fixture azimuth, camera/lens revision selection, and enabled state. `priority_areas` is project-specific user data in WGS84; projected copies are transient calculation inputs. `camera_geometry` contains per-slot provenance, warnings, projected/WGS84 rings, overlaps, priority summaries, and an explicit pixel-density `not-calculated` state.
+Phase 3 retains legacy `relative_azimuth_deg` and `downward_tilt_deg` override fields solely for lossless migration. Their presence blocks that slot's calculation until explicit reset. New UI editing is limited to fixture azimuth, camera/lens revision selection, and enabled state. `priority_areas` is project-specific user data in WGS84; projected copies are transient calculation inputs. Rename preserves the ring; redraw starts empty and replaces it only after finite, non-degenerate, non-self-intersecting validation. Invalid legacy `2.2.0` rings migrate losslessly to `legacy_invalid_priority_areas`. `camera_geometry` contains per-slot provenance including exact H/V FOV and mounting `geometry_contract_version`, warnings, projected/WGS84 rings, overlaps, priority summaries, and an explicit pixel-density `not-calculated` state.
 
 ## Phase 2 transition and lifecycle policy
 
@@ -57,7 +57,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.2.0` and software version is `0.3.0`. Phase 1 JSON (`1.0.0`), initial Phase 2 JSON (`2.0.0`), and corrective Phase 2 JSON (`2.1.0`) migrate without family inference or coordinate change. Legacy camera orientation override bytes remain explicit. The fixture operational contract advances additively to `1.2.0` for the fixed-zero-origin template contract; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.3.0` and software version is `0.3.1`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, and `2.2.0` migrate without family inference or coordinate change. Legacy camera orientation override bytes remain explicit. The fixture operational contract remains `1.2.0` for the fixed-zero-origin template contract; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

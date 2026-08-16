@@ -24,12 +24,14 @@ This register distinguishes governing conventions from temporary assumptions. Ma
 |---|---|---|
 | Conceptual Wi-Fi radius is 30 m | `data/network/wifi-defaults.json` | Enables later conceptual visualization only; not RF design. |
 | Proposed photometric rotation order is local tilt followed by world-vertical azimuth | `docs/photometric-conventions.md` | Documentation proposal only; calculations remain blocked pending AGi32 validation. |
+| Camera optical centers use immutable X/Y/Z=0 m offsets at the fixture origin | Mounting contract `fixed-zero-origin-1.0.0` | Approved for Phase 3 MVP; future authoritative mechanical offsets require a new pinned template revision. |
+| Camera footprints intersect flat local ground at Z=0 | Geometry model `flat-ground-pinhole-1.0.0` | Approved for Phase 3 MVP; future authoritative terrain requires a separately reviewed model. |
 
 No temporary CAP range, load, hop, redundancy, or fixture-compatibility assumption has been introduced.
 
 ## Values requiring future validation
 
-- Camera manufacturer/model, quantity, mounting position/offsets, azimuth, and analytics.
+- Camera manufacturer/enclosure identity and analytics capability. Phase 3 slot quantity, fixed relative azimuth, tilt, and zero-origin offsets are approved and operational.
 - Solitaire 50 W filename/header versus `60W` internal luminaire identifier; D02 negative dimensions.
 - Luminaire flux, CCT, mounting height, fixture-type compatibility, and C0-plane/housing orientation.
 - CAP-to-JNET1 terminology, fixture/node applicability, recommended range/load/hops, antenna/LOS, redundancy, band, and site utilities.

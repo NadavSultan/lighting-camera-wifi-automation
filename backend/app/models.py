@@ -3,16 +3,19 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import math
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from shapely.geometry import Polygon
+from shapely.validation import explain_validity
 
 
-SCHEMA_VERSION = "2.2.0"
-SOFTWARE_VERSION = "0.3.0"
+SCHEMA_VERSION = "2.3.0"
+SOFTWARE_VERSION = "0.3.1"
 
 
 def utc_now() -> datetime:
@@ -191,8 +194,15 @@ class PriorityArea(StrictModel):
         if len(set(self.wgs84_coordinates[:-1])) < 3:
             raise ValueError("priority-area polygon requires three distinct vertices")
         for longitude, latitude in self.wgs84_coordinates:
+            if not math.isfinite(longitude) or not math.isfinite(latitude):
+                raise ValueError("priority-area coordinates must be finite")
             if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
                 raise ValueError("priority-area coordinate is outside WGS84 bounds")
+        polygon = Polygon(self.wgs84_coordinates)
+        if not polygon.is_valid:
+            raise ValueError(f"priority-area polygon is invalid: {explain_validity(polygon)}")
+        if polygon.area <= 1e-18:
+            raise ValueError("priority-area polygon is degenerate and has no usable area")
         return self
 
 
@@ -213,12 +223,15 @@ class CameraFootprintResult(StrictModel):
     camera_model_revision: int | None
     lens_id: str | None
     lens_revision: int | None
+    horizontal_fov_deg: float | None = None
+    vertical_fov_deg: float | None = None
     fixture_height_m: float | None
     fixture_azimuth_deg: float
     template_relative_azimuth_deg: float
     fixed_downward_tilt_deg: float
     camera_absolute_azimuth_deg: float
     origin_offset_xyz_m: tuple[Literal[0.0], Literal[0.0], Literal[0.0]] = (0.0, 0.0, 0.0)
+    geometry_contract_version: str | None = None
     projected_crs: str | None
     geometry_model_version: Literal["flat-ground-pinhole-1.0.0"] = "flat-ground-pinhole-1.0.0"
     enabled: bool
@@ -259,7 +272,7 @@ class CameraGeometryLayer(StrictModel):
 
 
 class Project(StrictModel):
-    schema_version: Literal["2.2.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.3.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -275,6 +288,7 @@ class Project(StrictModel):
     layer_state: LayerState = Field(default_factory=LayerState)
     warnings: list[ProjectWarning] = Field(default_factory=list)
     priority_areas: list[PriorityArea] = Field(default_factory=list)
+    legacy_invalid_priority_areas: list[dict[str, Any]] = Field(default_factory=list)
     camera_geometry: CameraGeometryLayer = Field(default_factory=CameraGeometryLayer)
     assumptions: list[str] = Field(default_factory=lambda: [
         "Existing-pole mode is active; no pole locations are generated or optimized.",
@@ -321,13 +335,25 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0", "2.1.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["software_version"] = SOFTWARE_VERSION
     migrated["legacy_fixture_assignments_require_model_selection"] = True
     migrated.setdefault("priority_areas", [])
+    migrated.setdefault("legacy_invalid_priority_areas", [])
+    if version == "2.2.0":
+        valid_areas: list[dict[str, Any]] = []
+        legacy_areas = list(migrated["legacy_invalid_priority_areas"])
+        for area in migrated["priority_areas"]:
+            try:
+                PriorityArea.model_validate(area)
+                valid_areas.append(area)
+            except ValueError:
+                legacy_areas.append(area)
+        migrated["priority_areas"] = valid_areas
+        migrated["legacy_invalid_priority_areas"] = legacy_areas
     migrated.setdefault("camera_geometry", {})
     layer_state = dict(migrated.get("layer_state", {}))
     layer_state.setdefault("camera_overlap", True)
@@ -337,5 +363,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     notice = "Phase 1 fixture classifications were preserved; fixture family/model selection remains explicit."
     if notice not in assumptions:
         assumptions.append(notice)
+    if migrated["legacy_invalid_priority_areas"]:
+        assumptions.append("Invalid legacy Phase 3 priority-area records are preserved losslessly but quarantined from calculations until explicitly redrawn.")
     migrated["assumptions"] = assumptions
     return migrated

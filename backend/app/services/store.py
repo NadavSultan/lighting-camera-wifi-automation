@@ -70,7 +70,7 @@ class ProjectStore:
                 name=project.name,
                 mode=project.mode,
                 pole_count=len(project.source.poles),
-                warning_count=sum(1 for warning in project.warnings if warning.severity != "info"),
+                warning_count=sum(1 for warning in project.warnings if warning.severity != "info") + sum(1 for footprint in project.camera_geometry.footprints if footprint.enabled and footprint.warnings),
                 updated_at=project.updated_at,
             ))
         return sorted(summaries, key=lambda item: item.updated_at, reverse=True)

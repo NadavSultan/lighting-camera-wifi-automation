@@ -24,6 +24,7 @@ The browser never mutates a source file. A project records source poles and user
 - `frontend/app/components/CatalogManager.tsx`: fixture, IES, camera, and lens management.
 - `frontend/app/components/PoleInspector.tsx`: model-dependent per-pole lighting, Wi-Fi, and SMART camera configuration.
 - `frontend/app/components/EngineeringMap.tsx`: Phase 3 camera/overlap/priority layers and the fixture-level azimuth handle; no camera-level direction controls.
+- Enabled-camera calculation warnings appear in the global validation list and a pole-level map indicator controlled by the Warnings layer; disabled slots do not contribute errors.
 - `frontend/app/lib/api.ts`: typed backend transport and local file downloads.
 - `schemas/project.schema.json`: repository-owned machine-readable project schema.
 - `schemas/openapi.json`: generated HTTP contract for session-to-session API continuity.
@@ -64,7 +65,7 @@ The frontend retains the bundled Sites/Vinext worker scaffold for local developm
 
 ## Phase 3 calculation flow
 
-SMART user configuration and immutable pinned catalog/template revisions feed a pure geometry service. The service transforms the authoritative source pole coordinate into the project-selected projected CRS, intersects four pinhole-frustum boundary rays with local Z=0, and stores projected and WGS84 result rings in `camera_geometry`. Overlap and priority-area metrics use Shapely in projected metres. Recalculation never writes source poles or user assignments.
+SMART user configuration and immutable pinned catalog/template revisions feed a pure geometry service. The service transforms the authoritative source pole coordinate into the project-selected projected CRS, intersects four pinhole-frustum boundary rays with local Z=0, and stores projected/WGS84 rings plus exact lens FOV and mounting-contract provenance in `camera_geometry`. Overlap and priority-area metrics use Shapely in projected metres. Priority rename and redraw are separate commands, and replacement validates before mutating the saved ring. Recalculation never writes source poles or user assignments.
 
 ## Future phase seams
 

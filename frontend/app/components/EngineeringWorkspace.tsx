@@ -7,7 +7,7 @@ import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
 import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
 import { effectivePole, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
-import { closePriorityRing } from "../lib/phase3-workflows.mjs";
+import { emptyPriorityRedrawDraft, renamePriorityArea, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -56,6 +56,7 @@ export function EngineeringWorkspace() {
   const [priorityDraft, setPriorityDraft] = useState<Array<[number, number]>>([]);
   const [priorityAreaName, setPriorityAreaName] = useState("Priority area");
   const [selectedPriorityAreaId, setSelectedPriorityAreaId] = useState<string | null>(null);
+  const [renamingPriorityArea, setRenamingPriorityArea] = useState(false);
   const geometrySignatureRef = useRef("");
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
@@ -91,7 +92,8 @@ export function EngineeringWorkspace() {
     WIFI: effectivePoles.filter((pole) => pole.fixtureType === "WIFI").length,
     SMART: effectivePoles.filter((pole) => pole.fixtureType === "SMART").length,
   }), [effectivePoles]);
-  const activeWarnings = project?.warnings.filter((warning) => warning.severity !== "info").length ?? 0;
+  const cameraWarnings = project?.camera_geometry.footprints.filter((footprint) => footprint.enabled && footprint.warnings.length > 0) ?? [];
+  const activeWarnings = (project?.warnings.filter((warning) => warning.severity !== "info").length ?? 0) + cameraWarnings.length;
 
   function replaceProject(next: Project, recordHistory = true) {
     if (recordHistory && project) setPast((items) => [...items.slice(-39), project]);
@@ -243,25 +245,49 @@ export function EngineeringWorkspace() {
     mutateProject((draft) => { draft.layer_state[key] = enabled; });
   }
 
-  function startPriorityArea(areaId?: string) {
-    const area = project?.priority_areas.find((item) => item.id === areaId);
-    setSelectedPriorityAreaId(area?.id ?? null);
-    setPriorityAreaName(area?.name ?? `Priority area ${(project?.priority_areas.length ?? 0) + 1}`);
-    setPriorityDraft(area ? area.wgs84_coordinates.slice(0, -1) : []);
+  function startPriorityArea() {
+    setSelectedPriorityAreaId(null);
+    setPriorityAreaName(`Priority area ${(project?.priority_areas.length ?? 0) + 1}`);
+    setPriorityDraft(emptyPriorityRedrawDraft());
+    setRenamingPriorityArea(false);
     setDrawingPriorityArea(true);
-    setStatus(area ? "Editing priority-area geometry; click replacement vertices on the map" : "Drawing priority area; click at least three map vertices");
+    setStatus("Drawing a new priority area; click at least three distinct map vertices");
+  }
+
+  function startPriorityRedraw(areaId: string) {
+    const area = project?.priority_areas.find((item) => item.id === areaId);
+    if (!area) return;
+    setSelectedPriorityAreaId(area.id); setPriorityAreaName(area.name);
+    setPriorityDraft(emptyPriorityRedrawDraft()); setRenamingPriorityArea(false); setDrawingPriorityArea(true);
+    setStatus("Redrawing priority-area geometry from an empty draft; the saved polygon remains until replacement succeeds");
+  }
+
+  function startPriorityRename(areaId: string) {
+    const area = project?.priority_areas.find((item) => item.id === areaId);
+    if (!area) return;
+    setSelectedPriorityAreaId(area.id); setPriorityAreaName(area.name); setPriorityDraft([]); setDrawingPriorityArea(false); setRenamingPriorityArea(true);
+  }
+
+  function finishPriorityRename() {
+    if (!project || !selectedPriorityAreaId) return;
+    try {
+      mutateProject((draft) => { const index = draft.priority_areas.findIndex((item) => item.id === selectedPriorityAreaId); if (index >= 0) draft.priority_areas[index] = renamePriorityArea(draft.priority_areas[index], priorityAreaName, new Date().toISOString()); });
+      setRenamingPriorityArea(false); setSelectedPriorityAreaId(null); setStatus("Priority area renamed; its saved geometry was preserved exactly");
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not rename priority area"); }
   }
 
   function finishPriorityArea() {
-    if (!project || priorityDraft.length < 3) { setError("A priority area requires at least three vertices"); return; }
+    if (!project) return;
+    let closed: Array<[number, number]>;
+    try { closed = validateAndClosePriorityRing(priorityDraft); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : "The replacement priority area is invalid"); return; }
     const now = new Date().toISOString();
-    const closed = closePriorityRing(priorityDraft);
     mutateProject((draft) => {
       const index = selectedPriorityAreaId ? draft.priority_areas.findIndex((item) => item.id === selectedPriorityAreaId) : -1;
-      if (index >= 0) draft.priority_areas[index] = { ...draft.priority_areas[index], name: priorityAreaName.trim() || "Priority area", wgs84_coordinates: closed, modified_at: now };
+      if (index >= 0) draft.priority_areas[index] = { ...draft.priority_areas[index], wgs84_coordinates: closed, modified_at: now };
       else draft.priority_areas.push({ id: crypto.randomUUID(), name: priorityAreaName.trim() || "Priority area", wgs84_coordinates: closed, created_at: now, modified_at: now });
     });
-    setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null);
+    setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null); setRenamingPriorityArea(false);
     setStatus("Priority area saved as project user data; projected intersection summary recalculating");
   }
 
@@ -323,8 +349,9 @@ export function EngineeringWorkspace() {
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
-                {drawingPriorityArea && <div className="warning-card info"><div className="field full"><label htmlFor="priority-name">Area name</label><input id="priority-name" value={priorityAreaName} onChange={(event) => setPriorityAreaName(event.target.value)} /></div><p>{priorityDraft.length} vertices. Click the map to add points.</p><button className="quiet-button" onClick={finishPriorityArea}>Save polygon</button><button className="quiet-button" onClick={() => { setDrawingPriorityArea(false); setPriorityDraft([]); }}>Cancel</button></div>}
-                {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityArea(area.id)}>Edit</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
+                {drawingPriorityArea && <div className="warning-card info"><p>{selectedPriorityAreaId ? "Replacement geometry starts empty. The saved polygon remains unchanged unless this replacement validates." : "New priority area"}</p><p>{priorityDraft.length} vertices. Click the map to add at least three distinct points.</p><button className="quiet-button" onClick={finishPriorityArea}>Save polygon</button><button className="quiet-button" onClick={() => { setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
+                {renamingPriorityArea && <div className="warning-card info"><div className="field full"><label htmlFor="priority-name">Area name</label><input id="priority-name" value={priorityAreaName} onChange={(event) => setPriorityAreaName(event.target.value)} /></div><p>Renaming preserves every saved vertex.</p><button className="quiet-button" onClick={finishPriorityRename}>Save name</button><button className="quiet-button" onClick={() => { setRenamingPriorityArea(false); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
+                {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityRename(area.id)}>Rename</button><button className="quiet-button" onClick={() => startPriorityRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
                 {!project?.priority_areas.length && <p className="helper">Draw project-specific polygons to summarize geometric camera intersections.</p>}
               </section>
               <section className="section">
@@ -342,7 +369,7 @@ export function EngineeringWorkspace() {
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Validation</h3><span className="helper">{activeWarnings} warnings</span></div>
-                <div className="warning-list">{project?.warnings.slice(0, 8).map((warning, index) => <div className={`warning-card ${warning.severity}`} key={`${warning.code}-${index}`}>{warning.message}</div>)}{!project && <div className="empty-copy">Validation results appear after import.</div>}</div>
+                <div className="warning-list">{project?.warnings.slice(0, 8).map((warning, index) => <div className={`warning-card ${warning.severity}`} key={`${warning.code}-${index}`}>{warning.message}</div>)}{cameraWarnings.slice(0, 8).map((footprint) => <button className="warning-card warning" key={`${footprint.pole_id}-${footprint.camera_slot_id}`} onClick={() => setSelectedId(footprint.pole_id)}><strong>{footprint.pole_id} · {footprint.camera_slot_id}</strong><span>{footprint.warnings.join(" ")}</span></button>)}{!project && <div className="empty-copy">Validation results appear after import.</div>}</div>
               </section>
             </div>
           )}

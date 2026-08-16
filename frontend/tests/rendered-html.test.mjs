@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
-import { closePriorityRing, fixtureAzimuthFromHandle, normalizeFixtureAzimuth } from "../app/lib/phase3-workflows.mjs";
+import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -57,6 +57,13 @@ test("exposes Phase 3 camera geometry while keeping later engines gated", async 
   assert.match(api, /recalculateCameraGeometry/);
   assert.match(workspace, /camera_overlap/);
   assert.match(workspace, /priority_area_summaries/);
+  assert.match(workspace, /startPriorityRename/);
+  assert.match(workspace, /startPriorityRedraw/);
+  assert.match(workspace, /Replacement geometry starts empty/);
+  assert.match(workspace, /cameraWarnings/);
+  const map = await readFile(new URL("../app/components/EngineeringMap.tsx", import.meta.url), "utf8");
+  assert.match(map, /camera-warning-indicator/);
+  assert.match(map, /layer_state\.warnings/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
@@ -99,5 +106,14 @@ test("Phase 3 fixture rotation and priority-area helpers are deterministic", () 
   assert.ok(Math.abs(fixtureAzimuthFromHandle(-80, 25, -79.999, 25) - 90) < 1e-9);
   const vertices = [[-80, 25], [-79.999, 25], [-79.999, 25.001]];
   assert.deepEqual(closePriorityRing(vertices), [...vertices, vertices[0]]);
-  assert.throws(() => closePriorityRing(vertices.slice(0, 2)), /three vertices/);
+  assert.throws(() => closePriorityRing(vertices.slice(0, 2)), /three distinct vertices/);
+  assert.deepEqual(emptyPriorityRedrawDraft(), []);
+  const area = { id: "a", name: "Old", wgs84_coordinates: closePriorityRing(vertices), modified_at: "before" };
+  const renamed = renamePriorityArea(area, "Renamed", "after");
+  assert.equal(renamed.name, "Renamed");
+  assert.strictEqual(renamed.wgs84_coordinates, area.wgs84_coordinates);
+  assert.throws(() => validateAndClosePriorityRing([[0, 0], [1, 1], [0, 1], [1, 0]]), /self-intersecting/);
+  assert.throws(() => validateAndClosePriorityRing([[0, 0], [1, 1], [2, 2]]), /degenerate/);
+  assert.equal(formatEngineeringAzimuth(51.888999999999996), "51.889");
+  assert.equal(formatEngineeringAzimuth(360), "0");
 });

@@ -3,7 +3,7 @@
   "info": {
     "title": "Lighting Camera WiFi Automation API",
     "description": "Phase 3 fixed-mount camera ground geometry and existing-pole configuration workflow.",
-    "version": "0.3.0"
+    "version": "0.3.1"
   },
   "paths": {
     "/api/health": {
@@ -1262,6 +1262,28 @@
             ],
             "title": "Lens Revision"
           },
+          "horizontal_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizontal Fov Deg"
+          },
+          "vertical_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vertical Fov Deg"
+          },
           "fixture_height_m": {
             "anyOf": [
               {
@@ -1313,6 +1335,17 @@
               0.0,
               0.0
             ]
+          },
+          "geometry_contract_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geometry Contract Version"
           },
           "projected_crs": {
             "anyOf": [
@@ -2001,7 +2034,7 @@
           "version": {
             "type": "string",
             "title": "Version",
-            "default": "0.3.0"
+            "default": "0.3.1"
           }
         },
         "additionalProperties": false,
@@ -2835,6 +2868,13 @@
             "type": "array",
             "title": "Intersecting Footprint Ids"
           },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
           "assumption": {
             "type": "string",
             "title": "Assumption",
@@ -2857,14 +2897,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "2.2.0",
+            "const": "2.3.0",
             "title": "Schema Version",
-            "default": "2.2.0"
+            "default": "2.3.0"
           },
           "software_version": {
             "type": "string",
             "title": "Software Version",
-            "default": "0.3.0"
+            "default": "0.3.1"
           },
           "id": {
             "type": "string",
@@ -2940,6 +2980,14 @@
             },
             "type": "array",
             "title": "Priority Areas"
+          },
+          "legacy_invalid_priority_areas": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Legacy Invalid Priority Areas"
           },
           "camera_geometry": {
             "$ref": "#/components/schemas/CameraGeometryLayer"

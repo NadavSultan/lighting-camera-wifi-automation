@@ -51,6 +51,12 @@ function priorityFeatures(project: Project | null): FeatureCollection<Polygon> {
   return { type: "FeatureCollection", features: project?.priority_areas.map((area) => ({ type: "Feature", id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon", coordinates: [area.wgs84_coordinates] } })) ?? [] };
 }
 
+function cameraWarningFeatures(project: Project | null): FeatureCollection<Point> {
+  if (!project) return EMPTY;
+  const warningPoleIds = new Set(project.camera_geometry.footprints.filter((item) => item.enabled && item.warnings.length > 0).map((item) => item.pole_id));
+  return { type: "FeatureCollection", features: project.source.poles.filter((pole) => warningPoleIds.has(pole.id)).map((pole) => ({ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } })) };
+}
+
 function draftFeature(points: Array<[number, number]>): FeatureCollection<LineString | Polygon> {
   if (points.length < 2) return { type: "FeatureCollection", features: [] };
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: points.length >= 3 ? { type: "Polygon", coordinates: [[...points, points[0]]] } : { type: "LineString", coordinates: points } }] };
@@ -81,6 +87,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("camera-overlap", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-draft", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("camera-warnings", { type: "geojson", data: EMPTY });
       map.addLayer({ id: "priority-area-fill", type: "fill", source: "priority-areas", paint: { "fill-color": "#f59e0b", "fill-opacity": .15 } });
       map.addLayer({ id: "priority-area-line", type: "line", source: "priority-areas", paint: { "line-color": "#fbbf24", "line-width": 2, "line-dasharray": [2, 1] } });
       map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
@@ -98,6 +105,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
           paint: { "circle-radius": ["case", ["boolean", ["get", "modified"], false], 5.5, 4.5], "circle-color": color, "circle-opacity": .92, "circle-stroke-width": ["case", ["boolean", ["get", "modified"], false], 2, 1], "circle-stroke-color": "#071018" },
         });
       }
+      map.addLayer({ id: "camera-warning-indicator", type: "circle", source: "camera-warnings", paint: { "circle-radius": 12, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 4, "circle-stroke-color": "#ff7a59", "circle-opacity": .95 } });
       map.addLayer({ id: "selected-pole", type: "circle", source: "selection", paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 2, "circle-stroke-color": "#5de2c2", "circle-blur": .1 } });
       for (const layer of CLICKABLE_LAYERS) {
         map.on("click", layer, (event) => {
@@ -107,6 +115,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
         map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
       }
+      map.on("click", "camera-warning-indicator", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
       map.on("click", "priority-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
       map.on("click", (event) => { if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); });
     });
@@ -124,6 +133,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("camera-overlap") as GeoJSONSource | undefined)?.setData(overlapFeatures(project));
       (map.getSource("priority-areas") as GeoJSONSource | undefined)?.setData(priorityFeatures(project));
       (map.getSource("priority-draft") as GeoJSONSource | undefined)?.setData(draftFeature(priorityDraft));
+      (map.getSource("camera-warnings") as GeoJSONSource | undefined)?.setData(cameraWarningFeatures(project));
       const states: Array<[string, boolean]> = [
         ["poles-original", project?.layer_state.original_customer_poles ?? true],
         ["poles-lite", project?.layer_state.lite_fixtures ?? true],
@@ -134,6 +144,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["camera-overlap-fill", project?.layer_state.camera_overlap ?? true],
         ["priority-area-fill", project?.layer_state.priority_areas ?? true],
         ["priority-area-line", project?.layer_state.priority_areas ?? true],
+        ["camera-warning-indicator", project?.layer_state.warnings ?? true],
       ];
       for (const [layer, visible] of states) if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
       if (project && project.source.poles.length && fittedProjectRef.current !== project.id) {

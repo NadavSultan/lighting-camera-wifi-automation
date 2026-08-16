@@ -68,6 +68,30 @@
           ],
           "title": "Lens Revision"
         },
+        "horizontal_fov_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Horizontal Fov Deg"
+        },
+        "vertical_fov_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vertical Fov Deg"
+        },
         "fixture_height_m": {
           "anyOf": [
             {
@@ -119,6 +143,18 @@
           ],
           "title": "Origin Offset Xyz M",
           "type": "array"
+        },
+        "geometry_contract_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geometry Contract Version"
         },
         "projected_crs": {
           "anyOf": [
@@ -874,6 +910,13 @@
           "title": "Intersecting Footprint Ids",
           "type": "array"
         },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
         "assumption": {
           "default": "Geometric flat-ground intersection only; percentage is not analytics quality.",
           "title": "Assumption",
@@ -1206,13 +1249,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.2.0",
-      "default": "2.2.0",
+      "const": "2.3.0",
+      "default": "2.3.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.3.0",
+      "default": "0.3.1",
       "title": "Software Version",
       "type": "string"
     },
@@ -1290,6 +1333,14 @@
         "$ref": "#/$defs/PriorityArea"
       },
       "title": "Priority Areas",
+      "type": "array"
+    },
+    "legacy_invalid_priority_areas": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Legacy Invalid Priority Areas",
       "type": "array"
     },
     "camera_geometry": {

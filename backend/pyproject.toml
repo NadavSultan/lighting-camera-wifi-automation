@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lighting-camera-wifi-automation-backend"
-version = "0.3.0"
+version = "0.3.1"
 description = "Local Phase 3 camera-geometry and existing-pole engineering service"
 requires-python = ">=3.12"
 dependencies = [

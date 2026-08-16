@@ -9,10 +9,12 @@ import pytest
 
 from app.catalog_models import camera_absolute_azimuth, normalize_azimuth
 from app.models import PriorityArea, Project, migrate_project_payload
+from app.main import create_app
 from app.services.camera_geometry import calculate_camera_geometry, canonical_ring, project_ground_footprint
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
 from app.services.kml import import_project
+from app.services.store import ProjectStore
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +94,8 @@ def test_fixed_zero_origin_provenance_missing_data_disabled_and_legacy_override_
     assert all(item.valid and item.origin_offset_xyz_m == (0, 0, 0) for item in layer.footprints)
     assert all(item.fixture_model_revision == 2 and item.mounting_template_revision == 2 for item in layer.footprints)
     assert all(item.camera_model_revision == 1 and item.lens_revision == 1 for item in layer.footprints)
+    assert all(item.horizontal_fov_deg == 52 and item.vertical_fov_deg == 40 for item in layer.footprints)
+    assert all(item.geometry_contract_version == "fixed-zero-origin-1.0.0" for item in layer.footprints)
     assert all(item.pixel_density.value is None and item.pixel_density.method == "not-calculated" for item in layer.footprints)
 
     config = project.pole_edits[pole_id].fixture_configuration
@@ -140,7 +144,7 @@ def test_overlap_priority_intersection_and_save_reopen_coordinate_integrity(tmp_
     assert [(pole.id, pole.raw_coordinates, pole.longitude, pole.latitude) for pole in reopened.source.poles] == coordinates
 
 
-@pytest.mark.parametrize("version", ["1.0.0", "2.0.0", "2.1.0"])
+@pytest.mark.parametrize("version", ["1.0.0", "2.0.0", "2.1.0", "2.2.0"])
 def test_phase3_additive_migrations_preserve_legacy_orientation_bytes(version: str) -> None:
     project = miracle_project()
     pole_id = project.source.poles[0].id
@@ -150,6 +154,37 @@ def test_phase3_additive_migrations_preserve_legacy_orientation_bytes(version: s
     payload.pop("camera_geometry", None)
     payload["pole_edits"][pole_id] = {"pole_id": pole_id, "fixture_type": "SMART", "location_edit_authorized": False, "fixture_configuration": {"fixture_model_id": "phoenix-1-smart", "fixture_model_revision": 1, "mounting_template_revision": 1, "fixture_azimuth_deg": 0, "lighting_properties": {}, "wifi_configuration": {}, "camera_overrides": {"camera-1": {"slot_id": "camera-1", "relative_azimuth_deg": -65, "downward_tilt_deg": 30, "metadata": {"legacy": "preserve"}}}}}
     migrated_payload = migrate_project_payload(copy.deepcopy(payload))
-    assert migrated_payload["schema_version"] == "2.2.0"
+    assert migrated_payload["schema_version"] == "2.3.0"
     assert migrated_payload["pole_edits"][pole_id]["fixture_configuration"]["camera_overrides"]["camera-1"] == payload["pole_edits"][pole_id]["fixture_configuration"]["camera_overrides"]["camera-1"]
     assert migrated_payload["priority_areas"] == [] and migrated_payload["camera_geometry"] == {}
+
+
+def test_priority_area_validation_and_lossless_legacy_quarantine() -> None:
+    with pytest.raises(ValueError, match="invalid|self-intersection"):
+        PriorityArea(id="bad", name="Bow tie", wgs84_coordinates=[(0, 0), (1, 1), (0, 1), (1, 0), (0, 0)])
+    project = miracle_project().model_dump(mode="json")
+    project["schema_version"] = "2.2.0"
+    invalid = {"id": "bad", "name": "Bow tie", "wgs84_coordinates": [[0, 0], [1, 1], [0, 1], [1, 0], [0, 0]], "created_at": project["created_at"], "modified_at": project["updated_at"]}
+    project["priority_areas"] = [invalid]
+    migrated = migrate_project_payload(copy.deepcopy(project))
+    assert migrated["priority_areas"] == []
+    assert migrated["legacy_invalid_priority_areas"] == [invalid]
+
+
+def test_project_schema_and_openapi_are_exactly_fresh_in_memory() -> None:
+    project_schema = {"$schema": "https://json-schema.org/draft/2020-12/schema", **Project.model_json_schema()}
+    assert json.loads((ROOT / "schemas" / "project.schema.json").read_text(encoding="utf-8")) == project_schema
+    assert json.loads((ROOT / "schemas" / "openapi.json").read_text(encoding="utf-8")) == create_app().openapi()
+
+
+def test_project_summary_aggregates_enabled_camera_warnings_only(tmp_path: Path) -> None:
+    catalog_store = catalogs(tmp_path)
+    project = configure(miracle_project(), catalog_store, [miracle_project().source.poles[0].id])
+    pole_id = project.source.poles[0].id
+    project.pole_edits[pole_id].height_m = None
+    project.defaults.pole_height_m = None
+    project.pole_edits[pole_id].fixture_configuration.camera_overrides["camera-2"].enabled = False  # type: ignore[union-attr]
+    project.camera_geometry = calculate_camera_geometry(project, catalog_store.fixtures(), catalog_store.cameras())
+    project_store = ProjectStore(tmp_path / "projects")
+    project_store.save(project)
+    assert project_store.list()[0].warning_count == 1

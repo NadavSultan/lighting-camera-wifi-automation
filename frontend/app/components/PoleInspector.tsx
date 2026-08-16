@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import type { CameraEquipmentCatalog, EffectivePole, FixtureModelCatalog, IesLibrary, PoleEdit, PoleFixtureConfiguration, Project } from "../lib/types";
 import { withoutCameraOverride } from "../lib/phase2-workflows.mjs";
+import { formatEngineeringAzimuth } from "../lib/phase3-workflows.mjs";
 
 const COLORS = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 
@@ -81,7 +82,7 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
           <div className="field"><label htmlFor={`${slot.id}-fixed-azimuth`}>Inherited relative azimuth</label><input id={`${slot.id}-fixed-azimuth`} disabled value={`${slot.relative_azimuth_deg}° fixed`} /></div>
           <div className="field"><label htmlFor={`${slot.id}-fixed-tilt`}>Inherited downward tilt</label><input id={`${slot.id}-fixed-tilt`} disabled value={`${slot.downward_tilt_deg}° below horizontal`} /></div>
           <label className="toggle-line"><input type="checkbox" checked={enabled} onChange={(event) => updateSlot(slot.id, { enabled: event.target.checked })} />Camera enabled</label>
-        </div><div className="camera-provenance">Template r{template.revision} · {template.geometry_contract_version ?? "legacy mounting contract"} · origin X/Y/Z {slot.origin_offset_x_m}/{slot.origin_offset_y_m}/{slot.origin_offset_z_m} m<br />Camera {cameraId || "missing"} r{override?.camera_model_revision ?? slot.camera_model_revision ?? "?"} · Lens {lensId || "missing"} r{override?.lens_revision ?? slot.lens_revision ?? "?"}<br />Absolute azimuth {footprint?.camera_absolute_azimuth_deg ?? "—"}° · footprint {footprint?.valid ? `${footprint.footprint_area_m2?.toFixed(1)} m²` : "not calculated"}</div>
+        </div><div className="camera-provenance">Template r{template.revision} · {footprint?.geometry_contract_version ?? template.geometry_contract_version ?? "legacy mounting contract"} · origin X/Y/Z {slot.origin_offset_x_m}/{slot.origin_offset_y_m}/{slot.origin_offset_z_m} m<br />Camera {cameraId || "missing"} r{override?.camera_model_revision ?? slot.camera_model_revision ?? "?"} · Lens {lensId || "missing"} r{override?.lens_revision ?? slot.lens_revision ?? "?"} · H/V FOV {footprint?.horizontal_fov_deg ?? "—"}°/{footprint?.vertical_fov_deg ?? "—"}°<br />Absolute azimuth {formatEngineeringAzimuth(footprint?.camera_absolute_azimuth_deg ?? Number.NaN)}° · footprint {footprint?.valid ? `${footprint.footprint_area_m2?.toFixed(1)} m²` : "not calculated"}</div>
         {hasLegacyOrientation && <div className="warning-card error">Legacy per-pole direction/tilt bytes are preserved and block FOV calculation.<button type="button" className="quiet-button restore-button" onClick={() => resetLegacyOrientation(slot.id)}>Explicitly reset orientation to immutable template</button></div>}
         {footprint?.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}
         {override && <button type="button" className="quiet-button restore-button" onClick={() => removeSlotOverride(slot.id)}>Remove pole override and restore catalog default</button>}</div>;

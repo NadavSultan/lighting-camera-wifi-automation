@@ -1,11 +1,11 @@
 # Current status
 
-Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 camera geometry implementation is complete and awaiting independent integration review and QA; Phase 4 and later work remains unauthorized and unstarted.
+Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Independent Phase 3 QA returned **FAIL** with P3-IR-01 through P3-IR-06; the user authorized the bounded corrective implementation. Corrections are implemented and under final verification. Phase 4 and later work remains unauthorized and unstarted.
 
 ## Completed
 
 - All Phase 1 KML/KMZ import, source preservation, map, edit-overlay, save/reopen, and KML export workflows remain operational.
-- Project schema `2.2.0` migrates `1.0.0`, `2.0.0`, and `2.1.0` JSON without changing coordinates, discarding legacy overrides, or guessing a Phoenix 1/Solitaire family.
+- Project schema `2.3.0` migrates `1.0.0`, `2.0.0`, `2.1.0`, and `2.2.0` JSON without changing coordinates, discarding legacy overrides, or guessing a Phoenix 1/Solitaire family.
 - The seven approved Phase 1 engineering catalogs remain unchanged at `1.0.0`.
 - Operational IES and camera contracts remain `1.1.0`; the fixture-model contract advances additively to `1.2.0` for the immutable fixed-zero-origin template revision.
 - Six required fixture models are seeded with structured family, variant, and capabilities.
@@ -17,11 +17,18 @@ Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independen
 - Referenced equipment deactivation is conflict-safe, camera/lens compatibility is reciprocal with the lens relation authoritative, and per-slot overrides have an explicit restore-to-template action.
 - Catalog-management and model-dependent pole-configuration UI is available through the **Catalogs** toolbar action and properties inspector.
 
+## Corrective scope
+
+- Priority-area rename preserves geometry; explicit redraw begins empty and validates before replacement.
+- Generated project schema/OpenAPI are regenerated and exact in-memory freshness tested.
+- Enabled-camera warnings are globally visible and represented on the map under the Warnings layer.
+- Footprints persist exact H/V FOV and mounting geometry-contract version; UI azimuths use deterministic engineering formatting.
+
 ## Validation
 
-- Backend: 51 passed; one existing non-failing Starlette/httpx2 deprecation warning.
+- Backend: 85 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
-- Frontend rendered/workflow suite (3 tests), strict TypeScript, and ESLint: passed.
+- Frontend rendered/workflow suite (5 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
 - The final focused NIR-01 retest closed the sole remaining condition with no new findings; `docs/phase-2-nir-01-final-retest-report.md` is the controlling Phase 2 gate evidence.
@@ -36,4 +43,4 @@ Last updated: 2026-08-15. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Return commit `c8814587d08731cbb5e125d644b6a55f67483d48` and `docs/phase-3-completion-report.md` to independent session “92 – Phase 3 Integration Review & QA”. Do not begin Phase 4.
+Complete the corrective automated and real rendered workflow, commit the bounded correction and `docs/phase-3-corrective-completion-report.md`, then return it for independent Phase 3 corrective retest. Do not begin Phase 4.

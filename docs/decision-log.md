@@ -52,3 +52,11 @@
 - Date: 2026-08-15
 - Status: approved
 - Decision: there is no default lens. An enabled slot calculates only with an explicit compatible pinned camera/lens revision and valid height/template. Legacy per-pole relative-azimuth or downward-tilt override bytes remain persisted but block calculation until the user explicitly resets that slot to the immutable template; new angle overrides are not accepted by the Phase 3 UI.
+
+## DL-009 — Phase 3 corrective contract and safe priority replacement
+
+- Date: 2026-08-16
+- Status: approved corrective implementation following independent QA FAIL
+- Decision: advance the additive project contract to `2.3.0` and software/API to `0.3.1`. Persist exact lens H/V FOV and mounting geometry-contract provenance. Priority-area rename preserves geometry exactly; redraw begins empty and commits only a validated replacement. Invalid legacy `2.2.0` priority records are retained losslessly in a non-calculated quarantine collection.
+- UI decision: enabled-camera warnings are global validation items and pole-level map indicators controlled by the Warnings layer. Disabled cameras remain non-errors. Azimuth display is rounded to three decimal places without changing calculation precision.
+- Boundary: Phase 4 and later remain unauthorized and unstarted.

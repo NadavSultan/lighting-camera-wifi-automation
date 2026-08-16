@@ -23,11 +23,12 @@ Status: complete and formally closed on 2026-08-15 after independent **UNCONDITI
 
 ## Phase 3 - camera geometry
 
-Status: implementation complete on 2026-08-15; independent integration review and QA pending.
+Status: independent QA returned FAIL; user-authorized corrective work for P3-IR-01 through P3-IR-06 is implemented and undergoing final verification on 2026-08-16.
 
 - Flat-terrain ground-FOV projection for two immutable fixed-mount camera slots on SMART fixtures, with fixture-level azimuth editing and map rotation.
 - Explicit compatible lens selection, per-slot enable state, deterministic warnings, revision-aware provenance, overlap metrics, and persisted priority-area intersection summaries.
 - Keep geometric FOV and pixel-density architecture distinct from analytics-quality coverage; no recognition, LPR, or compliance thresholds.
+- Corrective gate adds safe rename/redraw priority editing, generated-contract freshness, global/map camera warnings, complete FOV/mounting provenance, deterministic azimuth formatting, and aligned documentation.
 
 ## Phase 4 - conceptual Wi-Fi
 

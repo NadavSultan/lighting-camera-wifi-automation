@@ -131,9 +131,11 @@ def calculate_camera_geometry(project: Project, fixtures: FixtureModelCatalog, c
                 pole_id=pole_id, fixture_model_id=config.fixture_model_id, fixture_model_revision=config.fixture_model_revision,
                 mounting_template_revision=config.mounting_template_revision or reference_template.revision, camera_slot_id=slot.id,
                 camera_model_id=camera_id, camera_model_revision=camera_revision, lens_id=lens_id, lens_revision=lens_revision,
+                horizontal_fov_deg=None, vertical_fov_deg=None,
                 fixture_height_m=edit.height_m if edit.height_m is not None else project.defaults.pole_height_m,
                 fixture_azimuth_deg=config.fixture_azimuth_deg, template_relative_azimuth_deg=slot.relative_azimuth_deg,
                 fixed_downward_tilt_deg=slot.downward_tilt_deg, camera_absolute_azimuth_deg=absolute,
+                geometry_contract_version=template.geometry_contract_version if template else None,
                 enabled=enabled, valid=False, projected_crs=project.projected_crs, assumptions=ASSUMPTIONS,
             )
             if not enabled:
@@ -141,6 +143,9 @@ def calculate_camera_geometry(project: Project, fixtures: FixtureModelCatalog, c
                 continue
             camera = camera_revisions.get((camera_id, camera_revision)) if camera_id and camera_revision else None
             lens = lens_revisions.get((lens_id, lens_revision)) if lens_id and lens_revision else None
+            if lens is not None:
+                result.horizontal_fov_deg = lens.horizontal_fov_deg
+                result.vertical_fov_deg = lens.vertical_fov_deg
             if model is None:
                 result.warnings.append("Pinned fixture model revision does not exist.")
             if template is None:

@@ -52,7 +52,7 @@ export interface PoleEdit {
 }
 
 export interface Project {
-  schema_version: "2.2.0";
+  schema_version: "2.3.0";
   software_version: string;
   id: string;
   name: string;
@@ -80,6 +80,7 @@ export interface Project {
   layer_state: Record<string, boolean>;
   warnings: ProjectWarning[];
   priority_areas: PriorityArea[];
+  legacy_invalid_priority_areas: Array<Record<string, unknown>>;
   camera_geometry: CameraGeometryLayer;
   assumptions: string[];
   calculated_layers: Record<string, unknown>;
@@ -92,8 +93,9 @@ export interface PriorityArea { id: string; name: string; wgs84_coordinates: Arr
 export interface CameraFootprintResult {
   pole_id: string; fixture_model_id: string; fixture_model_revision: number; mounting_template_revision: number;
   camera_slot_id: string; camera_model_id: string | null; camera_model_revision: number | null; lens_id: string | null; lens_revision: number | null;
+  horizontal_fov_deg: number | null; vertical_fov_deg: number | null;
   fixture_height_m: number | null; fixture_azimuth_deg: number; template_relative_azimuth_deg: number; fixed_downward_tilt_deg: number;
-  camera_absolute_azimuth_deg: number; origin_offset_xyz_m: [0, 0, 0]; projected_crs: string | null; geometry_model_version: "flat-ground-pinhole-1.0.0";
+  camera_absolute_azimuth_deg: number; origin_offset_xyz_m: [0, 0, 0]; geometry_contract_version: string | null; projected_crs: string | null; geometry_model_version: "flat-ground-pinhole-1.0.0";
   enabled: boolean; valid: boolean; warnings: string[]; assumptions: string[]; projected_coordinates_m: Array<[number, number]> | null;
   wgs84_coordinates: Array<[number, number]> | null; footprint_area_m2: number | null;
   pixel_density: { method: "not-calculated"; value: null; units: null; reason: string };

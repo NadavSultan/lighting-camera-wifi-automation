@@ -36,7 +36,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.3.0",
+        version="0.3.1",
         description="Phase 3 fixed-mount camera ground geometry and existing-pole configuration workflow.",
     )
     app.state.project_store = project_store
