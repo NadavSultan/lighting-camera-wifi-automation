@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Independent Phase 3 QA returned **FAIL** with P3-IR-01 through P3-IR-06; the user authorized the bounded corrective implementation. Corrections are implemented and under final verification. Phase 4 and later work remains unauthorized and unstarted.
+Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Independent Phase 3 QA returned **FAIL** with P3-IR-01 through P3-IR-06; the user authorized the bounded corrective implementation. All six corrections and the real rendered workflow are complete and ready for independent corrective retest. Phase 4 and later work remains unauthorized and unstarted.
 
 ## Completed
 
@@ -43,4 +43,4 @@ Last updated: 2026-08-16. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Complete the corrective automated and real rendered workflow, commit the bounded correction and `docs/phase-3-corrective-completion-report.md`, then return it for independent Phase 3 corrective retest. Do not begin Phase 4.
+Return implementation commit `acd14aac431b4737192333f085dfec1b8ce93311` and `docs/phase-3-corrective-completion-report.md` for independent Phase 3 corrective retest. Do not begin Phase 4.
