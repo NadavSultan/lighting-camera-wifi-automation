@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.catalog_models import camera_absolute_azimuth, normalize_azimuth
 from app.models import PriorityArea, Project, migrate_project_payload
@@ -83,6 +84,78 @@ def test_rotation_moves_both_cameras_together_preserving_template_separation_and
     assert [item.camera_absolute_azimuth_deg for item in second.footprints] == [30, 170]
     assert (second.footprints[1].camera_absolute_azimuth_deg - second.footprints[0].camera_absolute_azimuth_deg) % 360 == 140
     assert (pole.id, pole.raw_coordinates, pole.longitude, pole.latitude) == original
+
+
+def test_camera_geometry_crs_boundary_preserves_approved_behavior(tmp_path: Path) -> None:
+    store = catalogs(tmp_path)
+    project = miracle_project()
+    project = configure(project, store, [project.source.poles[0].id])
+
+    valid = calculate_camera_geometry(project, store.fixtures(), store.cameras())
+    assert valid.projected_crs == "EPSG:32617"
+    assert len(valid.footprints) == 2
+    assert all(footprint.valid for footprint in valid.footprints)
+
+    for unsupported in ("EPSG:4326", "EPSG:2263"):
+        project.projected_crs = unsupported
+        empty = calculate_camera_geometry(project, store.fixtures(), store.cameras())
+        assert empty.projected_crs == unsupported
+        assert empty.footprints == []
+
+    project.projected_crs = "NOT-A-CRS"
+    with pytest.raises(ValueError, match="Invalid projected CRS for camera geometry: NOT-A-CRS"):
+        calculate_camera_geometry(project, store.fixtures(), store.cameras())
+
+
+def test_invalid_camera_crs_is_controlled_across_shared_api_paths_and_preserves_store(tmp_path: Path) -> None:
+    catalog_store = catalogs(tmp_path)
+    project_store = ProjectStore(tmp_path / "projects")
+    project = miracle_project()
+    project_store.save(project)
+    client = TestClient(create_app(project_store, catalog_store))
+    valid_payload = project.model_dump(mode="json")
+    invalid_payload = copy.deepcopy(valid_payload)
+    invalid_payload["projected_crs"] = "NOT-A-CRS"
+
+    save_response = client.put(f"/api/projects/{project.id}", json=invalid_payload)
+    assert save_response.status_code == 422
+    assert save_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
+    assert project_store.load(project.id).projected_crs == "EPSG:32617"
+
+    project_count = len(project_store.list())
+    invalid_open_project = Project(name="Invalid CRS open probe", projected_crs="NOT-A-CRS")
+    open_response = client.post("/api/projects/open", json=invalid_open_project.model_dump(mode="json"))
+    assert open_response.status_code == 422
+    assert open_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
+    assert len(project_store.list()) == project_count
+    assert project_store.load(project.id).projected_crs == "EPSG:32617"
+    assert not (project_store.root / invalid_open_project.id).exists()
+
+    camera_response = client.post(f"/api/projects/{project.id}/camera-geometry/recalculate", json=invalid_payload)
+    assert camera_response.status_code == 422
+    assert camera_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
+    assert project_store.load(project.id).projected_crs == "EPSG:32617"
+
+    project_path = project_store.root / project.id / "project.json"
+    project_path.write_text(json.dumps(invalid_payload), encoding="utf-8")
+    corrupt_bytes = project_path.read_bytes()
+
+    get_response = client.get(f"/api/projects/{project.id}")
+    assert get_response.status_code == 422
+    assert "Stored project is invalid or corrupt: Invalid projected CRS for camera geometry: NOT-A-CRS" == get_response.json()["detail"]
+
+    bulk_response = client.patch(
+        f"/api/projects/{project.id}/poles/bulk",
+        json={"pole_ids": [project.source.poles[0].id], "patch": {"pole_height_m": 12}},
+    )
+    assert bulk_response.status_code == 422
+    assert bulk_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
+    assert project_path.read_bytes() == corrupt_bytes
+
+    project_store.save(project)
+    valid_response = client.put(f"/api/projects/{project.id}", json=valid_payload)
+    assert valid_response.status_code == 200
+    assert valid_response.json()["projected_crs"] == "EPSG:32617"
 
 
 def test_fixed_zero_origin_provenance_missing_data_disabled_and_legacy_override_policy(tmp_path: Path) -> None:

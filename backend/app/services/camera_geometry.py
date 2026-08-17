@@ -4,6 +4,7 @@ import math
 from itertools import combinations
 
 from pyproj import CRS, Transformer
+from pyproj.exceptions import CRSError, ProjError
 from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
 from shapely.ops import unary_union
 
@@ -99,11 +100,17 @@ def calculate_camera_geometry(project: Project, fixtures: FixtureModelCatalog, c
     lens_revisions = {(item.id, item.revision): item for item in [*cameras.lenses, *cameras.lens_history]}
     if not project.projected_crs:
         return layer
-    crs = CRS.from_user_input(project.projected_crs)
+    try:
+        crs = CRS.from_user_input(project.projected_crs)
+    except CRSError as exc:
+        raise ValueError(f"Invalid projected CRS for camera geometry: {project.projected_crs}") from exc
     if not crs.is_projected or any(axis.unit_name.lower() not in {"metre", "meter"} for axis in crs.axis_info[:2]):
         return layer
-    to_projected = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
-    to_wgs84 = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    try:
+        to_projected = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
+        to_wgs84 = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    except (CRSError, ProjError) as exc:
+        raise ValueError("Camera geometry could not construct the selected projected CRS transformations") from exc
     source_by_id = {pole.id: pole for pole in project.source.poles}
     polygon_by_id: dict[str, Polygon] = {}
 

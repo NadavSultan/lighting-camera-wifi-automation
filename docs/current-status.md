@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Independent Phase 4 QA returned **FAIL** with findings P4-IR-01 through P4-IR-07. A tightly scoped corrective implementation is complete and awaits separate independent corrective retest and a master gate decision; Phase 4 is not approved. Phase 5 and later remain unauthorized and unstarted.
+Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. The Phase 4 corrective retest passed P4-IR-01, P4-IR-02, P4-IR-03, P4-IR-04, P4-IR-06, and P4-IR-07 but returned **FAIL** because P4-IR-05 remained incomplete on shared invalid-CRS paths. The final narrowly scoped P4-IR-05 correction is complete and awaits one independent focused retest and a master gate decision; Phase 4 is not approved. Phase 5 and later remain unauthorized and unstarted.
 
 ## Completed
 
@@ -24,6 +24,7 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 - Enabled-camera warnings are globally visible and represented on the map under the Warnings layer.
 - Footprints persist exact H/V FOV and mounting geometry-contract version; UI azimuths use deterministic engineering formatting.
 - Final P3-IR-05 correction normalizes after three-decimal rounding so display and intentional map-handle edits can never produce `360`; authoritative backend values are not rewritten by presentation formatting.
+- Final P4-IR-05 correction converts expected camera-geometry CRS/transformer construction failures into controlled validation errors across shared project paths without changing valid camera geometry.
 
 ## Phase 4 implementation
 
@@ -34,7 +35,7 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Validation
 
-- Backend: 116 passed; one existing non-failing Starlette/httpx2 deprecation warning.
+- Backend: 118 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
 - Frontend rendered/workflow suite (9 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
@@ -53,4 +54,4 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Phase 4 remains unapproved after the independent FAIL recorded in `docs/phase-4-integration-review-and-qa.md`. A separate independent corrective retest must verify P4-IR-01 through P4-IR-07 before any master gate decision. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.
+Phase 4 remains unapproved after the focused corrective FAIL recorded in `docs/phase-4-corrective-retest-report.md`. One final independent focused retest must verify P4-IR-05 before any master gate decision; the six findings already passed by that report are not reopened. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.
