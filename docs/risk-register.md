@@ -1,11 +1,11 @@
 # Risk register
 
-Last reviewed: 2026-08-15
+Last reviewed: 2026-08-17
 
 | ID | Risk / limitation | Current treatment | Blocks |
 |---|---|---|---|
 | R-01 | Missing authoritative fixture-to-IES/electrical BOM mapping | IES compatibility is explicit user assignment only; no family/model mapping is inferred. | Authoritative photometric/BOM automation. |
-| R-02 | Unresolved Solitaire 50 W / 60 W conflict | Both supplied files and parsed headers remain preserved; no wattage choice is promoted to a fixture default. | Default Solitaire electrical/photometric selection. |
+| R-02 | Solitaire 50 W filename/numeric-input versus internal `60W` identifier conflict | Both supplied files remain byte-preserved; Phase 4 controls at 50 W and promotes the preserved `60W` identifier to provenance warnings. No automatic IES or fixture default is inferred. | Authoritative default Solitaire electrical/BOM selection. |
 | R-03 | Physical camera XYZ offset was previously unspecified | Resolved for Phase 3 MVP by approved immutable X=0 m, Y=0 m, Z=0 m optical-center offsets at the fixture origin; future non-zero geometry requires a new immutable template revision. | None for approved Phase 3 MVP. |
 | R-04 | Missing default lens assignments for SMART slots | Lens remains explicitly unassigned until a user chooses a compatible model/revision. | Default camera FOV configuration. |
 | R-05 | IES support limited to LM-63-1995/2002 Type C with `TILT=NONE` | Unsupported uploads are retained as inactive records with errors and cannot be associated/defaulted. | Other LM-63 forms and tilted photometry. |

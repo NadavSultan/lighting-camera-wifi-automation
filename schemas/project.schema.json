@@ -867,6 +867,11 @@
           "title": "Ies Original Filename",
           "type": "string"
         },
+        "ies_parsed_metadata": {
+          "additionalProperties": true,
+          "title": "Ies Parsed Metadata",
+          "type": "object"
+        },
         "mounting_height_m": {
           "title": "Mounting Height M",
           "type": "number"

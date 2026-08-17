@@ -58,7 +58,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         project.camera_geometry = calculate_camera_geometry(project, catalogs.fixtures(), catalogs.cameras())
         return project
 
-    def project_references(kind: str, item_id: str) -> list[str]:
+    def project_references(kind: str, item_id: str, fixture_id: str | None = None) -> list[str]:
         references: list[str] = []
         fixture_catalog = catalogs.fixtures()
         fixture_revisions = {(item.id, item.revision): item for item in [*fixture_catalog.fixture_models, *fixture_catalog.fixture_model_history]}
@@ -69,6 +69,12 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
                 if not config:
                     continue
                 if kind == "fixture" and config.fixture_model_id == item_id:
+                    references.append(f"{project.id}/{pole_id}")
+                    continue
+                if kind == "ies" and config.ies_file_id == item_id:
+                    references.append(f"{project.id}/{pole_id}")
+                    continue
+                if kind == "ies-association" and config.ies_file_id == item_id and config.fixture_model_id == fixture_id:
                     references.append(f"{project.id}/{pole_id}")
                     continue
                 model = fixture_revisions.get((config.fixture_model_id, config.fixture_model_revision))
@@ -141,7 +147,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     def bulk_configure_poles(project_id: str, request: BulkPoleConfigurationRequest) -> Project:
         try:
             project = pin_revisions(project_store.load(project_id))
-            updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras()))
+            updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras(), catalogs.ies()))
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -275,6 +281,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.patch("/api/catalogs/ies/{ies_id}", response_model=IesFileRecord)
     def set_ies_active(ies_id: str, active: bool = Body(..., embed=True)) -> IesFileRecord:
         try:
+            if not active:
+                references = project_references("ies", ies_id)
+                if references:
+                    raise HTTPException(status_code=409, detail=f"IES file is assigned to stored project locations: {references}")
             return catalogs.set_ies_active(ies_id, active)
         except CatalogNotFoundError:
             raise HTTPException(status_code=404, detail="IES file not found") from None
@@ -284,6 +294,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.put("/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}", response_model=IesFixtureAssociation)
     def associate_ies(ies_id: str, fixture_id: str, active: bool = Body(default=True, embed=True)) -> IesFixtureAssociation:
         try:
+            if not active:
+                references = project_references("ies-association", ies_id, fixture_id)
+                if references:
+                    raise HTTPException(status_code=409, detail=f"IES association is assigned to stored project locations: {references}")
             return catalogs.associate_ies(IesFixtureAssociation(ies_file_id=ies_id, fixture_model_id=fixture_id, active=active))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -291,6 +305,9 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.delete("/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}", status_code=204)
     def remove_ies_association(ies_id: str, fixture_id: str) -> Response:
         try:
+            references = project_references("ies-association", ies_id, fixture_id)
+            if references:
+                raise HTTPException(status_code=409, detail=f"IES association is assigned to stored project locations: {references}")
             catalogs.remove_ies_association(ies_id, fixture_id)
             return Response(status_code=204)
         except CatalogNotFoundError:

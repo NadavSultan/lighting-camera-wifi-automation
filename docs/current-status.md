@@ -5,9 +5,9 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 ## Completed
 
 - All Phase 1 KML/KMZ import, source preservation, map, edit-overlay, save/reopen, and KML export workflows remain operational.
-- Project schema `2.3.0` migrates `1.0.0`, `2.0.0`, `2.1.0`, and `2.2.0` JSON without changing coordinates, discarding legacy overrides, or guessing a Phoenix 1/Solitaire family.
+- Project schema `2.4.0` and software/API `0.4.0` migrate `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, and `2.3.0` JSON without changing coordinates, discarding legacy overrides, inferring lighting areas, or guessing a Phoenix 1/Solitaire family.
 - The seven approved Phase 1 engineering catalogs remain unchanged at `1.0.0`.
-- Operational IES and camera contracts remain `1.1.0`; the fixture-model contract advances additively to `1.2.0` for the immutable fixed-zero-origin template revision.
+- The operational IES contract is `1.2.0` with immutable file history; the camera contract remains `1.1.0`, and the fixture-model contract is `1.2.0` with the immutable fixed-zero-origin template revision.
 - Six required fixture models are seeded with structured family, variant, and capabilities.
 - Phoenix 1 SMART uses two slots at -70/+70 degrees; Solitaire SMART uses -60/+60 degrees. Both use positive 35-degree downward tilt.
 - Fixture, camera, lens, and mounting-template revisions are immutable. Pole assignments pin exact revisions and adopt newer revisions only explicitly.
@@ -29,12 +29,12 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 - Project schema `2.4.0`, software/API `0.4.0`, and IES operational contract `1.2.0` add lighting calculation areas, immutable IES record history, exact project IES pins, deterministic projected grids, Type C direct horizontal illuminance, maintained-lux statistics, and complete disclaimers/provenance.
 - Lighting calculation areas are separate from camera priority areas. Explicit create/select/edit/redraw/delete and calculate/recalculate workflows are enabled; Wi-Fi and later controls remain disabled.
-- Supplied Phoenix and Solitaire compatibility is enforced by exact SHA family restrictions while association and pole selection remain explicit with no default.
+- Both supplied Phoenix files are approved for Phoenix 1 LITE/WIFI/SMART and both supplied Solitaire files are approved for Solitaire LITE/WIFI/SMART, enforced by exact SHA family restrictions. Association and per-pole selection remain explicit, with no inferred association or automatic default.
 - The result model is intentionally simplified and is not independently validated against AGi32 or another professional photometric reference tool.
 
 ## Validation
 
-- Backend: 99 passed; one existing non-failing Starlette/httpx2 deprecation warning.
+- Backend: 101 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
 - Frontend rendered/workflow suite (7 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
@@ -46,10 +46,10 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 ## Known limitations
 
 - Missing authoritative fixture-to-IES/BOM mapping; operational compatibility remains explicitly user-assigned.
-- Unresolved Solitaire 50 W / 60 W filename/header versus internal-model conflict.
+- For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane; Wi-Fi coverage, illuminance, CAP recommendations, automatic pole placement, and reporting remain deferred.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is implemented but awaits independent QA; Phase 5 Wi-Fi, CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
 
 ## Current gate
 

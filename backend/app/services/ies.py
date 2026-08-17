@@ -4,15 +4,77 @@ import base64
 import hashlib
 import math
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from app.catalog_models import IesFileRecord, IesParsedMetadata
+from pydantic import ValidationError
+
+from app.catalog_models import IesFileRecord, IesLibrary, IesParsedMetadata
 
 
 class IesValidationError(ValueError):
     def __init__(self, message: str, record: IesFileRecord | None = None) -> None:
         super().__init__(message)
         self.record = record
+
+
+@dataclass(frozen=True)
+class ResolvedIesRevision:
+    """An exact immutable project pin plus its current lifecycle record."""
+
+    pinned_record: IesFileRecord
+    current_record: IesFileRecord
+
+    @property
+    def is_historical(self) -> bool:
+        return self.pinned_record.revision != self.current_record.revision
+
+
+def resolve_pinned_ies_revision(
+    library: IesLibrary,
+    ies_file_id: str,
+    ies_file_revision: int | None,
+    fixture_model_id: str,
+) -> ResolvedIesRevision:
+    """Resolve an assignment without falling back from its exact immutable pin.
+
+    Historical bytes are calculation-authoritative. The current record and the
+    current explicit association remain the lifecycle gates, so old pins do not
+    bypass deactivation, invalidation, or compatibility controls.
+    """
+
+    if ies_file_revision is None:
+        raise ValueError("selected IES assignment is missing an exact revision pin")
+    current_matches = [record for record in library.files if record.id == ies_file_id]
+    if len(current_matches) != 1:
+        qualifier = "missing" if not current_matches else "ambiguous"
+        raise ValueError(f"selected IES current lifecycle record is {qualifier}")
+    current = current_matches[0]
+    if not current.active or current.validation_status != "valid":
+        raise ValueError("selected IES current lifecycle record is inactive, invalid, or unsupported")
+    association_matches = [
+        association
+        for association in library.fixture_associations
+        if association.ies_file_id == ies_file_id and association.fixture_model_id == fixture_model_id
+    ]
+    if len(association_matches) != 1 or not association_matches[0].active:
+        qualifier = "ambiguous" if len(association_matches) > 1 else "missing or inactive"
+        raise ValueError(f"selected IES explicit fixture association is {qualifier}")
+    pinned_matches = [
+        record
+        for record in [*library.files, *library.file_history]
+        if record.id == ies_file_id and record.revision == ies_file_revision
+    ]
+    if len(pinned_matches) != 1:
+        qualifier = "missing" if not pinned_matches else "ambiguous"
+        raise ValueError(f"selected IES revision {ies_file_revision} is {qualifier}; current revision was not substituted")
+    try:
+        pinned = IesFileRecord.model_validate(pinned_matches[0].model_dump())
+    except ValidationError as exc:
+        raise ValueError(f"selected IES revision {ies_file_revision} is corrupt") from exc
+    if not pinned.active or pinned.validation_status != "valid":
+        raise ValueError(f"selected IES revision {ies_file_revision} is inactive, invalid, or unsupported")
+    return ResolvedIesRevision(pinned_record=pinned, current_record=current)
 
 
 def parse_ies_upload(filename: str, content: bytes) -> IesFileRecord:

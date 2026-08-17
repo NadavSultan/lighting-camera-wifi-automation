@@ -19,6 +19,7 @@ from app.models import (
     Project,
     utc_now,
 )
+from app.services.ies import resolve_pinned_ies_revision
 
 MODEL_VERSION = "direct-horizontal-type-c-1.0.0"
 BOUNDARY_TOLERANCE_M = 1e-7
@@ -169,8 +170,6 @@ def _eligible_fixtures(project: Project, area: CalculationArea, fixtures: Fixtur
     source_by_id = {pole.id: pole for pole in project.source.poles}
     fixture_revisions = {(item.id, item.revision): item for item in [*fixtures.fixture_models, *fixtures.fixture_model_history]}
     fixture_current = {item.id: item for item in fixtures.fixture_models}
-    ies_current = {item.id: item for item in ies.files}
-    associations = {(item.ies_file_id, item.fixture_model_id) for item in ies.fixture_associations if item.active}
     for pole in project.source.poles:
         edit = project.pole_edits.get(pole.id)
         if edit is None or edit.active is False:
@@ -186,13 +185,14 @@ def _eligible_fixtures(project: Project, area: CalculationArea, fixtures: Fixtur
             reasons.append("fixture model/revision is missing, inactive, or not lighting-capable")
         if not config.ies_file_id:
             reasons.append("explicit compatible IES selection is required")
-        record = ies_current.get(config.ies_file_id or "")
-        if record is None or not record.active or record.validation_status != "valid":
-            reasons.append("selected IES record is missing, inactive, invalid, or unsupported")
-        if config.ies_file_id and (config.ies_file_id, config.fixture_model_id) not in associations:
-            reasons.append("selected IES is not explicitly associated with the fixture model")
-        if record is not None and config.ies_file_revision != record.revision:
-            reasons.append("selected IES revision is not explicitly pinned to the active record revision")
+        record = None
+        if config.ies_file_id:
+            try:
+                record = resolve_pinned_ies_revision(
+                    ies, config.ies_file_id, config.ies_file_revision, config.fixture_model_id
+                ).pinned_record
+            except ValueError as exc:
+                reasons.append(str(exc))
         height = edit.height_m if edit.height_m is not None else project.defaults.pole_height_m
         if height is None or not math.isfinite(height) or height <= area.calculation_plane_elevation_m:
             reasons.append("valid mounting height above the calculation plane is required")
@@ -209,7 +209,9 @@ def _eligible_fixtures(project: Project, area: CalculationArea, fixtures: Fixtur
         provenance = LightingFixtureProvenance(
             pole_id=pole.id, fixture_model_id=config.fixture_model_id, fixture_model_revision=config.fixture_model_revision,
             ies_file_id=record.id, ies_file_revision=record.revision, ies_sha256=record.sha256,
-            ies_original_filename=record.original_filename, mounting_height_m=height, fixture_azimuth_deg=config.fixture_azimuth_deg,
+            ies_original_filename=record.original_filename,
+            ies_parsed_metadata=record.parsed_metadata.model_dump(mode="json") if record.parsed_metadata else {},
+            mounting_height_m=height, fixture_azimuth_deg=config.fixture_azimuth_deg,
             origin_projected_m=(origin_x, origin_y, height), warnings=fixture_warnings,
         )
         eligible.append(EligibleFixture(pole.id, origin_x, origin_y, height, config.fixture_azimuth_deg, photometry, provenance))

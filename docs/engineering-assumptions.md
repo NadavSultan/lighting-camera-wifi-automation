@@ -23,7 +23,7 @@ This register distinguishes governing conventions from temporary assumptions. Ma
 | Assumption | Authoritative record | Consequence |
 |---|---|---|
 | Conceptual Wi-Fi radius is 30 m | `data/network/wifi-defaults.json` | Enables later conceptual visualization only; not RF design. |
-| Proposed photometric rotation order is local tilt followed by world-vertical azimuth | `docs/photometric-conventions.md` | Documentation proposal only; calculations remain blocked pending AGi32 validation. |
+| Luminaire physical tilt is zero and world direction rotates into the local Type C frame by subtracting fixture azimuth | `docs/photometric-conventions.md`; DL-011 | Approved simplified Phase 4 implementation convention; independent professional-reference validation remains pending. |
 | Camera optical centers use immutable X/Y/Z=0 m offsets at the fixture origin | Mounting contract `fixed-zero-origin-1.0.0` | Approved for Phase 3 MVP; future authoritative mechanical offsets require a new pinned template revision. |
 | Camera footprints intersect flat local ground at Z=0 | Geometry model `flat-ground-pinhole-1.0.0` | Approved for Phase 3 MVP; future authoritative terrain requires a separately reviewed model. |
 | Luminaire physical tilt is zero and IES C0 aligns to fixture azimuth | Lighting model `direct-horizontal-type-c-1.0.0` | Approved Phase 4 MVP assumption; `TILT=NONE` is not installation proof. |
@@ -34,10 +34,10 @@ No temporary CAP range, load, hop, redundancy, or fixture-compatibility assumpti
 ## Values requiring future validation
 
 - Camera manufacturer/enclosure identity and analytics capability. Phase 3 slot quantity, fixed relative azimuth, tilt, and zero-origin offsets are approved and operational.
-- Solitaire 50 W filename/header versus `60W` internal luminaire identifier; D02 negative dimensions.
+- Manufacturer confirmation of the supplied Solitaire discrepancy remains open. Phase 4 controls at 50 W because filename and LM-63 input watts agree, preserves the internal `60W` identifier as a warning, and excludes D02 luminous-opening dimensions from the far-field model.
 - Luminaire flux, CCT, mounting height, fixture-type compatibility, and C0-plane/housing orientation.
 - CAP-to-JNET1 terminology, fixture/node applicability, recommended range/load/hops, antenna/LOS, redundancy, band, and site utilities.
 - Wi-Fi RF inputs and performance criteria.
-- Calculation-grid origin/boundary rules and approved lighting targets.
+- Approved lighting targets and professional-reference comparison; the Phase 4 grid origin/boundary rules are fixed by DL-011 for the simplified model.
 
 Values in this section must remain non-operational until resolved through the sources named in `docs/engineering-open-questions.md`.

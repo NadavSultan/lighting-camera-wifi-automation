@@ -16,7 +16,7 @@ Phase 4 implementation decisions for C0 alignment, zero physical tilt, interpola
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| Are the Solitaire D01/D02 products 50 W or 60 W, and which IES belongs to which orderable model? | Resolves filename/header/internal-model conflict. | Phases 2 and 5 | Inventory yes; assignment/calculation no | Wrong fixture and photometric result. | Manufacturer luminaire datasheet and photometric report. |
+| Which orderable Solitaire model/optic corresponds to D01/D02, and can the internal `60W` identifier be manufacturer-confirmed? | Resolves the remaining product-identity conflict; Phase 4 already controls at the matching filename/numeric-input value of 50 W and preserves the `60W` warning. | Phases 4, 5, 7 | Simplified Phase 4 calculation yes; automatic default no | Wrong automatic BOM/optic selection. | Manufacturer luminaire datasheet and photometric report. |
 | What are flux, CCT, recommended mounting heights, and LITE/WIFI/SMART compatibility for each model? | Completes selection and reporting fields. | Phases 2, 5, 7 | Framework yes | Invalid selection and misleading schedules. | Approved product datasheets/BOM. |
 | What does optic code D01/D02 mean physically? | Links distribution to product variant. | Phases 2 and 5 | Parsing yes | Wrong optic assignment. | Manufacturer optical catalog. |
 
@@ -24,9 +24,9 @@ Phase 4 implementation decisions for C0 alignment, zero physical tilt, interpola
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| How does each housing/bracket map to the IES C0 plane and positive azimuth? | Establishes world orientation. | Phase 4 | No final calculation | Rotated distributions and wrong uniformity. | Photometric lab drawing plus AGi32 reference model. |
+| Can the approved Phase 4 C0-to-fixture-azimuth convention be confirmed for each housing/bracket? | Validates the implemented simplified world orientation. | Phase 4 QA | Implemented with disclaimer; no professional equivalence claim | Rotated distributions and wrong uniformity. | Photometric lab drawing plus AGi32 reference model. |
 | What do the D02 negative width/length values represent, and are they accepted by the target engine? | Affects luminous-opening/shape interpretation. | Phase 4 | Metadata yes | Parser incompatibility or incorrect near-field treatment. | LM-63 expert, photometric lab, and AGi32 comparison. |
-| What interpolation, seam, boundary, absolute-photometry, and numeric tolerances are approved? | Defines a reproducible engine and acceptance gate. | Phase 4 | Design docs yes | Non-reproducible or divergent results. | Lighting engineer and AGi32 validation cases. |
+| What professional-reference cases and tolerances will independently validate the approved interpolation, seam, boundary, and absolute-photometry rules? | Defines the future external comparison gate for the implemented reproducible engine. | Phase 4 QA | Synthetic implementation validation yes | Undetected divergence from a professional reference. | Lighting engineer and AGi32 validation cases. |
 | What are the missing test report IDs? | Establishes photometric provenance. | Phases 2, 5, 7 | Yes with warning | Weak audit trail or obsolete data. | JUGANU photometric lab reports. |
 
 ## Wi-Fi
@@ -59,8 +59,8 @@ Phase 4 implementation decisions for C0 alignment, zero physical tilt, interpola
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
 | Which approved standard and project targets apply to each area type? | Supplies target illuminance/uniformity without invention. | Phase 4 | Grid framework yes | False compliance result. | Lighting engineer/client standard/AHJ. |
-| What grid origin/phase, boundary tolerance, hole/multipolygon behavior, and zero-point policy apply? | Makes point sets and statistics deterministic. | Phase 4 | Documentation yes | Different tools produce different totals. | Lighting engineer plus AGi32 reference setup. |
-| What maintenance factor applies and is it global or per luminaire/area? | Scales maintained illuminance. | Phase 4 | No final calculation | Systematic over/understatement. | Approved lighting design standard. |
+| Should a future professional-reference comparison use the approved projected-CRS-zero grid origin, `1e-7 m` boundary tolerance, exterior-ring-only scope, and explicit zero-point policy unchanged? | Aligns the implemented deterministic grid with an external comparison setup. | Phase 4 QA | Implemented with provenance | Different reference point sets and statistics. | Lighting engineer plus AGi32 reference setup. |
+| Which approved maintenance factor should users enter per calculation area? | The engine applies the explicit area value but does not invent the project value. | Phase 4 | Calculation yes with explicit input | Systematic over/understatement from an incorrect user input. | Approved lighting design standard. |
 
 ## Reporting
 

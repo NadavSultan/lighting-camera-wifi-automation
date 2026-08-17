@@ -7,6 +7,7 @@ from pydantic import Field
 
 from app.catalog_models import CameraEquipmentCatalog, FixtureModelCatalog, IesLibrary
 from app.models import PoleCameraOverride, PoleEdit, PoleFixtureConfiguration, Project, StrictModel, utc_now
+from app.services.ies import resolve_pinned_ies_revision
 
 
 class BulkPoleConfigurationPatch(StrictModel):
@@ -39,8 +40,6 @@ def validate_project_configuration(
     camera_revisions = {(item.id, item.revision): item for item in [*cameras.camera_models, *cameras.camera_model_history]}
     lens_current = {item.id: item for item in cameras.lenses}
     lens_revisions = {(item.id, item.revision): item for item in [*cameras.lenses, *cameras.lens_history]}
-    valid_ies = {item.id for item in ies.files if item.active and item.validation_status == "valid"}
-    associations = {(item.ies_file_id, item.fixture_model_id) for item in ies.fixture_associations if item.active}
     for pole_id, edit in project.pole_edits.items():
         config = edit.fixture_configuration
         if config is None:
@@ -88,11 +87,10 @@ def validate_project_configuration(
         elif config.wifi_configuration is not None:
             errors.append(f"{pole_id}: Wi-Fi configuration is incompatible with a LITE fixture")
         if config.ies_file_id is not None:
-            if config.ies_file_id not in valid_ies or (config.ies_file_id, model.id) not in associations:
-                errors.append(f"{pole_id}: missing or invalid IES association")
-            record = next((item for item in ies.files if item.id == config.ies_file_id), None)
-            if record is not None and config.ies_file_revision != record.revision:
-                errors.append(f"{pole_id}: selected IES revision is not pinned to the active record revision")
+            try:
+                resolve_pinned_ies_revision(ies, config.ies_file_id, config.ies_file_revision, model.id)
+            except ValueError as exc:
+                errors.append(f"{pole_id}: {exc}")
     return errors
 
 
@@ -101,6 +99,7 @@ def apply_bulk_configuration(
     request: BulkPoleConfigurationRequest,
     fixtures: FixtureModelCatalog,
     cameras: CameraEquipmentCatalog | None = None,
+    ies: IesLibrary | None = None,
 ) -> Project:
     next_project = deepcopy(project)
     source_ids = {pole.id for pole in project.source.poles}
@@ -133,7 +132,14 @@ def apply_bulk_configuration(
             raise ValueError("assign a fixture model before applying fixture configuration")
         if config is not None:
             if "ies_file_id" in fields:
-                config.ies_file_id = request.patch.ies_file_id
+                selected_id = request.patch.ies_file_id
+                if ies is None:
+                    raise ValueError("IES library is required for an explicit IES assignment or reselection")
+                selected = next((item for item in (ies.files if ies else []) if item.id == selected_id), None)
+                if selected is None or not selected.active or selected.validation_status != "valid":
+                    raise ValueError("bulk IES assignment references an unknown, inactive, invalid, or unsupported current record")
+                config.ies_file_id = selected_id
+                config.ies_file_revision = selected.revision
             if "fixture_azimuth_deg" in fields and request.patch.fixture_azimuth_deg is not None:
                 config.fixture_azimuth_deg = request.patch.fixture_azimuth_deg
             if "lighting_properties" in fields and request.patch.lighting_properties is not None:

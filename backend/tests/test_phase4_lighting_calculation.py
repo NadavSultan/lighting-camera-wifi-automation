@@ -5,10 +5,12 @@ import math
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 from pyproj import Transformer
 from shapely.geometry import Polygon
 
 from app.catalog_models import IesFixtureAssociation, IesLibrary
+from app.main import create_app
 from app.models import CalculationArea, FixtureType, PoleEdit, PoleFixtureConfiguration, Project, SourceLayer, SourcePole, migrate_project_payload
 from app.services.catalogs import AUTHORIZED_SUPPLIED_IES_COMPATIBILITY, CatalogStore
 from app.services.ies import parse_ies_upload
@@ -21,6 +23,7 @@ from app.services.lighting_calculation import (
     interpolate_candela,
     parse_type_c_photometry,
 )
+from app.services.store import ProjectStore
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -105,6 +108,135 @@ def test_area_calculation_statistics_maintenance_sum_and_provenance() -> None:
     assert result.disclaimer.startswith("Not independently validated")
     repeated = calculate_lighting_area(copy.deepcopy(project), area.id, fixtures, library)
     assert [(p.id, p.projected_coordinate_m, p.maintained_horizontal_illuminance_lux) for p in repeated.points] == [(p.id, p.projected_coordinate_m, p.maintained_horizontal_illuminance_lux) for p in result.points]
+
+
+def test_historical_ies_pin_survives_revision_update_until_explicit_reselection(tmp_path: Path) -> None:
+    revision_1 = parse_ies_upload("revision-1.ies", synthetic_ies([[1000.0] * 3 for _ in range(5)]))
+    revision_1.id = "ies-immutable-history-test"
+    revision_1.validation_warnings = ["preserved revision-1 warning"]
+    fixtures = CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")
+    fixtures.save_ies(IesLibrary(
+        files=[revision_1],
+        fixture_associations=[IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="phoenix-1-lite")],
+    ))
+    project, area = project_at_lattice(revision_1)
+    projects = ProjectStore(tmp_path / "projects")
+    projects.save(project)
+    client = TestClient(create_app(projects, fixtures))
+
+    initial = client.post(f"/api/projects/{project.id}/lighting/calculate/{area.id}", json=project.model_dump(mode="json"))
+    assert initial.status_code == 200, initial.text
+    revision_1_project = initial.json()
+    revision_1_result = revision_1_project["lighting_calculations"]["results"][area.id]
+    revision_1_center = revision_1_result["points"][4]["maintained_horizontal_illuminance_lux"]
+    assert revision_1_center == pytest.approx(10.0)
+
+    revision_2 = parse_ies_upload("revision-2.ies", synthetic_ies([[2000.0] * 3 for _ in range(5)]))
+    revision_2.id = revision_1.id
+    revision_2.revision = 2
+    revision_2.validation_warnings = ["revision-2 warning"]
+    advanced = IesLibrary(
+        files=[revision_2], file_history=[revision_1],
+        fixture_associations=[IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="phoenix-1-lite")],
+    )
+    fixtures.save_ies(advanced)
+    reopened_library = fixtures.ies()
+    assert [(record.id, record.revision, record.sha256) for record in reopened_library.file_history] == [
+        (revision_1.id, 1, revision_1.sha256)
+    ]
+
+    saved = client.put(f"/api/projects/{project.id}", json=revision_1_project)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] == 1
+    historical = client.post(f"/api/projects/{project.id}/lighting/calculate/{area.id}", json=saved.json())
+    assert historical.status_code == 200, historical.text
+    historical_project = historical.json()
+    historical_result = historical_project["lighting_calculations"]["results"][area.id]
+    historical_provenance = historical_result["fixture_provenance"][0]
+    assert historical_result["points"][4]["maintained_horizontal_illuminance_lux"] == pytest.approx(revision_1_center)
+    assert historical_provenance["ies_file_revision"] == 1
+    assert historical_provenance["ies_sha256"] == revision_1.sha256
+    assert historical_provenance["ies_original_filename"] == "revision-1.ies"
+    assert historical_provenance["ies_parsed_metadata"] == revision_1.parsed_metadata.model_dump(mode="json")
+    assert historical_provenance["warnings"] == ["preserved revision-1 warning"]
+    repeated = client.post(f"/api/projects/{project.id}/lighting/calculate/{area.id}", json=historical_project)
+    assert repeated.status_code == 200, repeated.text
+    assert repeated.json()["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] == 1
+    assert repeated.json()["lighting_calculations"]["results"][area.id]["points"] == historical_result["points"]
+
+    adopted = client.patch(
+        f"/api/projects/{project.id}/poles/bulk",
+        json={"pole_ids": ["pole-1"], "patch": {"ies_file_id": revision_2.id}},
+    )
+    assert adopted.status_code == 200, adopted.text
+    assert adopted.json()["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] == 2
+    revision_2_calculation = client.post(
+        f"/api/projects/{project.id}/lighting/calculate/{area.id}", json=adopted.json()
+    )
+    assert revision_2_calculation.status_code == 200, revision_2_calculation.text
+    revision_2_result = revision_2_calculation.json()["lighting_calculations"]["results"][area.id]
+    assert revision_2_result["points"][4]["maintained_horizontal_illuminance_lux"] == pytest.approx(20.0)
+    assert revision_2_result["fixture_provenance"][0]["ies_file_revision"] == 2
+    assert revision_2_result["fixture_provenance"][0]["ies_sha256"] == revision_2.sha256
+    assert revision_2_result["fixture_provenance"][0]["ies_original_filename"] == "revision-2.ies"
+
+    missing_history = IesLibrary(
+        files=[revision_2],
+        fixture_associations=[IesFixtureAssociation(ies_file_id=revision_2.id, fixture_model_id="phoenix-1-lite")],
+    )
+    fixtures.save_ies(missing_history)
+    stale_payload = revision_2_calculation.json()
+    stale_payload["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] = 1
+    rejected = client.put(f"/api/projects/{project.id}", json=stale_payload)
+    assert rejected.status_code == 422
+    assert "revision 1 is missing; current revision was not substituted" in rejected.json()["detail"]
+
+
+def test_new_ies_assignment_uses_only_current_active_valid_revision_and_referenced_deactivation_conflicts(tmp_path: Path) -> None:
+    catalogs = CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")
+    record = constant_record()
+    record.id = "ies-new-assignment-test"
+    catalogs.save_ies(IesLibrary(
+        files=[record],
+        fixture_associations=[IesFixtureAssociation(ies_file_id=record.id, fixture_model_id="phoenix-1-lite")],
+    ))
+    project, _ = project_at_lattice(record)
+    projects = ProjectStore(tmp_path / "projects")
+    projects.save(project)
+    client = TestClient(create_app(projects, catalogs))
+    deactivation = client.patch(f"/api/catalogs/ies/{record.id}", json={"active": False})
+    assert deactivation.status_code == 409
+    association_deactivation = client.put(
+        f"/api/catalogs/ies/{record.id}/fixtures/phoenix-1-lite", json={"active": False}
+    )
+    assert association_deactivation.status_code == 409
+    association_removal = client.delete(f"/api/catalogs/ies/{record.id}/fixtures/phoenix-1-lite")
+    assert association_removal.status_code == 409
+
+    inactive = copy.deepcopy(record)
+    inactive.active = False
+    inactive.revision = 2
+    catalogs.save_ies(IesLibrary(files=[inactive], file_history=[record]))
+    assignment = client.patch(
+        f"/api/projects/{project.id}/poles/bulk",
+        json={"pole_ids": ["pole-1"], "patch": {"ies_file_id": record.id}},
+    )
+    assert assignment.status_code == 422
+    assert "inactive, invalid, or unsupported current record" in assignment.json()["detail"]
+
+    invalid = type(inactive).model_validate({
+        **inactive.model_dump(),
+        "revision": 3,
+        "validation_status": "invalid",
+        "validation_errors": ["synthetic invalid current revision"],
+    })
+    catalogs.save_ies(IesLibrary(files=[invalid], file_history=[record, inactive]))
+    invalid_assignment = client.patch(
+        f"/api/projects/{project.id}/poles/bulk",
+        json={"pole_ids": ["pole-1"], "patch": {"ies_file_id": record.id}},
+    )
+    assert invalid_assignment.status_code == 422
+    assert "inactive, invalid, or unsupported current record" in invalid_assignment.json()["detail"]
 
 
 def test_multiple_fixture_summation_and_rotation_never_moves_origin() -> None:
@@ -207,3 +339,4 @@ def test_phase4_additive_migration_preserves_prior_data_and_starts_empty(version
     assert migrated["schema_version"] == "2.4.0"
     assert migrated["calculation_areas"] == [] and migrated["lighting_calculations"] == {}
     assert migrated["source"] == payload["source"] and migrated["priority_areas"] == payload["priority_areas"]
+    assert migrated["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] == record.revision

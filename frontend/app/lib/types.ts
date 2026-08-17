@@ -103,7 +103,7 @@ export interface LightingCalculationResult {
   calculation_area_id: string; calculation_area_name: string; calculation_model_version: "direct-horizontal-type-c-1.0.0"; calculated_at: string;
   polygon_revision: number; projected_crs: string; grid_origin_m: [number, number]; grid_anchor_policy: string; boundary_policy: string;
   points: LightingCalculationPoint[]; statistics: { point_count: number; grid_spacing_m: number; average_illuminance_lux: number | null; minimum_illuminance_lux: number | null; maximum_illuminance_lux: number | null; emin_over_eavg: number | null; emin_over_emax: number | null };
-  contributing_fixture_count: number; fixture_provenance: Array<{ pole_id: string; fixture_model_id: string; fixture_model_revision: number; ies_file_id: string; ies_file_revision: number; ies_sha256: string; ies_original_filename: string; mounting_height_m: number; fixture_azimuth_deg: number; origin_projected_m: [number, number, number]; warnings: string[] }>;
+  contributing_fixture_count: number; fixture_provenance: Array<{ pole_id: string; fixture_model_id: string; fixture_model_revision: number; ies_file_id: string; ies_file_revision: number; ies_sha256: string; ies_original_filename: string; ies_parsed_metadata: { input_watts?: number; photometric_type?: string; vertical_angle_count?: number; horizontal_angle_count?: number }; mounting_height_m: number; fixture_azimuth_deg: number; origin_projected_m: [number, number, number]; warnings: string[] }>;
   assumptions: string[]; warnings: string[]; disclaimer: string;
 }
 export interface LightingCalculationLayer { calculation_model_version: "direct-horizontal-type-c-1.0.0"; results: Record<string, LightingCalculationResult> }

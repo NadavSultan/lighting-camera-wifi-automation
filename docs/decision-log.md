@@ -79,3 +79,11 @@
 - Compatibility: both supplied Phoenix files are restricted by exact SHA-256 to Phoenix 1 LITE/WIFI/SMART; both supplied Solitaire files are restricted to Solitaire LITE/WIFI/SMART. Association and pole selection remain explicit and no default is created.
 - Solitaire: 50 W is controlling; the preserved 60W internal identifier is warned. Raw negative D02 dimensions remain unchanged and luminous-opening geometry is explicitly excluded from the far-field model.
 - Validation boundary: synthetic mathematical cases are implementation evidence only. Every result states that it is not independently validated against AGi32 or another professional reference tool and is not a standards-compliance determination. Phase 5 and later remain unauthorized.
+
+## DL-012 — Exact historical IES revision resolution
+
+- Date: 2026-08-17
+- Status: approved pre-QA correction; independent Phase 4 QA still required
+- Decision: an existing project IES assignment resolves its exact `(ies_file_id, ies_file_revision)` across the current record and immutable `file_history`. The pinned record supplies bytes, parsed metadata, filename, SHA-256, warnings, and calculated output; a missing, ambiguous, invalid, inactive, or corrupt exact pin fails without substituting the current revision.
+- Lifecycle: the current record must remain active and valid and its explicit fixture association must remain active. Supported API operations continue to block deactivation or association removal while stored projects reference them. New assignment and explicit reselection workflows pin only the current active valid revision; catalog updates never mutate existing pins.
+- Boundary: this correction changes no source coordinates or bytes, camera priority areas, lighting equations, compatibility families, or Phase 5+ behavior. Phase 4 remains unapproved pending independent QA.

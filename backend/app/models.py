@@ -264,6 +264,7 @@ class LightingFixtureProvenance(StrictModel):
     ies_file_revision: int
     ies_sha256: str
     ies_original_filename: str
+    ies_parsed_metadata: dict[str, Any] = Field(default_factory=dict)
     mounting_height_m: float
     fixture_azimuth_deg: float
     origin_projected_m: tuple[float, float, float]
