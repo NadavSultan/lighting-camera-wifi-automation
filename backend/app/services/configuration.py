@@ -8,6 +8,7 @@ from pydantic import Field
 from app.catalog_models import CameraEquipmentCatalog, FixtureModelCatalog, IesLibrary
 from app.models import PoleCameraOverride, PoleEdit, PoleFixtureConfiguration, Project, StrictModel, utc_now
 from app.services.ies import resolve_pinned_ies_revision
+from app.services.lighting_calculation import invalidate_stale_lighting_results
 
 
 class BulkPoleConfigurationPatch(StrictModel):
@@ -173,6 +174,7 @@ def apply_bulk_configuration(
             edit.fixture_configuration = config
         edit.modified_at = utc_now()
         next_project.pole_edits[pole_id] = edit
+    invalidate_stale_lighting_results(next_project)
     return next_project
 
 

@@ -8,7 +8,7 @@ import { calculateLighting, createProject, downloadProjectJson, downloadUpdatedK
 import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
-import { staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
+import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -188,13 +188,19 @@ export function EngineeringWorkspace() {
   function updatePole(poleId: string, patch: Partial<PoleEdit>) {
     mutateProject((draft) => {
       const existing = draft.pole_edits[poleId] ?? { pole_id: poleId, location_edit_authorized: false };
-      draft.pole_edits[poleId] = { ...existing, ...patch, pole_id: poleId, modified_at: new Date().toISOString() };
+      const updated = { ...existing, ...patch, pole_id: poleId, modified_at: new Date().toISOString() };
+      draft.pole_edits[poleId] = updated;
+      if (lightingSignificantPoleChange(existing, updated)) invalidateLightingResults(draft);
     });
     setStatus("Pole edit staged separately from the customer source");
   }
 
   function restorePole(poleId: string) {
-    mutateProject((draft) => { delete draft.pole_edits[poleId]; });
+    mutateProject((draft) => {
+      const existing = draft.pole_edits[poleId];
+      delete draft.pole_edits[poleId];
+      if (existing && lightingSignificantPoleChange(existing, undefined)) invalidateLightingResults(draft);
+    });
     setStatus("Restored all source/default values for the selected pole");
   }
 
@@ -212,10 +218,11 @@ export function EngineeringWorkspace() {
     if ((bulkCameraId || bulkLensId) && models.some((item) => !item?.capabilities.cameras)) { setError("Camera and lens bulk configuration is allowed only when every selected fixture is SMART"); return; }
     if (bulkIesId && models.some((model) => !iesLibrary?.fixture_associations.some((item) => item.active && item.ies_file_id === bulkIesId && item.fixture_model_id === model?.id))) { setError("The selected IES file is not explicitly associated with every target fixture model"); return; }
     mutateProject((draft) => {
+      let lightingInputsChanged = false;
       for (const [index, pole] of targets.entries()) {
         const current = draft.pole_edits[pole.id] ?? { pole_id: pole.id, location_edit_authorized: false };
         const model = models[index];
-        let config = current.fixture_configuration;
+        let config = current.fixture_configuration ? structuredClone(current.fixture_configuration) : current.fixture_configuration;
         if (selectedModel && config?.fixture_model_id !== selectedModel.id) config = { fixture_model_id: selectedModel.id, fixture_model_revision: selectedModel.revision, mounting_template_revision: selectedModel.current_mounting_template_revision, ies_file_id: selectedModel.default_ies_file_id, ies_file_revision: selectedModel.default_ies_file_id ? iesLibrary?.files.find((item) => item.id === selectedModel.default_ies_file_id)?.revision ?? null : null, fixture_azimuth_deg: 0, lighting_properties: {}, wifi_configuration: selectedModel.capabilities.wifi ? {} : null, camera_overrides: {} };
         if (config) {
           if (bulkIesId) { config.ies_file_id = bulkIesId; config.ies_file_revision = iesLibrary?.files.find((item) => item.id === bulkIesId)?.revision ?? null; }
@@ -231,8 +238,11 @@ export function EngineeringWorkspace() {
             }
           }
         }
-        draft.pole_edits[pole.id] = { ...current, fixture_type: selectedModel?.capability_variant ?? current.fixture_type, height_m: bulkHeight ? Number(bulkHeight) : current.height_m, fixture_configuration: config, modified_at: new Date().toISOString() };
+        const updated = { ...current, fixture_type: selectedModel?.capability_variant ?? current.fixture_type, height_m: bulkHeight ? Number(bulkHeight) : current.height_m, fixture_configuration: config, modified_at: new Date().toISOString() };
+        draft.pole_edits[pole.id] = updated;
+        lightingInputsChanged ||= lightingSignificantPoleChange(current, updated);
       }
+      if (lightingInputsChanged) invalidateLightingResults(draft);
     });
     setStatus(`Applied only the selected Phase 2 fields to ${targets.length} pole${targets.length === 1 ? "" : "s"}; source coordinates unchanged`);
   }

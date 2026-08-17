@@ -1,26 +1,30 @@
 from __future__ import annotations
 
 import copy
+import json
 import math
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from pyproj import Transformer
 from shapely.geometry import Polygon
 
 from app.catalog_models import IesFixtureAssociation, IesLibrary
 from app.main import create_app
-from app.models import CalculationArea, FixtureType, PoleEdit, PoleFixtureConfiguration, Project, SourceLayer, SourcePole, migrate_project_payload
+from app.models import CalculationArea, FixtureType, LightingCalculationPoint, LightingStatistics, MIN_GRID_SPACING_M, PoleEdit, PoleFixtureConfiguration, Project, SourceLayer, SourcePole, migrate_project_payload
 from app.services.catalogs import AUTHORIZED_SUPPLIED_IES_COMPATIBILITY, CatalogStore
-from app.services.ies import parse_ies_upload
+from app.services.ies import IesValidationError, parse_ies_upload, resolve_pinned_ies_revision
 from app.services.lighting_calculation import (
     MAX_CALCULATION_POINTS,
     EligibleFixture,
     calculate_lighting_area,
     deterministic_grid,
     horizontal_illuminance_lux,
+    invalidate_stale_lighting_results,
     interpolate_candela,
+    lighting_calculation_input_sha256,
     parse_type_c_photometry,
 )
 from app.services.store import ProjectStore
@@ -64,6 +68,32 @@ def catalogs_and_library(record):
     return fixture_catalog, library
 
 
+def calculated_api_project(tmp_path: Path):
+    revision_1 = constant_record(1000)
+    revision_1.id = "ies-input-r1"
+    revision_2 = parse_ies_upload("second.ies", synthetic_ies([[2000.0] * 3 for _ in range(5)]))
+    revision_2.id = "ies-input-r2"
+    catalog_store = CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")
+    catalog_store.save_ies(IesLibrary(
+        files=[revision_1, revision_2],
+        fixture_associations=[
+            IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="phoenix-1-lite"),
+            IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="solitaire-lite"),
+            IesFixtureAssociation(ies_file_id=revision_2.id, fixture_model_id="phoenix-1-lite"),
+        ],
+    ))
+    project, area = project_at_lattice(revision_1)
+    project_store = ProjectStore(tmp_path / "projects")
+    project_store.save(project)
+    client = TestClient(create_app(project_store, catalog_store))
+    calculated = client.post(
+        f"/api/projects/{project.id}/lighting/calculate/{area.id}", json=project.model_dump(mode="json")
+    )
+    assert calculated.status_code == 200, calculated.text
+    assert calculated.json()["lighting_calculations"]["results"][area.id]["calculation_input_sha256"]
+    return client, project_store, catalog_store, calculated.json(), area.id, revision_1, revision_2
+
+
 def test_constant_intensity_nadir_off_axis_inverse_square_and_incidence() -> None:
     record = constant_record()
     photometry = parse_type_c_photometry(record)
@@ -84,6 +114,28 @@ def test_vertical_c_plane_and_seam_interpolation_are_deterministic() -> None:
     assert interpolate_candela(photometry, 22.5, 360) == pytest.approx(50)
 
 
+@pytest.mark.parametrize(("horizontal", "rows"), [
+    ([37.0], [[100.0, 100.0, 100.0]]),
+    ([0.0, 90.0], [[100.0, 100.0, 100.0], [200.0, 200.0, 200.0]]),
+    ([0.0, 180.0], [[100.0, 100.0, 100.0], [200.0, 200.0, 200.0]]),
+    ([0.0, 180.0, 360.0], [[100.0, 100.0, 100.0], [200.0, 200.0, 200.0], [100.0, 100.0, 100.0]]),
+])
+def test_approved_type_c_horizontal_domains_are_accepted(horizontal: list[float], rows: list[list[float]]) -> None:
+    record = parse_ies_upload("domain.ies", synthetic_ies(rows, horizontal=horizontal))
+    assert record.validation_status == "valid"
+    assert parse_type_c_photometry(record).horizontal_angles_deg == tuple(horizontal)
+
+
+def test_unsupported_partial_c_domain_and_discontinuous_full_seam_are_rejected() -> None:
+    with pytest.raises(IesValidationError, match="Unsupported Type C horizontal domain"):
+        parse_ies_upload("partial.ies", synthetic_ies([[100.0] * 3, [200.0] * 3], horizontal=[10.0, 20.0]))
+    with pytest.raises(IesValidationError, match="0/360 C-plane seam is discontinuous"):
+        parse_ies_upload(
+            "seam.ies",
+            synthetic_ies([[100.0] * 3, [200.0] * 3, [900.0] * 3], horizontal=[0.0, 180.0, 360.0]),
+        )
+
+
 def test_grid_boundary_order_limit_and_exact_recalculation() -> None:
     polygon = Polygon([(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)])
     assert deterministic_grid(polygon, 2) == [(0, 0), (2, 0), (4, 0), (0, 2), (2, 2), (4, 2), (0, 4), (2, 4), (4, 4)]
@@ -91,6 +143,86 @@ def test_grid_boundary_order_limit_and_exact_recalculation() -> None:
     with pytest.raises(ValueError, match="point limit|too many"):
         deterministic_grid(too_large, 1)
     assert deterministic_grid(Polygon([(0.1, 0.1), (0.2, 0.1), (0.2, 0.2), (0.1, 0.2)]), 2) == []
+
+
+def test_boundary_tolerance_expands_minimum_maximum_edge_and_vertex_candidates() -> None:
+    inside = 9.99e-8
+    outside = 1.001e-7
+    assert (0, 0) in deterministic_grid(Polygon([(inside, -1), (1, -1), (1, 1), (inside, 1)]), 1)
+    assert (1, 0) in deterministic_grid(Polygon([(-1, -1), (1 - inside, -1), (1 - inside, 1), (-1, 1)]), 1)
+    assert (0, 0) in deterministic_grid(Polygon([(-1, inside), (1, inside), (1, 1), (-1, 1)]), 1)
+    assert (0, 1) in deterministic_grid(Polygon([(-1, -1), (1, -1), (1, 1 - inside), (-1, 1 - inside)]), 1)
+    vertex_offset = inside / math.sqrt(2)
+    vertex_points = deterministic_grid(Polygon([
+        (vertex_offset, vertex_offset), (1, vertex_offset), (1, 1), (vertex_offset, 1)
+    ]), 1)
+    assert (0, 0) in vertex_points
+    assert len(vertex_points) == len(set(vertex_points))
+    rejected = deterministic_grid(Polygon([(outside, -1), (1, -1), (1, 1), (outside, 1)]), 1)
+    assert (0, 0) not in rejected
+    outside_vertex_offset = outside / math.sqrt(2)
+    rejected_vertex = deterministic_grid(Polygon([
+        (outside_vertex_offset, outside_vertex_offset), (1, outside_vertex_offset), (1, 1), (outside_vertex_offset, 1)
+    ]), 1)
+    assert (0, 0) not in rejected_vertex
+
+
+def test_non_finite_models_and_overflow_photometry_are_rejected() -> None:
+    with pytest.raises(IesValidationError, match="non-finite scaled intensity"):
+        parse_ies_upload(
+            "overflow.ies",
+            synthetic_ies([[1e308] * 3 for _ in range(5)], multiplier=1e308),
+        )
+    with pytest.raises(ValidationError):
+        LightingCalculationPoint(
+            id="bad", sequence_index=0, projected_coordinate_m=(0, 0), wgs84_coordinate=(0, 0),
+            calculation_plane_elevation_m=0, maintained_horizontal_illuminance_lux=math.inf,
+        )
+    with pytest.raises(ValidationError):
+        LightingStatistics(point_count=1, grid_spacing_m=2, average_illuminance_lux=math.nan)
+
+
+def test_invalid_crs_and_unsafe_spacing_return_controlled_errors_and_preserve_project(tmp_path: Path) -> None:
+    client, projects, _, calculated, area_id, _, _ = calculated_api_project(tmp_path)
+    prior_result = copy.deepcopy(calculated["lighting_calculations"]["results"][area_id])
+    for invalid_crs in ("NOT-A-CRS", "EPSG:4326", "EPSG:2263"):
+        projects.save(Project.model_validate(copy.deepcopy(calculated)))
+        payload = copy.deepcopy(calculated)
+        payload["projected_crs"] = invalid_crs
+        response = client.post(f"/api/projects/{calculated['id']}/lighting/calculate/{area_id}", json=payload)
+        assert response.status_code == 422, (invalid_crs, response.text)
+        assert "CRS" in str(response.json()["detail"])
+        reopened = client.get(f"/api/projects/{calculated['id']}")
+        assert reopened.status_code == 200
+        assert reopened.json()["lighting_calculations"]["results"][area_id] == prior_result
+
+    subnormal = copy.deepcopy(calculated)
+    subnormal["calculation_areas"][0]["grid_spacing_m"] = 5e-324
+    response = client.post(f"/api/projects/{calculated['id']}/lighting/calculate/{area_id}", json=subnormal)
+    assert response.status_code == 422
+    assert "greater than or equal to 0.01" in response.text
+
+    lower_boundary = copy.deepcopy(calculated)
+    lower_boundary["calculation_areas"][0]["grid_spacing_m"] = MIN_GRID_SPACING_M
+    to_wgs84 = Transformer.from_crs("EPSG:32617", "EPSG:4326", always_xy=True)
+    lower_boundary["calculation_areas"][0]["wgs84_coordinates"] = [
+        to_wgs84.transform(x, y)
+        for x, y in ((599999.989, 2849999.989), (600000.011, 2849999.989), (600000.011, 2850000.011), (599999.989, 2850000.011), (599999.989, 2849999.989))
+    ]
+    accepted = client.post(f"/api/projects/{calculated['id']}/lighting/calculate/{area_id}", json=lower_boundary)
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["lighting_calculations"]["results"][area_id]["statistics"]["grid_spacing_m"] == MIN_GRID_SPACING_M
+
+
+def test_corrupt_non_finite_persisted_project_returns_422_not_not_found(tmp_path: Path) -> None:
+    client, projects, _, calculated, area_id, _, _ = calculated_api_project(tmp_path)
+    corrupted = copy.deepcopy(calculated)
+    corrupted["lighting_calculations"]["results"][area_id]["points"][0]["maintained_horizontal_illuminance_lux"] = math.inf
+    project_path = projects.root / calculated["id"] / "project.json"
+    project_path.write_text(json.dumps(corrupted), encoding="utf-8")
+    response = client.get(f"/api/projects/{calculated['id']}")
+    assert response.status_code == 422
+    assert "invalid or corrupt" in response.json()["detail"]
 
 
 def test_area_calculation_statistics_maintenance_sum_and_provenance() -> None:
@@ -108,6 +240,66 @@ def test_area_calculation_statistics_maintenance_sum_and_provenance() -> None:
     assert result.disclaimer.startswith("Not independently validated")
     repeated = calculate_lighting_area(copy.deepcopy(project), area.id, fixtures, library)
     assert [(p.id, p.projected_coordinate_m, p.maintained_horizontal_illuminance_lux) for p in repeated.points] == [(p.id, p.projected_coordinate_m, p.maintained_horizontal_illuminance_lux) for p in result.points]
+
+
+def test_calculation_significant_save_restore_and_bulk_mutations_invalidate_results(tmp_path: Path) -> None:
+    client, projects, _, calculated, area_id, _, revision_2 = calculated_api_project(tmp_path)
+
+    note_only = copy.deepcopy(calculated)
+    note_only["pole_edits"]["pole-1"]["engineering_notes"] = "No photometric change"
+    note_saved = client.put(f"/api/projects/{calculated['id']}", json=note_only)
+    assert note_saved.status_code == 200, note_saved.text
+    assert area_id in note_saved.json()["lighting_calculations"]["results"]
+
+    for change in ("height", "azimuth", "model", "ies", "active", "restore"):
+        projects.save(Project.model_validate(copy.deepcopy(calculated)))
+        payload = copy.deepcopy(calculated)
+        edit = payload["pole_edits"]["pole-1"]
+        config = edit["fixture_configuration"]
+        if change == "height":
+            edit["height_m"] = 20
+        elif change == "azimuth":
+            config["fixture_azimuth_deg"] = 90
+        elif change == "model":
+            config["fixture_model_id"] = "solitaire-lite"
+            config["fixture_model_revision"] = 1
+        elif change == "ies":
+            config["ies_file_id"] = revision_2.id
+            config["ies_file_revision"] = revision_2.revision
+        elif change == "active":
+            edit["active"] = False
+        else:
+            del payload["pole_edits"]["pole-1"]
+        saved = client.put(f"/api/projects/{calculated['id']}", json=payload)
+        assert saved.status_code == 200, f"{change}: {saved.text}"
+        assert saved.json()["lighting_calculations"]["results"] == {}, change
+        assert saved.json()["calculation_areas"][0]["calculation_state"]["status"] == "not-calculated"
+        reopened = client.get(f"/api/projects/{calculated['id']}")
+        assert reopened.status_code == 200
+        assert reopened.json()["lighting_calculations"]["results"] == {}, change
+
+    projects.save(Project.model_validate(copy.deepcopy(calculated)))
+    bulk = client.patch(
+        f"/api/projects/{calculated['id']}/poles/bulk",
+        json={"pole_ids": ["pole-1"], "patch": {"pole_height_m": 15, "fixture_azimuth_deg": 45}},
+    )
+    assert bulk.status_code == 200, bulk.text
+    assert bulk.json()["lighting_calculations"]["results"] == {}
+
+
+def test_input_signature_invalidates_old_or_mismatched_results_without_touching_notes() -> None:
+    record = constant_record()
+    project, area = project_at_lattice(record)
+    fixtures, library = catalogs_and_library(record)
+    result = calculate_lighting_area(project, area.id, fixtures, library)
+    project.lighting_calculations.results[area.id] = result
+    expected = lighting_calculation_input_sha256(project, area.id)
+    assert result.calculation_input_sha256 == expected
+    project.pole_edits["pole-1"].engineering_notes = "note only"
+    assert invalidate_stale_lighting_results(project) is False
+    project.pole_edits["pole-1"].height_m = 11
+    assert invalidate_stale_lighting_results(project) is True
+    assert project.lighting_calculations.results == {}
 
 
 def test_historical_ies_pin_survives_revision_update_until_explicit_reselection(tmp_path: Path) -> None:
@@ -190,6 +382,47 @@ def test_historical_ies_pin_survives_revision_update_until_explicit_reselection(
     rejected = client.put(f"/api/projects/{project.id}", json=stale_payload)
     assert rejected.status_code == 422
     assert "revision 1 is missing; current revision was not substituted" in rejected.json()["detail"]
+
+
+@pytest.mark.parametrize("metadata_patch", [
+    {"input_watts": 999.0},
+    {"vertical_angle_count": 99},
+    {"horizontal_angle_range_deg": (10.0, 20.0)},
+])
+def test_historical_resolver_reparses_bytes_and_rejects_metadata_mismatch(metadata_patch: dict[str, object]) -> None:
+    revision_1 = constant_record(1000)
+    revision_1.id = "ies-metadata-integrity"
+    corrupted_metadata = revision_1.parsed_metadata.model_copy(update=metadata_patch)  # type: ignore[union-attr]
+    corrupted = revision_1.model_copy(update={"parsed_metadata": corrupted_metadata})
+    revision_2 = constant_record(2000)
+    revision_2.id = revision_1.id
+    revision_2.revision = 2
+    library = IesLibrary(
+        files=[revision_2], file_history=[corrupted],
+        fixture_associations=[IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="phoenix-1-lite")],
+    )
+    with pytest.raises(ValueError, match="revision 1 parsed metadata does not match its immutable bytes"):
+        resolve_pinned_ies_revision(library, revision_1.id, 1, "phoenix-1-lite")
+    assert resolve_pinned_ies_revision(library, revision_1.id, 2, "phoenix-1-lite").pinned_record.sha256 == revision_2.sha256
+
+
+def test_historical_resolver_accepts_canonical_metadata_and_rejects_missing_metadata() -> None:
+    revision_1 = constant_record(1000)
+    revision_1.id = "ies-canonical-history"
+    revision_2 = constant_record(2000)
+    revision_2.id = revision_1.id
+    revision_2.revision = 2
+    association = IesFixtureAssociation(ies_file_id=revision_1.id, fixture_model_id="phoenix-1-lite")
+    valid_library = IesLibrary(files=[revision_2], file_history=[revision_1], fixture_associations=[association])
+    resolved = resolve_pinned_ies_revision(valid_library, revision_1.id, 1, "phoenix-1-lite")
+    assert resolved.pinned_record.parsed_metadata == revision_1.parsed_metadata
+
+    missing_payload = revision_1.model_dump()
+    missing_payload["parsed_metadata"] = None
+    missing = type(revision_1).model_construct(**missing_payload)
+    unsafe_library = IesLibrary.model_construct(files=[revision_2], file_history=[missing], fixture_associations=[association])
+    with pytest.raises(ValueError, match="revision 1 is corrupt"):
+        resolve_pinned_ies_revision(unsafe_library, revision_1.id, 1, "phoenix-1-lite")
 
 
 def test_new_ies_assignment_uses_only_current_active_valid_revision_and_referenced_deactivation_conflicts(tmp_path: Path) -> None:

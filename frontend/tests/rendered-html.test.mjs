@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
-import { staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
+import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -86,10 +86,54 @@ test("Phase 4 calculation-area validation and stale-state transitions are explic
   assert.equal(valid.name, "Road A");
   assert.equal(valid.grid_spacing_m, 2);
   assert.deepEqual(valid.wgs84_coordinates, [...vertices, vertices[0]]);
-  assert.throws(() => validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 0, maintenance_factor: 1 }), /positive/);
+  assert.throws(() => validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 0, maintenance_factor: 1 }), /at least 0.01 m/);
+  assert.equal(validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: MIN_GRID_SPACING_M, maintenance_factor: 1 }).grid_spacing_m, MIN_GRID_SPACING_M);
   assert.throws(() => validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 2, maintenance_factor: 1.1 }), /no greater than 1/);
   assert.equal(staleCalculationState({ polygon_revision: 4 }, false).polygon_revision, 4);
   assert.equal(staleCalculationState({ polygon_revision: 4 }, true).polygon_revision, 5);
+});
+
+test("P4-IR-01 immediately invalidates lighting results only for significant pole edits", async () => {
+  const base = { pole_id: "p1", height_m: 10, active: true, engineering_notes: "before", fixture_type: "LITE", fixture_configuration: { fixture_model_id: "phoenix-1-lite", fixture_model_revision: 1, mounting_template_revision: null, ies_file_id: "ies-1", ies_file_revision: 1, fixture_azimuth_deg: 0, lighting_properties: {}, wifi_configuration: null, camera_overrides: {} } };
+  assert.equal(lightingSignificantPoleChange(base, { ...base, engineering_notes: "after" }), false);
+  for (const changed of [
+    { ...base, height_m: 12 },
+    { ...base, active: false },
+    { ...base, fixture_type: "SMART" },
+    { ...base, fixture_configuration: { ...base.fixture_configuration, fixture_model_id: "solitaire-lite" } },
+    { ...base, fixture_configuration: { ...base.fixture_configuration, ies_file_id: "ies-2", ies_file_revision: 2 } },
+    { ...base, fixture_configuration: { ...base.fixture_configuration, fixture_azimuth_deg: 90 } },
+    undefined,
+  ]) assert.equal(lightingSignificantPoleChange(base, changed), true);
+  const project = { lighting_calculations: { results: { area: { stale: true } } }, calculation_areas: [{ id: "area", calculation_state: { status: "calculated", polygon_revision: 3, last_calculated_at: "before", warnings: ["old"], assumptions: ["old"], provenance: { old: true } } }] };
+  invalidateLightingResults(project);
+  assert.deepEqual(project.lighting_calculations.results, {});
+  assert.equal(project.calculation_areas[0].calculation_state.status, "not-calculated");
+  assert.equal(project.calculation_areas[0].calculation_state.polygon_revision, 3);
+  const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /lightingSignificantPoleChange\(existing, updated\)/);
+  assert.match(workspace, /lightingSignificantPoleChange\(existing, undefined\)/);
+  assert.match(workspace, /lightingInputsChanged \|\|= lightingSignificantPoleChange\(current, updated\)/);
+  assert.match(workspace, /if \(lightingInputsChanged\) invalidateLightingResults\(draft\)/);
+});
+
+test("P4-IR-07 lighting-area validation never uses priority-area wording", () => {
+  const settings = { name: "Lighting", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 2, maintenance_factor: 1 };
+  const cases = [
+    [[[0, 0], [1, 0]], /three distinct vertices/],
+    [[[0, 0], [0, 0], [1, 1]], /three distinct vertices/],
+    [[[0, 0], [1, 1], [0, 1], [1, 0]], /self-intersecting/],
+    [[[0, 0], [1, 1], [2, 2]], /degenerate/],
+    [[[0, 0], [1, Number.NaN], [2, 1]], /finite numbers/],
+    [[[0, 0], [181, 0], [1, 1]], /WGS84 bounds/],
+  ];
+  for (const [points, expected] of cases) {
+    let message = "";
+    try { validateCalculationAreaDraft(points, settings); } catch (caught) { message = caught.message; }
+    assert.match(message, expected);
+    assert.doesNotMatch(message, /priority area|priority-area/i);
+    assert.match(message, /lighting calculation area/i);
+  }
 });
 
 test("NIR-01 refreshes and reports a rejected retained IES record without raw JSON", async () => {

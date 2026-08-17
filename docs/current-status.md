@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 lighting is implemented under explicit authorization and awaits separate independent QA and a master gate decision; it is not approved. Phase 5 and later remain unauthorized and unstarted.
+Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Independent Phase 4 QA returned **FAIL** with findings P4-IR-01 through P4-IR-07. A tightly scoped corrective implementation is complete and awaits separate independent corrective retest and a master gate decision; Phase 4 is not approved. Phase 5 and later remain unauthorized and unstarted.
 
 ## Completed
 
@@ -34,9 +34,9 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Validation
 
-- Backend: 101 passed; one existing non-failing Starlette/httpx2 deprecation warning.
+- Backend: 116 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
-- Frontend rendered/workflow suite (7 tests), strict TypeScript, and ESLint: passed.
+- Frontend rendered/workflow suite (9 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
 - Rendered Phase 4 workflow: 74-pole KML, explicit Phoenix/Solitaire IES association and selection, separate Road calculation area, 286-point result, azimuth-driven result change, save/reopen, visible provenance/warnings, unchanged source coordinate, separate empty camera priority collection, Phase 5+ gating, and zero browser-console errors.
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
@@ -53,4 +53,4 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Phase 4 implementation is complete but not approved. A separate independent QA task must verify the claims in `docs/phase-4-completion-report.md` before any master gate decision. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.
+Phase 4 remains unapproved after the independent FAIL recorded in `docs/phase-4-integration-review-and-qa.md`. A separate independent corrective retest must verify P4-IR-01 through P4-IR-07 before any master gate decision. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.

@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import base64
 import bisect
+import hashlib
+import json
 import math
 import re
 from dataclasses import dataclass
 
 from pyproj import CRS, Transformer
+from pyproj.exceptions import CRSError, ProjError
 from shapely.geometry import Point, Polygon
 
 from app.catalog_models import FixtureModelCatalog, IesFileRecord, IesLibrary
@@ -16,6 +19,7 @@ from app.models import (
     LightingCalculationResult,
     LightingFixtureProvenance,
     LightingStatistics,
+    MIN_GRID_SPACING_M,
     Project,
     utc_now,
 )
@@ -35,6 +39,80 @@ ASSUMPTIONS = [
     "No depreciation is applied beyond the calculation area's explicit maintenance factor.",
     "Results are not a standards-compliance determination.",
 ]
+
+
+def _require_finite(value: float, label: str) -> float:
+    if not math.isfinite(value):
+        raise ValueError(f"Lighting calculation produced a non-finite {label}")
+    return value
+
+
+def lighting_calculation_input_sha256(project: Project, area_id: str) -> str:
+    area = next((item for item in project.calculation_areas if item.id == area_id), None)
+    if area is None:
+        raise ValueError("Calculation area was not found")
+    pole_inputs: list[dict[str, object]] = []
+    for pole in project.source.poles:
+        edit = project.pole_edits.get(pole.id)
+        config = edit.fixture_configuration if edit else None
+        pole_inputs.append({
+            "id": pole.id,
+            "longitude": pole.longitude,
+            "latitude": pole.latitude,
+            "active": edit.active if edit and edit.active is not None else True,
+            "fixture_type": (edit.fixture_type if edit and edit.fixture_type is not None else project.defaults.fixture_type).value,
+            "height_m": edit.height_m if edit and edit.height_m is not None else project.defaults.pole_height_m,
+            "fixture_configuration": None if config is None else {
+                "fixture_model_id": config.fixture_model_id,
+                "fixture_model_revision": config.fixture_model_revision,
+                "mounting_template_revision": config.mounting_template_revision,
+                "ies_file_id": config.ies_file_id,
+                "ies_file_revision": config.ies_file_revision,
+                "fixture_azimuth_deg": config.fixture_azimuth_deg,
+                "lighting_properties": config.lighting_properties,
+            },
+        })
+    payload = {
+        "projected_crs": project.projected_crs,
+        "area": {
+            "id": area.id,
+            "name": area.name,
+            "classification": area.classification,
+            "wgs84_coordinates": area.wgs84_coordinates,
+            "calculation_plane_elevation_m": area.calculation_plane_elevation_m,
+            "grid_spacing_m": area.grid_spacing_m,
+            "maintenance_factor": area.maintenance_factor,
+            "polygon_revision": area.calculation_state.polygon_revision,
+        },
+        "poles": pole_inputs,
+    }
+    try:
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Lighting calculation inputs are not finite JSON-compatible values") from exc
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def invalidate_stale_lighting_results(project: Project) -> bool:
+    area_ids = {area.id for area in project.calculation_areas}
+    stale_ids = [
+        area_id
+        for area_id, result in project.lighting_calculations.results.items()
+        if area_id not in area_ids
+        or result.calculation_input_sha256 != lighting_calculation_input_sha256(project, area_id)
+    ]
+    if not stale_ids:
+        return False
+    for area_id in stale_ids:
+        project.lighting_calculations.results.pop(area_id, None)
+        area = next((item for item in project.calculation_areas if item.id == area_id), None)
+        if area is not None:
+            area.calculation_state.status = "not-calculated"
+            area.calculation_state.last_calculated_at = None
+            area.calculation_state.warnings = []
+            area.calculation_state.assumptions = []
+            area.calculation_state.provenance = {}
+    return True
 
 
 @dataclass(frozen=True)
@@ -87,6 +165,8 @@ def parse_type_c_photometry(record: IesFileRecord) -> TypeCPhotometry:
     if len(vertical) != vertical_count or len(horizontal) != horizontal_count or len(values) != vertical_count * horizontal_count:
         raise ValueError("IES angle or candela array length mismatch")
     rows = tuple(tuple(values[row * vertical_count : (row + 1) * vertical_count]) for row in range(horizontal_count))
+    if any(not math.isfinite(value * multiplier) for row in rows for value in row):
+        raise ValueError("IES candela values and multiplier produce a non-finite scaled intensity")
     return TypeCPhotometry(vertical, horizontal, rows, multiplier, input_watts, keywords.get("LUMINAIRE"), dimensions)
 
 
@@ -101,7 +181,7 @@ def _linear(values: tuple[float, ...], samples: tuple[float, ...], value: float)
     left = right - 1
     span = samples[right] - samples[left]
     fraction = 0.0 if span == 0 else (value - samples[left]) / span
-    return values[left] + fraction * (values[right] - values[left])
+    return _require_finite(values[left] + fraction * (values[right] - values[left]), "interpolated candela value")
 
 
 def _canonical_c_angle(angle_deg: float, planes: tuple[float, ...]) -> float:
@@ -122,11 +202,11 @@ def interpolate_candela(photometry: TypeCPhotometry, vertical_deg: float, c_plan
     c_angle = _canonical_c_angle(c_plane_deg, planes)
     vertical_values = tuple(_linear(row, photometry.vertical_angles_deg, vertical_deg) for row in photometry.candela_rows)
     if len(planes) == 1:
-        return vertical_values[0] * photometry.candela_multiplier
+        return _require_finite(vertical_values[0] * photometry.candela_multiplier, "scaled candela intensity")
     if planes[0] == 0 and planes[-1] == 360:
         c_angle %= 360.0
     intensity = _linear(vertical_values, planes, c_angle)
-    return max(0.0, intensity * photometry.candela_multiplier)
+    return max(0.0, _require_finite(intensity * photometry.candela_multiplier, "scaled candela intensity"))
 
 
 def horizontal_illuminance_lux(fixture: EligibleFixture, point_x_m: float, point_y_m: float, plane_z_m: float) -> float:
@@ -141,13 +221,20 @@ def horizontal_illuminance_lux(fixture: EligibleFixture, point_x_m: float, point
     local_c_plane = (world_azimuth - fixture.azimuth_deg) % 360.0
     intensity_cd = interpolate_candela(fixture.photometry, vertical_angle, local_c_plane)
     incidence_cosine = vertical_separation / slant_distance
-    return max(0.0, intensity_cd * incidence_cosine / (slant_distance * slant_distance))
+    return max(0.0, _require_finite(intensity_cd * incidence_cosine / (slant_distance * slant_distance), "per-fixture illuminance"))
 
 
 def deterministic_grid(polygon: Polygon, spacing_m: float) -> list[tuple[float, float]]:
+    if not math.isfinite(spacing_m) or spacing_m < MIN_GRID_SPACING_M:
+        raise ValueError(f"Grid spacing must be finite and at least {MIN_GRID_SPACING_M:g} m")
     min_x, min_y, max_x, max_y = polygon.bounds
-    first_x, last_x = math.ceil(min_x / spacing_m), math.floor(max_x / spacing_m)
-    first_y, last_y = math.ceil(min_y / spacing_m), math.floor(max_y / spacing_m)
+    if not all(math.isfinite(value) for value in (min_x, min_y, max_x, max_y)):
+        raise ValueError("Calculation-area projected bounds must be finite")
+    try:
+        first_x, last_x = math.ceil((min_x - BOUNDARY_TOLERANCE_M) / spacing_m), math.floor((max_x + BOUNDARY_TOLERANCE_M) / spacing_m)
+        first_y, last_y = math.ceil((min_y - BOUNDARY_TOLERANCE_M) / spacing_m), math.floor((max_y + BOUNDARY_TOLERANCE_M) / spacing_m)
+    except OverflowError as exc:
+        raise ValueError("Grid spacing and projected bounds produce unsafe lattice indices") from exc
     candidate_count = max(0, last_x - first_x + 1) * max(0, last_y - first_y + 1)
     if candidate_count > MAX_CALCULATION_POINTS * 20:
         raise ValueError(f"Requested grid has too many candidate points ({candidate_count:,}); maximum accepted result count is {MAX_CALCULATION_POINTS:,}. Increase spacing explicitly or reduce the area.")
@@ -167,7 +254,6 @@ def deterministic_grid(polygon: Polygon, spacing_m: float) -> list[tuple[float, 
 def _eligible_fixtures(project: Project, area: CalculationArea, fixtures: FixtureModelCatalog, ies: IesLibrary, transformer: Transformer) -> tuple[list[EligibleFixture], list[str]]:
     warnings: list[str] = []
     eligible: list[EligibleFixture] = []
-    source_by_id = {pole.id: pole for pole in project.source.poles}
     fixture_revisions = {(item.id, item.revision): item for item in [*fixtures.fixture_models, *fixtures.fixture_model_history]}
     fixture_current = {item.id: item for item in fixtures.fixture_models}
     for pole in project.source.poles:
@@ -201,6 +287,8 @@ def _eligible_fixtures(project: Project, area: CalculationArea, fixtures: Fixtur
             continue
         photometry = parse_type_c_photometry(record)  # type: ignore[arg-type]
         origin_x, origin_y = transformer.transform(pole.longitude, pole.latitude)
+        _require_finite(origin_x, "fixture projected X coordinate")
+        _require_finite(origin_y, "fixture projected Y coordinate")
         fixture_warnings = list(record.validation_warnings)  # type: ignore[union-attr]
         if photometry.input_watts == 50 and photometry.luminaire_identifier and "60W" in photometry.luminaire_identifier.upper():
             fixture_warnings.append("Controlling nominal input is 50 W; the preserved internal [LUMINAIRE] identifier says 60W.")
@@ -224,12 +312,20 @@ def calculate_lighting_area(project: Project, area_id: str, fixtures: FixtureMod
         raise ValueError("Calculation area was not found")
     if not project.projected_crs:
         raise ValueError("A project-selected projected CRS is required")
-    crs = CRS.from_user_input(project.projected_crs)
+    try:
+        crs = CRS.from_user_input(project.projected_crs)
+    except CRSError as exc:
+        raise ValueError(f"Invalid projected CRS: {project.projected_crs}") from exc
     if not crs.is_projected or any(axis.unit_name.lower() not in {"metre", "meter"} for axis in crs.axis_info[:2]):
         raise ValueError("Lighting calculation requires a projected CRS with metre axes")
-    to_projected = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
-    to_wgs84 = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
-    ring = [to_projected.transform(longitude, latitude) for longitude, latitude in area.wgs84_coordinates]
+    try:
+        to_projected = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
+        to_wgs84 = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+        ring = [to_projected.transform(longitude, latitude) for longitude, latitude in area.wgs84_coordinates]
+    except (CRSError, ProjError) as exc:
+        raise ValueError("Lighting calculation could not construct or apply the selected projected CRS transformation") from exc
+    if not all(math.isfinite(value) for coordinate in ring for value in coordinate):
+        raise ValueError("Lighting calculation produced non-finite projected calculation-area coordinates")
     polygon = Polygon(ring)
     if not polygon.is_valid or polygon.area <= 1e-8:
         raise ValueError("Calculation area is invalid or degenerate in the selected projected CRS")
@@ -250,27 +346,55 @@ def calculate_lighting_area(project: Project, area_id: str, fixtures: FixtureMod
     points: list[LightingCalculationPoint] = []
     for index, (x, y) in enumerate(grid):
         contributions = {fixture.pole_id: horizontal_illuminance_lux(fixture, x, y, area.calculation_plane_elevation_m) for fixture in eligible}
-        maintained = math.fsum(contributions.values()) * area.maintenance_factor
-        longitude, latitude = to_wgs84.transform(x, y)
+        try:
+            summed = math.fsum(contributions.values())
+        except OverflowError as exc:
+            raise ValueError("Lighting fixture contributions overflowed during summation") from exc
+        _require_finite(summed, "summed illuminance")
+        maintained = _require_finite(summed * area.maintenance_factor, "maintenance-scaled illuminance")
+        try:
+            longitude, latitude = to_wgs84.transform(x, y)
+        except ProjError as exc:
+            raise ValueError("Lighting calculation could not transform a result point to WGS84") from exc
+        _require_finite(longitude, "result longitude")
+        _require_finite(latitude, "result latitude")
+        maintained_contributions = None
+        if retain_contributions:
+            maintained_contributions = {
+                key: _require_finite(value * area.maintenance_factor, "maintenance-scaled fixture contribution")
+                for key, value in contributions.items()
+            }
         points.append(LightingCalculationPoint(
             id=f"{area.id}:r{area.calculation_state.polygon_revision}:{index:06d}", sequence_index=index,
             projected_coordinate_m=(x, y), wgs84_coordinate=(longitude, latitude),
             calculation_plane_elevation_m=area.calculation_plane_elevation_m,
             maintained_horizontal_illuminance_lux=maintained,
-            per_fixture_contributions_lux=({key: value * area.maintenance_factor for key, value in contributions.items()} if retain_contributions else None),
+            per_fixture_contributions_lux=maintained_contributions,
         ))
     values = [point.maintained_horizontal_illuminance_lux for point in points]
-    average = math.fsum(values) / len(values) if values else None
+    try:
+        average = math.fsum(values) / len(values) if values else None
+    except OverflowError as exc:
+        raise ValueError("Lighting statistics overflowed during averaging") from exc
     minimum, maximum = (min(values), max(values)) if values else (None, None)
+    for label, value in (("average illuminance", average), ("minimum illuminance", minimum), ("maximum illuminance", maximum)):
+        if value is not None:
+            _require_finite(value, label)
+    emin_over_eavg = minimum / average if minimum is not None and average is not None and average > 0 else None
+    emin_over_emax = minimum / maximum if minimum is not None and maximum is not None and maximum > 0 else None
+    for label, value in (("Emin/Eavg", emin_over_eavg), ("Emin/Emax", emin_over_emax)):
+        if value is not None:
+            _require_finite(value, label)
     statistics = LightingStatistics(
         point_count=len(points), grid_spacing_m=area.grid_spacing_m,
         average_illuminance_lux=average, minimum_illuminance_lux=minimum, maximum_illuminance_lux=maximum,
-        emin_over_eavg=(minimum / average if minimum is not None and average is not None and average > 0 else None),
-        emin_over_emax=(minimum / maximum if minimum is not None and maximum is not None and maximum > 0 else None),
+        emin_over_eavg=emin_over_eavg,
+        emin_over_emax=emin_over_emax,
     )
     result = LightingCalculationResult(
         calculation_area_id=area.id, calculation_area_name=area.name,
         calculated_at=utc_now(), polygon_revision=area.calculation_state.polygon_revision, projected_crs=project.projected_crs,
+        calculation_input_sha256=lighting_calculation_input_sha256(project, area.id),
         points=points, statistics=statistics, contributing_fixture_count=len(eligible),
         fixture_provenance=[fixture.provenance for fixture in eligible], assumptions=ASSUMPTIONS,
         warnings=warnings,

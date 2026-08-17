@@ -16,6 +16,7 @@ from shapely.validation import explain_validity
 
 SCHEMA_VERSION = "2.4.0"
 SOFTWARE_VERSION = "0.4.0"
+MIN_GRID_SPACING_M = 0.01
 
 
 def utc_now() -> datetime:
@@ -23,7 +24,7 @@ def utc_now() -> datetime:
 
 
 class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+    model_config = ConfigDict(extra="forbid", validate_assignment=True, allow_inf_nan=False)
 
 
 class OperatingMode(str, Enum):
@@ -229,7 +230,7 @@ class CalculationArea(StrictModel):
     classification: CalculationAreaClassification
     wgs84_coordinates: Annotated[list[tuple[float, float]], Field(min_length=4)]
     calculation_plane_elevation_m: Annotated[float, Field(ge=-1000, le=10000)] = 0.0
-    grid_spacing_m: Annotated[float, Field(gt=0, le=1000)] = 2.0
+    grid_spacing_m: Annotated[float, Field(ge=MIN_GRID_SPACING_M, le=1000)] = 2.0
     maintenance_factor: Annotated[float, Field(gt=0, le=1)] = 1.0
     created_at: datetime = Field(default_factory=utc_now)
     modified_at: datetime = Field(default_factory=utc_now)
@@ -299,6 +300,7 @@ class LightingCalculationResult(StrictModel):
     calculated_at: datetime = Field(default_factory=utc_now)
     polygon_revision: Annotated[int, Field(ge=1)]
     projected_crs: str
+    calculation_input_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")] = None
     grid_origin_m: tuple[float, float] = (0.0, 0.0)
     grid_anchor_policy: Literal["projected-crs-zero-lattice"] = "projected-crs-zero-lattice"
     boundary_policy: Literal["inside-or-boundary-with-1e-7-m-tolerance"] = "inside-or-boundary-with-1e-7-m-tolerance"

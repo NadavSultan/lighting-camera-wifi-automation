@@ -46,8 +46,8 @@
         },
         "grid_spacing_m": {
           "default": 2.0,
-          "exclusiveMinimum": 0,
           "maximum": 1000,
+          "minimum": 0.01,
           "title": "Grid Spacing M",
           "type": "number"
         },
@@ -751,6 +751,19 @@
         "projected_crs": {
           "title": "Projected Crs",
           "type": "string"
+        },
+        "calculation_input_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calculation Input Sha256"
         },
         "grid_origin_m": {
           "default": [

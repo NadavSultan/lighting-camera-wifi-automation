@@ -75,3 +75,5 @@ Pixel density has a revision-aware `not-calculated` result seam. Phase 4 lightin
 ## Phase 4 calculation flow
 
 An explicit calculate action transforms a validated lighting polygon and every eligible unchanged source-pole origin into the project CRS. A deterministic CRS-zero lattice is clipped inside or within `1e-7 m` of the boundary. Each point is transformed into the luminaire-local Type C frame with local C-plane angle `(world azimuth - fixture azimuth) mod 360`. Bilinear angle interpolation supplies candela; direct horizontal illuminance is `I(gamma,C) * h / r^3`. Eligible fixture contributions are summed with `math.fsum`, then the area maintenance factor is applied. Results and provenance persist separately from source data and pole configuration.
+
+Each persisted lighting result carries a SHA-256 fingerprint of its projected CRS, calculation-area inputs, defaults, source origins, and lighting-significant pole configuration. Frontend edits and backend save/open/bulk/calculate paths clear results whose fingerprint no longer matches, so obsolete values cannot be displayed or reopened as current.

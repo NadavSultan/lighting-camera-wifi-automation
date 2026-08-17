@@ -18,6 +18,10 @@ class IesValidationError(ValueError):
         self.record = record
 
 
+IES_SEAM_REL_TOLERANCE = 1e-9
+IES_SEAM_ABS_TOLERANCE_CD = 1e-9
+
+
 @dataclass(frozen=True)
 class ResolvedIesRevision:
     """An exact immutable project pin plus its current lifecycle record."""
@@ -74,7 +78,19 @@ def resolve_pinned_ies_revision(
         raise ValueError(f"selected IES revision {ies_file_revision} is corrupt") from exc
     if not pinned.active or pinned.validation_status != "valid":
         raise ValueError(f"selected IES revision {ies_file_revision} is inactive, invalid, or unsupported")
-    return ResolvedIesRevision(pinned_record=pinned, current_record=current)
+    try:
+        canonical = _parse_valid_ies(
+            pinned.original_filename,
+            base64.b64decode(pinned.original_content_base64, validate=True),
+        )
+    except (IesValidationError, ValueError) as exc:
+        raise ValueError(f"selected IES revision {ies_file_revision} bytes do not reparse as valid supported photometry") from exc
+    if pinned.parsed_metadata is None or canonical.parsed_metadata is None:
+        raise ValueError(f"selected IES revision {ies_file_revision} is missing canonical parsed metadata")
+    if pinned.parsed_metadata.model_dump(mode="json") != canonical.parsed_metadata.model_dump(mode="json"):
+        raise ValueError(f"selected IES revision {ies_file_revision} parsed metadata does not match its immutable bytes")
+    canonical_pinned = pinned.model_copy(update={"parsed_metadata": canonical.parsed_metadata})
+    return ResolvedIesRevision(pinned_record=canonical_pinned, current_record=current)
 
 
 def parse_ies_upload(filename: str, content: bytes) -> IesFileRecord:
@@ -164,6 +180,23 @@ def _parse_valid_ies(filename: str, content: bytes) -> IesFileRecord:
         raise IesValidationError(f"IES candela count mismatch: expected {expected_candela}, found {len(candela)}")
     if any(value < 0 for value in candela):
         raise IesValidationError("IES candela values must be non-negative")
+    if len(horizontal) > 1 and not (
+        horizontal[0] == 0
+        and horizontal[-1] in {90, 180, 360}
+    ):
+        raise IesValidationError("Unsupported Type C horizontal domain; use one plane or a complete 0-90, 0-180, or 0-360 domain")
+    if horizontal[0] == 0 and horizontal[-1] == 360:
+        first_row = candela[:v_count]
+        last_row = candela[-v_count:]
+        if any(
+            not math.isclose(first, last, rel_tol=IES_SEAM_REL_TOLERANCE, abs_tol=IES_SEAM_ABS_TOLERANCE_CD)
+            for first, last in zip(first_row, last_row, strict=True)
+        ):
+            raise IesValidationError(
+                "IES 0/360 C-plane seam is discontinuous; duplicated candela rows must agree within 1e-9 relative or absolute tolerance"
+            )
+    if any(not math.isfinite(value * candela_multiplier) for value in candela):
+        raise IesValidationError("IES candela values and multiplier produce a non-finite scaled intensity")
     warnings: list[str] = []
     if not keywords.get("MANUFAC"):
         warnings.append("Manufacturer keyword is missing")

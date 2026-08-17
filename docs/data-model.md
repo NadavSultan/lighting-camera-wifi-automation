@@ -44,7 +44,7 @@ The effective pole is a view, not stored replacement data:
 
 Every project records source filename, SHA-256 hash, import timestamp, source CRS, selected projected CRS, software/schema version, mode, defaults, warnings, edits, assumptions, source catalog references, and calculation/recommendation placeholders.
 
-Phase 4 `calculation_areas` are user configuration with a stable ID, classification, validated WGS84 exterior ring, calculation plane, grid spacing, maintenance factor, timestamps, polygon revision, state, warnings, assumptions, and provenance. `lighting_calculations.results` stores deterministic ordered points, projected and WGS84 coordinates, maintained lux, payload-safe contributions, area statistics, exact fixture/IES revision and SHA provenance, limitations, warnings, and the professional-reference disclaimer. Camera `priority_areas` remain structurally separate.
+Phase 4 `calculation_areas` are user configuration with a stable ID, classification, validated WGS84 exterior ring, calculation plane, grid spacing of `0.01 m` through `1000 m`, maintenance factor, timestamps, polygon revision, state, warnings, assumptions, and provenance. `lighting_calculations.results` stores deterministic ordered points, projected and WGS84 coordinates, maintained lux, payload-safe contributions, area statistics, exact fixture/IES revision and SHA provenance, a calculation-input SHA-256 used for deterministic stale-result invalidation, limitations, warnings, and the professional-reference disclaimer. Camera `priority_areas` remain structurally separate.
 
 The formal JSON Schema is `schemas/project.schema.json` and is generated from the Pydantic `Project` model. HTTP input/output and error-response contracts are published in `schemas/openapi.json`.
 

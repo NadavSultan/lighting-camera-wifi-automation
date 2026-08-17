@@ -26,7 +26,7 @@ from app.services.configuration import (
     validate_project_configuration,
 )
 from app.services.camera_geometry import calculate_camera_geometry
-from app.services.lighting_calculation import calculate_lighting_area
+from app.services.lighting_calculation import calculate_lighting_area, invalidate_stale_lighting_results
 from app.services.ies import IesValidationError, parse_ies_upload
 from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
 from app.services.store import ProjectNotFoundError, ProjectStore
@@ -102,9 +102,14 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     @app.get("/api/projects/{project_id}", response_model=Project)
     def get_project(project_id: str) -> Project:
         try:
-            return recalculate(pin_revisions(project_store.load(project_id)))
-        except (ProjectNotFoundError, ValueError):
+            project = pin_revisions(project_store.load(project_id))
+            if invalidate_stale_lighting_results(project):
+                project_store.save(project)
+            return recalculate(project)
+        except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=f"Stored project is invalid or corrupt: {exc}") from exc
 
     @app.post("/api/projects/import", response_model=Project, status_code=201)
     def import_kml_or_kmz(
@@ -124,6 +129,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             raise HTTPException(status_code=409, detail="Project ID does not match request path")
         try:
             project = pin_revisions(project)
+            invalidate_stale_lighting_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -136,6 +142,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         try:
             project = pin_revisions(Project.model_validate(migrate_project_payload(payload)))
             validate_embedded_source(project)
+            invalidate_stale_lighting_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -148,6 +155,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         try:
             project = pin_revisions(project_store.load(project_id))
             updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras(), catalogs.ies()))
+            invalidate_stale_lighting_results(updated)
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -163,6 +171,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             raise HTTPException(status_code=409, detail="Project ID does not match request path")
         try:
             project = pin_revisions(project)
+            invalidate_stale_lighting_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -176,13 +185,14 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             raise HTTPException(status_code=409, detail="Project ID does not match request path")
         try:
             project = pin_revisions(project)
+            invalidate_stale_lighting_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
             result = calculate_lighting_area(project, area_id, catalogs.fixtures(), catalogs.ies())
             project.lighting_calculations.results[area_id] = result
             return project_store.save(recalculate(project))
-        except ValueError as exc:
+        except (ValueError, ArithmeticError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/catalogs/fixtures", response_model=FixtureModelCatalog)

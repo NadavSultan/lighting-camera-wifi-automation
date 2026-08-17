@@ -19,9 +19,9 @@ These descriptions define parser/orientation categories only. The exact relation
 
 IES C0 aligns with the user-selected fixture azimuth. Zero degrees is project/grid north and positive azimuth is clockwise. World points are translated relative to the unchanged source-pole origin and rotated into the luminaire-local frame by subtracting fixture azimuth. No physical luminaire tilt is applied. `TILT=NONE` means the IES file supplies no lamp-tilt correction table; zero installed tilt remains the explicitly approved MVP engineering assumption, not a fact inferred from the file.
 
-Linear interpolation is applied first across vertical angles within each adjacent C-plane and then across C-planes. The 0/360 plane is treated as one seam. Full calculation precision is retained internally.
+Linear interpolation is applied first across vertical angles within each adjacent C-plane and then across C-planes. Accepted horizontal domains are one rotationally symmetric plane, complete 0-90 or 0-180 symmetry domains, and a complete 0-360 domain. For 0-360 data, duplicated C0/C360 candela rows must agree point-for-point within `1e-9` relative or `1e-9 cd` absolute tolerance; a discontinuous seam is rejected rather than averaged or overwritten. Full calculation precision is retained internally.
 
-The calculation grid is anchored at projected CRS `(0,0)`, uses the requested spacing without adjustment, accepts polygon boundary points within `1e-7 m`, orders points by increasing Y then X, and rejects results over 25,000 points.
+The calculation grid is anchored at projected CRS `(0,0)`, uses the requested spacing without adjustment with a minimum of `0.01 m`, accepts polygon boundary points within `1e-7 m`, orders points by increasing Y then X, and rejects results over 25,000 points.
 
 ## File-specific issues
 
