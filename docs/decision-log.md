@@ -60,3 +60,12 @@
 - Decision: advance the additive project contract to `2.3.0` and software/API to `0.3.1`. Persist exact lens H/V FOV and mounting geometry-contract provenance. Priority-area rename preserves geometry exactly; redraw begins empty and commits only a validated replacement. Invalid legacy `2.2.0` priority records are retained losslessly in a non-calculated quarantine collection.
 - UI decision: enabled-camera warnings are global validation items and pole-level map indicators controlled by the Warnings layer. Disabled cameras remain non-errors. Azimuth display is rounded to three decimal places without changing calculation precision.
 - Boundary: Phase 4 and later remain unauthorized and unstarted.
+
+## DL-010 — Phase 4/5 roadmap and polygon separation
+
+- Date: 2026-08-17
+- Status: approved
+- Decision: Phase 4 is the Lighting Calculation Engine and Phase 5 is conceptual Wi-Fi coverage, matching the approved master roadmap.
+- Decision: Phase 3 camera `priority_areas` remain separate from Phase 4 lighting `calculation_areas`.
+- Decision: lighting calculation areas are user-drawn polygons classified as Road, Sidewalk, Parking, or Other; they must not be inferred from or silently merged with camera priority areas.
+- Boundary: this roadmap correction does not authorize Phase 4 implementation. Photometric inputs, conventions, validation criteria, and implementation/QA prompts must be approved first.

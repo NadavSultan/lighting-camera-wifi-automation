@@ -23,7 +23,7 @@ All four files declare `IESNA:LM-63-2002`, `TILT=NONE`, one lamp, 73 vertical an
 | JLED-GL-050W-SOLITAIRE 3B-D01.IES | JLED-GL-60W-SOLITAIRE-D01 | 50 | Filename, internal model, and watts conflict |
 | JLED-GL-050W-SOLITAIRE 3B-D02.ies | JLED-GL-60W-SOLITAIRE-D02 | 50 | Filename, internal model, and watts conflict; negative dimensions require review |
 
-The files are now represented in `data/luminaires/ies-inventory.json` and `data/luminaires/luminaire-catalog.json`. Photometric coordinate/orientation approval and verified luminaire mapping remain required Phase 2/5 inputs.
+The files are now represented in `data/luminaires/ies-inventory.json` and `data/luminaires/luminaire-catalog.json`. Photometric coordinate/orientation approval and verified luminaire mapping remain required Phase 4 inputs.
 
 ## Camera workbook
 

@@ -13,7 +13,7 @@ New sessions must start with `AGENTS.md` and `docs/current-status.md`, then foll
 ## Supplied references
 
 - `Input/Miracle_Mile_Lighting_Poles.kml`: 74 valid WGS84 point placemarks in five folders; no exact coordinate or name duplicates found during initial inventory.
-- `Input/Lighting/`: four LM-63-2002 IES files. Photometric implementation is deferred to Phase 5.
+- `Input/Lighting/`: four LM-63-2002 IES files. Photometric implementation is the gated Phase 4 scope.
 - `Input/Camera/VideoCAD Camera Models - Juganu.Xlsx`: three pinned IMX477-compatible camera/lens records used by the operational catalog and Phase 3 geometry.
 - `Input/CAP/CAP datasheet.pdf`: Juganu JNET1 Gateway data sheet Rev 1.2. CAP implementation is deferred to Phase 6.
 

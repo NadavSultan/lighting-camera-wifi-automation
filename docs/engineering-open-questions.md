@@ -22,18 +22,18 @@
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| How does each housing/bracket map to the IES C0 plane and positive azimuth? | Establishes world orientation. | Phase 5 | No final calculation | Rotated distributions and wrong uniformity. | Photometric lab drawing plus AGi32 reference model. |
-| What do the D02 negative width/length values represent, and are they accepted by the target engine? | Affects luminous-opening/shape interpretation. | Phase 5 | Metadata yes | Parser incompatibility or incorrect near-field treatment. | LM-63 expert, photometric lab, and AGi32 comparison. |
-| What interpolation, seam, boundary, absolute-photometry, and numeric tolerances are approved? | Defines a reproducible engine and acceptance gate. | Phase 5 | Design docs yes | Non-reproducible or divergent results. | Lighting engineer and AGi32 validation cases. |
+| How does each housing/bracket map to the IES C0 plane and positive azimuth? | Establishes world orientation. | Phase 4 | No final calculation | Rotated distributions and wrong uniformity. | Photometric lab drawing plus AGi32 reference model. |
+| What do the D02 negative width/length values represent, and are they accepted by the target engine? | Affects luminous-opening/shape interpretation. | Phase 4 | Metadata yes | Parser incompatibility or incorrect near-field treatment. | LM-63 expert, photometric lab, and AGi32 comparison. |
+| What interpolation, seam, boundary, absolute-photometry, and numeric tolerances are approved? | Defines a reproducible engine and acceptance gate. | Phase 4 | Design docs yes | Non-reproducible or divergent results. | Lighting engineer and AGi32 validation cases. |
 | What are the missing test report IDs? | Establishes photometric provenance. | Phases 2, 5, 7 | Yes with warning | Weak audit trail or obsolete data. | JUGANU photometric lab reports. |
 
 ## Wi-Fi
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| What bands, antennas, mounting heights, EIRP, receiver thresholds, throughput, client density, and channel plan apply? | Required for any RF prediction. | Phase 4 | Conceptual circles only | False coverage/capacity claims. | RF engineer, radio datasheets, and site survey. |
-| How should buildings, trees/foliage, terrain, materials, interference, and backhaul be modeled? | Determines attenuation and service feasibility. | Phase 4 | Conceptual circles only | Large coverage gaps hidden. | Site survey/GIS, RF design standard, network team. |
-| Is 30 m retained as a planning-only default or replaced per project? | Controls conceptual visualization. | Phase 4 | Yes | Users may over-trust the circle. | Company engineering owner. |
+| What bands, antennas, mounting heights, EIRP, receiver thresholds, throughput, client density, and channel plan apply? | Required for any RF prediction. | Phase 5 | Conceptual circles only | False coverage/capacity claims. | RF engineer, radio datasheets, and site survey. |
+| How should buildings, trees/foliage, terrain, materials, interference, and backhaul be modeled? | Determines attenuation and service feasibility. | Phase 5 | Conceptual circles only | Large coverage gaps hidden. | Site survey/GIS, RF design standard, network team. |
+| Is 30 m retained as a planning-only default or replaced per project? | Controls conceptual visualization. | Phase 5 | Yes | Users may over-trust the circle. | Company engineering owner. |
 
 ## CAP
 
@@ -56,9 +56,9 @@
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |
 |---|---|---|---|---|---|
-| Which approved standard and project targets apply to each area type? | Supplies target illuminance/uniformity without invention. | Phase 5 | Grid framework yes | False compliance result. | Lighting engineer/client standard/AHJ. |
-| What grid origin/phase, boundary tolerance, hole/multipolygon behavior, and zero-point policy apply? | Makes point sets and statistics deterministic. | Phase 5 | Documentation yes | Different tools produce different totals. | Lighting engineer plus AGi32 reference setup. |
-| What maintenance factor applies and is it global or per luminaire/area? | Scales maintained illuminance. | Phase 5 | No final calculation | Systematic over/understatement. | Approved lighting design standard. |
+| Which approved standard and project targets apply to each area type? | Supplies target illuminance/uniformity without invention. | Phase 4 | Grid framework yes | False compliance result. | Lighting engineer/client standard/AHJ. |
+| What grid origin/phase, boundary tolerance, hole/multipolygon behavior, and zero-point policy apply? | Makes point sets and statistics deterministic. | Phase 4 | Documentation yes | Different tools produce different totals. | Lighting engineer plus AGi32 reference setup. |
+| What maintenance factor applies and is it global or per luminaire/area? | Scales maintained illuminance. | Phase 4 | No final calculation | Systematic over/understatement. | Approved lighting design standard. |
 
 ## Reporting
 

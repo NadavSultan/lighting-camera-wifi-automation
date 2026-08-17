@@ -45,4 +45,4 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Phase 3 is formally closed. Before Phase 4 implementation, define and approve the conceptual Wi-Fi engineering contract, inputs, assumptions, validation criteria, and implementation/QA prompts. Do not begin Phase 4 without explicit user authorization.
+Phase 3 is formally closed. Phase 4 is the Lighting Calculation Engine; Phase 5 is conceptual Wi-Fi coverage. Before Phase 4 implementation, resolve and approve the fixture-to-IES mapping, photometric conventions, calculation-area contract, maintenance-factor behavior, uniformity definitions, accuracy/validation method, and implementation/QA prompts. Camera `priority_areas` remain separate from classified lighting `calculation_areas`. Do not begin Phase 4 without explicit user authorization.

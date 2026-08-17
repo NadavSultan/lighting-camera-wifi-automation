@@ -30,15 +30,18 @@ Status: complete and formally closed on 2026-08-17 after all P3-IR-01 through P3
 - Keep geometric FOV and pixel-density architecture distinct from analytics-quality coverage; no recognition, LPR, or compliance thresholds.
 - Corrective gate adds safe rename/redraw priority editing, generated-contract freshness, global/map camera warnings, complete FOV/mounting provenance, deterministic azimuth formatting, and aligned documentation.
 
-## Phase 4 - conceptual Wi-Fi
+## Phase 4 - lighting calculation engine
 
-- WIFI/SMART-only configurable circles, overlaps, gaps, and boundary statistics in projected metres.
+- First approve authoritative fixture-to-IES mapping, fixture orientation and IES axes, rotation order, interpolation, equations, maintenance-factor behavior, uniformity definitions, validation cases, comparison method, and tolerances.
+- Add lighting-specific `calculation_areas`, separate from Phase 3 camera `priority_areas`, classified as Road, Sidewalk, Parking, or Other.
+- Use an editable calculation plane at ground/road level and a default 2-metre clipped point grid inside each polygon.
+- Calculate direct horizontal illuminance at each point and show average, minimum, maximum, explicit uniformity ratios, assumptions, warnings, and fixture/IES provenance.
+- Add map point/result visualization and heat maps without making standards-compliance claims unless an approved standard, targets, and validation evidence exist.
+
+## Phase 5 - conceptual Wi-Fi
+
+- Add WIFI/SMART-only configurable circles, overlaps, gaps, and boundary statistics in projected metres.
 - Label all results conceptual, not verified RF design.
-
-## Phase 5 - photometric engine
-
-- First approve IES axes, luminaire orientation, rotation order, interpolation, equations, validation cases, AGi32 comparison method, and tolerances.
-- Implement calculation polygons, clipped grids, direct horizontal illuminance, heat maps, and per-area statistics.
 
 ## Phase 6 - CAP
 
@@ -54,4 +57,4 @@ Status: complete and formally closed on 2026-08-17 after all P3-IR-01 through P3
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. Phase 4 remains gated and requires separate explicit authorization.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 4 remains gated pending its engineering-input decisions and separate explicit implementation authorization.

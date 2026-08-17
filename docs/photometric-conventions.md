@@ -36,4 +36,4 @@ This proposed intrinsic-tilt-then-world-azimuth order is an `engineering_assumpt
 
 ## AGi32 validation still required
 
-Before a Phase 5 engine is accepted, compare representative points and complete calculation areas against AGi32 using the same IES file, mounting height, luminaire position, azimuth, tilt, maintenance factor, calculation plane, and grid. Approve the C0-plane/housing mapping, rotation signs and order, angle interpolation at seams, boundary behavior, absolute-photometry handling, negative-dimension interpretation, and numeric tolerances. Record both pointwise and summary-statistic tolerances before implementation.
+Before a Phase 4 engine is accepted, compare representative points and complete calculation areas against AGi32 using the same IES file, mounting height, luminaire position, azimuth, tilt, maintenance factor, calculation plane, and grid. Approve the C0-plane/housing mapping, rotation signs and order, angle interpolation at seams, boundary behavior, absolute-photometry handling, negative-dimension interpretation, and numeric tolerances. Record both pointwise and summary-statistic tolerances before implementation.

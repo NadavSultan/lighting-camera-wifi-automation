@@ -21,7 +21,7 @@ The supplied Miracle Mile project resolves to WGS84 / UTM zone 17N (`EPSG:32617`
 ## Phase 3 camera frame and orientation
 
 - Azimuth: degrees clockwise from true north; 0 north, 90 east, 180 south, 270 west.
-- Luminaire tilt: must be defined with the selected photometric orientation before Phase 5. No rotation order is assumed in Phase 1.
+- Luminaire tilt: must be defined with the selected photometric orientation before Phase 4. No rotation order is assumed in Phase 1.
 - Camera downward angle: degrees below horizontal; 0 horizontal and 90 vertically downward. Phase 3 SMART templates fix this at 35 degrees; it is not a user-editable camera field.
 - Projected axes are X east, Y north, Z up. Camera azimuth is clockwise from true north and normalized to `[0,360)`.
 - Camera forward is `(sin(a) cos(t), cos(a) cos(t), -sin(t))`; camera right is `(cos(a), -sin(a), 0)`; image up is `(-sin(a) sin(t), -cos(a) sin(t), cos(t))`.
