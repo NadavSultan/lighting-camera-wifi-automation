@@ -23,7 +23,7 @@ Status: complete and formally closed on 2026-08-15 after independent **UNCONDITI
 
 ## Phase 3 - camera geometry
 
-Status: independent QA returned FAIL; user-authorized corrective work for P3-IR-01 through P3-IR-06 completed automated and real rendered verification on 2026-08-16 and awaits independent corrective retest.
+Status: complete and formally closed on 2026-08-17 after all P3-IR-01 through P3-IR-06 corrections received independent retest and the final focused P3-IR-05 retest returned **PASS** with no confirmed defects or regressions.
 
 - Flat-terrain ground-FOV projection for two immutable fixed-mount camera slots on SMART fixtures, with fixture-level azimuth editing and map rotation.
 - Explicit compatible lens selection, per-slot enable state, deterministic warnings, revision-aware provenance, overlap metrics, and persisted priority-area intersection summaries.
@@ -54,4 +54,4 @@ Status: independent QA returned FAIL; user-authorized corrective work for P3-IR-
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. Phase 3 is authorized under approved zero XYZ origin offsets, an explicit per-slot lens requirement, and a flat local ground plane. Phase 4 remains gated.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. Phase 4 remains gated and requires separate explicit authorization.
