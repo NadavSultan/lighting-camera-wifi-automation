@@ -90,6 +90,9 @@ def validate_project_configuration(
         if config.ies_file_id is not None:
             if config.ies_file_id not in valid_ies or (config.ies_file_id, model.id) not in associations:
                 errors.append(f"{pole_id}: missing or invalid IES association")
+            record = next((item for item in ies.files if item.id == config.ies_file_id), None)
+            if record is not None and config.ies_file_revision != record.revision:
+                errors.append(f"{pole_id}: selected IES revision is not pinned to the active record revision")
     return errors
 
 
@@ -167,16 +170,19 @@ def apply_bulk_configuration(
     return next_project
 
 
-def pin_missing_equipment_revisions(project: Project, fixtures: FixtureModelCatalog, cameras: CameraEquipmentCatalog) -> Project:
+def pin_missing_equipment_revisions(project: Project, fixtures: FixtureModelCatalog, cameras: CameraEquipmentCatalog, ies: IesLibrary | None = None) -> Project:
     """One-time corrective migration: pin unversioned Phase 2 camera/lens assignments to the current revision."""
     migrated = deepcopy(project)
     fixture_by_id = {item.id: item for item in fixtures.fixture_models}
     camera_by_id = {item.id: item for item in cameras.camera_models}
     lens_by_id = {item.id: item for item in cameras.lenses}
+    ies_by_id = {item.id: item for item in (ies.files if ies else [])}
     for edit in migrated.pole_edits.values():
         config = edit.fixture_configuration
         model = fixture_by_id.get(config.fixture_model_id) if config else None
         template = next((item for item in model.mounting_template_revisions if item.revision == config.mounting_template_revision), None) if model and config else None
+        if config and config.ies_file_id and config.ies_file_revision is None and config.ies_file_id in ies_by_id:
+            config.ies_file_revision = ies_by_id[config.ies_file_id].revision
         if not config or not template:
             continue
         for slot in template.slots:

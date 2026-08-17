@@ -32,6 +32,8 @@ Status: complete and formally closed on 2026-08-17 after all P3-IR-01 through P3
 
 ## Phase 4 - lighting calculation engine
 
+Status: implemented under explicit authorization on 2026-08-17; awaiting separate independent QA and master gate decision.
+
 - First approve authoritative fixture-to-IES mapping, fixture orientation and IES axes, rotation order, interpolation, equations, maintenance-factor behavior, uniformity definitions, validation cases, comparison method, and tolerances.
 - Add lighting-specific `calculation_areas`, separate from Phase 3 camera `priority_areas`, classified as Road, Sidewalk, Parking, or Other.
 - Use an editable calculation plane at ground/road level and a default 2-metre clipped point grid inside each polygon.

@@ -18,6 +18,7 @@ The browser never mutates a source file. A project records source poles and user
 - `backend/app/catalog_models.py`: authoritative Phase 2 operational catalog contracts.
 - `backend/app/services/catalogs.py`: atomic operational catalog persistence, immutable full-record history, and immutable template-revision workflow.
 - `backend/app/services/ies.py`: validated LM-63 upload parser; no illuminance engine.
+- `backend/app/services/lighting_calculation.py`: deterministic projected point grid, Type C interpolation, direct horizontal illuminance, statistics, exclusions, and complete Phase 4 provenance.
 - `backend/app/services/configuration.py`: exact revision resolution, lifecycle/capability validation, corrective pin migration, and explicit-field bulk configuration.
 - `backend/app/services/camera_geometry.py`: deterministic projected-CRS frustum/ground intersection, overlap unions, priority-area intersections, and complete calculation provenance.
 - `frontend/app/components/EngineeringWorkspace.tsx`: toolbar, layer panel, MapLibre map, inspector, and status bar.
@@ -69,4 +70,8 @@ SMART user configuration and immutable pinned catalog/template revisions feed a 
 
 ## Future phase seams
 
-Pixel density has a revision-aware `not-calculated` result seam. Conceptual Wi-Fi coverage, lighting calculations, CAP recommendations, reporting, and proposed/automatic pole workflows are not implemented or enabled.
+Pixel density has a revision-aware `not-calculated` result seam. Phase 4 lighting is persisted in `calculation_areas` and `lighting_calculations`, fully separate from camera `priority_areas`. Conceptual Wi-Fi coverage, CAP recommendations, reporting, and proposed/automatic pole workflows are not implemented or enabled.
+
+## Phase 4 calculation flow
+
+An explicit calculate action transforms a validated lighting polygon and every eligible unchanged source-pole origin into the project CRS. A deterministic CRS-zero lattice is clipped inside or within `1e-7 m` of the boundary. Each point is transformed into the luminaire-local Type C frame with local C-plane angle `(world azimuth - fixture azimuth) mod 360`. Bilinear angle interpolation supplies candela; direct horizontal illuminance is `I(gamma,C) * h / r^3`. Eligible fixture contributions are summed with `math.fsum`, then the area maintenance factor is applied. Results and provenance persist separately from source data and pole configuration.

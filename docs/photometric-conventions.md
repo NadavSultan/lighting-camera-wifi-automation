@@ -2,7 +2,7 @@
 
 ## Source inventory boundary
 
-The four supplied files are LM-63-2002 photometric files with `TILT=NONE`, Type C photometry, metre dimension units, 73 vertical angles from 0 to 180 degrees, and 145 horizontal angles from 0 to 360 degrees. Each contains the expected 10,585 candela values. This session inventories metadata only; it does not calculate illuminance.
+The four supplied files are LM-63-2002 photometric files with `TILT=NONE`, Type C photometry, metre dimension units, 73 vertical angles from 0 to 180 degrees, and 145 horizontal angles from 0 to 360 degrees. Each contains the expected 10,585 candela values. Phase 4 parses the original immutable bytes again at calculation time and uses the exact angle arrays, candela values, and multiplier.
 
 `data/luminaires/ies-inventory.json` is authoritative for parsed IES header values. The luminaire catalog may repeat a value only when it includes an explicit authoritative reference back to the inventory.
 
@@ -15,17 +15,13 @@ The four supplied files are LM-63-2002 photometric files with `TILT=NONE`, Type 
 
 These descriptions define parser/orientation categories only. The exact relationship between the luminaire housing, bracket, roadway direction, IES C0 plane, and application azimuth still requires manufacturer confirmation and AGi32 comparison.
 
-## Project azimuth and tilt proposal
+## Phase 4 approved azimuth and tilt convention
 
-No approved luminaire azimuth zero exists yet. Proposed convention for later validation:
+IES C0 aligns with the user-selected fixture azimuth. Zero degrees is project/grid north and positive azimuth is clockwise. World points are translated relative to the unchanged source-pole origin and rotated into the luminaire-local frame by subtracting fixture azimuth. No physical luminaire tilt is applied. `TILT=NONE` means the IES file supplies no lamp-tilt correction table; zero installed tilt remains the explicitly approved MVP engineering assumption, not a fact inferred from the file.
 
-1. Define a luminaire-local right-handed frame fixed to the housing.
-2. Map the IES Type C axes into that frame using a manufacturer-approved C0-plane reference.
-3. Apply luminaire tilt about the approved local transverse axis.
-4. Apply luminaire azimuth about the world/project vertical axis.
-5. Translate to the pole mounting point after orientation is established.
+Linear interpolation is applied first across vertical angles within each adjacent C-plane and then across C-planes. The 0/360 plane is treated as one seam. Full calculation precision is retained internally.
 
-This proposed intrinsic-tilt-then-world-azimuth order is an `engineering_assumption`, not an implemented rule. `TILT=NONE` means the IES file supplies no lamp-tilt correction table; it does not prove that the installed luminaire has zero physical tilt.
+The calculation grid is anchored at projected CRS `(0,0)`, uses the requested spacing without adjustment, accepts polygon boundary points within `1e-7 m`, orders points by increasing Y then X, and rejects results over 25,000 points.
 
 ## File-specific issues
 
@@ -36,4 +32,4 @@ This proposed intrinsic-tilt-then-world-azimuth order is an `engineering_assumpt
 
 ## AGi32 validation still required
 
-Before a Phase 4 engine is accepted, compare representative points and complete calculation areas against AGi32 using the same IES file, mounting height, luminaire position, azimuth, tilt, maintenance factor, calculation plane, and grid. Approve the C0-plane/housing mapping, rotation signs and order, angle interpolation at seams, boundary behavior, absolute-photometry handling, negative-dimension interpretation, and numeric tolerances. Record both pointwise and summary-statistic tolerances before implementation.
+Before Phase 4 is approved, compare representative points and complete calculation areas against AGi32 or another professional reference tool using identical inputs. Until that separately authorized comparison exists, all results carry the explicit unvalidated-reference disclaimer and cannot support equivalence or compliance claims.

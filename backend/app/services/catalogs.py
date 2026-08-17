@@ -22,6 +22,14 @@ class CatalogNotFoundError(KeyError):
     pass
 
 
+AUTHORIZED_SUPPLIED_IES_COMPATIBILITY = {
+    "4a897fb04b6d8f6c75c94a3ceba473391021aee6d506f05357f48bc01d26d363": {"phoenix-1-lite", "phoenix-1-wifi", "phoenix-1-smart"},
+    "eb05f9cc5064ab6a0fa19e2886ff0af9cecfa06a7f2ef0bc2e269e57929173c1": {"phoenix-1-lite", "phoenix-1-wifi", "phoenix-1-smart"},
+    "fda02adb7ca11c6ca5af8e930bdc5e1b8ffb5f558eb8a432a7d4fae87e18db38": {"solitaire-lite", "solitaire-wifi", "solitaire-smart"},
+    "4efa14cfe43e2214080bcd09d6424b353322010c07717106bc3218297839c86a": {"solitaire-lite", "solitaire-wifi", "solitaire-smart"},
+}
+
+
 class CatalogStore:
     def __init__(self, root: Path | None = None, seed_root: Path | None = None) -> None:
         configured = os.environ.get("LCWA_CATALOG_DIR")
@@ -155,6 +163,7 @@ class CatalogStore:
             raise CatalogNotFoundError(ies_id)
         if active and record.validation_status != "valid":
             raise ValueError("only valid IES files can be activated")
+        library.file_history.append(deepcopy(record))
         record.active = active
         record.revision += 1
         if not active:
@@ -184,6 +193,9 @@ class CatalogStore:
             raise ValueError("IES association references an unknown file")
         if association.active and (not record.active or record.validation_status != "valid"):
             raise ValueError("active IES association requires an active valid file")
+        authorized = AUTHORIZED_SUPPLIED_IES_COMPATIBILITY.get(record.sha256)
+        if authorized is not None and association.fixture_model_id not in authorized:
+            raise ValueError("supplied IES compatibility is explicitly restricted to its authorized Phoenix 1 or Solitaire fixture family")
         existing = next((item for item in library.fixture_associations if (item.ies_file_id, item.fixture_model_id) == (association.ies_file_id, association.fixture_model_id)), None)
         if existing:
             existing.active = association.active
@@ -259,6 +271,9 @@ class CatalogStore:
                 model["current_mounting_template_revision"] = next_revision
                 model["revision"] = int(model.get("revision", 1)) + 1
                 payload.setdefault("fixture_model_history", []).append(previous)
+        if filename == "ies-library.json" and payload.get("schema_version") == "1.1.0":
+            payload["schema_version"] = "1.2.0"
+            payload.setdefault("file_history", [])
         return payload
 
     def _write(self, filename: str, payload: dict) -> None:

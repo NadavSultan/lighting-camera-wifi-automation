@@ -35,3 +35,10 @@ The supplied Miracle Mile project resolves to WGS84 / UTM zone 17N (`EPSG:32617`
 - Exact duplicate coordinates are warned.
 - Near duplicates within 0.50 m are warned but not merged.
 - Points more than 5 km from the projected median centre are warned as suspicious but never moved or removed.
+
+## Phase 4 photometric frame
+
+- World projected axes are X east, Y north, Z up; the calculation plane is horizontal at the area's configured elevation.
+- The photometric origin is the authoritative source-pole X/Y transformed into the project CRS and Z equal to configured mounting height. Changing azimuth never translates this origin.
+- World azimuth is `atan2(east, north)` clockwise from grid north. The luminaire-local C-plane angle is `(world azimuth - fixture azimuth) mod 360`, so C0 points along selected fixture azimuth.
+- Type C vertical angle is `atan2(horizontal distance, mounting height - plane elevation)`, with 0 degrees at nadir. Evaluation order is translate world point relative to the fixed origin, subtract fixture azimuth, interpolate C-plane/vertical candela, then apply slant distance and horizontal-plane incidence.

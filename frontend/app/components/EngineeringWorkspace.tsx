@@ -4,10 +4,11 @@ import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useSt
 import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
-import { createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
-import { effectivePole, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
+import { calculateLighting, createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
+import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
+import { staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -19,10 +20,10 @@ const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: numbe
   { key: "camera_fov", label: "Camera 1 / Camera 2 FOV", color: "#8b5cf6" },
   { key: "camera_overlap", label: "Camera footprint overlap", color: "#ec4899" },
   { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },
-  { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 4 },
-  { key: "calculation_areas", label: "Calculation areas", color: "#fb923c", phase: 5 },
-  { key: "calculation_points", label: "Calculation points", color: "#e2e8f0", phase: 5 },
-  { key: "lighting_heat_map", label: "Lighting heat map", color: "#f97316", phase: 5 },
+  { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 5 },
+  { key: "calculation_areas", label: "Calculation areas", color: "#14b8a6" },
+  { key: "calculation_points", label: "Calculation points", color: "#e2e8f0" },
+  { key: "lighting_heat_map", label: "Lighting results", color: "#f97316" },
   { key: "cap_locations", label: "Recommended CAP", color: "#34d399", phase: 6 },
   { key: "cap_connections", label: "CAP connections", color: "#10b981", phase: 6 },
   { key: "warnings", label: "Warnings", color: "var(--warning)" },
@@ -36,7 +37,7 @@ export function EngineeringWorkspace() {
   const [past, setPast] = useState<Project[]>([]);
   const [future, setFuture] = useState<Project[]>([]);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("Ready - Phase 3 fixed-mount camera geometry workflow");
+  const [status, setStatus] = useState("Ready - Phase 4 lighting calculation workflow");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
   const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");
@@ -57,6 +58,15 @@ export function EngineeringWorkspace() {
   const [priorityAreaName, setPriorityAreaName] = useState("Priority area");
   const [selectedPriorityAreaId, setSelectedPriorityAreaId] = useState<string | null>(null);
   const [renamingPriorityArea, setRenamingPriorityArea] = useState(false);
+  const [drawingCalculationArea, setDrawingCalculationArea] = useState(false);
+  const [calculationDraft, setCalculationDraft] = useState<Array<[number, number]>>([]);
+  const [selectedCalculationAreaId, setSelectedCalculationAreaId] = useState<string | null>(null);
+  const [editingCalculationArea, setEditingCalculationArea] = useState(false);
+  const [calculationAreaName, setCalculationAreaName] = useState("Calculation area 1");
+  const [calculationClassification, setCalculationClassification] = useState<CalculationAreaClassification>("ROAD");
+  const [calculationPlane, setCalculationPlane] = useState("0");
+  const [calculationSpacing, setCalculationSpacing] = useState("2");
+  const [calculationMaintenance, setCalculationMaintenance] = useState("1");
   const geometrySignatureRef = useRef("");
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
@@ -93,7 +103,8 @@ export function EngineeringWorkspace() {
     SMART: effectivePoles.filter((pole) => pole.fixtureType === "SMART").length,
   }), [effectivePoles]);
   const cameraWarnings = project?.camera_geometry.footprints.filter((footprint) => footprint.enabled && footprint.warnings.length > 0) ?? [];
-  const activeWarnings = (project?.warnings.filter((warning) => warning.severity !== "info").length ?? 0) + cameraWarnings.length;
+  const lightingWarnings = project ? Object.values(project.lighting_calculations.results).flatMap((result) => result.warnings.map((warning) => ({ areaId: result.calculation_area_id, warning }))) : [];
+  const activeWarnings = (project?.warnings.filter((warning) => warning.severity !== "info").length ?? 0) + cameraWarnings.length + lightingWarnings.length;
 
   function replaceProject(next: Project, recordHistory = true) {
     if (recordHistory && project) setPast((items) => [...items.slice(-39), project]);
@@ -205,9 +216,9 @@ export function EngineeringWorkspace() {
         const current = draft.pole_edits[pole.id] ?? { pole_id: pole.id, location_edit_authorized: false };
         const model = models[index];
         let config = current.fixture_configuration;
-        if (selectedModel && config?.fixture_model_id !== selectedModel.id) config = { fixture_model_id: selectedModel.id, fixture_model_revision: selectedModel.revision, mounting_template_revision: selectedModel.current_mounting_template_revision, ies_file_id: selectedModel.default_ies_file_id, fixture_azimuth_deg: 0, lighting_properties: {}, wifi_configuration: selectedModel.capabilities.wifi ? {} : null, camera_overrides: {} };
+        if (selectedModel && config?.fixture_model_id !== selectedModel.id) config = { fixture_model_id: selectedModel.id, fixture_model_revision: selectedModel.revision, mounting_template_revision: selectedModel.current_mounting_template_revision, ies_file_id: selectedModel.default_ies_file_id, ies_file_revision: selectedModel.default_ies_file_id ? iesLibrary?.files.find((item) => item.id === selectedModel.default_ies_file_id)?.revision ?? null : null, fixture_azimuth_deg: 0, lighting_properties: {}, wifi_configuration: selectedModel.capabilities.wifi ? {} : null, camera_overrides: {} };
         if (config) {
-          if (bulkIesId) config.ies_file_id = bulkIesId;
+          if (bulkIesId) { config.ies_file_id = bulkIesId; config.ies_file_revision = iesLibrary?.files.find((item) => item.id === bulkIesId)?.revision ?? null; }
           if (bulkAzimuth) config.fixture_azimuth_deg = Number(bulkAzimuth);
           if (bulkWifiNotes) config.wifi_configuration = { ...(config.wifi_configuration ?? {}), notes: bulkWifiNotes };
           if (bulkCameraId || bulkLensId) {
@@ -234,7 +245,7 @@ export function EngineeringWorkspace() {
       fixture_configuration: {
         fixture_model_id: model.id, fixture_model_revision: model.revision,
         mounting_template_revision: model.current_mounting_template_revision,
-        ies_file_id: model.default_ies_file_id, fixture_azimuth_deg: 0,
+        ies_file_id: model.default_ies_file_id, ies_file_revision: model.default_ies_file_id ? iesLibrary?.files.find((item) => item.id === model.default_ies_file_id)?.revision ?? null : null, fixture_azimuth_deg: 0,
         lighting_properties: {}, wifi_configuration: model.capabilities.wifi ? {} : null, camera_overrides: {},
       },
     });
@@ -296,6 +307,68 @@ export function EngineeringWorkspace() {
     setSelectedPriorityAreaId(null); setStatus("Priority area deleted; source poles and coordinates unchanged");
   }
 
+  function loadCalculationForm(areaId: string | null) {
+    const area = project?.calculation_areas.find((item) => item.id === areaId);
+    setSelectedCalculationAreaId(area?.id ?? null);
+    setCalculationAreaName(area?.name ?? `Calculation area ${(project?.calculation_areas.length ?? 0) + 1}`);
+    setCalculationClassification(area?.classification ?? "ROAD");
+    setCalculationPlane(String(area?.calculation_plane_elevation_m ?? 0));
+    setCalculationSpacing(String(area?.grid_spacing_m ?? 2));
+    setCalculationMaintenance(String(area?.maintenance_factor ?? 1));
+  }
+
+  function startCalculationArea() {
+    loadCalculationForm(null); setCalculationDraft([]); setDrawingCalculationArea(true); setEditingCalculationArea(true);
+    setDrawingPriorityArea(false); setStatus("Drawing a new lighting calculation area from an empty draft");
+  }
+
+  function editCalculationArea(areaId: string, redraw = false) {
+    loadCalculationForm(areaId); setCalculationDraft([]); setDrawingCalculationArea(redraw); setEditingCalculationArea(true);
+    setDrawingPriorityArea(false); setStatus(redraw ? "Redrawing from an empty draft; the prior valid lighting polygon remains stored until validation succeeds" : "Editing calculation-area settings; source and camera polygons remain unchanged");
+  }
+
+  function cancelCalculationArea() {
+    setCalculationDraft([]); setDrawingCalculationArea(false); setEditingCalculationArea(false);
+  }
+
+  function finishCalculationArea() {
+    if (!project) return;
+    const existing = project.calculation_areas.find((item) => item.id === selectedCalculationAreaId);
+    const points = drawingCalculationArea ? calculationDraft : existing?.wgs84_coordinates.slice(0, -1) ?? [];
+    try {
+      const validated = validateCalculationAreaDraft(points, { name: calculationAreaName, classification: calculationClassification, calculation_plane_elevation_m: calculationPlane, grid_spacing_m: calculationSpacing, maintenance_factor: calculationMaintenance });
+      const now = new Date().toISOString();
+      mutateProject((draft) => {
+        const index = selectedCalculationAreaId ? draft.calculation_areas.findIndex((item) => item.id === selectedCalculationAreaId) : -1;
+        if (index >= 0) {
+          const prior = draft.calculation_areas[index];
+          draft.calculation_areas[index] = { ...prior, ...validated, modified_at: now, calculation_state: staleCalculationState(prior.calculation_state, drawingCalculationArea) as CalculationArea["calculation_state"] };
+          delete draft.lighting_calculations.results[prior.id];
+        } else {
+          const id = crypto.randomUUID();
+          draft.calculation_areas.push({ id, ...validated, created_at: now, modified_at: now, calculation_state: { status: "not-calculated", polygon_revision: 1, last_calculated_at: null, warnings: [], assumptions: [], provenance: {} } });
+          setSelectedCalculationAreaId(id);
+        }
+      });
+      setCalculationDraft([]); setDrawingCalculationArea(false); setEditingCalculationArea(false);
+      setStatus(existing ? "Calculation area updated and prior derived result marked stale" : "Lighting calculation area created separately from camera priority areas");
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Calculation area is invalid"); }
+  }
+
+  function deleteCalculationArea(areaId: string) {
+    mutateProject((draft) => { draft.calculation_areas = draft.calculation_areas.filter((item) => item.id !== areaId); delete draft.lighting_calculations.results[areaId]; });
+    if (selectedCalculationAreaId === areaId) setSelectedCalculationAreaId(null);
+    setStatus("Calculation area and its derived result deleted; source poles and camera priority areas unchanged");
+  }
+
+  async function calculateSelectedArea() {
+    if (!project || !selectedCalculationAreaId) { setError("Select a lighting calculation area first"); return; }
+    await runAction(async () => {
+      const calculated = await calculateLighting(project, selectedCalculationAreaId);
+      setProject(calculated); setStatus(`Calculated ${calculated.lighting_calculations.results[selectedCalculationAreaId]?.statistics.point_count ?? 0} deterministic lighting points`);
+    });
+  }
+
   function exportBoth() {
     if (!project) return;
     void runAction(async () => {
@@ -322,8 +395,9 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={redo} disabled={!future.length}>Redo</button>
           <span className="toolbar-divider" />
           <button className="tool-button" onClick={() => setCatalogOpen(true)}>Catalogs</button>
-          <button className="tool-button" onClick={() => startPriorityArea()} disabled={!project || drawingPriorityArea}>Draw Priority Area</button>
-          <button className="tool-button" disabled title="Phase 5 after validated IES conventions">Calculate Lighting</button>
+          <button className="tool-button" onClick={() => startPriorityArea()} disabled={!project || drawingPriorityArea || drawingCalculationArea}>Draw Priority Area</button>
+          <button className="tool-button" onClick={startCalculationArea} disabled={!project || drawingCalculationArea || drawingPriorityArea}>Draw Calculation Area</button>
+          <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !selectedCalculationAreaId || busy}>Calculate Lighting</button>
           <button className="tool-button" disabled title="Phase 6 after CAP constraints are clarified">Recommend CAP</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>
         </nav>
@@ -343,9 +417,22 @@ export function EngineeringWorkspace() {
                 <div className="counts-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((fixture) => <div className={`count-card ${fixture.toLowerCase()}`} key={fixture}><span>{fixture}</span><strong>{counts[fixture]}</strong></div>)}</div>
               </section>
               <section className="section">
-                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 3</span></div>
+                <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 4</span></div>
                 {LAYERS.map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || Boolean(layer.phase)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
                 <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>
+              </section>
+              <section className="section">
+                <div className="section-heading"><h3>Lighting calculation areas</h3><span className="helper">Separate from camera</span></div>
+                <p className="lighting-disclaimer">Not independently validated against AGi32 or another professional photometric reference tool.</p>
+                {editingCalculationArea && <div className="warning-card info"><div className="form-grid">
+                  <div className="field full"><label htmlFor="calculation-area-name">Name</label><input id="calculation-area-name" value={calculationAreaName} onChange={(event) => setCalculationAreaName(event.target.value)} /></div>
+                  <div className="field"><label htmlFor="calculation-classification">Classification</label><select id="calculation-classification" value={calculationClassification} onChange={(event) => setCalculationClassification(event.target.value as CalculationAreaClassification)}><option value="ROAD">Road</option><option value="SIDEWALK">Sidewalk</option><option value="PARKING">Parking</option><option value="OTHER">Other</option></select></div>
+                  <div className="field"><label htmlFor="calculation-plane">Plane elevation (m)</label><input id="calculation-plane" type="number" value={calculationPlane} onChange={(event) => setCalculationPlane(event.target.value)} /></div>
+                  <div className="field"><label htmlFor="calculation-spacing">Grid spacing (m)</label><input id="calculation-spacing" type="number" min="0.01" max="1000" value={calculationSpacing} onChange={(event) => setCalculationSpacing(event.target.value)} /></div>
+                  <div className="field"><label htmlFor="calculation-maintenance">Maintenance factor</label><input id="calculation-maintenance" type="number" min="0.01" max="1" step="0.01" value={calculationMaintenance} onChange={(event) => setCalculationMaintenance(event.target.value)} /></div>
+                </div>{drawingCalculationArea && <p>{selectedCalculationAreaId ? "Replacement begins empty; the stored polygon is preserved until this draft validates." : "New polygon"} · {calculationDraft.length} vertices.</p>}<button className="quiet-button" onClick={finishCalculationArea}>{drawingCalculationArea ? "Validate and save polygon" : "Save details"}</button><button className="quiet-button" onClick={cancelCalculationArea}>Cancel</button></div>}
+                {project?.calculation_areas.map((area) => { const result = project.lighting_calculations.results[area.id]; const stats = result?.statistics; return <div className={`calculation-row ${selectedCalculationAreaId === area.id ? "selected" : ""}`} key={area.id}><strong>{area.name} · {area.classification}</strong><span>{stats ? `${stats.point_count} points · Eavg ${stats.average_illuminance_lux?.toFixed(2) ?? "—"} lx · Emin ${stats.minimum_illuminance_lux?.toFixed(2) ?? "—"} lx · Emax ${stats.maximum_illuminance_lux?.toFixed(2) ?? "—"} lx` : "Not calculated"}</span>{stats && <small>Emin/Eavg {stats.emin_over_eavg?.toFixed(3) ?? "—"} · Emin/Emax {stats.emin_over_emax?.toFixed(3) ?? "—"} · {result.contributing_fixture_count} fixtures</small>}<div><button className="quiet-button" onClick={() => setSelectedCalculationAreaId(area.id)}>Select</button><button className="quiet-button" onClick={() => editCalculationArea(area.id)}>Edit</button><button className="quiet-button" onClick={() => editCalculationArea(area.id, true)}>Redraw</button><button className="quiet-button" onClick={() => deleteCalculationArea(area.id)}>Delete</button></div>{result && <><p className="lighting-disclaimer">{result.disclaimer}</p><p className="helper">Approved simplified direct-light model; not a standards-compliance determination.</p><details className="lighting-provenance"><summary>Calculation and fixture provenance</summary><p>Model {result.calculation_model_version} · CRS {result.projected_crs} · polygon r{result.polygon_revision}<br />Grid {result.statistics.grid_spacing_m} m · origin {result.grid_origin_m.join(", ")} m · {result.grid_anchor_policy}<br />Boundary {result.boundary_policy} · plane {area.calculation_plane_elevation_m} m · maintenance factor {area.maintenance_factor}</p>{result.fixture_provenance.map((fixture) => <p key={fixture.pole_id}><strong>{fixture.pole_id}</strong><br />{fixture.fixture_model_id} r{fixture.fixture_model_revision} · {fixture.ies_original_filename} r{fixture.ies_file_revision}<br />SHA-256 {fixture.ies_sha256} · height {fixture.mounting_height_m} m · azimuth {fixture.fixture_azimuth_deg}°<br />Origin {fixture.origin_projected_m.join(", ")} m{fixture.warnings.length ? <><br />Warnings: {fixture.warnings.join(" ")}</> : null}</p>)}</details>{result.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}</>}</div>; })}
+                {!project?.calculation_areas.length && <p className="helper">Draw a Road, Sidewalk, Parking, or Other polygon. Defaults: 0.0 m plane, 2.0 m grid, maintenance factor 1.0.</p>}
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
@@ -369,15 +456,15 @@ export function EngineeringWorkspace() {
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Validation</h3><span className="helper">{activeWarnings} warnings</span></div>
-                <div className="warning-list">{project?.warnings.slice(0, 8).map((warning, index) => <div className={`warning-card ${warning.severity}`} key={`${warning.code}-${index}`}>{warning.message}</div>)}{cameraWarnings.slice(0, 8).map((footprint) => <button className="warning-card warning" key={`${footprint.pole_id}-${footprint.camera_slot_id}`} onClick={() => setSelectedId(footprint.pole_id)}><strong>{footprint.pole_id} · {footprint.camera_slot_id}</strong><span>{footprint.warnings.join(" ")}</span></button>)}{!project && <div className="empty-copy">Validation results appear after import.</div>}</div>
+                <div className="warning-list">{project?.warnings.slice(0, 8).map((warning, index) => <div className={`warning-card ${warning.severity}`} key={`${warning.code}-${index}`}>{warning.message}</div>)}{cameraWarnings.slice(0, 8).map((footprint) => <button className="warning-card warning" key={`${footprint.pole_id}-${footprint.camera_slot_id}`} onClick={() => setSelectedId(footprint.pole_id)}><strong>{footprint.pole_id} · {footprint.camera_slot_id}</strong><span>{footprint.warnings.join(" ")}</span></button>)}{lightingWarnings.slice(0, 8).map((item, index) => <button className="warning-card warning" key={`${item.areaId}-${index}`} onClick={() => setSelectedCalculationAreaId(item.areaId)}><strong>Lighting · {item.areaId}</strong><span>{item.warning}</span></button>)}{!project && <div className="empty-copy">Validation results appear after import.</div>}</div>
               </section>
             </div>
           )}
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
-          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 3 calculates from existing poles only. No locations are generated or moved.</span></div>
+          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
+          <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 4 lighting rotates distributions around unchanged existing-pole origins. No customer location is generated or moved.</span></div>
           {!project?.source.poles.length && <div className="map-overlay map-empty"><span className="eyebrow">Phase 1 · Existing-pole foundation</span><h1>Start with the customer’s pole layout</h1><p>Import a KML or KMZ to validate and display authoritative pole coordinates. Your changes remain separate and reversible.</p><button className="primary-button" onClick={() => importRef.current?.click()} disabled={busy}>Import KML/KMZ</button></div>}
         </section>
 

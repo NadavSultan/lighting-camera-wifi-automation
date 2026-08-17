@@ -197,7 +197,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     phase_one.pop("legacy_fixture_assignments_require_model_selection")
     phase_one["pole_edits"][pole.id] = {"pole_id": pole.id, "fixture_type": "SMART", "location_edit_authorized": False}
     migrated = Project.model_validate(migrate_project_payload(json.loads(json.dumps(phase_one))))
-    assert migrated.schema_version == "2.3.0"
+    assert migrated.schema_version == "2.4.0"
     assert migrated.legacy_fixture_assignments_require_model_selection is True
     assert migrated.pole_edits[pole.id].fixture_type.value == "SMART"
     assert migrated.pole_edits[pole.id].fixture_configuration is None
@@ -207,7 +207,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     initial_phase_two = migrated.model_dump(mode="json")
     initial_phase_two["schema_version"] = "2.0.0"
     remigrated = Project.model_validate(migrate_project_payload(initial_phase_two))
-    assert remigrated.schema_version == "2.3.0"
+    assert remigrated.schema_version == "2.4.0"
     assert remigrated.source == migrated.source
 
 
@@ -231,7 +231,7 @@ def test_initial_phase_two_catalog_contracts_migrate_to_corrective_minor_version
     migrated_store = CatalogStore(legacy_root, SEEDS)
     assert migrated_store.fixtures().schema_version == "1.2.0"
     assert migrated_store.cameras().schema_version == "1.1.0"
-    assert migrated_store.ies().schema_version == "1.1.0"
+    assert migrated_store.ies().schema_version == "1.2.0"
     smart = next(item for item in migrated_store.fixtures().fixture_models if item.id == "phoenix-1-smart")
     assert all(slot.camera_model_revision == 1 for slot in smart.current_template().slots)
 
@@ -262,7 +262,7 @@ def test_phase_two_api_catalog_upload_and_bulk_configuration(tmp_path: Path) -> 
     assert upload.status_code == 201, upload.text
     assert upload.headers["access-control-allow-origin"] == "http://127.0.0.1:3000"
     ies_id = upload.json()["id"]
-    for fixture_id in ("phoenix-1-smart", "solitaire-smart"):
+    for fixture_id in ("phoenix-1-smart", "phoenix-1-wifi"):
         response = client.put(f"/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}", json={"active": True})
         assert response.status_code == 200, response.text
 

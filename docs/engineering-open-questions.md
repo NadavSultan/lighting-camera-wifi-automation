@@ -2,6 +2,8 @@
 
 `Can continue` means repository/data preparation can continue without the answer; it does not authorize the dependent calculation or recommendation.
 
+Phase 4 implementation decisions for C0 alignment, zero physical tilt, interpolation, grid anchoring, boundary tolerance, point limit, area-level maintenance factor, and synthetic validation were explicitly authorized on 2026-08-17 and are recorded in DL-011. Manufacturer confirmation and professional-reference comparison remain open acceptance work; they do not permit claims beyond the displayed simplified-model disclaimer.
+
 ## Camera
 
 | Question | Why required | Dependent phase | Can continue? | Assumption risk | Recommended owner/source |

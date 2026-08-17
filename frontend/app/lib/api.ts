@@ -48,6 +48,12 @@ export function recalculateCameraGeometry(project: Project) {
   });
 }
 
+export function calculateLighting(project: Project, areaId: string) {
+  return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/lighting/calculate/${encodeURIComponent(areaId)}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),
+  });
+}
+
 export function openProject(project: Project) {
   return api<Project>("/api/projects/open", {
     method: "POST",

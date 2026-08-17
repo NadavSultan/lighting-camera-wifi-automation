@@ -52,7 +52,7 @@ export interface PoleEdit {
 }
 
 export interface Project {
-  schema_version: "2.3.0";
+  schema_version: "2.4.0";
   software_version: string;
   id: string;
   name: string;
@@ -80,6 +80,8 @@ export interface Project {
   layer_state: Record<string, boolean>;
   warnings: ProjectWarning[];
   priority_areas: PriorityArea[];
+  calculation_areas: CalculationArea[];
+  lighting_calculations: LightingCalculationLayer;
   legacy_invalid_priority_areas: Array<Record<string, unknown>>;
   camera_geometry: CameraGeometryLayer;
   assumptions: string[];
@@ -90,6 +92,21 @@ export interface Project {
 }
 
 export interface PriorityArea { id: string; name: string; wgs84_coordinates: Array<[number, number]>; created_at: string; modified_at: string }
+export type CalculationAreaClassification = "ROAD" | "SIDEWALK" | "PARKING" | "OTHER";
+export interface CalculationArea {
+  id: string; name: string; classification: CalculationAreaClassification; wgs84_coordinates: Array<[number, number]>;
+  calculation_plane_elevation_m: number; grid_spacing_m: number; maintenance_factor: number; created_at: string; modified_at: string;
+  calculation_state: { status: "not-calculated" | "calculated" | "warning" | "error"; polygon_revision: number; last_calculated_at: string | null; warnings: string[]; assumptions: string[]; provenance: Record<string, unknown> };
+}
+export interface LightingCalculationPoint { id: string; sequence_index: number; projected_coordinate_m: [number, number]; wgs84_coordinate: [number, number]; calculation_plane_elevation_m: number; maintained_horizontal_illuminance_lux: number; per_fixture_contributions_lux: Record<string, number> | null; warnings: string[] }
+export interface LightingCalculationResult {
+  calculation_area_id: string; calculation_area_name: string; calculation_model_version: "direct-horizontal-type-c-1.0.0"; calculated_at: string;
+  polygon_revision: number; projected_crs: string; grid_origin_m: [number, number]; grid_anchor_policy: string; boundary_policy: string;
+  points: LightingCalculationPoint[]; statistics: { point_count: number; grid_spacing_m: number; average_illuminance_lux: number | null; minimum_illuminance_lux: number | null; maximum_illuminance_lux: number | null; emin_over_eavg: number | null; emin_over_emax: number | null };
+  contributing_fixture_count: number; fixture_provenance: Array<{ pole_id: string; fixture_model_id: string; fixture_model_revision: number; ies_file_id: string; ies_file_revision: number; ies_sha256: string; ies_original_filename: string; mounting_height_m: number; fixture_azimuth_deg: number; origin_projected_m: [number, number, number]; warnings: string[] }>;
+  assumptions: string[]; warnings: string[]; disclaimer: string;
+}
+export interface LightingCalculationLayer { calculation_model_version: "direct-horizontal-type-c-1.0.0"; results: Record<string, LightingCalculationResult> }
 export interface CameraFootprintResult {
   pole_id: string; fixture_model_id: string; fixture_model_revision: number; mounting_template_revision: number;
   camera_slot_id: string; camera_model_id: string | null; camera_model_revision: number | null; lens_id: string | null; lens_revision: number | null;
@@ -124,6 +141,7 @@ export interface PoleFixtureConfiguration {
   fixture_model_revision: number;
   mounting_template_revision: number | null;
   ies_file_id: string | null;
+  ies_file_revision: number | null;
   fixture_azimuth_deg: number;
   lighting_properties: Record<string, unknown>;
   wifi_configuration: Record<string, unknown> | null;
@@ -169,7 +187,7 @@ export interface CameraModel { id: string; display_name: string; manufacturer: s
 export interface LensConfiguration { id: string; display_name: string; focal_length_mm: number | null; horizontal_fov_deg: number | null; vertical_fov_deg: number | null; compatible_camera_model_ids: string[]; technical_properties: Record<string, unknown>; source_reference_id: string | null; active: boolean; revision: number }
 export interface CameraEquipmentCatalog { schema_version: "1.1.0"; catalog_id: string; camera_models: CameraModel[]; lenses: LensConfiguration[]; camera_model_history: CameraModel[]; lens_history: LensConfiguration[] }
 export interface IesFileRecord { id: string; original_filename: string; sha256: string; uploaded_at: string; ies_format_version: string; parsed_metadata: Record<string, unknown> | null; validation_status: "valid" | "invalid" | "unsupported"; validation_errors: string[]; validation_warnings: string[]; active: boolean; revision: number }
-export interface IesLibrary { schema_version: "1.1.0"; catalog_id: string; files: IesFileRecord[]; fixture_associations: Array<{ ies_file_id: string; fixture_model_id: string; active: boolean }> }
+export interface IesLibrary { schema_version: "1.2.0"; catalog_id: string; files: IesFileRecord[]; file_history: IesFileRecord[]; fixture_associations: Array<{ ies_file_id: string; fixture_model_id: string; active: boolean }> }
 
 export interface EffectivePole extends SourcePole {
   displayName: string;

@@ -26,6 +26,7 @@ from app.services.configuration import (
     validate_project_configuration,
 )
 from app.services.camera_geometry import calculate_camera_geometry
+from app.services.lighting_calculation import calculate_lighting_area
 from app.services.ies import IesValidationError, parse_ies_upload
 from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
 from app.services.store import ProjectNotFoundError, ProjectStore
@@ -36,8 +37,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.3.1",
-        description="Phase 3 fixed-mount camera ground geometry and existing-pole configuration workflow.",
+        version="0.4.0",
+        description="Phase 4 deterministic direct-light calculation and existing-pole engineering workflow.",
     )
     app.state.project_store = project_store
     app.state.catalog_store = catalogs
@@ -51,7 +52,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     )
 
     def pin_revisions(project: Project) -> Project:
-        return pin_missing_equipment_revisions(project, catalogs.fixtures(), catalogs.cameras())
+        return pin_missing_equipment_revisions(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
 
     def recalculate(project: Project) -> Project:
         project.camera_geometry = calculate_camera_geometry(project, catalogs.fixtures(), catalogs.cameras())
@@ -140,7 +141,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     def bulk_configure_poles(project_id: str, request: BulkPoleConfigurationRequest) -> Project:
         try:
             project = pin_revisions(project_store.load(project_id))
-            updated = apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras())
+            updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras()))
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -160,6 +161,21 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             if errors:
                 raise ValueError("; ".join(errors))
             return recalculate(project)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/lighting/calculate/{area_id}", response_model=Project)
+    def calculate_project_lighting(project_id: str, area_id: str, project: Project) -> Project:
+        if project.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            project = pin_revisions(project)
+            errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
+            if errors:
+                raise ValueError("; ".join(errors))
+            result = calculate_lighting_area(project, area_id, catalogs.fixtures(), catalogs.ies())
+            project.lighting_calculations.results[area_id] = result
+            return project_store.save(recalculate(project))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 

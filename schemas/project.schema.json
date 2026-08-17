@@ -1,6 +1,152 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
+    "CalculationArea": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/CalculationAreaClassification"
+        },
+        "wgs84_coordinates": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 4,
+          "title": "Wgs84 Coordinates",
+          "type": "array"
+        },
+        "calculation_plane_elevation_m": {
+          "default": 0.0,
+          "maximum": 10000,
+          "minimum": -1000,
+          "title": "Calculation Plane Elevation M",
+          "type": "number"
+        },
+        "grid_spacing_m": {
+          "default": 2.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Grid Spacing M",
+          "type": "number"
+        },
+        "maintenance_factor": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Maintenance Factor",
+          "type": "number"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "modified_at": {
+          "format": "date-time",
+          "title": "Modified At",
+          "type": "string"
+        },
+        "calculation_state": {
+          "$ref": "#/$defs/CalculationAreaState"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "classification",
+        "wgs84_coordinates"
+      ],
+      "title": "CalculationArea",
+      "type": "object"
+    },
+    "CalculationAreaClassification": {
+      "enum": [
+        "ROAD",
+        "SIDEWALK",
+        "PARKING",
+        "OTHER"
+      ],
+      "title": "CalculationAreaClassification",
+      "type": "string"
+    },
+    "CalculationAreaState": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "not-calculated",
+          "enum": [
+            "not-calculated",
+            "calculated",
+            "warning",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "polygon_revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Polygon Revision",
+          "type": "integer"
+        },
+        "last_calculated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Calculated At"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": true,
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "title": "CalculationAreaState",
+      "type": "object"
+    },
     "CameraFootprintResult": {
       "additionalProperties": false,
       "properties": {
@@ -439,17 +585,17 @@
           "type": "boolean"
         },
         "calculation_areas": {
-          "default": false,
+          "default": true,
           "title": "Calculation Areas",
           "type": "boolean"
         },
         "calculation_points": {
-          "default": false,
+          "default": true,
           "title": "Calculation Points",
           "type": "boolean"
         },
         "lighting_heat_map": {
-          "default": false,
+          "default": true,
           "title": "Lighting Heat Map",
           "type": "boolean"
         },
@@ -470,6 +616,383 @@
         }
       },
       "title": "LayerState",
+      "type": "object"
+    },
+    "LightingCalculationLayer": {
+      "additionalProperties": false,
+      "properties": {
+        "calculation_model_version": {
+          "const": "direct-horizontal-type-c-1.0.0",
+          "default": "direct-horizontal-type-c-1.0.0",
+          "title": "Calculation Model Version",
+          "type": "string"
+        },
+        "results": {
+          "additionalProperties": {
+            "$ref": "#/$defs/LightingCalculationResult"
+          },
+          "title": "Results",
+          "type": "object"
+        }
+      },
+      "title": "LightingCalculationLayer",
+      "type": "object"
+    },
+    "LightingCalculationPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence_index": {
+          "minimum": 0,
+          "title": "Sequence Index",
+          "type": "integer"
+        },
+        "projected_coordinate_m": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Projected Coordinate M",
+          "type": "array"
+        },
+        "wgs84_coordinate": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Wgs84 Coordinate",
+          "type": "array"
+        },
+        "calculation_plane_elevation_m": {
+          "title": "Calculation Plane Elevation M",
+          "type": "number"
+        },
+        "maintained_horizontal_illuminance_lux": {
+          "minimum": 0,
+          "title": "Maintained Horizontal Illuminance Lux",
+          "type": "number"
+        },
+        "per_fixture_contributions_lux": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Per Fixture Contributions Lux"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "sequence_index",
+        "projected_coordinate_m",
+        "wgs84_coordinate",
+        "calculation_plane_elevation_m",
+        "maintained_horizontal_illuminance_lux"
+      ],
+      "title": "LightingCalculationPoint",
+      "type": "object"
+    },
+    "LightingCalculationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "calculation_area_id": {
+          "title": "Calculation Area Id",
+          "type": "string"
+        },
+        "calculation_area_name": {
+          "title": "Calculation Area Name",
+          "type": "string"
+        },
+        "calculation_model_version": {
+          "const": "direct-horizontal-type-c-1.0.0",
+          "default": "direct-horizontal-type-c-1.0.0",
+          "title": "Calculation Model Version",
+          "type": "string"
+        },
+        "calculated_at": {
+          "format": "date-time",
+          "title": "Calculated At",
+          "type": "string"
+        },
+        "polygon_revision": {
+          "minimum": 1,
+          "title": "Polygon Revision",
+          "type": "integer"
+        },
+        "projected_crs": {
+          "title": "Projected Crs",
+          "type": "string"
+        },
+        "grid_origin_m": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Grid Origin M",
+          "type": "array"
+        },
+        "grid_anchor_policy": {
+          "const": "projected-crs-zero-lattice",
+          "default": "projected-crs-zero-lattice",
+          "title": "Grid Anchor Policy",
+          "type": "string"
+        },
+        "boundary_policy": {
+          "const": "inside-or-boundary-with-1e-7-m-tolerance",
+          "default": "inside-or-boundary-with-1e-7-m-tolerance",
+          "title": "Boundary Policy",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/LightingCalculationPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "statistics": {
+          "$ref": "#/$defs/LightingStatistics"
+        },
+        "contributing_fixture_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Contributing Fixture Count",
+          "type": "integer"
+        },
+        "fixture_provenance": {
+          "items": {
+            "$ref": "#/$defs/LightingFixtureProvenance"
+          },
+          "title": "Fixture Provenance",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "disclaimer": {
+          "const": "Not independently validated against AGi32 or another professional photometric reference tool.",
+          "default": "Not independently validated against AGi32 or another professional photometric reference tool.",
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "calculation_area_id",
+        "calculation_area_name",
+        "polygon_revision",
+        "projected_crs",
+        "statistics"
+      ],
+      "title": "LightingCalculationResult",
+      "type": "object"
+    },
+    "LightingFixtureProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "pole_id": {
+          "title": "Pole Id",
+          "type": "string"
+        },
+        "fixture_model_id": {
+          "title": "Fixture Model Id",
+          "type": "string"
+        },
+        "fixture_model_revision": {
+          "title": "Fixture Model Revision",
+          "type": "integer"
+        },
+        "ies_file_id": {
+          "title": "Ies File Id",
+          "type": "string"
+        },
+        "ies_file_revision": {
+          "title": "Ies File Revision",
+          "type": "integer"
+        },
+        "ies_sha256": {
+          "title": "Ies Sha256",
+          "type": "string"
+        },
+        "ies_original_filename": {
+          "title": "Ies Original Filename",
+          "type": "string"
+        },
+        "mounting_height_m": {
+          "title": "Mounting Height M",
+          "type": "number"
+        },
+        "fixture_azimuth_deg": {
+          "title": "Fixture Azimuth Deg",
+          "type": "number"
+        },
+        "origin_projected_m": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Origin Projected M",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pole_id",
+        "fixture_model_id",
+        "fixture_model_revision",
+        "ies_file_id",
+        "ies_file_revision",
+        "ies_sha256",
+        "ies_original_filename",
+        "mounting_height_m",
+        "fixture_azimuth_deg",
+        "origin_projected_m"
+      ],
+      "title": "LightingFixtureProvenance",
+      "type": "object"
+    },
+    "LightingStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "point_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Point Count",
+          "type": "integer"
+        },
+        "grid_spacing_m": {
+          "title": "Grid Spacing M",
+          "type": "number"
+        },
+        "average_illuminance_lux": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Average Illuminance Lux"
+        },
+        "minimum_illuminance_lux": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Illuminance Lux"
+        },
+        "maximum_illuminance_lux": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Illuminance Lux"
+        },
+        "emin_over_eavg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emin Over Eavg"
+        },
+        "emin_over_emax": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emin Over Emax"
+        }
+      },
+      "required": [
+        "grid_spacing_m"
+      ],
+      "title": "LightingStatistics",
       "type": "object"
     },
     "OperatingMode": {
@@ -790,6 +1313,19 @@
           "default": null,
           "title": "Ies File Id"
         },
+        "ies_file_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ies File Revision"
+        },
         "fixture_azimuth_deg": {
           "default": 0.0,
           "exclusiveMaximum": 360,
@@ -956,7 +1492,7 @@
           "title": "Pole Height M"
         },
         "maintenance_factor": {
-          "default": 0.8,
+          "default": 1.0,
           "exclusiveMinimum": 0,
           "maximum": 1,
           "title": "Maintenance Factor",
@@ -1249,13 +1785,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.3.0",
-      "default": "2.3.0",
+      "const": "2.4.0",
+      "default": "2.4.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.3.1",
+      "default": "0.4.0",
       "title": "Software Version",
       "type": "string"
     },
@@ -1334,6 +1870,16 @@
       },
       "title": "Priority Areas",
       "type": "array"
+    },
+    "calculation_areas": {
+      "items": {
+        "$ref": "#/$defs/CalculationArea"
+      },
+      "title": "Calculation Areas",
+      "type": "array"
+    },
+    "lighting_calculations": {
+      "$ref": "#/$defs/LightingCalculationLayer"
     },
     "legacy_invalid_priority_areas": {
       "items": {

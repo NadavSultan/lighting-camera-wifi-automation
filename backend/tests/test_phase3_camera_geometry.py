@@ -154,7 +154,7 @@ def test_phase3_additive_migrations_preserve_legacy_orientation_bytes(version: s
     payload.pop("camera_geometry", None)
     payload["pole_edits"][pole_id] = {"pole_id": pole_id, "fixture_type": "SMART", "location_edit_authorized": False, "fixture_configuration": {"fixture_model_id": "phoenix-1-smart", "fixture_model_revision": 1, "mounting_template_revision": 1, "fixture_azimuth_deg": 0, "lighting_properties": {}, "wifi_configuration": {}, "camera_overrides": {"camera-1": {"slot_id": "camera-1", "relative_azimuth_deg": -65, "downward_tilt_deg": 30, "metadata": {"legacy": "preserve"}}}}}
     migrated_payload = migrate_project_payload(copy.deepcopy(payload))
-    assert migrated_payload["schema_version"] == "2.3.0"
+    assert migrated_payload["schema_version"] == "2.4.0"
     assert migrated_payload["pole_edits"][pole_id]["fixture_configuration"]["camera_overrides"]["camera-1"] == payload["pole_edits"][pole_id]["fixture_configuration"]["camera_overrides"]["camera-1"]
     assert migrated_payload["priority_areas"] == [] and migrated_payload["camera_geometry"] == {}
 

@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** after P3-IR-01 through P3-IR-06 were corrected and retested; it is formally closed. Phase 4 and later work remain unauthorized and unstarted.
+Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 lighting is implemented under explicit authorization and awaits separate independent QA and a master gate decision; it is not approved. Phase 5 and later remain unauthorized and unstarted.
 
 ## Completed
 
@@ -25,12 +25,20 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 - Footprints persist exact H/V FOV and mounting geometry-contract version; UI azimuths use deterministic engineering formatting.
 - Final P3-IR-05 correction normalizes after three-decimal rounding so display and intentional map-handle edits can never produce `360`; authoritative backend values are not rewritten by presentation formatting.
 
+## Phase 4 implementation
+
+- Project schema `2.4.0`, software/API `0.4.0`, and IES operational contract `1.2.0` add lighting calculation areas, immutable IES record history, exact project IES pins, deterministic projected grids, Type C direct horizontal illuminance, maintained-lux statistics, and complete disclaimers/provenance.
+- Lighting calculation areas are separate from camera priority areas. Explicit create/select/edit/redraw/delete and calculate/recalculate workflows are enabled; Wi-Fi and later controls remain disabled.
+- Supplied Phoenix and Solitaire compatibility is enforced by exact SHA family restrictions while association and pole selection remain explicit with no default.
+- The result model is intentionally simplified and is not independently validated against AGi32 or another professional photometric reference tool.
+
 ## Validation
 
-- Backend: 85 passed; one existing non-failing Starlette/httpx2 deprecation warning.
+- Backend: 99 passed; one existing non-failing Starlette/httpx2 deprecation warning.
 - Engineering data validator: passed all seven frozen catalog/schema pairs and source hashes.
-- Frontend rendered/workflow suite (6 tests), strict TypeScript, and ESLint: passed.
+- Frontend rendered/workflow suite (7 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
+- Rendered Phase 4 workflow: 74-pole KML, explicit Phoenix/Solitaire IES association and selection, separate Road calculation area, 286-point result, azimuth-driven result change, save/reopen, visible provenance/warnings, unchanged source coordinate, separate empty camera priority collection, Phase 5+ gating, and zero browser-console errors.
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
 - The final focused NIR-01 retest closed the sole remaining condition with no new findings; `docs/phase-2-nir-01-final-retest-report.md` is the controlling Phase 2 gate evidence.
 - The final focused P3-IR-05 retest returned PASS with no confirmed defects or regressions; `docs/phase-3-final-focused-retest-report.md` is the controlling Phase 3 gate evidence.
@@ -40,9 +48,9 @@ Last updated: 2026-08-17. Phase 1 remains frozen. Phase 2 received an independen
 - Missing authoritative fixture-to-IES/BOM mapping; operational compatibility remains explicitly user-assigned.
 - Unresolved Solitaire 50 W / 60 W filename/header versus internal-model conflict.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
-- Current IES upload support is limited to LM-63-1995/2002 Type C files with `TILT=NONE`.
+- Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
 - Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane; Wi-Fi coverage, illuminance, CAP recommendations, automatic pole placement, and reporting remain deferred.
 
 ## Current gate
 
-Phase 3 is formally closed. Phase 4 is the Lighting Calculation Engine; Phase 5 is conceptual Wi-Fi coverage. Before Phase 4 implementation, resolve and approve the fixture-to-IES mapping, photometric conventions, calculation-area contract, maintenance-factor behavior, uniformity definitions, accuracy/validation method, and implementation/QA prompts. Camera `priority_areas` remain separate from classified lighting `calculation_areas`. Do not begin Phase 4 without explicit user authorization.
+Phase 4 implementation is complete but not approved. A separate independent QA task must verify the claims in `docs/phase-4-completion-report.md` before any master gate decision. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.

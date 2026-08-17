@@ -26,6 +26,8 @@ This register distinguishes governing conventions from temporary assumptions. Ma
 | Proposed photometric rotation order is local tilt followed by world-vertical azimuth | `docs/photometric-conventions.md` | Documentation proposal only; calculations remain blocked pending AGi32 validation. |
 | Camera optical centers use immutable X/Y/Z=0 m offsets at the fixture origin | Mounting contract `fixed-zero-origin-1.0.0` | Approved for Phase 3 MVP; future authoritative mechanical offsets require a new pinned template revision. |
 | Camera footprints intersect flat local ground at Z=0 | Geometry model `flat-ground-pinhole-1.0.0` | Approved for Phase 3 MVP; future authoritative terrain requires a separately reviewed model. |
+| Luminaire physical tilt is zero and IES C0 aligns to fixture azimuth | Lighting model `direct-horizontal-type-c-1.0.0` | Approved Phase 4 MVP assumption; `TILT=NONE` is not installation proof. |
+| Direct far-field point-source light only | Lighting model `direct-horizontal-type-c-1.0.0` | Excludes luminous-opening geometry, terrain, occlusion, shadows, reflection, interreflection, and atmospheric effects. |
 
 No temporary CAP range, load, hop, redundancy, or fixture-compatibility assumption has been introduced.
 

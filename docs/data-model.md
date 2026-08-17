@@ -6,7 +6,7 @@
 |---|---|---|
 | Original customer data | `source.poles` and immutable uploaded file | Never overwritten |
 | User-edited data | `pole_edits`, keyed by stable source pole ID | Explicit edits only; source values remain available |
-| Calculated data | `camera_geometry` and `calculated_layers` | Reproducible derived results only; never a source or user-assignment mutation |
+| Calculated data | `camera_geometry`, `lighting_calculations`, and `calculated_layers` | Reproducible derived results only; never a source or user-assignment mutation |
 | Recommended data | `recommended_layers` | Empty in Phase 1; no pole or CAP generation |
 | Exported data | Generated response plus export event | Never treated as source |
 
@@ -44,6 +44,8 @@ The effective pole is a view, not stored replacement data:
 
 Every project records source filename, SHA-256 hash, import timestamp, source CRS, selected projected CRS, software/schema version, mode, defaults, warnings, edits, assumptions, source catalog references, and calculation/recommendation placeholders.
 
+Phase 4 `calculation_areas` are user configuration with a stable ID, classification, validated WGS84 exterior ring, calculation plane, grid spacing, maintenance factor, timestamps, polygon revision, state, warnings, assumptions, and provenance. `lighting_calculations.results` stores deterministic ordered points, projected and WGS84 coordinates, maintained lux, payload-safe contributions, area statistics, exact fixture/IES revision and SHA provenance, limitations, warnings, and the professional-reference disclaimer. Camera `priority_areas` remain structurally separate.
+
 The formal JSON Schema is `schemas/project.schema.json` and is generated from the Pydantic `Project` model. HTTP input/output and error-response contracts are published in `schemas/openapi.json`.
 
 ## Phase 1 invariants
@@ -57,7 +59,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.3.0` and software version is `0.3.1`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, and `2.2.0` migrate without family inference or coordinate change. Legacy camera orientation override bytes remain explicit. The fixture operational contract remains `1.2.0` for the fixed-zero-origin template contract; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.4.0` and software version is `0.4.0`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, and `2.3.0` migrate without family inference, coordinate change, or inferred lighting areas. Legacy camera orientation override bytes remain explicit. Fixture and IES selections pin exact revisions; the IES operational contract is `1.2.0` with immutable record history. The fixture operational contract remains `1.2.0`; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

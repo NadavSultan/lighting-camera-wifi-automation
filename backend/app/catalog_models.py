@@ -265,9 +265,10 @@ class IesFixtureAssociation(StrictModel):
 
 
 class IesLibrary(StrictModel):
-    schema_version: Literal["1.1.0"] = "1.1.0"
+    schema_version: Literal["1.2.0"] = "1.2.0"
     catalog_id: str = "ies-library"
     files: list[IesFileRecord] = Field(default_factory=list)
+    file_history: list[IesFileRecord] = Field(default_factory=list)
     fixture_associations: list[IesFixtureAssociation] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -278,6 +279,10 @@ class IesLibrary(StrictModel):
             raise ValueError("duplicate IES identifiers")
         if len(hashes) != len(set(hashes)):
             raise ValueError("duplicate IES file checksum")
+        history_keys = [(item.id, item.revision) for item in self.file_history]
+        current_keys = {(item.id, item.revision) for item in self.files}
+        if len(history_keys) != len(set(history_keys)) or current_keys.intersection(history_keys):
+            raise ValueError("IES record revisions must be immutable and unique")
         known = set(ids)
         pairs: set[tuple[str, str]] = set()
         for association in self.fixture_associations:

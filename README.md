@@ -1,6 +1,6 @@
 # Lighting Camera WiFi Automation
 
-Local Phase 3 map-centred engineering application for importing customer KML/KMZ pole layouts, preserving source coordinates and metadata, managing fixture/IES/camera catalogs, assigning fixed-mount SMART cameras, calculating flat-ground FOV/overlap/priority intersections, saving/reopening project JSON, and exporting updated KML.
+Local Phase 4 map-centred engineering application for importing customer KML/KMZ pole layouts, preserving source coordinates and metadata, managing fixture/IES/camera catalogs, calculating fixed-mount camera geometry and simplified direct horizontal illuminance on explicit lighting areas, saving/reopening project JSON, and exporting updated KML.
 
 ## Run locally
 
@@ -40,4 +40,4 @@ pnpm run build
 
 ## Scope and safety
 
-Existing-pole mode remains mandatory. No proposed poles are created and no customer coordinates are moved, corrected, or overwritten. Phase 3 renders geometric camera FOV, overlap, and priority areas only. It does not calculate Wi-Fi coverage, illuminance, CAP recommendations, analytics suitability, or automatic pole placement.
+Existing-pole mode remains mandatory. No proposed poles are created and no customer coordinates are moved, corrected, or overwritten. Phase 4 lighting is a simplified direct-light Type C model and is not independently validated against AGi32 or another professional reference tool. It does not calculate Wi-Fi coverage, CAP recommendations, standards compliance, analytics suitability, or automatic pole placement.

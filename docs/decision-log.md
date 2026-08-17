@@ -69,3 +69,13 @@
 - Decision: Phase 3 camera `priority_areas` remain separate from Phase 4 lighting `calculation_areas`.
 - Decision: lighting calculation areas are user-drawn polygons classified as Road, Sidewalk, Parking, or Other; they must not be inferred from or silently merged with camera priority areas.
 - Boundary: this roadmap correction does not authorize Phase 4 implementation. Photometric inputs, conventions, validation criteria, and implementation/QA prompts must be approved first.
+
+## DL-011 — Phase 4 direct-light model and validation boundary
+
+- Date: 2026-08-17
+- Status: approved for implementation; independent QA still required
+- Decision: project schema `2.4.0` and software/API `0.4.0` add lighting-only `calculation_areas` and persisted `lighting_calculations`. Grids use a projected-CRS-zero lattice, requested spacing, inside-or-boundary policy with `1e-7 m` tolerance, deterministic south-to-north then west-to-east ordering, and a 25,000-point limit without silent spacing changes or point removal.
+- Photometry: Type C C0 aligns with fixture azimuth; azimuth is clockwise from grid north; world points rotate into the local frame by subtracting fixture azimuth. No physical tilt is applied. Direct horizontal illuminance is `I * cos(incidence) / r^2`, equivalent to `I*h/r^3`, summed across eligible fixtures and multiplied by the area maintenance factor.
+- Compatibility: both supplied Phoenix files are restricted by exact SHA-256 to Phoenix 1 LITE/WIFI/SMART; both supplied Solitaire files are restricted to Solitaire LITE/WIFI/SMART. Association and pole selection remain explicit and no default is created.
+- Solitaire: 50 W is controlling; the preserved 60W internal identifier is warned. Raw negative D02 dimensions remain unchanged and luminous-opening geometry is explicitly excluded from the far-field model.
+- Validation boundary: synthetic mathematical cases are implementation evidence only. Every result states that it is not independently validated against AGi32 or another professional reference tool and is not a standards-compliance determination. Phase 5 and later remain unauthorized.

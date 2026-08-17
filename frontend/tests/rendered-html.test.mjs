@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
+import { staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -11,7 +12,7 @@ async function render() {
   return worker.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the Phase 3 engineering workspace", async () => {
+test("server-renders the Phase 4 engineering workspace", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
@@ -24,7 +25,7 @@ test("server-renders the Phase 3 engineering workspace", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
-test("exposes Phase 3 camera geometry while keeping later engines gated", async () => {
+test("exposes Phase 4 lighting while keeping Wi-Fi and later engines gated", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
   const inspector = await readFile(new URL("../app/components/PoleInspector.tsx", import.meta.url), "utf8");
   const catalogs = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
@@ -32,6 +33,13 @@ test("exposes Phase 3 camera geometry while keeping later engines gated", async 
   const api = await readFile(new URL("../app/lib/api.ts", import.meta.url), "utf8");
   const packageJson = await readFile(new URL("../package.json", import.meta.url), "utf8");
   assert.match(workspace, /Draw Priority Area/);
+  assert.match(workspace, /Draw Calculation Area/);
+  assert.match(workspace, /calculateSelectedArea/);
+  assert.match(workspace, /Approved simplified direct-light model/);
+  assert.match(workspace, /Calculation and fixture provenance/);
+  assert.match(workspace, /ies_sha256/);
+  assert.match(workspace, /Not independently validated/);
+  assert.match(workspace, /Conceptual Wi-Fi.*phase: 5/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /disabled title="Phase 6/);
   assert.match(inspector, /Restore source\/default values/);
@@ -55,6 +63,7 @@ test("exposes Phase 3 camera geometry while keeping later engines gated", async 
   assert.match(types, /location_edit_authorized/);
   assert.match(api, /formatApiErrorDetail/);
   assert.match(api, /recalculateCameraGeometry/);
+  assert.match(api, /calculateLighting/);
   assert.match(workspace, /camera_overlap/);
   assert.match(workspace, /priority_area_summaries/);
   assert.match(workspace, /startPriorityRename/);
@@ -64,8 +73,23 @@ test("exposes Phase 3 camera geometry while keeping later engines gated", async 
   const map = await readFile(new URL("../app/components/EngineeringMap.tsx", import.meta.url), "utf8");
   assert.match(map, /camera-warning-indicator/);
   assert.match(map, /layer_state\.warnings/);
+  assert.match(map, /calculation-area-fill/);
+  assert.match(map, /lighting-calculation-points/);
+  assert.match(map, /lighting-heat-points/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("Phase 4 calculation-area validation and stale-state transitions are explicit", () => {
+  const vertices = [[-80, 25], [-79.999, 25], [-79.999, 25.001]];
+  const valid = validateCalculationAreaDraft(vertices, { name: " Road A ", classification: "ROAD", calculation_plane_elevation_m: "0", grid_spacing_m: "2", maintenance_factor: "1" });
+  assert.equal(valid.name, "Road A");
+  assert.equal(valid.grid_spacing_m, 2);
+  assert.deepEqual(valid.wgs84_coordinates, [...vertices, vertices[0]]);
+  assert.throws(() => validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 0, maintenance_factor: 1 }), /positive/);
+  assert.throws(() => validateCalculationAreaDraft(vertices, { name: "A", classification: "ROAD", calculation_plane_elevation_m: 0, grid_spacing_m: 2, maintenance_factor: 1.1 }), /no greater than 1/);
+  assert.equal(staleCalculationState({ polygon_revision: 4 }, false).polygon_revision, 4);
+  assert.equal(staleCalculationState({ polygon_revision: 4 }, true).polygon_revision, 5);
 });
 
 test("NIR-01 refreshes and reports a rejected retained IES record without raw JSON", async () => {
