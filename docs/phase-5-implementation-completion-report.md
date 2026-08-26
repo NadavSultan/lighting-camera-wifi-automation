@@ -2,7 +2,9 @@
 
 Date: 2026-08-26
 
-Disposition: **Implementation complete; awaiting independent QA.** Phase 5 is not accepted or closed.
+Disposition: **Corrective implementation complete; awaiting master re-review and independent QA.** Phase 5 is not accepted or closed.
+
+This report supersedes the initial implementation handoff after the master review identified lifecycle, UI, fingerprint, precision, geometry-accounting, and acceptance-evidence gaps.
 
 ## Scope delivered
 
@@ -18,6 +20,15 @@ Implemented only the approved Phase 5 conceptual Wi-Fi scope in existing-pole mo
 - Fingerprinting includes geometry-significant effective inputs and excludes notes, timestamps, and general configuration revisions. Stale results are cleared on geometry-significant save/open/get/bulk paths.
 - Caps: 500 circles; 64,500 circle vertices; 50,000 candidate/intersection operations; 200 analysis areas; 10,000 vertices per area; 250,000 persisted geometry vertices. Invalid mutations return controlled validation errors before persistence.
 
+## Corrective scope
+
+- Added `phase5-workflows.mjs` and routed ordinary pole edits, model replacement, bulk edits, default-radius edits, area create/edit/redraw/delete/rename, restore, and undo/redo through precise Wi-Fi-significant invalidation. Notes, timestamps, general revisions, and layer visibility remain non-significant.
+- Completed the three-state per-pole enabled workflow, explicit radius clearing, project default-radius control, and explicit bulk set/clear radius/enabled/notes controls with atomic target validation.
+- Completed safe analysis-area selection, rename, redraw-from-empty, delete, cancel, revision handling, WGS84 draft validation, and preserved-result behavior on invalid replacement.
+- Expanded result/provenance UI for all approved aggregate and per-area metrics, assumptions, warnings, model/CRS/approximation/fingerprint values, source/effective coordinates, effective values, and the exact disclaimer.
+- Fingerprints now include only area ID/name/revision/ring geometry; aggregate individual area uses exact Shapely areas before final rounding; total geometry limits use actual persisted circle and area vertices.
+- Added regression tests for timestamp/notes invalidation exclusions, significant changes, triple overlap, 500-circle precision, explicit bulk set/clear, API preservation/errors, safe drafts, inheritance, and rendered Phase 5 behavior.
+
 ## Changed files
 
 Backend models, migration, configuration, API, and service: `backend/app/models.py`, `backend/app/services/wifi_coverage.py`, `backend/app/services/configuration.py`, `backend/app/main.py`, and `backend/pyproject.toml`.
@@ -32,13 +43,13 @@ Documentation: `docs/architecture.md`, `docs/data-model.md`, `docs/implementatio
 
 ## Verification
 
-- `python -m pytest backend/tests`: **127 passed**, one existing Starlette/httpx deprecation warning.
+- `python -m pytest backend/tests`: **132 passed**, one existing Starlette/httpx deprecation warning.
 - `python scripts/validate_engineering_data.py`: **passed**, all seven frozen catalogs and supplied-source hashes valid.
 - `python backend/scripts/export_schema.py`: regenerated project schema/OpenAPI; freshness tests pass in the backend suite.
 - Frontend strict TypeScript: **passed**.
 - Frontend ESLint: **passed**.
 - Frontend production Vinext build: **passed**, existing client chunk-size advisory only.
-- Frontend rendered/workflow suite: **9 passed**, zero failures.
+- Frontend rendered/workflow suite: **10 passed**, zero failures, including Phase 5 rendered shell/workflow helper coverage while retaining all Phase 1–4 regression tests.
 - `git diff --check`: **passed**.
 
 The supplied 74-pole source path remains covered by the existing KML/import, source-byte, raw-coordinate, and engineering-data tests. No `Input/`, frozen catalog, runtime project, export, or source archive file was changed. Updated KML export remains limited to source poles and fixture edits; Wi-Fi results remain JSON-only.
@@ -47,6 +58,7 @@ The supplied 74-pole source path remains covered by the existing KML/import, sou
 
 This is conceptual geometry, not RF design. Terrain, obstructions, antenna patterns, bands, EIRP, sensitivity, propagation loss, interference, throughput, capacity, service quality, standards compliance, backhaul, and CAP recommendations remain out of scope. Independent QA must verify the acceptance matrix, adversarial cap/API preservation behavior, migration losslessness/idempotence, supplied 74-pole rendered workflow, browser-console cleanliness, and regression behavior across Phases 1–4.
 
-Implementation commit: `674bf01` (`feat: implement Phase 5 conceptual Wi-Fi geometry`).
+Initial implementation commit: `674bf01` (`feat: implement Phase 5 conceptual Wi-Fi geometry`).
+Corrective implementation commit: recorded in the final documentation commit below.
 
 Working-tree status at handoff: expected clean after commit.

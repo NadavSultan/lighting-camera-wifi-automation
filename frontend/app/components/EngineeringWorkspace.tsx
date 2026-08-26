@@ -5,10 +5,11 @@ import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
 import { calculateLighting, calculateWifiCoverage, createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
-import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type Project, type WifiAnalysisArea } from "../lib/types";
+import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
+import { closeWifiArea, invalidateWifiIfSignificant } from "../lib/phase5-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -29,6 +30,17 @@ const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: numbe
   { key: "warnings", label: "Warnings", color: "var(--warning)" },
 ];
 
+function wifiFields(value: PoleFixtureConfiguration | null | undefined) {
+  const wifi = value?.wifi_configuration;
+  return { radius_override_m: wifi?.radius_override_m ?? null, enabled: wifi?.enabled ?? null, notes: wifi?.notes ?? "" };
+}
+
+function applyWifiRevision(previous: PoleFixtureConfiguration | null | undefined, next: PoleFixtureConfiguration | null | undefined) {
+  if (!next?.wifi_configuration || JSON.stringify(wifiFields(previous)) === JSON.stringify(wifiFields(next))) return next;
+  const priorRevision = previous?.wifi_configuration?.configuration_revision ?? 0;
+  return { ...next, wifi_configuration: { ...next.wifi_configuration, configuration_revision: priorRevision + 1, modified_at: new Date().toISOString() } };
+}
+
 export function EngineeringWorkspace() {
   const [project, setProject] = useState<Project | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -47,6 +59,9 @@ export function EngineeringWorkspace() {
   const [bulkAzimuth, setBulkAzimuth] = useState("");
   const [bulkIesId, setBulkIesId] = useState("");
   const [bulkWifiNotes, setBulkWifiNotes] = useState("");
+  const [bulkWifiRadius, setBulkWifiRadius] = useState("");
+  const [bulkClearWifiRadius, setBulkClearWifiRadius] = useState(false);
+  const [bulkWifiEnabled, setBulkWifiEnabled] = useState<"unchanged" | "inherit" | "enabled" | "disabled">("unchanged");
   const [bulkCameraId, setBulkCameraId] = useState("");
   const [bulkLensId, setBulkLensId] = useState("");
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -70,6 +85,8 @@ export function EngineeringWorkspace() {
   const [drawingWifiArea, setDrawingWifiArea] = useState(false);
   const [wifiDraft, setWifiDraft] = useState<Array<[number, number]>>([]);
   const [wifiAreaName, setWifiAreaName] = useState("Wi-Fi analysis area");
+  const [selectedWifiAreaId, setSelectedWifiAreaId] = useState<string | null>(null);
+  const [renamingWifiArea, setRenamingWifiArea] = useState(false);
   const geometrySignatureRef = useRef("");
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
@@ -112,7 +129,7 @@ export function EngineeringWorkspace() {
   function replaceProject(next: Project, recordHistory = true) {
     if (recordHistory && project) setPast((items) => [...items.slice(-39), project]);
     if (recordHistory) setFuture([]);
-    setProject(next);
+    setProject(project ? invalidateWifiIfSignificant(project, next) : next);
   }
 
   function mutateProject(updater: (draft: Project) => void) {
@@ -120,7 +137,7 @@ export function EngineeringWorkspace() {
     const next = structuredClone(project);
     updater(next);
     next.updated_at = new Date().toISOString();
-    replaceProject(next);
+    replaceProject(invalidateWifiIfSignificant(project, next));
   }
 
   async function runAction(action: () => Promise<void>) {
@@ -175,7 +192,7 @@ export function EngineeringWorkspace() {
     const previous = past[past.length - 1];
     setFuture((items) => [project, ...items].slice(0, 40));
     setPast((items) => items.slice(0, -1));
-    setProject(previous);
+    setProject(invalidateWifiIfSignificant(project, previous));
     setStatus("Undid last project edit");
   }
 
@@ -184,14 +201,14 @@ export function EngineeringWorkspace() {
     const next = future[0];
     setPast((items) => [...items, project].slice(-40));
     setFuture((items) => items.slice(1));
-    setProject(next);
+    setProject(invalidateWifiIfSignificant(project, next));
     setStatus("Redid project edit");
   }
 
   function updatePole(poleId: string, patch: Partial<PoleEdit>) {
     mutateProject((draft) => {
       const existing = draft.pole_edits[poleId] ?? { pole_id: poleId, location_edit_authorized: false };
-      const updated = { ...existing, ...patch, pole_id: poleId, modified_at: new Date().toISOString() };
+      const updated = { ...existing, ...patch, pole_id: poleId, fixture_configuration: applyWifiRevision(existing.fixture_configuration, patch.fixture_configuration ?? existing.fixture_configuration), modified_at: new Date().toISOString() };
       draft.pole_edits[poleId] = updated;
       if (lightingSignificantPoleChange(existing, updated)) invalidateLightingResults(draft);
     });
@@ -215,9 +232,10 @@ export function EngineeringWorkspace() {
     const selectedModel = fixtureCatalog?.fixture_models.find((item) => item.id === bulkModelId && item.active);
     const fixtureRevisions = [...(fixtureCatalog?.fixture_models ?? []), ...(fixtureCatalog?.fixture_model_history ?? [])];
     const models = targets.map((pole) => selectedModel ?? fixtureRevisions.find((item) => item.id === pole.fixtureConfiguration?.fixture_model_id && item.revision === pole.fixtureConfiguration.fixture_model_revision));
-    const needsConfiguration = Boolean(bulkIesId || bulkAzimuth || bulkWifiNotes || bulkCameraId || bulkLensId);
+    const needsConfiguration = Boolean(bulkIesId || bulkAzimuth || bulkWifiNotes || bulkWifiRadius || bulkClearWifiRadius || bulkWifiEnabled !== "unchanged" || bulkCameraId || bulkLensId);
     if (needsConfiguration && models.some((item) => !item)) { setError("Every selected pole needs an explicit fixture model before applying configuration fields"); return; }
-    if (bulkWifiNotes && models.some((item) => !item?.capabilities.wifi)) { setError("Wi-Fi bulk configuration is allowed only when every selected fixture supports Wi-Fi"); return; }
+    if ((bulkWifiNotes || bulkWifiRadius || bulkClearWifiRadius || bulkWifiEnabled !== "unchanged") && models.some((item) => !item?.capabilities.wifi)) { setError("Wi-Fi bulk configuration is allowed only when every selected fixture supports Wi-Fi"); return; }
+    if (bulkWifiRadius && (!Number.isFinite(Number(bulkWifiRadius)) || Number(bulkWifiRadius) <= 0 || Number(bulkWifiRadius) > 1000)) { setError("Wi-Fi radius must be greater than 0 and at most 1000 m"); return; }
     if ((bulkCameraId || bulkLensId) && models.some((item) => !item?.capabilities.cameras)) { setError("Camera and lens bulk configuration is allowed only when every selected fixture is SMART"); return; }
     if (bulkIesId && models.some((model) => !iesLibrary?.fixture_associations.some((item) => item.active && item.ies_file_id === bulkIesId && item.fixture_model_id === model?.id))) { setError("The selected IES file is not explicitly associated with every target fixture model"); return; }
     mutateProject((draft) => {
@@ -230,7 +248,11 @@ export function EngineeringWorkspace() {
         if (config) {
           if (bulkIesId) { config.ies_file_id = bulkIesId; config.ies_file_revision = iesLibrary?.files.find((item) => item.id === bulkIesId)?.revision ?? null; }
           if (bulkAzimuth) config.fixture_azimuth_deg = Number(bulkAzimuth);
-          if (bulkWifiNotes) config.wifi_configuration = { ...(config.wifi_configuration ?? {}), notes: bulkWifiNotes };
+          if (bulkWifiNotes) config.wifi_configuration = { ...(config.wifi_configuration ?? {}), notes: bulkWifiNotes, modified_at: new Date().toISOString(), configuration_revision: (config.wifi_configuration?.configuration_revision ?? 0) + 1 };
+          if (bulkWifiRadius || bulkClearWifiRadius || bulkWifiEnabled !== "unchanged") {
+            const wifi = config.wifi_configuration ?? { radius_override_m: null, enabled: null, notes: "", modified_at: new Date().toISOString(), configuration_revision: 1, legacy_metadata: {} };
+            config.wifi_configuration = { ...wifi, radius_override_m: bulkClearWifiRadius ? null : (bulkWifiRadius ? Number(bulkWifiRadius) : wifi.radius_override_m), enabled: bulkWifiEnabled === "inherit" ? null : bulkWifiEnabled === "enabled" ? true : bulkWifiEnabled === "disabled" ? false : wifi.enabled, modified_at: new Date().toISOString(), configuration_revision: (wifi.configuration_revision ?? 0) + 1 };
+          }
           if (bulkCameraId || bulkLensId) {
             const template = model?.mounting_template_revisions.find((item) => item.revision === config?.mounting_template_revision);
             for (const slot of template?.slots ?? []) {
@@ -275,13 +297,18 @@ export function EngineeringWorkspace() {
   }
 
   function finishWifiArea() {
-    if (!project || wifiDraft.length < 3) { setError("A Wi-Fi analysis area needs at least three distinct vertices"); return; }
-    const closed = [...wifiDraft, wifiDraft[0]];
-    if (new Set(closed.slice(0, -1).map((point) => point.join(","))).size < 3) { setError("A Wi-Fi analysis area needs three distinct vertices"); return; }
+    if (!project) return;
+    let closed: Array<[number, number]>;
+    try { closed = closeWifiArea(wifiDraft); } catch (caught) { setError(caught instanceof Error ? caught.message : "Wi-Fi analysis area is invalid"); return; }
     const now = new Date().toISOString();
-    mutateProject((draft) => { const area: WifiAnalysisArea = { id: crypto.randomUUID(), name: wifiAreaName.trim() || "Wi-Fi analysis area", wgs84_coordinates: closed, created_at: now, modified_at: now, polygon_revision: 1 }; draft.wifi_analysis_areas.push(area); draft.wifi_coverage.result = null; draft.wifi_coverage.state.status = "not-calculated"; });
-    setWifiDraft([]); setDrawingWifiArea(false); setStatus("Wi-Fi analysis area saved separately; calculate conceptual Wi-Fi to refresh statistics");
+    mutateProject((draft) => { const index = selectedWifiAreaId ? draft.wifi_analysis_areas.findIndex((item) => item.id === selectedWifiAreaId) : -1; if (index >= 0) { const prior = draft.wifi_analysis_areas[index]; draft.wifi_analysis_areas[index] = { ...prior, name: wifiAreaName.trim() || prior.name, wgs84_coordinates: closed, modified_at: now, polygon_revision: prior.polygon_revision + 1 }; } else draft.wifi_analysis_areas.push({ id: crypto.randomUUID(), name: wifiAreaName.trim() || "Wi-Fi analysis area", wgs84_coordinates: closed, created_at: now, modified_at: now, polygon_revision: 1 }); });
+    setWifiDraft([]); setDrawingWifiArea(false); setSelectedWifiAreaId(null); setRenamingWifiArea(false); setStatus("Wi-Fi analysis area saved separately; calculate conceptual Wi-Fi to refresh statistics");
   }
+
+  function startWifiRedraw(areaId: string) { const area = project?.wifi_analysis_areas.find((item) => item.id === areaId); if (!area) return; setSelectedWifiAreaId(area.id); setWifiAreaName(area.name); setWifiDraft([]); setDrawingWifiArea(true); setRenamingWifiArea(false); setStatus("Redrawing Wi-Fi analysis area from an empty draft; saved geometry remains until validation succeeds"); }
+  function startWifiRename(areaId: string) { const area = project?.wifi_analysis_areas.find((item) => item.id === areaId); if (!area) return; setSelectedWifiAreaId(area.id); setWifiAreaName(area.name); setDrawingWifiArea(false); setRenamingWifiArea(true); }
+  function finishWifiRename() { if (!project || !selectedWifiAreaId || !wifiAreaName.trim()) { setError("Wi-Fi analysis-area name is required"); return; } mutateProject((draft) => { const area = draft.wifi_analysis_areas.find((item) => item.id === selectedWifiAreaId); if (area) { area.name = wifiAreaName.trim(); area.modified_at = new Date().toISOString(); } }); setRenamingWifiArea(false); setSelectedWifiAreaId(null); setStatus("Wi-Fi analysis area renamed; its geometry was preserved"); }
+  function deleteWifiArea(areaId: string) { mutateProject((draft) => { draft.wifi_analysis_areas = draft.wifi_analysis_areas.filter((item) => item.id !== areaId); }); setSelectedWifiAreaId(null); setStatus("Wi-Fi analysis area deleted; source, camera, and lighting data unchanged"); }
 
   function startPriorityArea() {
     setSelectedPriorityAreaId(null);
@@ -453,9 +480,11 @@ export function EngineeringWorkspace() {
               <section className="section">
                 <div className="section-heading"><h3>Phase 5 — Conceptual Wi-Fi</h3><span className="helper">Projected geometry only</span></div>
                 <p className="lighting-disclaimer">Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance.</p>
+                <div className="field"><label htmlFor="wifi-default-radius">Project default radius (m) · engineering assumption</label><input id="wifi-default-radius" type="number" min="0.01" max="1000" step="0.01" value={project?.defaults.wifi_radius_m ?? 30} onChange={(event) => { const value = Number(event.target.value); if (Number.isFinite(value) && value > 0 && value <= 1000) mutateProject((draft) => { draft.defaults.wifi_radius_m = value; }); }} /><small>Source/default: 30 m · 0 &lt; radius ≤ 1000 m</small></div>
                 {drawingWifiArea && <div className="warning-card info"><div className="field full"><label htmlFor="wifi-area-name">Analysis-area name</label><input id="wifi-area-name" value={wifiAreaName} onChange={(event) => setWifiAreaName(event.target.value)} /></div><p>Replacement/new area starts empty; {wifiDraft.length} vertices.</p><button className="quiet-button" onClick={finishWifiArea}>Save Wi-Fi area</button><button className="quiet-button" onClick={() => { setDrawingWifiArea(false); setWifiDraft([]); }}>Cancel</button></div>}
-                {project?.wifi_coverage.result ? <><p>{project.wifi_coverage.result.global_statistics.circle_count} circles · {project.wifi_coverage.result.global_statistics.union_covered_area_m2.toFixed(1)} m² union · {project.wifi_coverage.result.global_statistics.overlap_pair_count} overlap pairs</p>{project.wifi_coverage.result.analysis_area_statistics.map((stats) => <div className="calculation-row" key={stats.analysis_area_id}><strong>{stats.analysis_area_name}</strong><span>{stats.covered_percentage.toFixed(1)}% covered · {stats.uncovered_percentage.toFixed(1)}% uncovered · {stats.boundary_covered_percentage.toFixed(1)}% boundary</span></div>)}</> : <p className="helper">No result yet. Circles and global metrics are available after calculation; boundary/gap statistics unavailable — draw a Wi-Fi analysis area.</p>}
-                {project?.wifi_analysis_areas.map((area) => <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{area.wgs84_coordinates.length - 1} vertices</span></div>)}
+                {renamingWifiArea && <div className="warning-card info"><div className="field full"><label htmlFor="wifi-rename">Area name</label><input id="wifi-rename" value={wifiAreaName} onChange={(event) => setWifiAreaName(event.target.value)} /></div><button className="quiet-button" onClick={finishWifiRename}>Save name</button><button className="quiet-button" onClick={() => { setRenamingWifiArea(false); setSelectedWifiAreaId(null); }}>Cancel</button></div>}
+                {project?.wifi_coverage.result ? <><p>{project.wifi_coverage.result.global_statistics.circle_count} circles · individual {project.wifi_coverage.result.global_statistics.individual_area_m2.toFixed(6)} m² · union {project.wifi_coverage.result.global_statistics.union_covered_area_m2.toFixed(6)} m² · overlap {project.wifi_coverage.result.global_statistics.overlap_area_m2.toFixed(6)} m²</p><p>Aggregate pairwise overlap {project.wifi_coverage.result.global_statistics.pairwise_overlap_area_m2.toFixed(6)} m² · multiply-covered union {project.wifi_coverage.result.global_statistics.multiply_covered_union_area_m2.toFixed(6)} m² · {project.wifi_coverage.result.global_statistics.overlap_pair_count} overlap pairs</p>{project.wifi_coverage.result.analysis_area_statistics.map((stats) => <div className="calculation-row" key={stats.analysis_area_id}><strong>{stats.analysis_area_name}</strong><span>{stats.covered_area_m2.toFixed(6)} m² covered ({stats.covered_percentage.toFixed(1)}%) · {stats.uncovered_area_m2.toFixed(6)} m² uncovered ({stats.uncovered_percentage.toFixed(1)}%) · boundary {stats.boundary_covered_length_m.toFixed(6)} m ({stats.boundary_covered_percentage.toFixed(1)}%)</span></div>)}<details className="lighting-provenance"><summary>Wi-Fi assumptions and provenance</summary><p>Model {project.wifi_coverage.result.model_version} · CRS {project.wifi_coverage.result.projected_crs} · approximation {project.wifi_coverage.result.approximation_resolution} segments/quarter<br />Fingerprint {project.wifi_coverage.result.calculation_input_sha256}</p>{project.wifi_coverage.result.assumptions.map((assumption) => <p key={assumption}>{assumption}</p>)}{project.wifi_coverage.result.circles.map((circle) => <p key={circle.id}><strong>{circle.pole_id}</strong> · source {circle.source_wgs84_coordinate.join(", ")} · effective {circle.effective_wgs84_coordinate.join(", ")} · radius {circle.effective_radius_m} m · enabled {String(circle.enabled)}</p>)}{project.wifi_coverage.result.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}<p>{project.wifi_coverage.result.disclaimer}</p></details></> : <p className="helper">No result yet. Circles and global metrics are available after calculation; boundary/gap statistics unavailable — draw a Wi-Fi analysis area.</p>}
+                {project?.wifi_analysis_areas.map((area) => <div className={`priority-row ${selectedWifiAreaId === area.id ? "selected" : ""}`} key={area.id}><strong>{area.name}</strong><span>{area.wgs84_coordinates.length - 1} vertices · revision {area.polygon_revision}</span><div><button className="quiet-button" onClick={() => setSelectedWifiAreaId(area.id)}>Select</button><button className="quiet-button" onClick={() => startWifiRename(area.id)}>Rename</button><button className="quiet-button" onClick={() => startWifiRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deleteWifiArea(area.id)}>Delete</button></div></div>)}
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Lighting calculation areas</h3><span className="helper">Separate from camera</span></div>
@@ -485,9 +514,11 @@ export function EngineeringWorkspace() {
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-model">Explicit fixture model</label><select id="bulk-model" value={bulkModelId} onChange={(event) => setBulkModelId(event.target.value)} disabled={!project}><option value="">Choose model…</option>{fixtureCatalog?.fixture_models.filter((item) => item.active).map((model) => <option value={model.id} key={model.id}>{model.display_name}</option>)}</select></div>
                 <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-height">Height (m)</label><input id="bulk-height" type="number" min="0.1" max="100" value={bulkHeight} placeholder="Unchanged" onChange={(event) => setBulkHeight(event.target.value)} /></div><div className="field"><label htmlFor="bulk-azimuth">Azimuth (°)</label><input id="bulk-azimuth" type="number" min="0" max="359.999" value={bulkAzimuth} placeholder="Unchanged" onChange={(event) => setBulkAzimuth(event.target.value)} /></div></div>
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-ies">IES file</label><select id="bulk-ies" value={bulkIesId} onChange={(event) => setBulkIesId(event.target.value)}><option value="">Unchanged</option>{iesLibrary?.files.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.original_filename}</option>)}</select></div>
+                <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-wifi-radius">Wi-Fi radius override (m)</label><input id="bulk-wifi-radius" type="number" min="0.01" max="1000" step="0.01" value={bulkWifiRadius} placeholder="Unchanged" onChange={(event) => setBulkWifiRadius(event.target.value)} /><label className="toggle-line"><input type="checkbox" checked={bulkClearWifiRadius} onChange={(event) => setBulkClearWifiRadius(event.target.checked)} />Clear radius to project default</label></div>
+                <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-wifi-enabled">Wi-Fi enabled override</label><select id="bulk-wifi-enabled" value={bulkWifiEnabled} onChange={(event) => setBulkWifiEnabled(event.target.value as typeof bulkWifiEnabled)}><option value="unchanged">Unchanged</option><option value="inherit">Clear to inherit (true)</option><option value="enabled">Set enabled</option><option value="disabled">Set disabled</option></select></div>
                 <div className="field full" style={{ marginTop: 8 }}><label htmlFor="bulk-wifi">Wi-Fi notes</label><input id="bulk-wifi" value={bulkWifiNotes} placeholder="Unchanged" onChange={(event) => setBulkWifiNotes(event.target.value)} /></div>
                 <div className="bulk-row" style={{ marginTop: 8 }}><div className="field"><label htmlFor="bulk-camera">SMART camera</label><select id="bulk-camera" value={bulkCameraId} onChange={(event) => setBulkCameraId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.camera_models.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div><div className="field"><label htmlFor="bulk-lens">SMART lens</label><select id="bulk-lens" value={bulkLensId} onChange={(event) => setBulkLensId(event.target.value)}><option value="">Unchanged</option>{cameraCatalog?.lenses.filter((item) => item.active).map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select></div></div>
-                <button className="quiet-button" style={{ marginTop: 7, width: "100%" }} disabled={!project || !(bulkModelId || bulkHeight || bulkAzimuth || bulkIesId || bulkWifiNotes || bulkCameraId || bulkLensId)} onClick={applyBulkConfiguration}>Apply selected fields</button>
+                <button className="quiet-button" style={{ marginTop: 7, width: "100%" }} disabled={!project || !(bulkModelId || bulkHeight || bulkAzimuth || bulkIesId || bulkWifiNotes || bulkWifiRadius || bulkClearWifiRadius || bulkWifiEnabled !== "unchanged" || bulkCameraId || bulkLensId)} onClick={applyBulkConfiguration}>Apply selected fields</button>
                 <p className="helper">Assignments create edit overlays. Manual selections, all-pole targeting, and folder targeting are explicit; folder names are never interpreted automatically.</p>
               </section>
               <section className="section">
@@ -499,7 +530,7 @@ export function EngineeringWorkspace() {
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
+          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
           <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 4 lighting rotates distributions around unchanged existing-pole origins. No customer location is generated or moved.</span></div>
           {!project?.source.poles.length && <div className="map-overlay map-empty"><span className="eyebrow">Phase 1 · Existing-pole foundation</span><h1>Start with the customer’s pole layout</h1><p>Import a KML or KMZ to validate and display authoritative pole coordinates. Your changes remain separate and reversible.</p><button className="primary-button" onClick={() => importRef.current?.click()} disabled={busy}>Import KML/KMZ</button></div>}
         </section>

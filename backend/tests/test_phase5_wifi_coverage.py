@@ -5,10 +5,15 @@ from pathlib import Path
 
 import pytest
 from pyproj import Transformer
+from fastapi.testclient import TestClient
+from shapely.geometry import Point
 
+from app.main import create_app
 from app.models import FixtureType, PoleEdit, Project, SourceLayer, SourcePole, WifiAnalysisArea, migrate_project_payload
 from app.services.catalogs import CatalogStore
-from app.services.wifi_coverage import calculate_wifi_coverage, invalidate_stale_wifi_results, wifi_calculation_input_sha256
+from app.services.store import ProjectStore
+from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
+from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results, wifi_calculation_input_sha256
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -53,6 +58,19 @@ def test_analysis_area_clips_and_no_area_never_infers_boundary():
     assert result.analysis_area_statistics[0].boundary_covered_percentage > 0
 
 
+def test_three_circle_pairwise_sum_and_multiply_covered_union_are_distinct():
+    project = wifi_project()
+    to_wgs84 = Transformer.from_crs("EPSG:32617", "EPSG:4326", always_xy=True)
+    for index, x in enumerate((600000, 600010, 600020)):
+        lon, lat = to_wgs84.transform(x, 2850000)
+        pole = SourcePole(id=f"triple-{index}", sequence_index=index, name=f"Triple {index}", longitude=lon, latitude=lat, raw_coordinates=f"{lon},{lat},0")
+        project.source.poles.append(pole)
+        project.pole_edits[pole.id] = PoleEdit(pole_id=pole.id, fixture_type=FixtureType.WIFI)
+    result = calculate_wifi_coverage(project, fixtures())
+    assert result.global_statistics.overlap_pair_count >= 3
+    assert result.global_statistics.pairwise_overlap_area_m2 > result.global_statistics.multiply_covered_union_area_m2
+
+
 def test_disabled_and_inactive_poles_are_excluded_and_fingerprint_ignores_notes():
     project = wifi_project()
     project.pole_edits["p-0"].fixture_configuration = {"fixture_model_id": "phoenix-1-wifi", "fixture_model_revision": 1, "fixture_azimuth_deg": 0, "lighting_properties": {}, "wifi_configuration": {"enabled": False}}
@@ -63,8 +81,42 @@ def test_disabled_and_inactive_poles_are_excluded_and_fingerprint_ignores_notes(
     before = wifi_calculation_input_sha256(project)
     project.pole_edits["p-0"].fixture_configuration.wifi_configuration.notes = "field note"
     assert wifi_calculation_input_sha256(project) == before
-    project.pole_edits["p-0"].active = False
-    assert invalidate_stale_wifi_results(Project.model_validate({**project.model_dump(mode="json"), "wifi_coverage": {"result": result.model_dump(mode="json")}}))
+    calculated = apply_wifi_result(project, result)
+    calculated.pole_edits["p-0"].fixture_configuration.wifi_configuration.notes = "timestamp and note only"
+    assert not invalidate_stale_wifi_results(calculated)
+    calculated.pole_edits["p-0"].active = False
+    assert invalidate_stale_wifi_results(calculated)
+
+
+def test_significant_inputs_invalidate_but_area_timestamps_do_not():
+    project = wifi_project()
+    result = calculate_wifi_coverage(project, fixtures())
+    calculated = apply_wifi_result(project, result)
+    ring = [(-80.0, 25.0), (-79.999, 25.0), (-79.999, 25.001), (-80.0, 25.001), (-80.0, 25.0)]
+    calculated.wifi_analysis_areas.append(WifiAnalysisArea(id="a", name="Area", wgs84_coordinates=ring))
+    calculated.wifi_coverage.result = calculate_wifi_coverage(calculated, fixtures())
+    calculated.wifi_coverage.state.calculation_input_sha256 = calculated.wifi_coverage.result.calculation_input_sha256
+    calculated.wifi_analysis_areas[0].modified_at = calculated.wifi_analysis_areas[0].modified_at.replace(year=2027)
+    assert not invalidate_stale_wifi_results(calculated)
+    calculated.defaults.wifi_radius_m = 31
+    assert invalidate_stale_wifi_results(calculated)
+
+
+def test_exact_area_precision_is_used_for_many_circles():
+    base = wifi_project()
+    to_wgs84 = Transformer.from_crs("EPSG:32617", "EPSG:4326", always_xy=True)
+    poles = []
+    for index in range(500):
+        lon, lat = to_wgs84.transform(600000 + index * 300, 2850000)
+        poles.append(SourcePole(id=f"p-{index}", sequence_index=index, name=f"P{index}", longitude=lon, latitude=lat, raw_coordinates=f"{lon},{lat},0"))
+    project = Project(projected_crs="EPSG:32617", source=SourceLayer(poles=poles))
+    for pole in poles:
+        project.pole_edits[pole.id] = PoleEdit(pole_id=pole.id, fixture_type=FixtureType.WIFI)
+    result = calculate_wifi_coverage(project, fixtures())
+    to_projected = Transformer.from_crs("EPSG:4326", "EPSG:32617", always_xy=True)
+    expected = round(sum(Point(*to_projected.transform(pole.longitude, pole.latitude)).buffer(30, quad_segs=32).area for pole in poles), 6)
+    assert result.global_statistics.individual_area_m2 == pytest.approx(expected, abs=1e-6)
+    assert abs(result.global_statistics.individual_area_m2 - sum(circle.area_m2 for circle in result.circles)) > 0.0001
 
 
 def test_migration_is_additive_lossless_and_idempotent():
@@ -89,3 +141,34 @@ def test_caps_reject_without_partial_result():
     with pytest.raises(ValueError, match="200"):
         calculate_wifi_coverage(project, fixtures())
     assert project.wifi_coverage.result is result
+
+
+def test_wifi_api_calculate_and_controlled_errors_preserve_project(tmp_path: Path):
+    project = wifi_project()
+    store = ProjectStore(tmp_path / "projects")
+    store.save(project)
+    client = TestClient(create_app(store, CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")))
+    response = client.post(f"/api/projects/{project.id}/wifi-coverage/calculate", json=project.model_dump(mode="json"))
+    assert response.status_code == 200
+    calculated = response.json()
+    assert calculated["wifi_coverage"]["result"]["disclaimer"].startswith("Conceptual geometric visualization only")
+    assert client.post(f"/api/projects/{project.id}/wifi-coverage/calculate", json={**calculated, "id": "wrong"}).status_code == 409
+    assert client.post("/api/projects/missing/wifi-coverage/invalidate").status_code == 404
+    invalid_area = {"id": "bad", "name": "Bad", "wgs84_coordinates": [[0, 0], [1, 1], [0, 1], [1, 0], [0, 0]]}
+    failed = client.post(f"/api/projects/{project.id}/wifi-analysis-areas", json=invalid_area)
+    assert failed.status_code == 422
+    assert store.load(project.id).wifi_coverage.result is not None
+
+
+def test_bulk_wifi_set_and_clear_are_explicit_and_atomic():
+    project = wifi_project()
+    request = BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-wifi", wifi_radius_override_m=42, wifi_enabled=False, wifi_notes="bulk"))
+    updated = apply_bulk_configuration(project, request, fixtures())
+    wifi = updated.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    assert wifi.radius_override_m == 42 and wifi.enabled is False and wifi.configuration_revision == 2
+    clear = BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=BulkPoleConfigurationPatch(clear_wifi_radius_override=True, clear_wifi_enabled_override=True))
+    cleared = apply_bulk_configuration(updated, clear, fixtures())
+    wifi = cleared.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    assert wifi.radius_override_m is None and wifi.enabled is None and wifi.configuration_revision == 3
+    with pytest.raises(ValueError, match="unknown poles"):
+        apply_bulk_configuration(project, BulkPoleConfigurationRequest(pole_ids=["missing"], patch=BulkPoleConfigurationPatch(wifi_radius_override_m=10)), fixtures())

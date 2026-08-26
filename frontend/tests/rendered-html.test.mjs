@@ -4,6 +4,7 @@ import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
+import { closeWifiArea, invalidateWifiIfSignificant, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -12,7 +13,7 @@ async function render() {
   return worker.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the Phase 4 engineering workspace", async () => {
+test("server-renders the Phase 5 engineering workspace", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
@@ -22,10 +23,12 @@ test("server-renders the Phase 4 engineering workspace", async () => {
   assert.match(html, /Import KML\/KMZ/);
   assert.match(html, /Catalogs/);
   assert.match(html, /Customer coordinates are locked/);
+  assert.match(html, /Phase 5/);
+  assert.match(html, /Conceptual geometric visualization only/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
-test("exposes Phase 4 lighting while keeping Wi-Fi and later engines gated", async () => {
+test("exposes Phase 5 conceptual Wi-Fi while keeping CAP gated", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
   const inspector = await readFile(new URL("../app/components/PoleInspector.tsx", import.meta.url), "utf8");
   const catalogs = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
@@ -40,11 +43,18 @@ test("exposes Phase 4 lighting while keeping Wi-Fi and later engines gated", asy
   assert.match(workspace, /ies_sha256/);
   assert.match(workspace, /Not independently validated/);
   assert.match(workspace, /Conceptual Wi-Fi.*phase: 5/);
+  assert.match(workspace, /Draw Wi-Fi analysis area/);
+  assert.match(workspace, /Calculate conceptual Wi-Fi/);
+  assert.match(workspace, /Clear radius to project default/);
+  assert.match(workspace, /boundary\/gap statistics unavailable/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /disabled title="Phase 6/);
   assert.match(inspector, /Restore source\/default values/);
   assert.match(workspace, /Apply selected fields/);
   assert.match(inspector, /Explicit model selection required/);
+  assert.match(inspector, /Explicitly enabled/);
+  assert.match(inspector, /Explicitly disabled/);
+  assert.match(inspector, /Clear to project default/);
   assert.match(inspector, /Catalog default/);
   assert.match(inspector, /Pole override/);
   assert.match(inspector, /Remove pole override and restore catalog default/);
@@ -78,6 +88,19 @@ test("exposes Phase 4 lighting while keeping Wi-Fi and later engines gated", asy
   assert.match(map, /lighting-heat-points/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("Phase 5 workflow helpers preserve safe drafts, inheritance, and precise invalidation", () => {
+  const base = { projected_crs: "EPSG:32617", defaults: { fixture_type: "LITE", wifi_radius_m: 30 }, source: { poles: [{ id: "p1", sequence_index: 0, longitude: -80, latitude: 25 }] }, pole_edits: { p1: { fixture_type: "WIFI", active: true, fixture_configuration: { fixture_model_id: "wifi", fixture_model_revision: 1, wifi_configuration: { radius_override_m: null, enabled: null, notes: "" } } } }, wifi_analysis_areas: [] , wifi_coverage: { result: { old: true }, state: { status: "calculated" } } };
+  assert.deepEqual(closeWifiArea([[0, 0], [1, 0], [1, 1]]), [[0, 0], [1, 0], [1, 1], [0, 0]]);
+  assert.throws(() => closeWifiArea([[0, 0], [1, 1]]), /three distinct vertices/);
+  assert.deepEqual(wifiEffectiveValues(base, "p1"), { radius_m: 30, enabled: true, enabled_override: null, radius_override_m: null });
+  const notes = structuredClone(base); notes.pole_edits.p1.fixture_configuration.wifi_configuration.notes = "field note";
+  assert.equal(wifiSignificantProjectChange(base, notes), false);
+  assert.equal(invalidateWifiIfSignificant(base, notes).wifi_coverage.result.old, true);
+  const changed = structuredClone(base); changed.defaults.wifi_radius_m = 31;
+  assert.equal(wifiSignificantProjectChange(base, changed), true);
+  assert.equal(invalidateWifiIfSignificant(base, changed).wifi_coverage.result, null);
 });
 
 test("Phase 4 calculation-area validation and stale-state transitions are explicit", () => {

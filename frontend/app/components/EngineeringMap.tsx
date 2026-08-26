@@ -79,7 +79,7 @@ function draftFeature(points: Array<[number, number]>): FeatureCollection<LineSt
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: points.length >= 3 ? { type: "Polygon", coordinates: [[...points, points[0]]] } : { type: "LineString", coordinates: points } }] };
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, resizeSignal }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; resizeSignal: string }) {
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -93,9 +93,10 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const onCalculationSelectRef = useRef(onSelectCalculationArea);
   const drawingWifiRef = useRef(drawingWifiArea);
   const onWifiDraftPointRef = useRef(onWifiDraftPoint);
+  const onWifiAreaSelectRef = useRef(onSelectWifiArea);
 
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
-  useEffect(() => { drawingRef.current = drawingPriorityArea; onDraftPointRef.current = onPriorityDraftPoint; onPrioritySelectRef.current = onSelectPriorityArea; drawingCalculationRef.current = drawingCalculationArea; onCalculationDraftPointRef.current = onCalculationDraftPoint; onCalculationSelectRef.current = onSelectCalculationArea; drawingWifiRef.current = drawingWifiArea; onWifiDraftPointRef.current = onWifiDraftPoint; }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, onWifiDraftPoint]);
+  useEffect(() => { drawingRef.current = drawingPriorityArea; onDraftPointRef.current = onPriorityDraftPoint; onPrioritySelectRef.current = onSelectPriorityArea; drawingCalculationRef.current = drawingCalculationArea; onCalculationDraftPointRef.current = onCalculationDraftPoint; onCalculationSelectRef.current = onSelectCalculationArea; drawingWifiRef.current = drawingWifiArea; onWifiDraftPointRef.current = onWifiDraftPoint; onWifiAreaSelectRef.current = onSelectWifiArea; }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, onWifiDraftPoint, onSelectWifiArea]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -122,6 +123,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addLayer({ id: "calculation-area-line", type: "line", source: "calculation-areas", paint: { "line-color": ["case", ["boolean", ["get", "warning"], false], "#ff7a59", "#2dd4bf"], "line-width": 2.5 } });
       map.addLayer({ id: "wifi-coverage-fill", type: "fill", source: "wifi-coverage", paint: { "fill-color": "#06b6d4", "fill-opacity": .16, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "wifi-analysis-area-line", type: "line", source: "wifi-analysis-areas", paint: { "line-color": "#a3e635", "line-width": 2, "line-dasharray": [3, 2] } });
+      map.addLayer({ id: "wifi-analysis-area-fill", type: "fill", source: "wifi-analysis-areas", paint: { "fill-color": "#a3e635", "fill-opacity": .04 } });
       map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
       map.addLayer({ id: "camera-2-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-2"], paint: { "fill-color": "#22d3ee", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "camera-overlap-fill", type: "fill", source: "camera-overlap", paint: { "fill-color": "#ec4899", "fill-opacity": .48, "fill-outline-color": "#f9a8d4" } });
@@ -154,6 +156,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.on("click", "camera-warning-indicator", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
       map.on("click", "priority-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
       map.on("click", "calculation-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
+      map.on("click", "wifi-analysis-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onWifiAreaSelectRef.current(id); });
       map.on("click", (event) => { if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingWifiRef.current) onWifiDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); });
     });
     mapRef.current = map;
@@ -193,6 +196,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["lighting-heat-points", project?.layer_state.lighting_heat_map ?? true],
         ["wifi-coverage-fill", Boolean(project?.layer_state.wifi_coverage && project?.wifi_coverage.result)],
         ["wifi-analysis-area-line", project?.layer_state.wifi_coverage ?? false],
+        ["wifi-analysis-area-fill", project?.layer_state.wifi_coverage ?? false],
         ["camera-warning-indicator", project?.layer_state.warnings ?? true],
       ];
       for (const [layer, visible] of states) if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");

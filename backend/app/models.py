@@ -559,7 +559,8 @@ class Project(StrictModel):
         if len(self.wifi_analysis_areas) > MAX_WIFI_ANALYSIS_AREAS:
             raise ValueError(f"Wi-Fi analysis areas exceed the {MAX_WIFI_ANALYSIS_AREAS:,}-area limit")
         total_area_vertices = sum(len(area.wgs84_coordinates) for area in self.wifi_analysis_areas)
-        if total_area_vertices + MAX_WIFI_CIRCLE_VERTICES > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
+        result_vertices = sum(len(circle.projected_ring) for circle in (self.wifi_coverage.result.circles if self.wifi_coverage.result else []))
+        if result_vertices + total_area_vertices > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
             raise ValueError(f"Wi-Fi persisted geometry exceeds the {MAX_WIFI_TOTAL_GEOMETRY_VERTICES:,}-vertex limit")
         return self
 

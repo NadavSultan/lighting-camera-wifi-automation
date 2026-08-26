@@ -78,7 +78,11 @@ def wifi_calculation_input_sha256(project: Project) -> str:
         "model_version": WIFI_MODEL_VERSION, "resolution": 32,
         "projected_crs": project.projected_crs, "source_crs": project.source_crs,
         "default_radius": project.defaults.wifi_radius_m, "poles": poles,
-        "analysis_areas": [area.model_dump(mode="json") for area in project.wifi_analysis_areas],
+        "analysis_areas": [
+            {"id": area.id, "name": area.name, "polygon_revision": area.polygon_revision,
+             "wgs84_coordinates": [[lon, lat] for lon, lat in area.wgs84_coordinates]}
+            for area in project.wifi_analysis_areas
+        ],
         "candidate_operation_cap": MAX_WIFI_CANDIDATE_OPERATIONS,
     }
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
@@ -131,13 +135,26 @@ def _projected_area(project: Project, area):
     return polygon, to_projected
 
 
+def validate_wifi_analysis_areas(project: Project) -> None:
+    """Validate every stored area in the selected projected CRS before mutation/persistence."""
+    if len(project.wifi_analysis_areas) > MAX_WIFI_ANALYSIS_AREAS:
+        raise ValueError(f"Wi-Fi analysis areas exceed the {MAX_WIFI_ANALYSIS_AREAS:,}-area limit")
+    total_vertices = sum(len(area.wgs84_coordinates) for area in project.wifi_analysis_areas)
+    for area in project.wifi_analysis_areas:
+        if len(area.wgs84_coordinates) - 1 > 10000:
+            raise ValueError(f"Wi-Fi analysis area {area.id} exceeds the 10,000-vertex limit")
+        _projected_area(project, area)
+    result_vertices = sum(len(circle.projected_ring) for circle in (project.wifi_coverage.result.circles if project.wifi_coverage.result else []))
+    if result_vertices + total_vertices > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
+        raise ValueError(f"Wi-Fi persisted geometry exceeds the {MAX_WIFI_TOTAL_GEOMETRY_VERTICES:,}-vertex limit")
+
+
 def calculate_wifi_coverage(project: Project, fixtures: FixtureModelCatalog) -> WifiCoverageResult:
     if not project.projected_crs:
         raise ValueError("A project-selected projected CRS is required for Wi-Fi geometry")
     if len(project.wifi_analysis_areas) > MAX_WIFI_ANALYSIS_AREAS:
         raise ValueError(f"Wi-Fi analysis areas exceed the {MAX_WIFI_ANALYSIS_AREAS:,}-area limit")
-    if sum(len(area.wgs84_coordinates) for area in project.wifi_analysis_areas) + MAX_WIFI_CIRCLE_VERTICES > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
-        raise ValueError(f"Wi-Fi persisted geometry exceeds the {MAX_WIFI_TOTAL_GEOMETRY_VERTICES:,}-vertex limit")
+    total_area_vertices = sum(len(area.wgs84_coordinates) for area in project.wifi_analysis_areas)
     crs = validate_projected_metre_crs(project.projected_crs)
     to_projected, to_wgs84 = project_transformers(crs)
     models = {(model.id, model.revision): model for model in [*fixtures.fixture_models, *fixtures.fixture_model_history]}
@@ -198,6 +215,8 @@ def calculate_wifi_coverage(project: Project, fixtures: FixtureModelCatalog) -> 
             raise ValueError(f"Wi-Fi eligible circles exceed the {MAX_WIFI_CIRCLES:,}-circle limit")
     if len(circles) * 129 > MAX_WIFI_CIRCLE_VERTICES:
         raise ValueError(f"Wi-Fi circle vertices exceed the {MAX_WIFI_CIRCLE_VERTICES:,}-vertex limit")
+    if len(circles) * 129 + total_area_vertices > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
+        raise ValueError(f"Wi-Fi persisted geometry exceeds the {MAX_WIFI_TOTAL_GEOMETRY_VERTICES:,}-vertex limit")
     geometries = exact_geometries
     union = unary_union(geometries) if geometries else GeometryCollection()
     tree = STRtree(geometries) if geometries else None
@@ -221,7 +240,7 @@ def calculate_wifi_coverage(project: Project, fixtures: FixtureModelCatalog) -> 
             overlap_geometries.append(intersection)
             overlap_count += 1
     multiply_union = unary_union(overlap_geometries) if overlap_geometries else GeometryCollection()
-    individual = math.fsum(circle.area_m2 for circle in circles)
+    individual = math.fsum(geometry.area for geometry in geometries)
     union_area = union.area if not union.is_empty else 0.0
     global_stats = WifiGlobalStatistics(
         circle_count=len(circles), individual_area_m2=_round(individual, 6),
