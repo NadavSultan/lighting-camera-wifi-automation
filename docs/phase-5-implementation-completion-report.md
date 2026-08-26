@@ -59,6 +59,6 @@ The supplied 74-pole source path remains covered by the existing KML/import, sou
 This is conceptual geometry, not RF design. Terrain, obstructions, antenna patterns, bands, EIRP, sensitivity, propagation loss, interference, throughput, capacity, service quality, standards compliance, backhaul, and CAP recommendations remain out of scope. Independent QA must verify the acceptance matrix, adversarial cap/API preservation behavior, migration losslessness/idempotence, supplied 74-pole rendered workflow, browser-console cleanliness, and regression behavior across Phases 1–4.
 
 Initial implementation commit: `674bf01` (`feat: implement Phase 5 conceptual Wi-Fi geometry`).
-Corrective implementation commit: recorded in the final documentation commit below.
+Corrective implementation commit: `672d549` (`fix: close Phase 5 Wi-Fi review findings`).
 
 Working-tree status at handoff: expected clean after commit.
