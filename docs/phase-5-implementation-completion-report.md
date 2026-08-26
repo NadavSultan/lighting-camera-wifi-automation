@@ -52,6 +52,8 @@ Documentation: `docs/architecture.md`, `docs/data-model.md`, `docs/implementatio
 - Frontend rendered/workflow suite: **10 passed**, zero failures, including Phase 5 rendered shell/workflow helper coverage while retaining all Phase 1–4 regression tests.
 - `git diff --check`: **passed**.
 
+Supplied-input acceptance probe: `Input/Miracle_Mile_Lighting_Poles.kml` imported as 74 poles, preserved source SHA-256 `2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328`, calculated 74 conceptual circles and 339 indexed overlap pairs; source bytes and raw coordinate representations remained unchanged.
+
 The supplied 74-pole source path remains covered by the existing KML/import, source-byte, raw-coordinate, and engineering-data tests. No `Input/`, frozen catalog, runtime project, export, or source archive file was changed. Updated KML export remains limited to source poles and fixture edits; Wi-Fi results remain JSON-only.
 
 ## Known limitations and independent-QA items
