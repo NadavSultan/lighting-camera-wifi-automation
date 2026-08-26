@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. The Phase 4 corrective retest passed P4-IR-01, P4-IR-02, P4-IR-03, P4-IR-04, P4-IR-06, and P4-IR-07 but returned **FAIL** because P4-IR-05 remained incomplete on shared invalid-CRS paths. The final narrowly scoped P4-IR-05 correction now rejects invalid, geographic, and projected non-metre project engineering CRS values at the shared project-model boundary and awaits one fresh independent focused retest and a master gate decision; Phase 4 is not approved. Phase 5 and later remain unauthorized and unstarted.
+Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 and later remain unauthorized and unstarted.
 
 ## Completed
 
@@ -43,6 +43,7 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
 - The final focused NIR-01 retest closed the sole remaining condition with no new findings; `docs/phase-2-nir-01-final-retest-report.md` is the controlling Phase 2 gate evidence.
 - The final focused P3-IR-05 retest returned PASS with no confirmed defects or regressions; `docs/phase-3-final-focused-retest-report.md` is the controlling Phase 3 gate evidence.
+- The final independent P4-IR-05 retest returned PASS across invalid, unsupported, valid projected-metre, and nullable blank-project CRS states; `docs/phase-4-final-p4-ir-05-independent-retest-2026-08-26.md` and `docs/phase-4-master-gate-decision-2026-08-26.md` are the controlling final Phase 4 gate evidence.
 
 ## Known limitations
 
@@ -50,8 +51,8 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is implemented but awaits independent QA; Phase 5 Wi-Fi, CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated; Phase 5 Wi-Fi, CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
 
 ## Current gate
 
-The final focused retest in `docs/phase-4-final-focused-retest-report.md` returned **FAIL** because geographic `EPSG:4326` and projected non-metre `EPSG:2263` were accepted and persisted on shared project paths. The new final P4-IR-05 correction is now implemented, but Phase 4 remains unapproved pending one fresh independent focused P4-IR-05 retest and a master gate decision. P4-IR-01, P4-IR-02, P4-IR-03, P4-IR-04, P4-IR-06, and P4-IR-07 are not reopened. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.
+Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi and every later phase remain unauthorized and require separate explicit user approval. Camera `priority_areas` remain separate from classified lighting `calculation_areas`.

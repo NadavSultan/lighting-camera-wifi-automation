@@ -32,7 +32,7 @@ Status: complete and formally closed on 2026-08-17 after all P3-IR-01 through P3
 
 ## Phase 4 - lighting calculation engine
 
-Status: implemented under explicit authorization on 2026-08-17; awaiting separate independent QA and master gate decision.
+Status: complete and formally closed on 2026-08-26 after all P4-IR-01 through P4-IR-07 findings received independent passing evidence and the master gate returned **PASS**.
 
 - First approve authoritative fixture-to-IES mapping, fixture orientation and IES axes, rotation order, interpolation, equations, maintenance-factor behavior, uniformity definitions, validation cases, comparison method, and tolerances.
 - Add lighting-specific `calculation_areas`, separate from Phase 3 camera `priority_areas`, classified as Road, Sidewalk, Parking, or Other.
@@ -59,4 +59,4 @@ Status: implemented under explicit authorization on 2026-08-17; awaiting separat
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 4 is implemented under explicit authorization but remains unapproved pending independent QA and a master gate decision; Phase 5 and later remain unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 5 and later remain unauthorized.

@@ -14,7 +14,7 @@ Before planning or changing code, every future session must read these files in 
 6. `docs/data-model.md`
 7. `docs/phase-1-completion-report.md`
 
-Then inspect `git status` and preserve unrelated or user-owned changes. Phase 1 is frozen. Phase 2 was explicitly authorized on 2026-08-14 and is implemented; later phases remain gated.
+Then inspect `git status` and preserve unrelated or user-owned changes. Phases 1-4 are accepted and formally closed. Phase 5 and later remain gated and unauthorized.
 
 ## Safety and engineering rules
 
@@ -23,7 +23,7 @@ Then inspect `git status` and preserve unrelated or user-owned changes. Phase 1 
 - Treat WGS84 coordinates as interchange/display data only. Select a local projected CRS in metres for distance, area, coverage, or later photometric calculations.
 - Do not infer CAP limits, fixture applicability, photometric conventions, or analytics performance. Record an assumption or block the feature.
 - Camera downward angle is measured below horizontal: 0 degrees is horizontal and 90 degrees is vertically down.
-- Phase work must remain gated. Phases 1-3 are closed; Phase 4 implementation awaits independent QA. Do not begin Phase 5 without separate authorization.
+- Phase work must remain gated. Phases 1-4 are closed. Do not begin Phase 5 without separate authorization.
 
 ## Development
 
