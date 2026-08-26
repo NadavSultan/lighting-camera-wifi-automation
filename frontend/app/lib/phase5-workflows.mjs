@@ -45,12 +45,36 @@ export function closeWifiArea(points) {
   if (!Array.isArray(points) || points.length < 3) throw new Error("Wi-Fi analysis area needs at least three distinct vertices");
   if (points.length > 10000) throw new Error("Wi-Fi analysis area exceeds the 10,000-vertex limit");
   if (points.some((point) => !Array.isArray(point) || point.length !== 2 || !Number.isFinite(point[0]) || !Number.isFinite(point[1]) || point[0] < -180 || point[0] > 180 || point[1] < -90 || point[1] > 90)) throw new Error("Wi-Fi analysis-area coordinates must be finite numbers within WGS84 bounds");
+  const near = (a, b) => Math.abs(a[0] - b[0]) <= 1e-12 && Math.abs(a[1] - b[1]) <= 1e-12;
+  for (let i = 0; i < points.length; i += 1) for (let j = i + 1; j < points.length; j += 1) if (near(points[i], points[j])) throw new Error("Wi-Fi analysis area has repeated or zero-length vertices");
   const distinct = new Set(points.map((point) => `${point[0]},${point[1]}`));
   if (distinct.size < 3) throw new Error("Wi-Fi analysis area needs at least three distinct vertices");
   const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
-  const intersects = (a, b, c, d) => cross(a, b, c) * cross(a, b, d) < 0 && cross(c, d, a) * cross(c, d, b) < 0;
-  for (let i = 0; i < points.length; i += 1) for (let j = i + 1; j < points.length; j += 1) if (Math.abs(i - j) > 1 && !(i === 0 && j === points.length - 1) && intersects(points[i], points[(i + 1) % points.length], points[j], points[(j + 1) % points.length])) throw new Error("Wi-Fi analysis area is self-intersecting");
+  const onSegment = (a, b, p) => Math.min(a[0], b[0]) <= p[0] && p[0] <= Math.max(a[0], b[0]) && Math.min(a[1], b[1]) <= p[1] && p[1] <= Math.max(a[1], b[1]) && Math.abs(cross(a, b, p)) <= Number.EPSILON;
+  const intersects = (a, b, c, d) => {
+    const abC = cross(a, b, c); const abD = cross(a, b, d); const cdA = cross(c, d, a); const cdB = cross(c, d, b);
+    return (abC === 0 && onSegment(a, b, c)) || (abD === 0 && onSegment(a, b, d)) || (cdA === 0 && onSegment(c, d, a)) || (cdB === 0 && onSegment(c, d, b)) || ((abC > 0) !== (abD > 0) && (cdA > 0) !== (cdB > 0));
+  };
+  for (let i = 0; i < points.length; i += 1) {
+    const a = points[i]; const b = points[(i + 1) % points.length];
+    if (a[0] === b[0] && a[1] === b[1]) throw new Error("Wi-Fi analysis area has a zero-length edge");
+    for (let j = i + 1; j < points.length; j += 1) {
+      if (j === i + 1 || (i === 0 && j === points.length - 1)) continue;
+      if (intersects(a, b, points[j], points[(j + 1) % points.length])) throw new Error("Wi-Fi analysis area has a self-touch or self-intersection");
+    }
+  }
+  let area2 = 0;
+  for (let i = 0; i < points.length; i += 1) area2 += points[i][0] * points[(i + 1) % points.length][1] - points[(i + 1) % points.length][0] * points[i][1];
+  if (Math.abs(area2) <= 1e-18) throw new Error("Wi-Fi analysis area is degenerate or has zero area");
   return [...points, points[0]];
+}
+
+export function applyWifiFields(configuration, patch, modifiedAt = new Date().toISOString()) {
+  const current = configuration ?? { radius_override_m: null, enabled: null, notes: "", modified_at: null, configuration_revision: 0, legacy_metadata: {} };
+  const next = { ...current, ...patch };
+  const changed = ["radius_override_m", "enabled", "notes"].some((field) => (current[field] ?? null) !== (next[field] ?? null));
+  if (!changed) return current;
+  return { ...next, configuration_revision: (current.configuration_revision ?? 0) + 1, modified_at: modifiedAt };
 }
 
 export function wifiEffectiveValues(project, poleId) {

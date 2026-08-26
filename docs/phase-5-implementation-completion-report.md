@@ -6,6 +6,8 @@ Disposition: **Corrective implementation complete; awaiting master re-review and
 
 This report supersedes the initial implementation handoff after the master review identified lifecycle, UI, fingerprint, precision, geometry-accounting, and acceptance-evidence gaps.
 
+This final corrective pass also closes the remaining safe-draft validation and atomic-bulk-revision findings. The rendered acceptance record is [phase-5-rendered-qa-evidence-2026-08-26.md](phase-5-rendered-qa-evidence-2026-08-26.md). The implementation remains complete and is awaiting master re-review and independent QA.
+
 ## Scope delivered
 
 Implemented only the approved Phase 5 conceptual Wi-Fi scope in existing-pole mode. WIFI and SMART poles can produce configurable projected-plane conceptual circles; LITE, inactive, disabled, and capability-conflicting poles are excluded with warnings. No poles, source coordinates, uploaded source bytes, CAP behavior, RF propagation, capacity, service-quality, standards-compliance, or later-phase features were added.
@@ -28,6 +30,7 @@ Implemented only the approved Phase 5 conceptual Wi-Fi scope in existing-pole mo
 - Expanded result/provenance UI for all approved aggregate and per-area metrics, assumptions, warnings, model/CRS/approximation/fingerprint values, source/effective coordinates, effective values, and the exact disclaimer.
 - Fingerprints now include only area ID/name/revision/ring geometry; aggregate individual area uses exact Shapely areas before final rounding; total geometry limits use actual persisted circle and area vertices.
 - Added regression tests for timestamp/notes invalidation exclusions, significant changes, triple overlap, 500-circle precision, explicit bulk set/clear, API preservation/errors, safe drafts, inheritance, and rendered Phase 5 behavior.
+- Corrected draft validation to reject repeated vertices, endpoint touches, collinear/improper intersections, zero-area rings, non-finite/out-of-range coordinates, and over-limit drafts before mutation. Corrected combined bulk notes/radius/enabled updates to increment each affected pole exactly once, with unchanged fields producing no revision.
 
 ## Changed files
 
@@ -49,10 +52,10 @@ Documentation: `docs/architecture.md`, `docs/data-model.md`, `docs/implementatio
 - Frontend strict TypeScript: **passed**.
 - Frontend ESLint: **passed**.
 - Frontend production Vinext build: **passed**, existing client chunk-size advisory only.
-- Frontend rendered/workflow suite: **10 passed**, zero failures, including Phase 5 rendered shell/workflow helper coverage while retaining all Phase 1–4 regression tests.
+- Frontend rendered/workflow suite: **12 passed**, zero failures, including focused Phase 5 draft and bulk-revision regressions while retaining all Phase 1–4 regression tests.
 - `git diff --check`: **passed**.
 
-Supplied-input acceptance probe: `Input/Miracle_Mile_Lighting_Poles.kml` imported as 74 poles, preserved source SHA-256 `2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328`, calculated 74 conceptual circles and 339 indexed overlap pairs; source bytes and raw coordinate representations remained unchanged.
+Supplied-input rendered acceptance: `Input/Miracle_Mile_Lighting_Poles.kml` imported through the visible UI as 74 poles, preserved source SHA-256 `2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328` and byte length `34385`, calculated 74 conceptual circles, saved/exported/reopened with the final area and result visible, and produced zero browser console errors. The updated KML export contained 74 placemarks and no Wi-Fi geometry. Full step evidence and exact observed metrics are in the dated rendered-QA document.
 
 The supplied 74-pole source path remains covered by the existing KML/import, source-byte, raw-coordinate, and engineering-data tests. No `Input/`, frozen catalog, runtime project, export, or source archive file was changed. Updated KML export remains limited to source poles and fixture edits; Wi-Fi results remain JSON-only.
 
@@ -62,5 +65,7 @@ This is conceptual geometry, not RF design. Terrain, obstructions, antenna patte
 
 Initial implementation commit: `674bf01` (`feat: implement Phase 5 conceptual Wi-Fi geometry`).
 Corrective implementation commit: `672d549` (`fix: close Phase 5 Wi-Fi review findings`).
+
+Final corrective commit: pending until this pass is committed.
 
 Working-tree status at handoff: expected clean after commit.

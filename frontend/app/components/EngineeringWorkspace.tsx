@@ -9,7 +9,7 @@ import { effectivePole, type CalculationArea, type CalculationAreaClassification
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
-import { closeWifiArea, invalidateWifiIfSignificant } from "../lib/phase5-workflows.mjs";
+import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant } from "../lib/phase5-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -248,11 +248,12 @@ export function EngineeringWorkspace() {
         if (config) {
           if (bulkIesId) { config.ies_file_id = bulkIesId; config.ies_file_revision = iesLibrary?.files.find((item) => item.id === bulkIesId)?.revision ?? null; }
           if (bulkAzimuth) config.fixture_azimuth_deg = Number(bulkAzimuth);
-          if (bulkWifiNotes) config.wifi_configuration = { ...(config.wifi_configuration ?? {}), notes: bulkWifiNotes, modified_at: new Date().toISOString(), configuration_revision: (config.wifi_configuration?.configuration_revision ?? 0) + 1 };
-          if (bulkWifiRadius || bulkClearWifiRadius || bulkWifiEnabled !== "unchanged") {
-            const wifi = config.wifi_configuration ?? { radius_override_m: null, enabled: null, notes: "", modified_at: new Date().toISOString(), configuration_revision: 1, legacy_metadata: {} };
-            config.wifi_configuration = { ...wifi, radius_override_m: bulkClearWifiRadius ? null : (bulkWifiRadius ? Number(bulkWifiRadius) : wifi.radius_override_m), enabled: bulkWifiEnabled === "inherit" ? null : bulkWifiEnabled === "enabled" ? true : bulkWifiEnabled === "disabled" ? false : wifi.enabled, modified_at: new Date().toISOString(), configuration_revision: (wifi.configuration_revision ?? 0) + 1 };
-          }
+          const wifiPatch: Record<string, unknown> = {};
+          if (bulkWifiNotes) wifiPatch.notes = bulkWifiNotes;
+          if (bulkClearWifiRadius) wifiPatch.radius_override_m = null;
+          else if (bulkWifiRadius) wifiPatch.radius_override_m = Number(bulkWifiRadius);
+          if (bulkWifiEnabled !== "unchanged") wifiPatch.enabled = bulkWifiEnabled === "inherit" ? null : bulkWifiEnabled === "enabled";
+          if (Object.keys(wifiPatch).length) config.wifi_configuration = applyWifiFields(config.wifi_configuration, wifiPatch);
           if (bulkCameraId || bulkLensId) {
             const template = model?.mounting_template_revisions.find((item) => item.revision === config?.mounting_template_revision);
             for (const slot of template?.slots ?? []) {

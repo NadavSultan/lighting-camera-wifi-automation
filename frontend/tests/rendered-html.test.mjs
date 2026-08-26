@@ -4,7 +4,7 @@ import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
-import { closeWifiArea, invalidateWifiIfSignificant, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
+import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -101,6 +101,36 @@ test("Phase 5 workflow helpers preserve safe drafts, inheritance, and precise in
   const changed = structuredClone(base); changed.defaults.wifi_radius_m = 31;
   assert.equal(wifiSignificantProjectChange(base, changed), true);
   assert.equal(invalidateWifiIfSignificant(base, changed).wifi_coverage.result, null);
+});
+
+test("Phase 5 Wi-Fi drafts reject every invalid ring and preserve both winding directions", () => {
+  const invalid = [
+    [[0, 0], [1, 0], [0, 0], [0, 1]],
+    [[0, 0], [2, 2], [0, 2], [2, 0]],
+    [[0, 0], [1, 0], [1, 1], [1, 0], [0, 1]],
+    [[0, 0], [2, 0], [1, 0], [1, 1]],
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 0], [1, Number.NaN], [0, 1]],
+    [[0, 0], [181, 0], [0, 1]],
+  ];
+  for (const ring of invalid) assert.throws(() => closeWifiArea(ring));
+  const ccw = [[0, 0], [1, 0], [1, 1]];
+  const cw = [...ccw].reverse();
+  assert.equal(closeWifiArea(ccw).length, 4);
+  assert.equal(closeWifiArea(cw).length, 4);
+  const boundary = Array.from({ length: 10000 }, (_, index) => [Math.cos(index * 2 * Math.PI / 10000), Math.sin(index * 2 * Math.PI / 10000)]);
+  assert.equal(closeWifiArea(boundary).length, 10001);
+  assert.throws(() => closeWifiArea(Array.from({ length: 10001 }, (_, index) => [index / 100000, index % 2])) , /10,000/);
+});
+
+test("Phase 5 Wi-Fi bulk fields revise once only and ignore unchanged fields", () => {
+  const base = { radius_override_m: null, enabled: null, notes: "", configuration_revision: 4, modified_at: "before" };
+  assert.equal(applyWifiFields(base, { notes: "note" }, "after").configuration_revision, 5);
+  assert.equal(applyWifiFields(base, { radius_override_m: 40 }, "after").configuration_revision, 5);
+  assert.equal(applyWifiFields(base, { enabled: true }, "after").configuration_revision, 5);
+  assert.equal(applyWifiFields(base, { notes: "note", radius_override_m: 40, enabled: true }, "after").configuration_revision, 5);
+  assert.equal(applyWifiFields({ ...base, radius_override_m: 40, enabled: true }, { radius_override_m: null, enabled: null }, "after").configuration_revision, 5);
+  assert.strictEqual(applyWifiFields(base, { notes: "", radius_override_m: null, enabled: null }, "after"), base);
 });
 
 test("Phase 4 calculation-area validation and stale-state transitions are explicit", () => {
