@@ -87,3 +87,12 @@
 - Decision: an existing project IES assignment resolves its exact `(ies_file_id, ies_file_revision)` across the current record and immutable `file_history`. The pinned record supplies bytes, parsed metadata, filename, SHA-256, warnings, and calculated output; a missing, ambiguous, invalid, inactive, or corrupt exact pin fails without substituting the current revision.
 - Lifecycle: the current record must remain active and valid and its explicit fixture association must remain active. Supported API operations continue to block deactivation or association removal while stored projects reference them. New assignment and explicit reselection workflows pin only the current active valid revision; catalog updates never mutate existing pins.
 - Boundary: this correction changes no source coordinates or bytes, camera priority areas, lighting equations, compatibility families, or Phase 5+ behavior. Phase 4 remains unapproved pending independent QA.
+
+## DL-013 — Phase 5 planning authorization and conceptual Wi-Fi boundary
+
+- Date: 2026-08-26
+- Status: planning authorized; implementation not authorized
+- Decision: Phase 5 planning may define an implementation-ready conceptual Wi-Fi contract. This authorization does not authorize application-code changes, schema regeneration, tests, catalog changes, runtime data changes, or Phase 5 implementation.
+- Binding product boundary: only WIFI and SMART fixtures may contribute conceptual circles; LITE never contributes. Results are geometric planning visualizations and area statistics only, never verified RF design, capacity, service quality, standards compliance, or a performance guarantee.
+- Recommended contract direction: add a separate user-drawn Wi-Fi analysis-area collection for gap and boundary statistics. Camera `priority_areas` and lighting `calculation_areas` must not be reused or inferred as the Wi-Fi boundary. With no valid Wi-Fi analysis area, show eligible circles and global overlap metrics only and report boundary/gap statistics as unavailable.
+- Evidence: `docs/phase-5-planning-and-implementation-contract.md` and the frozen `data/network/wifi-defaults.json`/schema.

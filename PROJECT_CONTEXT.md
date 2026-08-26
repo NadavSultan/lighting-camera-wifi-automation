@@ -6,7 +6,7 @@ Lighting Camera WiFi Automation is a local, map-centred engineering application 
 
 ## Current repository state
 
-Phases 1, 2, 3, and 4 are accepted and formally closed after independent QA and their master gate decisions. The FastAPI and React/TypeScript MapLibre application includes operational catalogs, fixed SMART mounting templates, camera geometry, separate lighting calculation areas, deterministic Type C direct-light calculations, and persisted provenance. Phase 4 remains explicitly simplified and is not professionally validated against AGi32 or another reference tool. Existing-pole mode is mandatory and proposed-layout mode is unavailable. Phase 5 and later remain unauthorized.
+Phases 1, 2, 3, and 4 are accepted and formally closed after independent QA and their master gate decisions. The FastAPI and React/TypeScript MapLibre application includes operational catalogs, fixed SMART mounting templates, camera geometry, separate lighting calculation areas, deterministic Type C direct-light calculations, and persisted provenance. Phase 4 remains explicitly simplified and is not professionally validated against AGi32 or another reference tool. Existing-pole mode is mandatory and proposed-layout mode is unavailable. Phase 5 planning was authorized on 2026-08-26; Phase 5 implementation and later phases remain unauthorized.
 
 New sessions must start with `AGENTS.md` and `docs/current-status.md`, then follow the remaining reading order recorded in `AGENTS.md`.
 
