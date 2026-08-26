@@ -66,6 +66,6 @@ This is conceptual geometry, not RF design. Terrain, obstructions, antenna patte
 Initial implementation commit: `674bf01` (`feat: implement Phase 5 conceptual Wi-Fi geometry`).
 Corrective implementation commit: `672d549` (`fix: close Phase 5 Wi-Fi review findings`).
 
-Final corrective commit: pending until this pass is committed.
+Final corrective commit: `8e9070c` (`fix: complete final Phase 5 corrective pass`).
 
 Working-tree status at handoff: expected clean after commit.
