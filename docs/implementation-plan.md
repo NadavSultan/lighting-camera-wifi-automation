@@ -42,12 +42,12 @@ Status: complete and formally closed on 2026-08-26 after all P4-IR-01 through P4
 
 ## Phase 5 - conceptual Wi-Fi
 
-Planning authorized on 2026-08-26; implementation remains unauthorized pending the blocking decisions and gate criteria in `docs/phase-5-planning-and-implementation-contract.md`.
+Planning and every section-15 planning decision were approved on 2026-08-26. Implementation remains unauthorized pending separate explicit user authorization and remains governed by `docs/phase-5-planning-and-implementation-contract.md`.
 
 - Add WIFI/SMART-only configurable circles, overlaps, gaps, and boundary statistics in projected metres.
 - Label all results conceptual, not verified RF design.
-- Recommendation pending section-15 approval: keep a separate user-drawn Wi-Fi analysis-area collection for boundary/gap statistics; do not infer a project boundary from source extents or other phase polygons.
-- Recommendation pending section-15 approval: preserve source poles and all prior calculated/recommended collections; add only a separate persisted conceptual Wi-Fi result layer.
+- Keep a separate user-drawn Wi-Fi analysis-area collection for boundary/gap statistics; do not infer a project boundary from source extents or other phase polygons.
+- Preserve source poles and all prior calculated/recommended collections; add only a separate persisted conceptual Wi-Fi result layer.
 
 ## Phase 6 - CAP
 
@@ -63,4 +63,4 @@ Planning authorized on 2026-08-26; implementation remains unauthorized pending t
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 5 planning is authorized on 2026-08-26; Phase 5 implementation and later phases remain unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 5 planning and all planning decisions were approved on 2026-08-26; Phase 5 implementation and later phases remain unauthorized.

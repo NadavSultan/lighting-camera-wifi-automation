@@ -96,3 +96,10 @@
 - Binding product boundary: only WIFI and SMART fixtures may contribute conceptual circles; LITE never contributes. Results are geometric planning visualizations and area statistics only, never verified RF design, capacity, service quality, standards compliance, or a performance guarantee.
 - Recommended contract direction: add a separate user-drawn Wi-Fi analysis-area collection for gap and boundary statistics. Camera `priority_areas` and lighting `calculation_areas` must not be reused or inferred as the Wi-Fi boundary. With no valid Wi-Fi analysis area, show eligible circles and global overlap metrics only and report boundary/gap statistics as unavailable.
 - Evidence: `docs/phase-5-planning-and-implementation-contract.md` and the frozen `data/network/wifi-defaults.json`/schema.
+
+## DL-014 — Phase 5 planning decisions approved
+
+- Date: 2026-08-26
+- Status: planning decisions approved; implementation not authorized
+- Decision: the user explicitly approved every recommended choice in section 15 of `docs/phase-5-planning-and-implementation-contract.md`. Those choices are binding for a future Phase 5 implementation: separate user-drawn Wi-Fi analysis areas; WIFI/SMART default eligibility with LITE excluded; nullable inheritance and override semantics; 30 m default and 1000 m maximum radius; 128-sided circles and the documented precision/caps; bounded aggregate overlap outputs; boundary-line coverage against the union of circles; project/software/model versions `2.5.0`/`0.5.0`/`1.0.0`; and JSON-authoritative results excluded from updated KML.
+- Gate: this approval resolves the Phase 5 planning blockers only. Application-code changes, schemas, generated contracts, tests, runtime data, and Phase 5 implementation remain unauthorized until the user grants separate explicit implementation authorization.

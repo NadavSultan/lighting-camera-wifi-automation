@@ -6,7 +6,7 @@ Controlling repository state: `c20b77b` (`docs: close Phase 4 after final QA pas
 
 ## 1. Authorization boundary and exclusions
 
-This document is an implementation-ready plan, not authorization to implement. Phase 5 planning was explicitly authorized on 2026-08-26. A later session may edit code only after separate explicit Phase 5 implementation authorization and resolution of every blocking decision in section 15.
+This document is an implementation-ready plan, not authorization to implement. Phase 5 planning and every recommended decision in section 15 were explicitly approved on 2026-08-26. A later session may edit code only after separate explicit Phase 5 implementation authorization.
 
 Phase 5 is limited to conceptual Wi-Fi visualization and deterministic area statistics:
 
@@ -265,7 +265,9 @@ Do not change frozen catalog versions or `data/network/wifi-defaults.json` durin
 
 The Phase 5 implementation cannot be accepted until an independent reviewer confirms: all blocking decisions are recorded; generated contracts are fresh; migrations are lossless and idempotent; geometry/statistics tests cover synthetic cases and limits; the supplied 74-pole source remains byte/coordinate identical; stale-result invalidation covers every listed mutation; layer separation and fixture colors are preserved; all UI copy is explicitly conceptual; no RF factors or CAP recommendations were inferred; and the production-rendered workflow passes with no regressions to Phases 1–4. The reviewer must issue a separate PASS/FAIL decision document before Phase 6 planning or implementation is considered.
 
-## 15. Open decisions requiring user approval
+## 15. Approved planning decisions
+
+The user explicitly approved every recommended choice below on 2026-08-26. These decisions are binding implementation scope. This decision approval does not authorize implementation, which remains a separate gate.
 
 | Decision | Recommended choice | Consequence if approved | Consequence if changed/omitted |
 |---|---|---|---|

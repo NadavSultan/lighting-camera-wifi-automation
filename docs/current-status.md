@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 planning was explicitly authorized on 2026-08-26; Phase 5 implementation remains unauthorized and unstarted.
+Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 planning and all planning-contract decisions were explicitly approved on 2026-08-26; Phase 5 implementation remains unauthorized and unstarted.
 
 ## Completed
 
@@ -51,15 +51,15 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated; Phase 5 implementation remains deferred and unauthorized, while Phase 5 planning is authorized. CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated; Phase 5 implementation remains deferred and unauthorized, while its planning decisions are approved. CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
 
 ## Phase 5 planning authorization
 
 - Planning-only authorization was granted on 2026-08-26.
-- `docs/phase-5-planning-and-implementation-contract.md` records the repository findings, recommended contract, implementation seams, acceptance matrix, and blocking user decisions.
-- `docs/phase-5-master-implementation-prompt.md` is a future implementation prompt only. It is not executable until separate explicit Phase 5 implementation authorization is granted and every blocking decision in the contract is resolved.
+- Every recommended decision in section 15 of `docs/phase-5-planning-and-implementation-contract.md` was explicitly approved by the user on 2026-08-26 and is now binding implementation scope.
+- `docs/phase-5-master-implementation-prompt.md` is a future implementation prompt only. It is not executable until separate explicit Phase 5 implementation authorization is granted.
 - No application code, tests, schemas, catalogs, Input files, or runtime data were changed during planning.
 
 ## Current gate
 
-Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi planning is authorized, but implementation and every later phase remain unauthorized and require separate explicit user approval. Camera `priority_areas`, lighting `calculation_areas`, and the planned Wi-Fi analysis areas remain separate collections.
+Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi planning decisions are approved and locked, but implementation and every later phase remain unauthorized and require separate explicit user approval. Camera `priority_areas`, lighting `calculation_areas`, and the planned Wi-Fi analysis areas remain separate collections.
