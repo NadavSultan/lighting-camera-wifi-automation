@@ -42,7 +42,7 @@ Status: complete and formally closed on 2026-08-26 after all P4-IR-01 through P4
 
 ## Phase 5 - conceptual Wi-Fi
 
-Planning and every section-15 planning decision were approved on 2026-08-26. Implementation remains unauthorized pending separate explicit user authorization and remains governed by `docs/phase-5-planning-and-implementation-contract.md`.
+Planning and every section-15 planning decision were approved on 2026-08-26. Implementation is complete in this worktree and awaits independent QA under `docs/phase-5-planning-and-implementation-contract.md`.
 
 - Add WIFI/SMART-only configurable circles, overlaps, gaps, and boundary statistics in projected metres.
 - Label all results conceptual, not verified RF design.

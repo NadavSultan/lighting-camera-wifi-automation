@@ -60,6 +60,14 @@ function calculationPointFeatures(project: Project | null): FeatureCollection<Po
   return { type: "FeatureCollection", features: results.flatMap((result) => result.points.map((point) => ({ type: "Feature" as const, id: point.id, properties: { id: point.id, area_id: result.calculation_area_id, lux: point.maintained_horizontal_illuminance_lux }, geometry: { type: "Point" as const, coordinates: point.wgs84_coordinate } }))) };
 }
 
+function wifiFeatures(project: Project | null): FeatureCollection<Polygon> {
+  return { type: "FeatureCollection", features: project?.wifi_coverage.result?.circles.map((circle) => ({ type: "Feature" as const, id: circle.id, properties: { id: circle.id, pole_id: circle.pole_id, radius_m: circle.effective_radius_m, conceptual: true }, geometry: { type: "Polygon" as const, coordinates: [circle.wgs84_ring] } })) ?? [] };
+}
+
+function wifiAreaFeatures(project: Project | null): FeatureCollection<Polygon> {
+  return { type: "FeatureCollection", features: project?.wifi_analysis_areas.map((area) => ({ type: "Feature" as const, id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon" as const, coordinates: [area.wgs84_coordinates] } })) ?? [] };
+}
+
 function cameraWarningFeatures(project: Project | null): FeatureCollection<Point> {
   if (!project) return EMPTY;
   const warningPoleIds = new Set(project.camera_geometry.footprints.filter((item) => item.enabled && item.warnings.length > 0).map((item) => item.pole_id));
@@ -71,7 +79,7 @@ function draftFeature(points: Array<[number, number]>): FeatureCollection<LineSt
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: points.length >= 3 ? { type: "Polygon", coordinates: [[...points, points[0]]] } : { type: "LineString", coordinates: points } }] };
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, resizeSignal }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; resizeSignal: string }) {
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, resizeSignal }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; resizeSignal: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -83,9 +91,11 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const drawingCalculationRef = useRef(drawingCalculationArea);
   const onCalculationDraftPointRef = useRef(onCalculationDraftPoint);
   const onCalculationSelectRef = useRef(onSelectCalculationArea);
+  const drawingWifiRef = useRef(drawingWifiArea);
+  const onWifiDraftPointRef = useRef(onWifiDraftPoint);
 
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
-  useEffect(() => { drawingRef.current = drawingPriorityArea; onDraftPointRef.current = onPriorityDraftPoint; onPrioritySelectRef.current = onSelectPriorityArea; drawingCalculationRef.current = drawingCalculationArea; onCalculationDraftPointRef.current = onCalculationDraftPoint; onCalculationSelectRef.current = onSelectCalculationArea; }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea]);
+  useEffect(() => { drawingRef.current = drawingPriorityArea; onDraftPointRef.current = onPriorityDraftPoint; onPrioritySelectRef.current = onSelectPriorityArea; drawingCalculationRef.current = drawingCalculationArea; onCalculationDraftPointRef.current = onCalculationDraftPoint; onCalculationSelectRef.current = onSelectCalculationArea; drawingWifiRef.current = drawingWifiArea; onWifiDraftPointRef.current = onWifiDraftPoint; }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, onWifiDraftPoint]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -100,18 +110,24 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("priority-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-draft", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("calculation-areas", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("wifi-coverage", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("wifi-analysis-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("calculation-draft", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("wifi-draft", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("lighting-points", { type: "geojson", data: EMPTY });
       map.addSource("camera-warnings", { type: "geojson", data: EMPTY });
       map.addLayer({ id: "priority-area-fill", type: "fill", source: "priority-areas", paint: { "fill-color": "#f59e0b", "fill-opacity": .15 } });
       map.addLayer({ id: "priority-area-line", type: "line", source: "priority-areas", paint: { "line-color": "#fbbf24", "line-width": 2, "line-dasharray": [2, 1] } });
       map.addLayer({ id: "calculation-area-fill", type: "fill", source: "calculation-areas", paint: { "fill-color": "#14b8a6", "fill-opacity": .13 } });
       map.addLayer({ id: "calculation-area-line", type: "line", source: "calculation-areas", paint: { "line-color": ["case", ["boolean", ["get", "warning"], false], "#ff7a59", "#2dd4bf"], "line-width": 2.5 } });
+      map.addLayer({ id: "wifi-coverage-fill", type: "fill", source: "wifi-coverage", paint: { "fill-color": "#06b6d4", "fill-opacity": .16, "fill-outline-color": "#67e8f9" } });
+      map.addLayer({ id: "wifi-analysis-area-line", type: "line", source: "wifi-analysis-areas", paint: { "line-color": "#a3e635", "line-width": 2, "line-dasharray": [3, 2] } });
       map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
       map.addLayer({ id: "camera-2-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-2"], paint: { "fill-color": "#22d3ee", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "camera-overlap-fill", type: "fill", source: "camera-overlap", paint: { "fill-color": "#ec4899", "fill-opacity": .48, "fill-outline-color": "#f9a8d4" } });
       map.addLayer({ id: "priority-draft-fill", type: "fill", source: "priority-draft", paint: { "fill-color": "#fb923c", "fill-opacity": .2, "fill-outline-color": "#fdba74" } });
       map.addLayer({ id: "calculation-draft-fill", type: "fill", source: "calculation-draft", paint: { "fill-color": "#14b8a6", "fill-opacity": .24, "fill-outline-color": "#5eead4" } });
+      map.addLayer({ id: "wifi-draft-fill", type: "fill", source: "wifi-draft", paint: { "fill-color": "#06b6d4", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "lighting-heat-points", type: "circle", source: "lighting-points", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2, 19, 7], "circle-color": ["interpolate", ["linear"], ["get", "lux"], 0, "#172554", 1, "#2563eb", 5, "#22d3ee", 15, "#facc15", 30, "#f97316", 60, "#ef4444"], "circle-opacity": .76, "circle-stroke-width": .4, "circle-stroke-color": "#ffffff" } });
       map.addLayer({ id: "lighting-calculation-points", type: "circle", source: "lighting-points", paint: { "circle-radius": 1.4, "circle-color": "#f8fafc", "circle-opacity": .9 } });
       map.addLayer({ id: "poles-original", type: "circle", source: "poles", paint: { "circle-radius": 7, "circle-color": "#7f8d9b", "circle-opacity": .34, "circle-stroke-width": 1, "circle-stroke-color": "#d8e1e9", "circle-stroke-opacity": .42 } });
@@ -138,7 +154,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.on("click", "camera-warning-indicator", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
       map.on("click", "priority-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
       map.on("click", "calculation-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
-      map.on("click", (event) => { if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); });
+      map.on("click", (event) => { if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingWifiRef.current) onWifiDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); });
     });
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
@@ -155,7 +171,10 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("priority-areas") as GeoJSONSource | undefined)?.setData(priorityFeatures(project));
       (map.getSource("priority-draft") as GeoJSONSource | undefined)?.setData(draftFeature(priorityDraft));
       (map.getSource("calculation-areas") as GeoJSONSource | undefined)?.setData(calculationAreaFeatures(project));
+      (map.getSource("wifi-coverage") as GeoJSONSource | undefined)?.setData(wifiFeatures(project));
+      (map.getSource("wifi-analysis-areas") as GeoJSONSource | undefined)?.setData(wifiAreaFeatures(project));
       (map.getSource("calculation-draft") as GeoJSONSource | undefined)?.setData(draftFeature(calculationDraft));
+      (map.getSource("wifi-draft") as GeoJSONSource | undefined)?.setData(draftFeature(wifiDraft));
       (map.getSource("lighting-points") as GeoJSONSource | undefined)?.setData(calculationPointFeatures(project));
       (map.getSource("camera-warnings") as GeoJSONSource | undefined)?.setData(cameraWarningFeatures(project));
       const states: Array<[string, boolean]> = [
@@ -172,6 +191,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["calculation-area-line", project?.layer_state.calculation_areas ?? true],
         ["lighting-calculation-points", project?.layer_state.calculation_points ?? true],
         ["lighting-heat-points", project?.layer_state.lighting_heat_map ?? true],
+        ["wifi-coverage-fill", Boolean(project?.layer_state.wifi_coverage && project?.wifi_coverage.result)],
+        ["wifi-analysis-area-line", project?.layer_state.wifi_coverage ?? false],
         ["camera-warning-indicator", project?.layer_state.warnings ?? true],
       ];
       for (const [layer, visible] of states) if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
@@ -182,7 +203,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       }
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
-  }, [project, selected, priorityDraft, calculationDraft]);
+  }, [project, selected, priorityDraft, calculationDraft, wifiDraft]);
 
   useEffect(() => {
     azimuthMarkerRef.current?.remove();

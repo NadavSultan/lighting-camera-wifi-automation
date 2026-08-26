@@ -16,8 +16,17 @@ from shapely.validation import explain_validity
 from app.crs import validate_projected_metre_crs
 
 
-SCHEMA_VERSION = "2.4.0"
-SOFTWARE_VERSION = "0.4.0"
+SCHEMA_VERSION = "2.5.0"
+SOFTWARE_VERSION = "0.5.0"
+WIFI_MODEL_VERSION = "conceptual-circle-1.0.0"
+WIFI_RING_RESOLUTION = 32
+MAX_WIFI_CIRCLES = 500
+MAX_WIFI_CIRCLE_VERTICES = 64500
+MAX_WIFI_CANDIDATE_OPERATIONS = 50000
+MAX_WIFI_ANALYSIS_AREAS = 200
+MAX_WIFI_AREA_VERTICES = 10000
+MAX_WIFI_TOTAL_GEOMETRY_VERTICES = 250000
+WIFI_INTERSECTION_TOLERANCE_M2 = 1e-8
 MIN_GRID_SPACING_M = 0.01
 
 
@@ -102,6 +111,15 @@ class SourceLayer(StrictModel):
     unsupported_geometry_count: int = 0
 
 
+class PoleWifiConfiguration(StrictModel):
+    radius_override_m: Annotated[float | None, Field(gt=0, le=1000)] = None
+    enabled: bool | None = None
+    notes: str = ""
+    modified_at: datetime = Field(default_factory=utc_now)
+    configuration_revision: Annotated[int, Field(ge=1)] = 1
+    legacy_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class PoleEdit(StrictModel):
     pole_id: str
     display_name: str | None = None
@@ -156,7 +174,7 @@ class PoleFixtureConfiguration(StrictModel):
     ies_file_revision: Annotated[int | None, Field(ge=1)] = None
     fixture_azimuth_deg: Annotated[float, Field(ge=0, lt=360)] = 0.0
     lighting_properties: dict[str, Any] = Field(default_factory=dict)
-    wifi_configuration: dict[str, Any] | None = None
+    wifi_configuration: PoleWifiConfiguration | None = None
     camera_overrides: dict[str, PoleCameraOverride] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -257,6 +275,106 @@ class CalculationArea(StrictModel):
         if polygon.area <= 1e-18:
             raise ValueError("calculation-area polygon is degenerate and has no usable area")
         return self
+
+
+class WifiAnalysisArea(StrictModel):
+    id: Annotated[str, Field(min_length=1, max_length=120)]
+    name: Annotated[str, Field(min_length=1, max_length=120)]
+    wgs84_coordinates: Annotated[list[tuple[float, float]], Field(min_length=4)]
+    created_at: datetime = Field(default_factory=utc_now)
+    modified_at: datetime = Field(default_factory=utc_now)
+    polygon_revision: Annotated[int, Field(ge=1)] = 1
+
+    @model_validator(mode="after")
+    def validate_polygon(self) -> "WifiAnalysisArea":
+        if len(self.wgs84_coordinates) > MAX_WIFI_AREA_VERTICES + 1:
+            raise ValueError(f"Wi-Fi analysis area exceeds the {MAX_WIFI_AREA_VERTICES:,}-vertex limit")
+        if self.wgs84_coordinates[0] != self.wgs84_coordinates[-1]:
+            raise ValueError("Wi-Fi analysis-area polygon must be closed")
+        if len(set(self.wgs84_coordinates[:-1])) < 3:
+            raise ValueError("Wi-Fi analysis-area polygon requires three distinct vertices")
+        for longitude, latitude in self.wgs84_coordinates:
+            if not math.isfinite(longitude) or not math.isfinite(latitude):
+                raise ValueError("Wi-Fi analysis-area coordinates must be finite")
+            if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
+                raise ValueError("Wi-Fi analysis-area coordinate is outside WGS84 bounds")
+        polygon = Polygon(self.wgs84_coordinates)
+        if not polygon.is_valid:
+            raise ValueError(f"Wi-Fi analysis-area polygon is invalid: {explain_validity(polygon)}")
+        if polygon.area <= 1e-18:
+            raise ValueError("Wi-Fi analysis-area polygon is degenerate and has no usable area")
+        return self
+
+
+class WifiCoverageState(StrictModel):
+    status: Literal["not-calculated", "calculated", "warning", "error"] = "not-calculated"
+    last_calculated_at: datetime | None = None
+    warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    calculation_input_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")] = None
+    model_version: Literal["conceptual-circle-1.0.0"] = WIFI_MODEL_VERSION
+
+
+class WifiCircle(StrictModel):
+    id: str
+    pole_id: str
+    effective_fixture_type: FixtureType
+    center_projected_m: tuple[float, float]
+    source_wgs84_coordinate: tuple[float, float]
+    effective_wgs84_coordinate: tuple[float, float]
+    projected_ring: list[tuple[float, float]] = Field(min_length=129, max_length=129)
+    wgs84_ring: list[tuple[float, float]] = Field(min_length=129, max_length=129)
+    effective_radius_m: Annotated[float, Field(gt=0, le=1000)]
+    enabled: bool
+    eligible: bool
+    area_m2: float
+    approximation_resolution: Literal[32] = 32
+    source_provenance: dict[str, Any] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class WifiGlobalStatistics(StrictModel):
+    circle_count: int = 0
+    individual_area_m2: float = 0.0
+    union_covered_area_m2: float = 0.0
+    overlap_area_m2: float = 0.0
+    pairwise_overlap_area_m2: float = 0.0
+    multiply_covered_union_area_m2: float = 0.0
+    overlap_pair_count: int = 0
+    union_over_individual_percentage: float | None = None
+
+
+class WifiAnalysisAreaStatistics(StrictModel):
+    analysis_area_id: str
+    analysis_area_name: str
+    area_m2: float
+    covered_area_m2: float
+    uncovered_area_m2: float
+    covered_percentage: float
+    uncovered_percentage: float
+    boundary_covered_length_m: float
+    boundary_covered_percentage: float
+
+
+class WifiCoverageResult(StrictModel):
+    model_version: Literal["conceptual-circle-1.0.0"] = WIFI_MODEL_VERSION
+    calculated_at: datetime = Field(default_factory=utc_now)
+    projected_crs: str
+    approximation_resolution: Literal[32] = 32
+    circles: list[WifiCircle] = Field(default_factory=list)
+    global_statistics: WifiGlobalStatistics
+    analysis_area_statistics: list[WifiAnalysisAreaStatistics] = Field(default_factory=list)
+    calculation_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    disclaimer: Literal["Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance."] = "Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance."
+
+
+class WifiCoverageLayer(StrictModel):
+    model_version: Literal["conceptual-circle-1.0.0"] = WIFI_MODEL_VERSION
+    state: WifiCoverageState = Field(default_factory=WifiCoverageState)
+    result: WifiCoverageResult | None = None
 
 
 class LightingFixtureProvenance(StrictModel):
@@ -386,7 +504,7 @@ class CameraGeometryLayer(StrictModel):
 
 
 class Project(StrictModel):
-    schema_version: Literal["2.4.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.5.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -404,6 +522,8 @@ class Project(StrictModel):
     priority_areas: list[PriorityArea] = Field(default_factory=list)
     calculation_areas: list[CalculationArea] = Field(default_factory=list)
     lighting_calculations: LightingCalculationLayer = Field(default_factory=LightingCalculationLayer)
+    wifi_analysis_areas: list[WifiAnalysisArea] = Field(default_factory=list)
+    wifi_coverage: WifiCoverageLayer = Field(default_factory=WifiCoverageLayer)
     legacy_invalid_priority_areas: list[dict[str, Any]] = Field(default_factory=list)
     camera_geometry: CameraGeometryLayer = Field(default_factory=CameraGeometryLayer)
     assumptions: list[str] = Field(default_factory=lambda: [
@@ -436,6 +556,11 @@ class Project(StrictModel):
         for key, edit in self.pole_edits.items():
             if edit.pole_id != key:
                 raise ValueError(f"pole edit key {key!r} does not match pole_id")
+        if len(self.wifi_analysis_areas) > MAX_WIFI_ANALYSIS_AREAS:
+            raise ValueError(f"Wi-Fi analysis areas exceed the {MAX_WIFI_ANALYSIS_AREAS:,}-area limit")
+        total_area_vertices = sum(len(area.wgs84_coordinates) for area in self.wifi_analysis_areas)
+        if total_area_vertices + MAX_WIFI_CIRCLE_VERTICES > MAX_WIFI_TOTAL_GEOMETRY_VERTICES:
+            raise ValueError(f"Wi-Fi persisted geometry exceeds the {MAX_WIFI_TOTAL_GEOMETRY_VERTICES:,}-vertex limit")
         return self
 
 
@@ -450,7 +575,7 @@ class ProjectSummary(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    phase: Literal[4] = 4
+    phase: Literal[5] = 5
     version: str = SOFTWARE_VERSION
 
 
@@ -459,7 +584,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
@@ -468,6 +593,8 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     migrated.setdefault("priority_areas", [])
     migrated.setdefault("calculation_areas", [])
     migrated.setdefault("lighting_calculations", {})
+    migrated.setdefault("wifi_analysis_areas", [])
+    migrated.setdefault("wifi_coverage", {})
     migrated.setdefault("legacy_invalid_priority_areas", [])
     if version == "2.2.0":
         valid_areas: list[dict[str, Any]] = []
@@ -488,11 +615,35 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     layer_state.setdefault("calculation_points", True)
     layer_state.setdefault("lighting_heat_map", True)
     migrated["layer_state"] = layer_state
+    wifi_coverage = dict(migrated.get("wifi_coverage", {}))
+    wifi_coverage.setdefault("state", {})
+    wifi_coverage.setdefault("result", None)
+    migrated["wifi_coverage"] = wifi_coverage
+    for edit in migrated.get("pole_edits", {}).values():
+        config = edit.get("fixture_configuration") if isinstance(edit, dict) else None
+        if not isinstance(config, dict) or "wifi_configuration" not in config:
+            continue
+        legacy = config.get("wifi_configuration")
+        if isinstance(legacy, dict):
+            known = {"radius_override_m", "enabled", "notes", "modified_at", "configuration_revision", "legacy_metadata"}
+            metadata = dict(legacy.get("legacy_metadata", {}))
+            metadata.update({key: value for key, value in legacy.items() if key not in known})
+            config["wifi_configuration"] = {
+                "radius_override_m": legacy.get("radius_override_m"),
+                "enabled": legacy.get("enabled"),
+                "notes": str(legacy.get("notes", "")),
+                "modified_at": legacy.get("modified_at", edit.get("modified_at", utc_now().isoformat())),
+                "configuration_revision": legacy.get("configuration_revision", 1),
+                "legacy_metadata": metadata,
+            }
     assumptions = list(migrated.get("assumptions", []))
     notice = "Phase 1 fixture classifications were preserved; fixture family/model selection remains explicit."
     if notice not in assumptions:
         assumptions.append(notice)
     if migrated["legacy_invalid_priority_areas"]:
         assumptions.append("Invalid legacy Phase 3 priority-area records are preserved losslessly but quarantined from calculations until explicitly redrawn.")
+    wifi_notice = "Conceptual Wi-Fi circles are projected-plane geometry only and have not been calculated as verified RF coverage."
+    if wifi_notice not in assumptions:
+        assumptions.append(wifi_notice)
     migrated["assumptions"] = assumptions
     return migrated

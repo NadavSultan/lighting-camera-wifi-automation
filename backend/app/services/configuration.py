@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import Field
 
 from app.catalog_models import CameraEquipmentCatalog, FixtureModelCatalog, IesLibrary
-from app.models import PoleCameraOverride, PoleEdit, PoleFixtureConfiguration, Project, StrictModel, utc_now
+from app.models import PoleCameraOverride, PoleEdit, PoleFixtureConfiguration, PoleWifiConfiguration, Project, StrictModel, utc_now
 from app.services.ies import resolve_pinned_ies_revision
 from app.services.lighting_calculation import invalidate_stale_lighting_results
 
@@ -18,6 +18,11 @@ class BulkPoleConfigurationPatch(StrictModel):
     fixture_azimuth_deg: float | None = Field(default=None, ge=0, lt=360)
     lighting_properties: dict[str, Any] | None = None
     wifi_configuration: dict[str, Any] | None = None
+    wifi_radius_override_m: float | None = Field(default=None, gt=0, le=1000)
+    clear_wifi_radius_override: bool = False
+    wifi_enabled: bool | None = None
+    clear_wifi_enabled_override: bool = False
+    wifi_notes: str | None = None
     camera_model_by_slot: dict[str, str] | None = None
     lens_by_slot: dict[str, str] | None = None
     camera_enabled_by_slot: dict[str, bool] | None = None
@@ -146,7 +151,23 @@ def apply_bulk_configuration(
             if "lighting_properties" in fields and request.patch.lighting_properties is not None:
                 config.lighting_properties.update(request.patch.lighting_properties)
             if "wifi_configuration" in fields:
-                config.wifi_configuration = request.patch.wifi_configuration
+                config.wifi_configuration = PoleWifiConfiguration.model_validate(request.patch.wifi_configuration) if request.patch.wifi_configuration is not None else None
+            wifi_fields = {"wifi_radius_override_m", "clear_wifi_radius_override", "wifi_enabled", "clear_wifi_enabled_override", "wifi_notes"}
+            if fields & wifi_fields:
+                wifi = config.wifi_configuration or PoleWifiConfiguration()
+                if "wifi_radius_override_m" in fields:
+                    wifi.radius_override_m = request.patch.wifi_radius_override_m
+                if request.patch.clear_wifi_radius_override:
+                    wifi.radius_override_m = None
+                if "wifi_enabled" in fields:
+                    wifi.enabled = request.patch.wifi_enabled
+                if request.patch.clear_wifi_enabled_override:
+                    wifi.enabled = None
+                if "wifi_notes" in fields and request.patch.wifi_notes is not None:
+                    wifi.notes = request.patch.wifi_notes
+                wifi.configuration_revision += 1
+                wifi.modified_at = utc_now()
+                config.wifi_configuration = wifi
             for field_name, values in (
                 ("camera_model_by_slot", request.patch.camera_model_by_slot),
                 ("lens_by_slot", request.patch.lens_by_slot),

@@ -59,7 +59,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.4.0` and software version is `0.4.0`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, and `2.3.0` migrate without family inference, coordinate change, or inferred lighting areas. Legacy camera orientation override bytes remain explicit. Fixture and IES selections pin exact revisions; the IES operational contract is `1.2.0` with immutable record history. The fixture operational contract remains `1.2.0`; the seven Phase 1 catalogs remain frozen. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.5.0` and software version is `0.5.0`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, and `2.4.0` migrate losslessly without family inference, coordinate change, inferred boundaries, or inferred circles. Legacy camera orientation override bytes and unknown legacy Wi-Fi keys remain explicit. Fixture and IES selections pin exact revisions; the IES operational contract is `1.2.0` with immutable record history. The fixture operational contract remains `1.2.0`; the seven Phase 1 catalogs remain frozen. Conceptual Wi-Fi uses model `conceptual-circle-1.0.0`, 128-sided projected buffers, a 500-circle cap, 64,500 circle vertices, 50,000 indexed candidate operations, 200 areas, 10,000 vertices per area, and 250,000 total persisted geometry vertices. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

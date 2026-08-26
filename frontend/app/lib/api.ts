@@ -1,4 +1,4 @@
-import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project } from "./types";
+import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, WifiAnalysisArea } from "./types";
 import { formatApiErrorDetail } from "./phase2-workflows.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
@@ -52,6 +52,22 @@ export function calculateLighting(project: Project, areaId: string) {
   return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/lighting/calculate/${encodeURIComponent(areaId)}`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),
   });
+}
+
+export function calculateWifiCoverage(project: Project) {
+  return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/wifi-coverage/calculate`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),
+  });
+}
+
+export function addWifiAnalysisArea(projectId: string, area: WifiAnalysisArea) {
+  return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/wifi-analysis-areas`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(area) });
+}
+export function replaceWifiAnalysisArea(projectId: string, area: WifiAnalysisArea) {
+  return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/wifi-analysis-areas/${encodeURIComponent(area.id)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(area) });
+}
+export function deleteWifiAnalysisArea(projectId: string, areaId: string) {
+  return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/wifi-analysis-areas/${encodeURIComponent(areaId)}`, { method: "DELETE" });
 }
 
 export function openProject(project: Project) {

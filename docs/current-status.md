@@ -1,11 +1,11 @@
 # Current status
 
-Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 planning and all planning-contract decisions were explicitly approved on 2026-08-26; Phase 5 implementation remains unauthorized and unstarted.
+Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 implementation is complete and awaiting independent QA; it is not accepted or closed.
 
 ## Completed
 
 - All Phase 1 KML/KMZ import, source preservation, map, edit-overlay, save/reopen, and KML export workflows remain operational.
-- Project schema `2.4.0` and software/API `0.4.0` migrate `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, and `2.3.0` JSON without changing coordinates, discarding legacy overrides, inferring lighting areas, or guessing a Phoenix 1/Solitaire family.
+- Project schema `2.5.0` and software/API `0.5.0` migrate `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, and `2.4.0` JSON without changing coordinates, discarding legacy overrides, inferring Wi-Fi areas, or guessing a Phoenix 1/Solitaire family.
 - The seven approved Phase 1 engineering catalogs remain unchanged at `1.0.0`.
 - The operational IES contract is `1.2.0` with immutable file history; the camera contract remains `1.1.0`, and the fixture-model contract is `1.2.0` with the immutable fixed-zero-origin template revision.
 - Six required fixture models are seeded with structured family, variant, and capabilities.
@@ -62,4 +62,4 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 
 ## Current gate
 
-Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi planning decisions are approved and locked, but implementation and every later phase remain unauthorized and require separate explicit user approval. Camera `priority_areas`, lighting `calculation_areas`, and the planned Wi-Fi analysis areas remain separate collections.
+Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi implementation is complete, with independent QA still required. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections; CAP and later phases remain gated.

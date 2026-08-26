@@ -51,8 +51,17 @@ export interface PoleEdit {
   modified_at?: string;
 }
 
+export interface PoleWifiConfiguration {
+  radius_override_m: number | null;
+  enabled: boolean | null;
+  notes: string;
+  modified_at: string;
+  configuration_revision: number;
+  legacy_metadata: Record<string, unknown>;
+}
+
 export interface Project {
-  schema_version: "2.4.0";
+  schema_version: "2.5.0";
   software_version: string;
   id: string;
   name: string;
@@ -82,6 +91,8 @@ export interface Project {
   priority_areas: PriorityArea[];
   calculation_areas: CalculationArea[];
   lighting_calculations: LightingCalculationLayer;
+  wifi_analysis_areas: WifiAnalysisArea[];
+  wifi_coverage: WifiCoverageLayer;
   legacy_invalid_priority_areas: Array<Record<string, unknown>>;
   camera_geometry: CameraGeometryLayer;
   assumptions: string[];
@@ -144,9 +155,14 @@ export interface PoleFixtureConfiguration {
   ies_file_revision: number | null;
   fixture_azimuth_deg: number;
   lighting_properties: Record<string, unknown>;
-  wifi_configuration: Record<string, unknown> | null;
+  wifi_configuration: Partial<PoleWifiConfiguration> | null;
   camera_overrides: Record<string, PoleCameraOverride>;
 }
+
+export interface WifiAnalysisArea { id: string; name: string; wgs84_coordinates: Array<[number, number]>; created_at: string; modified_at: string; polygon_revision: number }
+export interface WifiCircle { id: string; pole_id: string; effective_fixture_type: FixtureType; center_projected_m: [number, number]; source_wgs84_coordinate: [number, number]; effective_wgs84_coordinate: [number, number]; projected_ring: Array<[number, number]>; wgs84_ring: Array<[number, number]>; effective_radius_m: number; enabled: boolean; eligible: boolean; area_m2: number; approximation_resolution: 32; source_provenance: Record<string, unknown>; warnings: string[] }
+export interface WifiCoverageResult { model_version: "conceptual-circle-1.0.0"; calculated_at: string; projected_crs: string; approximation_resolution: 32; circles: WifiCircle[]; global_statistics: { circle_count: number; individual_area_m2: number; union_covered_area_m2: number; overlap_area_m2: number; pairwise_overlap_area_m2: number; multiply_covered_union_area_m2: number; overlap_pair_count: number; union_over_individual_percentage: number | null }; analysis_area_statistics: Array<{ analysis_area_id: string; analysis_area_name: string; area_m2: number; covered_area_m2: number; uncovered_area_m2: number; covered_percentage: number; uncovered_percentage: number; boundary_covered_length_m: number; boundary_covered_percentage: number }>; calculation_input_sha256: string; warnings: string[]; assumptions: string[]; disclaimer: string }
+export interface WifiCoverageLayer { model_version: "conceptual-circle-1.0.0"; state: { status: "not-calculated" | "calculated" | "warning" | "error"; last_calculated_at: string | null; warnings: string[]; assumptions: string[]; provenance: Record<string, unknown>; calculation_input_sha256: string | null; model_version: "conceptual-circle-1.0.0" }; result: WifiCoverageResult | null }
 
 export interface CameraMountingSlot {
   id: string;

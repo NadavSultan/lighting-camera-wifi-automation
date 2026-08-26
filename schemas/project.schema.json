@@ -1359,15 +1359,13 @@
         "wifi_configuration": {
           "anyOf": [
             {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/$defs/PoleWifiConfiguration"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Wifi Configuration"
+          "default": null
         },
         "camera_overrides": {
           "additionalProperties": {
@@ -1382,6 +1380,60 @@
         "fixture_model_revision"
       ],
       "title": "PoleFixtureConfiguration",
+      "type": "object"
+    },
+    "PoleWifiConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "radius_override_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1000,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Radius Override M"
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        },
+        "notes": {
+          "default": "",
+          "title": "Notes",
+          "type": "string"
+        },
+        "modified_at": {
+          "format": "date-time",
+          "title": "Modified At",
+          "type": "string"
+        },
+        "configuration_revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Configuration Revision",
+          "type": "integer"
+        },
+        "legacy_metadata": {
+          "additionalProperties": true,
+          "title": "Legacy Metadata",
+          "type": "object"
+        }
+      },
+      "title": "PoleWifiConfiguration",
       "type": "object"
     },
     "PriorityArea": {
@@ -1798,18 +1850,503 @@
       ],
       "title": "WarningSeverity",
       "type": "string"
+    },
+    "WifiAnalysisArea": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "wgs84_coordinates": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 4,
+          "title": "Wgs84 Coordinates",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "modified_at": {
+          "format": "date-time",
+          "title": "Modified At",
+          "type": "string"
+        },
+        "polygon_revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Polygon Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "wgs84_coordinates"
+      ],
+      "title": "WifiAnalysisArea",
+      "type": "object"
+    },
+    "WifiAnalysisAreaStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_area_id": {
+          "title": "Analysis Area Id",
+          "type": "string"
+        },
+        "analysis_area_name": {
+          "title": "Analysis Area Name",
+          "type": "string"
+        },
+        "area_m2": {
+          "title": "Area M2",
+          "type": "number"
+        },
+        "covered_area_m2": {
+          "title": "Covered Area M2",
+          "type": "number"
+        },
+        "uncovered_area_m2": {
+          "title": "Uncovered Area M2",
+          "type": "number"
+        },
+        "covered_percentage": {
+          "title": "Covered Percentage",
+          "type": "number"
+        },
+        "uncovered_percentage": {
+          "title": "Uncovered Percentage",
+          "type": "number"
+        },
+        "boundary_covered_length_m": {
+          "title": "Boundary Covered Length M",
+          "type": "number"
+        },
+        "boundary_covered_percentage": {
+          "title": "Boundary Covered Percentage",
+          "type": "number"
+        }
+      },
+      "required": [
+        "analysis_area_id",
+        "analysis_area_name",
+        "area_m2",
+        "covered_area_m2",
+        "uncovered_area_m2",
+        "covered_percentage",
+        "uncovered_percentage",
+        "boundary_covered_length_m",
+        "boundary_covered_percentage"
+      ],
+      "title": "WifiAnalysisAreaStatistics",
+      "type": "object"
+    },
+    "WifiCircle": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pole_id": {
+          "title": "Pole Id",
+          "type": "string"
+        },
+        "effective_fixture_type": {
+          "$ref": "#/$defs/FixtureType"
+        },
+        "center_projected_m": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Center Projected M",
+          "type": "array"
+        },
+        "source_wgs84_coordinate": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Source Wgs84 Coordinate",
+          "type": "array"
+        },
+        "effective_wgs84_coordinate": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Effective Wgs84 Coordinate",
+          "type": "array"
+        },
+        "projected_ring": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "maxItems": 129,
+          "minItems": 129,
+          "title": "Projected Ring",
+          "type": "array"
+        },
+        "wgs84_ring": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "maxItems": 129,
+          "minItems": 129,
+          "title": "Wgs84 Ring",
+          "type": "array"
+        },
+        "effective_radius_m": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Effective Radius M",
+          "type": "number"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "eligible": {
+          "title": "Eligible",
+          "type": "boolean"
+        },
+        "area_m2": {
+          "title": "Area M2",
+          "type": "number"
+        },
+        "approximation_resolution": {
+          "const": 32,
+          "default": 32,
+          "title": "Approximation Resolution",
+          "type": "integer"
+        },
+        "source_provenance": {
+          "additionalProperties": true,
+          "title": "Source Provenance",
+          "type": "object"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "pole_id",
+        "effective_fixture_type",
+        "center_projected_m",
+        "source_wgs84_coordinate",
+        "effective_wgs84_coordinate",
+        "projected_ring",
+        "wgs84_ring",
+        "effective_radius_m",
+        "enabled",
+        "eligible",
+        "area_m2"
+      ],
+      "title": "WifiCircle",
+      "type": "object"
+    },
+    "WifiCoverageLayer": {
+      "additionalProperties": false,
+      "properties": {
+        "model_version": {
+          "const": "conceptual-circle-1.0.0",
+          "default": "conceptual-circle-1.0.0",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/WifiCoverageState"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WifiCoverageResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "WifiCoverageLayer",
+      "type": "object"
+    },
+    "WifiCoverageResult": {
+      "additionalProperties": false,
+      "properties": {
+        "model_version": {
+          "const": "conceptual-circle-1.0.0",
+          "default": "conceptual-circle-1.0.0",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "calculated_at": {
+          "format": "date-time",
+          "title": "Calculated At",
+          "type": "string"
+        },
+        "projected_crs": {
+          "title": "Projected Crs",
+          "type": "string"
+        },
+        "approximation_resolution": {
+          "const": 32,
+          "default": 32,
+          "title": "Approximation Resolution",
+          "type": "integer"
+        },
+        "circles": {
+          "items": {
+            "$ref": "#/$defs/WifiCircle"
+          },
+          "title": "Circles",
+          "type": "array"
+        },
+        "global_statistics": {
+          "$ref": "#/$defs/WifiGlobalStatistics"
+        },
+        "analysis_area_statistics": {
+          "items": {
+            "$ref": "#/$defs/WifiAnalysisAreaStatistics"
+          },
+          "title": "Analysis Area Statistics",
+          "type": "array"
+        },
+        "calculation_input_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Calculation Input Sha256",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "disclaimer": {
+          "const": "Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance.",
+          "default": "Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance.",
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "projected_crs",
+        "global_statistics",
+        "calculation_input_sha256"
+      ],
+      "title": "WifiCoverageResult",
+      "type": "object"
+    },
+    "WifiCoverageState": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "not-calculated",
+          "enum": [
+            "not-calculated",
+            "calculated",
+            "warning",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "last_calculated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Calculated At"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": true,
+          "title": "Provenance",
+          "type": "object"
+        },
+        "calculation_input_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calculation Input Sha256"
+        },
+        "model_version": {
+          "const": "conceptual-circle-1.0.0",
+          "default": "conceptual-circle-1.0.0",
+          "title": "Model Version",
+          "type": "string"
+        }
+      },
+      "title": "WifiCoverageState",
+      "type": "object"
+    },
+    "WifiGlobalStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "circle_count": {
+          "default": 0,
+          "title": "Circle Count",
+          "type": "integer"
+        },
+        "individual_area_m2": {
+          "default": 0.0,
+          "title": "Individual Area M2",
+          "type": "number"
+        },
+        "union_covered_area_m2": {
+          "default": 0.0,
+          "title": "Union Covered Area M2",
+          "type": "number"
+        },
+        "overlap_area_m2": {
+          "default": 0.0,
+          "title": "Overlap Area M2",
+          "type": "number"
+        },
+        "pairwise_overlap_area_m2": {
+          "default": 0.0,
+          "title": "Pairwise Overlap Area M2",
+          "type": "number"
+        },
+        "multiply_covered_union_area_m2": {
+          "default": 0.0,
+          "title": "Multiply Covered Union Area M2",
+          "type": "number"
+        },
+        "overlap_pair_count": {
+          "default": 0,
+          "title": "Overlap Pair Count",
+          "type": "integer"
+        },
+        "union_over_individual_percentage": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Union Over Individual Percentage"
+        }
+      },
+      "title": "WifiGlobalStatistics",
+      "type": "object"
     }
   },
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.4.0",
-      "default": "2.4.0",
+      "const": "2.5.0",
+      "default": "2.5.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.4.0",
+      "default": "0.5.0",
       "title": "Software Version",
       "type": "string"
     },
@@ -1898,6 +2435,16 @@
     },
     "lighting_calculations": {
       "$ref": "#/$defs/LightingCalculationLayer"
+    },
+    "wifi_analysis_areas": {
+      "items": {
+        "$ref": "#/$defs/WifiAnalysisArea"
+      },
+      "title": "Wifi Analysis Areas",
+      "type": "array"
+    },
+    "wifi_coverage": {
+      "$ref": "#/$defs/WifiCoverageLayer"
     },
     "legacy_invalid_priority_areas": {
       "items": {

@@ -19,6 +19,7 @@ The browser never mutates a source file. A project records source poles and user
 - `backend/app/services/catalogs.py`: atomic operational catalog persistence, immutable full-record history, and immutable template-revision workflow.
 - `backend/app/services/ies.py`: validated LM-63 upload parser; no illuminance engine.
 - `backend/app/services/lighting_calculation.py`: deterministic projected point grid, Type C interpolation, direct horizontal illuminance, statistics, exclusions, and complete Phase 4 provenance.
+- `backend/app/services/wifi_coverage.py`: deterministic projected-plane conceptual circles, indexed aggregate overlap, area clipping, limits, fingerprinting, and stale-result invalidation.
 - `backend/app/services/configuration.py`: exact revision resolution, lifecycle/capability validation, corrective pin migration, and explicit-field bulk configuration.
 - `backend/app/services/camera_geometry.py`: deterministic projected-CRS frustum/ground intersection, overlap unions, priority-area intersections, and complete calculation provenance.
 - `frontend/app/components/EngineeringWorkspace.tsx`: toolbar, layer panel, MapLibre map, inspector, and status bar.
@@ -70,7 +71,7 @@ SMART user configuration and immutable pinned catalog/template revisions feed a 
 
 ## Future phase seams
 
-Pixel density has a revision-aware `not-calculated` result seam. Phase 4 lighting is persisted in `calculation_areas` and `lighting_calculations`, fully separate from camera `priority_areas`. Conceptual Wi-Fi coverage, CAP recommendations, reporting, and proposed/automatic pole workflows are not implemented or enabled.
+Pixel density has a revision-aware `not-calculated` result seam. Phase 4 lighting is persisted in `calculation_areas` and `lighting_calculations`, fully separate from camera `priority_areas`. Phase 5 Wi-Fi is persisted in separate `wifi_analysis_areas` and `wifi_coverage` collections; CAP recommendations, reporting, and proposed/automatic pole workflows remain unavailable.
 
 ## Phase 4 calculation flow
 

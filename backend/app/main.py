@@ -17,7 +17,7 @@ from app.catalog_models import (
     IesLibrary,
     LensConfiguration,
 )
-from app.models import HealthResponse, Project, ProjectSummary, migrate_project_payload
+from app.models import HealthResponse, Project, ProjectSummary, WifiAnalysisArea, migrate_project_payload
 from app.services.catalogs import CatalogNotFoundError, CatalogStore
 from app.services.configuration import (
     BulkPoleConfigurationRequest,
@@ -27,6 +27,7 @@ from app.services.configuration import (
 )
 from app.services.camera_geometry import calculate_camera_geometry
 from app.services.lighting_calculation import calculate_lighting_area, invalidate_stale_lighting_results
+from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results
 from app.services.ies import IesValidationError, parse_ies_upload
 from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
 from app.services.store import ProjectNotFoundError, ProjectStore
@@ -37,8 +38,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.4.0",
-        description="Phase 4 deterministic direct-light calculation and existing-pole engineering workflow.",
+        version="0.5.0",
+        description="Phase 5 conceptual projected-plane Wi-Fi geometry and existing-pole engineering workflow.",
     )
     app.state.project_store = project_store
     app.state.catalog_store = catalogs
@@ -105,6 +106,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project = pin_revisions(project_store.load(project_id))
             if invalidate_stale_lighting_results(project):
                 project_store.save(project)
+            if invalidate_stale_wifi_results(project):
+                project_store.save(project)
             return recalculate(project)
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
@@ -130,6 +133,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         try:
             project = pin_revisions(project)
             invalidate_stale_lighting_results(project)
+            invalidate_stale_wifi_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -143,6 +147,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project = pin_revisions(Project.model_validate(migrate_project_payload(payload)))
             validate_embedded_source(project)
             invalidate_stale_lighting_results(project)
+            invalidate_stale_wifi_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -156,6 +161,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project = pin_revisions(project_store.load(project_id))
             updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras(), catalogs.ies()))
             invalidate_stale_lighting_results(updated)
+            invalidate_stale_wifi_results(updated)
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -172,6 +178,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         try:
             project = pin_revisions(project)
             invalidate_stale_lighting_results(project)
+            invalidate_stale_wifi_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -186,6 +193,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         try:
             project = pin_revisions(project)
             invalidate_stale_lighting_results(project)
+            invalidate_stale_wifi_results(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
                 raise ValueError("; ".join(errors))
@@ -193,6 +201,79 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project.lighting_calculations.results[area_id] = result
             return project_store.save(recalculate(project))
         except (ValueError, ArithmeticError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/wifi-coverage/calculate", response_model=Project)
+    def calculate_project_wifi(project_id: str, project: Project) -> Project:
+        if project.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            project = pin_revisions(project)
+            invalidate_stale_lighting_results(project)
+            invalidate_stale_wifi_results(project)
+            errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
+            if errors:
+                raise ValueError("; ".join(errors))
+            result = calculate_wifi_coverage(project, catalogs.fixtures())
+            updated = apply_wifi_result(project, result)
+            return project_store.save(recalculate(updated))
+        except (ValueError, ArithmeticError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/wifi-coverage/invalidate", response_model=Project)
+    def invalidate_project_wifi(project_id: str) -> Project:
+        try:
+            project = project_store.load(project_id)
+            invalidate_stale_wifi_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/wifi-analysis-areas", response_model=Project)
+    def add_wifi_analysis_area(project_id: str, area: WifiAnalysisArea) -> Project:
+        try:
+            project = project_store.load(project_id)
+            if any(existing.id == area.id for existing in project.wifi_analysis_areas):
+                raise ValueError(f"Wi-Fi analysis area ID already exists: {area.id}")
+            project.wifi_analysis_areas.append(area)
+            invalidate_stale_wifi_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.put("/api/projects/{project_id}/wifi-analysis-areas/{area_id}", response_model=Project)
+    def replace_wifi_analysis_area(project_id: str, area_id: str, area: WifiAnalysisArea) -> Project:
+        if area.id != area_id:
+            raise HTTPException(status_code=409, detail="Analysis-area ID does not match request path")
+        try:
+            project = project_store.load(project_id)
+            index = next((idx for idx, existing in enumerate(project.wifi_analysis_areas) if existing.id == area_id), None)
+            if index is None:
+                raise HTTPException(status_code=404, detail="Wi-Fi analysis area not found")
+            project.wifi_analysis_areas[index] = area
+            invalidate_stale_wifi_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.delete("/api/projects/{project_id}/wifi-analysis-areas/{area_id}", response_model=Project)
+    def delete_wifi_analysis_area(project_id: str, area_id: str) -> Project:
+        try:
+            project = project_store.load(project_id)
+            if not any(existing.id == area_id for existing in project.wifi_analysis_areas):
+                raise HTTPException(status_code=404, detail="Wi-Fi analysis area not found")
+            project.wifi_analysis_areas = [existing for existing in project.wifi_analysis_areas if existing.id != area_id]
+            invalidate_stale_wifi_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/catalogs/fixtures", response_model=FixtureModelCatalog)
