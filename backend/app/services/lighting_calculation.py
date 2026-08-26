@@ -8,11 +8,11 @@ import math
 import re
 from dataclasses import dataclass
 
-from pyproj import CRS, Transformer
-from pyproj.exceptions import CRSError, ProjError
+from pyproj import Transformer
 from shapely.geometry import Point, Polygon
 
 from app.catalog_models import FixtureModelCatalog, IesFileRecord, IesLibrary
+from app.crs import project_transformers, validate_projected_metre_crs
 from app.models import (
     CalculationArea,
     LightingCalculationPoint,
@@ -312,18 +312,9 @@ def calculate_lighting_area(project: Project, area_id: str, fixtures: FixtureMod
         raise ValueError("Calculation area was not found")
     if not project.projected_crs:
         raise ValueError("A project-selected projected CRS is required")
-    try:
-        crs = CRS.from_user_input(project.projected_crs)
-    except CRSError as exc:
-        raise ValueError(f"Invalid projected CRS: {project.projected_crs}") from exc
-    if not crs.is_projected or any(axis.unit_name.lower() not in {"metre", "meter"} for axis in crs.axis_info[:2]):
-        raise ValueError("Lighting calculation requires a projected CRS with metre axes")
-    try:
-        to_projected = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
-        to_wgs84 = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
-        ring = [to_projected.transform(longitude, latitude) for longitude, latitude in area.wgs84_coordinates]
-    except (CRSError, ProjError) as exc:
-        raise ValueError("Lighting calculation could not construct or apply the selected projected CRS transformation") from exc
+    crs = validate_projected_metre_crs(project.projected_crs)
+    to_projected, to_wgs84 = project_transformers(crs)
+    ring = [to_projected.transform(longitude, latitude) for longitude, latitude in area.wgs84_coordinates]
     if not all(math.isfinite(value) for coordinate in ring for value in coordinate):
         raise ValueError("Lighting calculation produced non-finite projected calculation-area coordinates")
     polygon = Polygon(ring)

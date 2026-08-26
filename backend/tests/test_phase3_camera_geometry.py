@@ -7,9 +7,13 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
+from pyproj import Transformer
+from pyproj.exceptions import ProjError
 
 from app.catalog_models import camera_absolute_azimuth, normalize_azimuth
-from app.models import PriorityArea, Project, migrate_project_payload
+from app.crs import project_transformers, validate_projected_metre_crs
+from app.models import CalculationArea, PriorityArea, Project, migrate_project_payload
 from app.main import create_app
 from app.services.camera_geometry import calculate_camera_geometry, canonical_ring, project_ground_footprint
 from app.services.catalogs import CatalogStore
@@ -96,66 +100,165 @@ def test_camera_geometry_crs_boundary_preserves_approved_behavior(tmp_path: Path
     assert len(valid.footprints) == 2
     assert all(footprint.valid for footprint in valid.footprints)
 
-    for unsupported in ("EPSG:4326", "EPSG:2263"):
-        project.projected_crs = unsupported
-        empty = calculate_camera_geometry(project, store.fixtures(), store.cameras())
-        assert empty.projected_crs == unsupported
-        assert empty.footprints == []
+    for unsupported in ("NOT-A-CRS", "EPSG:4326", "EPSG:2263"):
+        with pytest.raises(ValidationError, match="[Pp]roject engineering CRS"):
+            Project.model_validate({**project.model_dump(mode="json"), "projected_crs": unsupported})
+        bypassed = project.model_copy(update={"projected_crs": unsupported})
+        with pytest.raises(ValueError, match="[Pp]roject engineering CRS"):
+            calculate_camera_geometry(bypassed, store.fixtures(), store.cameras())
 
-    project.projected_crs = "NOT-A-CRS"
-    with pytest.raises(ValueError, match="Invalid projected CRS for camera geometry: NOT-A-CRS"):
-        calculate_camera_geometry(project, store.fixtures(), store.cameras())
+    missing = calculate_camera_geometry(Project(), store.fixtures(), store.cameras())
+    assert missing.projected_crs is None and missing.footprints == []
 
 
-def test_invalid_camera_crs_is_controlled_across_shared_api_paths_and_preserves_store(tmp_path: Path) -> None:
+def test_project_transformer_construction_translates_only_expected_pyproj_failures(monkeypatch: pytest.MonkeyPatch) -> None:
+    crs = validate_projected_metre_crs("EPSG:32617")
+
+    def expected_failure(*args, **kwargs):
+        raise ProjError("controlled construction failure")
+
+    monkeypatch.setattr("app.crs.Transformer.from_crs", expected_failure)
+    with pytest.raises(ValueError, match="Could not construct transformations"):
+        project_transformers(crs)
+
+    def unexpected_failure(*args, **kwargs):
+        raise RuntimeError("programming defect")
+
+    monkeypatch.setattr("app.crs.Transformer.from_crs", unexpected_failure)
+    with pytest.raises(RuntimeError, match="programming defect"):
+        project_transformers(crs)
+
+
+@pytest.mark.parametrize("invalid_crs", ["NOT-A-CRS", "EPSG:4326", "EPSG:2263"])
+def test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state(
+    tmp_path: Path, invalid_crs: str
+) -> None:
     catalog_store = catalogs(tmp_path)
     project_store = ProjectStore(tmp_path / "projects")
     project = miracle_project()
+    project = configure(project, catalog_store, [project.source.poles[0].id])
+    to_projected = Transformer.from_crs("EPSG:4326", project.projected_crs, always_xy=True)
+    to_wgs84 = Transformer.from_crs(project.projected_crs, "EPSG:4326", always_xy=True)
+    center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+    project.calculation_areas = [CalculationArea(
+        id="crs-area", name="CRS regression area", classification="OTHER", grid_spacing_m=2,
+        wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+            (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+            (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+            (center_x - 2.1, center_y - 2.1),
+        )],
+    )]
     project_store.save(project)
     client = TestClient(create_app(project_store, catalog_store))
     valid_payload = project.model_dump(mode="json")
+    valid_save = client.put(f"/api/projects/{project.id}", json=valid_payload)
+    assert valid_save.status_code == 200, valid_save.text
+    assert len(valid_save.json()["camera_geometry"]["footprints"]) == 2
+    valid_payload = valid_save.json()
+    project_path = project_store.root / project.id / "project.json"
+    prior_valid_bytes = project_path.read_bytes()
+
     invalid_payload = copy.deepcopy(valid_payload)
-    invalid_payload["projected_crs"] = "NOT-A-CRS"
+    invalid_payload["projected_crs"] = invalid_crs
 
     save_response = client.put(f"/api/projects/{project.id}", json=invalid_payload)
     assert save_response.status_code == 422
-    assert save_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
-    assert project_store.load(project.id).projected_crs == "EPSG:32617"
+    assert "project engineering crs" in save_response.text.lower()
+    assert project_path.read_bytes() == prior_valid_bytes
 
     project_count = len(project_store.list())
-    invalid_open_project = Project(name="Invalid CRS open probe", projected_crs="NOT-A-CRS")
-    open_response = client.post("/api/projects/open", json=invalid_open_project.model_dump(mode="json"))
+    open_payload = copy.deepcopy(invalid_payload)
+    open_payload["id"] = f"invalid-open-{invalid_crs.split(':')[-1].lower().replace('-', '_')}"
+    open_response = client.post("/api/projects/open", json=open_payload)
     assert open_response.status_code == 422
-    assert open_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
+    assert "project engineering crs" in open_response.text.lower()
     assert len(project_store.list()) == project_count
-    assert project_store.load(project.id).projected_crs == "EPSG:32617"
-    assert not (project_store.root / invalid_open_project.id).exists()
+    assert project_path.read_bytes() == prior_valid_bytes
+    assert not (project_store.root / open_payload["id"]).exists()
 
     camera_response = client.post(f"/api/projects/{project.id}/camera-geometry/recalculate", json=invalid_payload)
     assert camera_response.status_code == 422
-    assert camera_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
-    assert project_store.load(project.id).projected_crs == "EPSG:32617"
+    assert "project engineering crs" in camera_response.text.lower()
+    assert project_path.read_bytes() == prior_valid_bytes
 
-    project_path = project_store.root / project.id / "project.json"
-    project_path.write_text(json.dumps(invalid_payload), encoding="utf-8")
-    corrupt_bytes = project_path.read_bytes()
+    lighting_response = client.post(f"/api/projects/{project.id}/lighting/calculate/crs-area", json=invalid_payload)
+    assert lighting_response.status_code == 422
+    assert "project engineering crs" in lighting_response.text.lower()
+    assert project_path.read_bytes() == prior_valid_bytes
 
-    get_response = client.get(f"/api/projects/{project.id}")
+    corrupt_payload = copy.deepcopy(invalid_payload)
+    corrupt_payload["id"] = f"invalid-stored-{invalid_crs.split(':')[-1].lower().replace('-', '_')}"
+    corrupt_path = project_store.root / corrupt_payload["id"] / "project.json"
+    corrupt_path.parent.mkdir(parents=True)
+    corrupt_path.write_text(json.dumps(corrupt_payload, indent=2), encoding="utf-8")
+    corrupt_bytes = corrupt_path.read_bytes()
+
+    get_response = client.get(f"/api/projects/{corrupt_payload['id']}")
     assert get_response.status_code == 422
-    assert "Stored project is invalid or corrupt: Invalid projected CRS for camera geometry: NOT-A-CRS" == get_response.json()["detail"]
+    assert "Stored project is invalid or corrupt" in get_response.json()["detail"]
+    assert "project engineering crs" in get_response.json()["detail"].lower()
+    assert corrupt_path.read_bytes() == corrupt_bytes
 
     bulk_response = client.patch(
-        f"/api/projects/{project.id}/poles/bulk",
+        f"/api/projects/{corrupt_payload['id']}/poles/bulk",
         json={"pole_ids": [project.source.poles[0].id], "patch": {"pole_height_m": 12}},
     )
     assert bulk_response.status_code == 422
-    assert bulk_response.json()["detail"] == "Invalid projected CRS for camera geometry: NOT-A-CRS"
-    assert project_path.read_bytes() == corrupt_bytes
+    assert "project engineering crs" in bulk_response.json()["detail"].lower()
+    assert corrupt_path.read_bytes() == corrupt_bytes
+    assert project_path.read_bytes() == prior_valid_bytes
 
+
+def test_projected_metre_crs_and_missing_crs_contract_remain_operational_across_shared_paths(tmp_path: Path) -> None:
+    catalog_store = catalogs(tmp_path)
+    project_store = ProjectStore(tmp_path / "projects")
+    client = TestClient(create_app(project_store, catalog_store))
+
+    blank = client.post("/api/projects", json={"name": "Blank project without source"})
+    assert blank.status_code == 201 and blank.json()["projected_crs"] is None
+    assert client.get(f"/api/projects/{blank.json()['id']}").status_code == 200
+
+    project = miracle_project()
+    project = configure(project, catalog_store, [project.source.poles[0].id])
+    to_projected = Transformer.from_crs("EPSG:4326", "EPSG:32617", always_xy=True)
+    to_wgs84 = Transformer.from_crs("EPSG:32617", "EPSG:4326", always_xy=True)
+    center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+    project.calculation_areas = [CalculationArea(
+        id="valid-area", name="Valid projected-metre area", classification="OTHER", grid_spacing_m=2,
+        wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+            (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+            (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+            (center_x - 2.1, center_y - 2.1),
+        )],
+    )]
     project_store.save(project)
-    valid_response = client.put(f"/api/projects/{project.id}", json=valid_payload)
-    assert valid_response.status_code == 200
-    assert valid_response.json()["projected_crs"] == "EPSG:32617"
+    payload = project.model_dump(mode="json")
+
+    saved = client.put(f"/api/projects/{project.id}", json=payload)
+    assert saved.status_code == 200 and saved.json()["projected_crs"] == "EPSG:32617"
+    assert len(saved.json()["camera_geometry"]["footprints"]) == 2
+    fetched = client.get(f"/api/projects/{project.id}")
+    assert fetched.status_code == 200 and len(fetched.json()["camera_geometry"]["footprints"]) == 2
+    bulk = client.patch(f"/api/projects/{project.id}/poles/bulk", json={
+        "pole_ids": [project.source.poles[0].id], "patch": {"pole_height_m": 11},
+    })
+    assert bulk.status_code == 200 and len(bulk.json()["camera_geometry"]["footprints"]) == 2
+    recalculated = client.post(f"/api/projects/{project.id}/camera-geometry/recalculate", json=bulk.json())
+    assert recalculated.status_code == 200 and all(
+        item["valid"] for item in recalculated.json()["camera_geometry"]["footprints"]
+    )
+    lighting = client.post(f"/api/projects/{project.id}/lighting/calculate/valid-area", json=recalculated.json())
+    assert lighting.status_code == 200, lighting.text
+    assert lighting.json()["lighting_calculations"]["results"]["valid-area"]["statistics"]["point_count"] > 0
+
+    reopened_payload = copy.deepcopy(lighting.json())
+    reopened_payload["id"] = "valid-open-epsg-32617"
+    reopened = client.post("/api/projects/open", json=reopened_payload)
+    assert reopened.status_code == 200, reopened.text
+    assert reopened.json()["projected_crs"] == "EPSG:32617"
+    assert len(reopened.json()["camera_geometry"]["footprints"]) == 2
+    assert reopened.json()["lighting_calculations"]["results"]["valid-area"]["statistics"]["point_count"] > 0
+
 
 
 def test_fixed_zero_origin_provenance_missing_data_disabled_and_legacy_override_policy(tmp_path: Path) -> None:

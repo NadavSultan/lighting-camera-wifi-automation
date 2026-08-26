@@ -9,9 +9,11 @@ from enum import Enum
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from shapely.geometry import Polygon
 from shapely.validation import explain_validity
+
+from app.crs import validate_projected_metre_crs
 
 
 SCHEMA_VERSION = "2.4.0"
@@ -412,6 +414,14 @@ class Project(StrictModel):
     recommended_layers: dict[str, Any] = Field(default_factory=dict)
     source_references: dict[str, str] = Field(default_factory=dict)
     legacy_fixture_assignments_require_model_selection: bool = True
+
+    @field_validator("projected_crs")
+    @classmethod
+    def enforce_engineering_crs(cls, value: str | None) -> str | None:
+        # Blank projects have no engineering CRS until a source is imported.
+        if value is not None:
+            validate_projected_metre_crs(value)
+        return value
 
     @model_validator(mode="after")
     def enforce_phase_one_policy(self) -> "Project":
