@@ -217,3 +217,93 @@ def test_bulk_wifi_api_noop_preserves_revision_and_timestamp(tmp_path: Path):
     returned = response.json()["pole_edits"]["p-0"]["fixture_configuration"]["wifi_configuration"]
     assert returned["configuration_revision"] == 7
     assert returned["modified_at"] == "2026-01-01T00:00:00Z"
+
+
+def _full_replacement_project() -> Project:
+    project = apply_bulk_configuration(
+        project=wifi_project(),
+        request=BulkPoleConfigurationRequest(
+            pole_ids=["p-0"],
+            patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-wifi", wifi_notes="same"),
+        ),
+        fixtures=fixtures(),
+    )
+    wifi = project.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    wifi.radius_override_m = 42
+    wifi.enabled = False
+    wifi.notes = "same"
+    wifi.legacy_metadata = {"source": "test"}
+    wifi.modified_at = "2026-01-01T00:00:00Z"
+    wifi.configuration_revision = 7
+    return project
+
+
+def test_bulk_wifi_full_replacement_noop_preserves_typed_metadata():
+    project = _full_replacement_project()
+    original = copy.deepcopy(project.pole_edits["p-0"].fixture_configuration.wifi_configuration)
+    replacement = {
+        "radius_override_m": 42,
+        "enabled": False,
+        "notes": "same",
+        "legacy_metadata": {"source": "test"},
+    }
+    updated = apply_bulk_configuration(
+        project,
+        BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=BulkPoleConfigurationPatch(wifi_configuration=replacement)),
+        fixtures(),
+    )
+    actual = updated.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    assert actual == original
+    assert actual.configuration_revision == 7
+    assert actual.modified_at.isoformat() == "2026-01-01T00:00:00+00:00"
+
+
+def test_bulk_wifi_api_full_replacement_noop_preserves_revision_and_timestamp(tmp_path: Path):
+    project = _full_replacement_project()
+    store = ProjectStore(tmp_path / "projects")
+    store.save(project)
+    client = TestClient(create_app(store, CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")))
+    response = client.patch(
+        f"/api/projects/{project.id}/poles/bulk",
+        json={
+            "pole_ids": ["p-0"],
+            "patch": {
+                "wifi_configuration": {
+                    "radius_override_m": 42,
+                    "enabled": False,
+                    "notes": "same",
+                    "legacy_metadata": {"source": "test"},
+                }
+            },
+        },
+    )
+    assert response.status_code == 200
+    returned = response.json()["pole_edits"]["p-0"]["fixture_configuration"]["wifi_configuration"]
+    assert returned["configuration_revision"] == 7
+    assert returned["modified_at"] == "2026-01-01T00:00:00Z"
+
+
+def test_bulk_wifi_full_replacement_meaningful_change_increments_once():
+    project = _full_replacement_project()
+    updated = apply_bulk_configuration(
+        project,
+        BulkPoleConfigurationRequest(
+            pole_ids=["p-0"],
+            patch=BulkPoleConfigurationPatch(
+                wifi_configuration={
+                    "radius_override_m": 55,
+                    "enabled": True,
+                    "notes": "changed",
+                    "legacy_metadata": {"source": "replacement"},
+                }
+            ),
+        ),
+        fixtures(),
+    )
+    actual = updated.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    assert actual.radius_override_m == 55
+    assert actual.enabled is True
+    assert actual.notes == "changed"
+    assert actual.legacy_metadata == {"source": "replacement"}
+    assert actual.configuration_revision == 8
+    assert actual.modified_at.isoformat() != "2026-01-01T00:00:00+00:00"

@@ -33,6 +33,17 @@ class BulkPoleConfigurationRequest(StrictModel):
     patch: BulkPoleConfigurationPatch
 
 
+def _wifi_semantics(value: PoleWifiConfiguration | None) -> tuple[Any, ...] | None:
+    if value is None:
+        return None
+    return (
+        value.radius_override_m,
+        value.enabled,
+        value.notes,
+        tuple(sorted(value.legacy_metadata.items())),
+    )
+
+
 def validate_project_configuration(
     project: Project,
     fixtures: FixtureModelCatalog,
@@ -177,11 +188,12 @@ def apply_bulk_configuration(
                 config.wifi_configuration = wifi
             if "wifi_configuration" in fields or (fields & wifi_fields and wifi_change_requested):
                 current_wifi = config.wifi_configuration
-                def wifi_semantics(value: PoleWifiConfiguration | None) -> tuple[Any, ...] | None:
-                    if value is None:
-                        return None
-                    return (value.radius_override_m, value.enabled, value.notes, tuple(sorted(value.legacy_metadata.items())))
-                if wifi_semantics(original_wifi) != wifi_semantics(current_wifi) and current_wifi is not None:
+                if _wifi_semantics(original_wifi) == _wifi_semantics(current_wifi):
+                    # A replacement payload may omit metadata, causing Pydantic to
+                    # supply fresh defaults. Preserve the original typed object for
+                    # a true semantic no-op, including its revision and timestamp.
+                    config.wifi_configuration = deepcopy(original_wifi)
+                elif current_wifi is not None:
                     prior_revision = original_wifi.configuration_revision if original_wifi is not None else current_wifi.configuration_revision
                     current_wifi.configuration_revision = prior_revision + 1
                     current_wifi.modified_at = utc_now()
