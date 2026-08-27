@@ -119,6 +119,7 @@ def apply_bulk_configuration(
     for pole_id in request.pole_ids:
         edit = next_project.pole_edits.get(pole_id) or PoleEdit(pole_id=pole_id)
         config = edit.fixture_configuration
+        original_wifi = deepcopy(config.wifi_configuration) if config is not None else None
         if "fixture_model_id" in fields:
             model = model_by_id.get(request.patch.fixture_model_id or "")
             if model is None:
@@ -153,7 +154,15 @@ def apply_bulk_configuration(
             if "wifi_configuration" in fields:
                 config.wifi_configuration = PoleWifiConfiguration.model_validate(request.patch.wifi_configuration) if request.patch.wifi_configuration is not None else None
             wifi_fields = {"wifi_radius_override_m", "clear_wifi_radius_override", "wifi_enabled", "clear_wifi_enabled_override", "wifi_notes"}
-            if fields & wifi_fields:
+            wifi_change_requested = (
+                "wifi_configuration" in fields
+                or "wifi_radius_override_m" in fields
+                or "wifi_enabled" in fields
+                or ("wifi_notes" in fields and request.patch.wifi_notes is not None)
+                or request.patch.clear_wifi_radius_override
+                or request.patch.clear_wifi_enabled_override
+            )
+            if fields & wifi_fields and wifi_change_requested:
                 wifi = config.wifi_configuration or PoleWifiConfiguration()
                 if "wifi_radius_override_m" in fields:
                     wifi.radius_override_m = request.patch.wifi_radius_override_m
@@ -165,9 +174,17 @@ def apply_bulk_configuration(
                     wifi.enabled = None
                 if "wifi_notes" in fields and request.patch.wifi_notes is not None:
                     wifi.notes = request.patch.wifi_notes
-                wifi.configuration_revision += 1
-                wifi.modified_at = utc_now()
                 config.wifi_configuration = wifi
+            if "wifi_configuration" in fields or (fields & wifi_fields and wifi_change_requested):
+                current_wifi = config.wifi_configuration
+                def wifi_semantics(value: PoleWifiConfiguration | None) -> tuple[Any, ...] | None:
+                    if value is None:
+                        return None
+                    return (value.radius_override_m, value.enabled, value.notes, tuple(sorted(value.legacy_metadata.items())))
+                if wifi_semantics(original_wifi) != wifi_semantics(current_wifi) and current_wifi is not None:
+                    prior_revision = original_wifi.configuration_revision if original_wifi is not None else current_wifi.configuration_revision
+                    current_wifi.configuration_revision = prior_revision + 1
+                    current_wifi.modified_at = utc_now()
             for field_name, values in (
                 ("camera_model_by_slot", request.patch.camera_model_by_slot),
                 ("lens_by_slot", request.patch.lens_by_slot),

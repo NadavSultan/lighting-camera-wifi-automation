@@ -8,6 +8,8 @@ This report supersedes the initial implementation handoff after the master revie
 
 This final corrective pass also closes the remaining safe-draft validation and atomic-bulk-revision findings. The rendered acceptance record is [phase-5-rendered-qa-evidence-2026-08-26.md](phase-5-rendered-qa-evidence-2026-08-26.md). The implementation remains complete and is awaiting master re-review and independent QA.
 
+The 2026-08-26 independent final gate report identified two additional defects. QA-01/R-02 is corrected by rendering the exact unavailable-boundary message in both pre-calculation and post-calculation zero-area states. QA-02/G-03 is corrected by comparing typed Wi-Fi semantics before and after bulk mutation, so false clear flags and identical notes/values are true no-ops. The exact focused evidence is recorded in [phase-5-final-corrective-completion-report-2026-08-27.md](phase-5-final-corrective-completion-report-2026-08-27.md).
+
 ## Scope delivered
 
 Implemented only the approved Phase 5 conceptual Wi-Fi scope in existing-pole mode. WIFI and SMART poles can produce configurable projected-plane conceptual circles; LITE, inactive, disabled, and capability-conflicting poles are excluded with warnings. No poles, source coordinates, uploaded source bytes, CAP behavior, RF propagation, capacity, service-quality, standards-compliance, or later-phase features were added.
@@ -46,14 +48,16 @@ Documentation: `docs/architecture.md`, `docs/data-model.md`, `docs/implementatio
 
 ## Verification
 
-- `python -m pytest backend/tests`: **132 passed**, one existing Starlette/httpx deprecation warning.
+- `python -m pytest backend/tests`: **134 passed**, one existing Starlette/httpx deprecation warning.
 - `python scripts/validate_engineering_data.py`: **passed**, all seven frozen catalogs and supplied-source hashes valid.
 - `python backend/scripts/export_schema.py`: regenerated project schema/OpenAPI; freshness tests pass in the backend suite.
 - Frontend strict TypeScript: **passed**.
 - Frontend ESLint: **passed**.
 - Frontend production Vinext build: **passed**, existing client chunk-size advisory only.
-- Frontend rendered/workflow suite: **12 passed**, zero failures, including focused Phase 5 draft and bulk-revision regressions while retaining all Phase 1–4 regression tests.
+- Frontend rendered/workflow suite: **13 passed**, zero failures, including focused QA-01 post-calculation no-area rendering and Phase 5 bulk-revision regressions while retaining all Phase 1–4 regression tests.
 - `git diff --check`: **passed**.
+
+The focused production-browser QA-01 retest was attempted against the production Vinext server, but the in-app browser URL policy blocked/refused the local `127.0.0.1:3000` navigation in this session. No alternate browser or policy bypass was used. Shell reachability was confirmed separately; the rendered regression is therefore covered by the SSR/helper test and awaits independent browser retest.
 
 Supplied-input rendered acceptance: `Input/Miracle_Mile_Lighting_Poles.kml` imported through the visible UI as 74 poles, preserved source SHA-256 `2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328` and byte length `34385`, calculated 74 conceptual circles, saved/exported/reopened with the final area and result visible, and produced zero browser console errors. The updated KML export contained 74 placemarks and no Wi-Fi geometry. Full step evidence and exact observed metrics are in the dated rendered-QA document.
 

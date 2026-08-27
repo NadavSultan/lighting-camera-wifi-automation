@@ -1,4 +1,9 @@
 export const WIFI_DISCLAIMER = "Conceptual geometric visualization only; not verified RF coverage, performance, capacity, service quality, or standards compliance.";
+export const WIFI_BOUNDARY_GAP_UNAVAILABLE = "Boundary/gap statistics unavailable — draw a Wi-Fi analysis area.";
+
+export function wifiBoundaryGapMessage(result) {
+  return !result || result.analysis_area_statistics.length === 0 ? WIFI_BOUNDARY_GAP_UNAVAILABLE : null;
+}
 
 function wifiPoleInputs(poleEdit) {
   const config = poleEdit?.fixture_configuration;

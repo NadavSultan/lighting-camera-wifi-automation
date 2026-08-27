@@ -172,3 +172,48 @@ def test_bulk_wifi_set_and_clear_are_explicit_and_atomic():
     assert wifi.radius_override_m is None and wifi.enabled is None and wifi.configuration_revision == 3
     with pytest.raises(ValueError, match="unknown poles"):
         apply_bulk_configuration(project, BulkPoleConfigurationRequest(pole_ids=["missing"], patch=BulkPoleConfigurationPatch(wifi_radius_override_m=10)), fixtures())
+
+
+def test_bulk_wifi_noop_and_meaningful_revision_semantics():
+    project = apply_bulk_configuration(project=wifi_project(), request=BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-wifi", wifi_notes="baseline")), fixtures=fixtures())
+    wifi = project.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    wifi.notes = "same"
+    wifi.modified_at = "2026-01-01T00:00:00Z"
+    wifi.configuration_revision = 7
+
+    def apply(patch):
+        return apply_bulk_configuration(project, BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=patch), fixtures()).pole_edits["p-0"].fixture_configuration.wifi_configuration
+
+    unchanged = apply(BulkPoleConfigurationPatch(wifi_notes="same", clear_wifi_radius_override=False, clear_wifi_enabled_override=False))
+    assert unchanged.configuration_revision == 7
+    assert unchanged.modified_at.isoformat() == "2026-01-01T00:00:00+00:00"
+    unchanged_flags = apply(BulkPoleConfigurationPatch(clear_wifi_radius_override=False, clear_wifi_enabled_override=False))
+    assert unchanged_flags.configuration_revision == 7 and unchanged_flags.modified_at.isoformat() == "2026-01-01T00:00:00+00:00"
+    unchanged_value = apply(BulkPoleConfigurationPatch(wifi_radius_override_m=None, wifi_enabled=None, wifi_notes="same"))
+    assert unchanged_value.configuration_revision == 7 and unchanged_value.modified_at.isoformat() == "2026-01-01T00:00:00+00:00"
+
+    changed_note = apply(BulkPoleConfigurationPatch(wifi_notes="changed"))
+    assert changed_note.configuration_revision == 8 and changed_note.notes == "changed"
+    project.pole_edits["p-0"].fixture_configuration.wifi_configuration.radius_override_m = 42
+    project.pole_edits["p-0"].fixture_configuration.wifi_configuration.enabled = False
+    project.pole_edits["p-0"].fixture_configuration.wifi_configuration.configuration_revision = 7
+    combined = apply(BulkPoleConfigurationPatch(wifi_notes="combined", wifi_radius_override_m=50, wifi_enabled=True))
+    assert combined.configuration_revision == 8 and combined.notes == "combined" and combined.radius_override_m == 50 and combined.enabled is True
+    cleared = apply(BulkPoleConfigurationPatch(clear_wifi_radius_override=True, clear_wifi_enabled_override=True))
+    assert cleared.configuration_revision == 8 and cleared.radius_override_m is None and cleared.enabled is None
+
+
+def test_bulk_wifi_api_noop_preserves_revision_and_timestamp(tmp_path: Path):
+    project = apply_bulk_configuration(project=wifi_project(), request=BulkPoleConfigurationRequest(pole_ids=["p-0"], patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-wifi", wifi_notes="baseline")), fixtures=fixtures())
+    wifi = project.pole_edits["p-0"].fixture_configuration.wifi_configuration
+    wifi.notes = "same"
+    wifi.modified_at = "2026-01-01T00:00:00Z"
+    wifi.configuration_revision = 7
+    store = ProjectStore(tmp_path / "projects")
+    store.save(project)
+    client = TestClient(create_app(store, CatalogStore(root=tmp_path / "catalogs", seed_root=ROOT / "data" / "phase2")))
+    response = client.patch(f"/api/projects/{project.id}/poles/bulk", json={"pole_ids": ["p-0"], "patch": {"wifi_notes": "same", "clear_wifi_radius_override": False, "clear_wifi_enabled_override": False}})
+    assert response.status_code == 200
+    returned = response.json()["pole_edits"]["p-0"]["fixture_configuration"]["wifi_configuration"]
+    assert returned["configuration_revision"] == 7
+    assert returned["modified_at"] == "2026-01-01T00:00:00Z"

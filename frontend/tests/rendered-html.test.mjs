@@ -4,7 +4,7 @@ import test from "node:test";
 import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCameraOverride } from "../app/lib/phase2-workflows.mjs";
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
-import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
+import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -46,7 +46,7 @@ test("exposes Phase 5 conceptual Wi-Fi while keeping CAP gated", async () => {
   assert.match(workspace, /Draw Wi-Fi analysis area/);
   assert.match(workspace, /Calculate conceptual Wi-Fi/);
   assert.match(workspace, /Clear radius to project default/);
-  assert.match(workspace, /boundary\/gap statistics unavailable/);
+  assert.match(workspace, /wifiBoundaryGapMessage/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /disabled title="Phase 6/);
   assert.match(inspector, /Restore source\/default values/);
@@ -131,6 +131,14 @@ test("Phase 5 Wi-Fi bulk fields revise once only and ignore unchanged fields", (
   assert.equal(applyWifiFields(base, { notes: "note", radius_override_m: 40, enabled: true }, "after").configuration_revision, 5);
   assert.equal(applyWifiFields({ ...base, radius_override_m: 40, enabled: true }, { radius_override_m: null, enabled: null }, "after").configuration_revision, 5);
   assert.strictEqual(applyWifiFields(base, { notes: "", radius_override_m: null, enabled: null }, "after"), base);
+});
+
+test("QA-01 keeps the exact no-area boundary message in the post-calculation result branch", async () => {
+  assert.equal(wifiBoundaryGapMessage({ analysis_area_statistics: [] }), "Boundary/gap statistics unavailable — draw a Wi-Fi analysis area.");
+  assert.equal(wifiBoundaryGapMessage({ analysis_area_statistics: [{ analysis_area_id: "a" }] }), null);
+  const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /project\.wifi_coverage\.result\) && <p className="helper">\{wifiBoundaryGapMessage\(project\.wifi_coverage\.result\)\}<\/p>/);
+  assert.match(workspace, /No result yet\. Circles and global metrics are available after calculation\.<\/p><p className="helper">\{wifiBoundaryGapMessage\(null\)\}/);
 });
 
 test("Phase 4 calculation-area validation and stale-state transitions are explicit", () => {
