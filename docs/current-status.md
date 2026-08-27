@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 implementation is complete and awaiting independent QA; it is not accepted or closed.
+Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope.
 
 ## Completed
 
@@ -40,6 +40,8 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 - Frontend rendered/workflow suite (9 tests), strict TypeScript, and ESLint: passed.
 - Production Vinext build: passed with the existing non-failing MapLibre chunk-size advisory.
 - Rendered Phase 4 workflow: 74-pole KML, explicit Phoenix/Solitaire IES association and selection, separate Road calculation area, 286-point result, azimuth-driven result change, save/reopen, visible provenance/warnings, unchanged source coordinate, separate empty camera priority collection, Phase 5+ gating, and zero browser-console errors.
+- Final Phase 5 validation: 137 backend tests, 13 frontend rendered/workflow tests, strict TypeScript, ESLint, production build, engineering-data validation, and schema/OpenAPI freshness passed. The production-rendered focused retest showed 74 global Wi-Fi circles and metrics together with the exact unavailable-boundary message, no inferred area, and zero browser-console errors.
+- Independent QA-02 service/API/persistence probes passed all no-op, meaningful-change, clear, combined, and full-replacement revision/timestamp cases.
 - The three Phase 2 seeds validate against their checked-in Draft 2020-12 schemas.
 - The final focused NIR-01 retest closed the sole remaining condition with no new findings; `docs/phase-2-nir-01-final-retest-report.md` is the controlling Phase 2 gate evidence.
 - The final focused P3-IR-05 retest returned PASS with no confirmed defects or regressions; `docs/phase-3-final-focused-retest-report.md` is the controlling Phase 3 gate evidence.
@@ -51,15 +53,15 @@ Last updated: 2026-08-26. Phase 1 remains frozen. Phase 2 received an independen
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated; Phase 5 implementation remains deferred and unauthorized, while its planning decisions are approved. CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
 
-## Phase 5 planning authorization
+## Phase 5 closure
 
-- Planning-only authorization was granted on 2026-08-26.
-- Every recommended decision in section 15 of `docs/phase-5-planning-and-implementation-contract.md` was explicitly approved by the user on 2026-08-26 and is now binding implementation scope.
-- `docs/phase-5-master-implementation-prompt.md` is a future implementation prompt only. It is not executable until separate explicit Phase 5 implementation authorization is granted.
-- No application code, tests, schemas, catalogs, Input files, or runtime data were changed during planning.
+- Planning decisions and implementation were separately authorized on 2026-08-26.
+- The original independent gate review failed QA-01/R-02 and QA-02/G-03; both received corrective implementation and independent focused passing evidence on 2026-08-27.
+- `docs/phase-5-final-focused-retest-2026-08-27.md` and `docs/phase-5-master-gate-decision-2026-08-27.md` are the controlling final Phase 5 evidence.
+- No source pole, source coordinate, supplied Input file, frozen catalog, CAP recommendation, or Phase 6 behavior was changed.
 
 ## Current gate
 
-Phase 4 is formally closed by the master **PASS** in `docs/phase-4-master-gate-decision-2026-08-26.md`. P4-IR-01 through P4-IR-07 all have independent passing evidence. Phase 5 conceptual Wi-Fi implementation is complete, with independent QA still required. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections; CAP and later phases remain gated.
+Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 CAP planning and implementation, and all later phases, remain gated and unauthorized.

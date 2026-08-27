@@ -42,7 +42,7 @@ Status: complete and formally closed on 2026-08-26 after all P4-IR-01 through P4
 
 ## Phase 5 - conceptual Wi-Fi
 
-Planning and every section-15 planning decision were approved on 2026-08-26. Implementation is complete in this worktree and awaits independent QA under `docs/phase-5-planning-and-implementation-contract.md`.
+Status: complete and formally closed on 2026-08-27 after the independent final review findings QA-01 and QA-02 received a focused independent **PASS** and the master gate returned **PASS**.
 
 - Add WIFI/SMART-only configurable circles, overlaps, gaps, and boundary statistics in projected metres.
 - Label all results conceptual, not verified RF design.
@@ -63,4 +63,4 @@ Planning and every section-15 planning decision were approved on 2026-08-26. Imp
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. The user confirmed on 2026-08-17 that Phase 4 is lighting and Phase 5 is conceptual Wi-Fi. Phase 5 planning and all planning decisions were approved on 2026-08-26; Phase 5 implementation and later phases remain unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 and later phases remain unauthorized.
