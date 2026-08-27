@@ -12,7 +12,7 @@ Controlling report: `C:\Users\NadavSultan\.codex\worktrees\e0cc\lighting-camera-
 
 ## Evidence
 
-- Backend: `python -m pytest` — **134 passed**, one known Starlette/httpx deprecation warning.
+- Backend: `python -m pytest` — **137 passed**, one known Starlette/httpx deprecation warning.
 - Frontend: pinned `node --test tests/rendered-html.test.mjs` — **13 passed**.
 - Strict TypeScript — passed.
 - ESLint — passed with zero output/errors.
@@ -24,11 +24,14 @@ Controlling report: `C:\Users\NadavSultan\.codex\worktrees\e0cc\lighting-camera-
 
 The frontend regression explicitly exercises the result-with-zero-analysis-area branch through `wifiBoundaryGapMessage({ analysis_area_statistics: [] })` and verifies the component uses that helper inside the result branch. The backend regressions include API-level no-op notes/false-clear behavior, unchanged-value behavior, meaningful single and combined changes, and clearing existing overrides.
 
+The final QA-02 correction adds full `wifi_configuration` replacement coverage. Service and API tests prove that an identical replacement payload omitting revision/timestamp preserves the original typed object exactly, while a meaningful replacement from revision 7 stores the new semantic fields at revision 8 with one timestamp update. The implementation is in `eace95d`.
+
 A focused production-browser QA-01 check was attempted against `http://127.0.0.1:3000`; this session's in-app browser URL policy blocked/refused local navigation. Shell reachability was confirmed, but no policy bypass or alternate browser was used. Independent focused browser retest remains required.
 
 ## Commits
 
 - `90e2bbc` — `fix: correct final Phase 5 gate defects` (implementation and tests)
 - `0e34e72` — `docs: record QA-01 QA-02 corrective hash` (corrective report and evidence)
+- `eace95d` — `fix: preserve identical Wi-Fi replacements` (backend implementation and regression tests)
 
 Final state: corrective implementation complete; awaiting master re-review and independent focused retest. Phase 6 remains gated.
