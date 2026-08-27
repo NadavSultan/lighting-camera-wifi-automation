@@ -29,6 +29,6 @@ A focused production-browser QA-01 check was attempted against `http://127.0.0.1
 ## Commits
 
 - `90e2bbc` — `fix: correct final Phase 5 gate defects` (implementation and tests)
-- `6aabf3d` — `docs: record QA-01 QA-02 corrective hash` (corrective report and evidence)
+- `0e34e72` — `docs: record QA-01 QA-02 corrective hash` (corrective report and evidence)
 
 Final state: corrective implementation complete; awaiting master re-review and independent focused retest. Phase 6 remains gated.
