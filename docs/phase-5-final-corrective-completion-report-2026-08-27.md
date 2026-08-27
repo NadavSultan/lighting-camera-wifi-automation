@@ -1,6 +1,6 @@
 # Phase 5 final corrective completion report
 
-Date: 2026-08-27  
+Date: 2026-08-27
 Scope: QA-01/R-02 and QA-02/G-03 only. Phase 5 remains unaccepted and unclosed.
 
 Controlling report: `C:\Users\NadavSultan\.codex\worktrees\e0cc\lighting-camera-wifi-automation\docs\phase-5-independent-final-gate-review-2026-08-26.md`.
@@ -28,7 +28,7 @@ A focused production-browser QA-01 check was attempted against `http://127.0.0.1
 
 ## Commits
 
-- `pending` — implementation and tests
-- `pending` — this report and completion-report update
+- `90e2bbc` — `fix: correct final Phase 5 gate defects` (implementation and tests)
+- `6aabf3d` — `docs: record QA-01 QA-02 corrective hash` (corrective report and evidence)
 
 Final state: corrective implementation complete; awaiting master re-review and independent focused retest. Phase 6 remains gated.
