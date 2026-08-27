@@ -4,9 +4,9 @@ Date: 2026-08-27
 
 Scope: planning and future implementation prompt only
 
-Outcome: **Planning artifacts complete; all 20 decisions subsequently approved; Phase 6 implementation remains unauthorized.**
+Outcome: **Planning artifacts complete; all 20 decisions and Phase 6 implementation subsequently authorized; Phase 6 remains open and unaccepted.**
 
-Post-planning gate update: the user explicitly approved every recommended implementation-policy decision on 2026-08-27 after the master review and corrective pass. This changes the planning-decision gate only; it does not retroactively authorize implementation or turn test-only values into approved Miracle Mile inputs.
+Post-planning gate update: the user explicitly approved every recommended implementation-policy decision and then separately authorized Phase 6 implementation using GPT-5.6 Terra on 2026-08-27 after the master review and corrective pass. This does not turn test-only values into approved Miracle Mile inputs or accept/close Phase 6 before independent QA and a master gate decision.
 
 ## Authorization observed
 
@@ -153,15 +153,15 @@ No recommendation is recorded as approved by this report.
 ## Planning artifacts
 
 - `docs/phase-6-cap-planning-and-implementation-contract.md` - evidence hierarchy, known/unknown facts, safe MVP, strict architecture/data/API/UI/migration design, deterministic algorithms/tie-breaks, safety caps, invalidation/provenance, adversarial acceptance matrix, and 20 implementation-policy decisions.
-- `docs/phase-6-master-implementation-prompt.md` - bounded execution prompt for a future GPT-5.6 Terra implementation task, with exact startup, file boundary, work packages, invariants, commands, rendered QA, handoff, and stop conditions.
+- `docs/phase-6-master-implementation-prompt.md` - bounded execution prompt for the authorized GPT-5.6 Terra implementation task, with exact startup, file boundary, work packages, invariants, commands, rendered QA, handoff, and stop conditions.
 - `docs/phase-6-cap-planning-report-2026-08-27.md` - this evidence and gate report.
 
 No other file is authorized or intended to change in this planning task.
 
 ## Blockers and next gate
 
-The implementation-policy decisions above are approved. Phase 6 implementation remains blocked solely by the absence of separate explicit implementation authorization; it is **not** blocked merely because real-project engineering inputs are missing.
+The implementation-policy decisions and separate Phase 6 implementation authorization are approved. The Terra implementation task may proceed; it is **not** blocked merely because real-project engineering inputs are missing.
 
 The repository still has no approved Miracle Mile CAP/product mapping, node-membership matrix, band/variant/jurisdiction, planning link distance, conservative node/child/hop limits, gateway/node-count convention, site feasibility inventory, or redundancy selection. Those are legitimate runtime `unknown` values. After implementation they must prevent dependent calculate/validate/recommend operations until entered with required provenance, but they do not prevent implementation of the approved unknown-state models, UI, preflight, algorithms, and tests.
 
-The master task should review the three planning artifacts, approve or replace each numbered implementation-policy decision, and only then issue a separate explicit Phase 6 implementation authorization using the Terra prompt. If the user also wants any real-site value locked into the implementation contract, record it separately and explicitly; do not infer that intent from policy approval. Planning approval alone must not launch implementation. Phase 7 remains gated.
+The required review, decision approval, and separate implementation authorization gates are complete. The authorized Terra task is the next action. If the user later wants any real-site value locked into the implementation contract, record it separately and explicitly; do not infer that intent from implementation authorization. Phase 6 still requires independent QA and master acceptance, and Phase 7 remains gated.

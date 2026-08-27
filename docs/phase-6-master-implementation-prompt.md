@@ -1,6 +1,6 @@
 # Phase 6 master implementation prompt for GPT-5.6 Terra
 
-> **NOT EXECUTABLE YET.** The user approved every implementation-policy decision in `docs/phase-6-cap-planning-and-implementation-contract.md`, section 16, on 2026-08-27, but has not separately authorized Phase 6 implementation. Planning authorization and approval of planning decisions are not implementation authorization. Do not use this prompt until that separate authorization is recorded; if governance later becomes unresolved, stop without editing implementation files.
+> **AUTHORIZED FOR EXECUTION.** The user approved every implementation-policy decision in `docs/phase-6-cap-planning-and-implementation-contract.md`, section 16, and separately authorized Phase 6 implementation using GPT-5.6 Terra on 2026-08-27. Execute only this approved scope. If governance later becomes unresolved, stop without editing implementation files.
 
 Actual Miracle Mile operational inputs are not prerequisites to implement the approved model and workflow. Product/variant mapping, fixture node dispositions, band/jurisdiction, link distance, project node/child/hop limits, gateway/node-count convention, site inventory/feasibility, and redundancy selection may remain `unknown`. Implement those states without defaults; runtime preflight must block only the dependent calculate/validate/recommend operation. Test and rendered-QA inputs must be conspicuously labelled test-only and must never be recorded as real-project approval.
 

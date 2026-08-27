@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning and all 20 implementation-policy decisions are approved; implementation is unauthorized and unstarted.
+Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning, all 20 implementation-policy decisions, and implementation are explicitly authorized; implementation is the current open task.
 
 ## Completed
 
@@ -67,9 +67,9 @@ Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independen
 - The SOL planning task produced the reviewed planning contract, master Terra implementation prompt, and planning report on 2026-08-27.
 - The user explicitly approved all 20 recommended implementation-policy decisions in `docs/phase-6-cap-planning-and-implementation-contract.md`; they are binding for any future Phase 6 implementation.
 - This approval does not lock actual Miracle Mile operational values. Product mapping, fixture node dispositions, band/jurisdiction, link distance, node/child/hop limits, counting convention, candidate inventory/feasibility, and redundancy selection remain `unknown` unless separately approved and must be handled by the approved runtime preflight rules.
-- `docs/phase-6-master-implementation-prompt.md` remains a future Terra implementation prompt and is not executable until the user grants separate explicit Phase 6 implementation authorization.
+- `docs/phase-6-master-implementation-prompt.md` is the controlling executable prompt for the authorized GPT-5.6 Terra implementation task.
 - Planning changed documentation only. No application code, tests, schemas, generated contracts, catalogs, supplied Input files, or runtime data were changed.
 
 ## Current gate
 
-Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 planning and all 20 implementation-policy decisions are approved. Phase 6 implementation still requires separate explicit authorization; it is unstarted, and Phase 7 remains gated and unauthorized.
+Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 implementation is explicitly authorized under all 20 approved implementation-policy decisions. It remains open until implementation evidence, independent QA, and a master gate decision are complete. Phase 7 remains gated and unauthorized.

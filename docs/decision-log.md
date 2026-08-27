@@ -111,3 +111,11 @@
 - Decision: the user explicitly approved all 20 recommended implementation-policy decisions in section 16 of `docs/phase-6-cap-planning-and-implementation-contract.md`. They are binding for any future Phase 6 implementation, including the product/terminology boundary, node membership, candidate sites, engine authority, unknown-state behavior, limits and counting semantics, deterministic algorithms, manual controls, versions, APIs, safety caps, UI/disclaimers, export boundary, acceptance matrix, and independent gate.
 - Runtime boundary: this approval does not supply or lock actual Miracle Mile operational values. Product mapping, fixture node dispositions, band/jurisdiction, link distance, node/child/hop limits, gateway/co-located-node counting selection, candidate inventory/feasibility, and redundancy selection remain `unknown` unless separately approved. The future implementation must persist unknowns without inferred defaults and block only dependent runtime operations at preflight.
 - Gate: the reviewed Terra master prompt remains future-only. Application code, tests, schemas, generated contracts, catalogs, runtime data, and Phase 6 implementation remain unauthorized until the user grants separate explicit Phase 6 implementation authorization. Phase 7 remains gated.
+
+## DL-016 — Phase 6 CAP implementation authorized
+
+- Date: 2026-08-27
+- Status: implementation explicitly authorized; Phase 6 open and unaccepted
+- Decision: the user explicitly authorized Phase 6 implementation using GPT-5.6 Terra. The implementation must follow all 20 approved decisions in `docs/phase-6-cap-planning-and-implementation-contract.md` and the controlling `docs/phase-6-master-implementation-prompt.md`.
+- Runtime boundary: implementation authorization does not approve or infer any actual Miracle Mile CAP operational value. Unknown values and provenance must be preserved and dependent runtime operations must be blocked exactly as specified by the planning contract.
+- Gate: the Terra task may change only the authorized Phase 6 scope and must provide full automated and rendered evidence plus a completion report. Phase 6 remains unaccepted until independent QA and a master gate decision pass. Phase 7 remains unauthorized.

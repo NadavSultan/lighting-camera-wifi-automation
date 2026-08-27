@@ -2,13 +2,13 @@
 
 Date: 2026-08-27
 
-Status: planning decisions approved; implementation unauthorized
+Status: planning decisions approved; implementation explicitly authorized; Phase 6 open and unaccepted
 
 Controlling repository state: `100d458a066caa28c19b48bee28d392eb9fbc073` (`docs: close Phase 5 after final QA pass`)
 
 ## 1. Authorization boundary
 
-The user explicitly approved all 20 implementation-policy recommendations in section 16 on 2026-08-27. They are binding scope for any future Phase 6 implementation. This approval does not authorize Phase 6 implementation, generated-contract updates, catalog changes, runtime changes, or an implementation task; separate explicit Phase 6 implementation authorization is still required.
+The user explicitly approved all 20 implementation-policy recommendations in section 16 and separately authorized Phase 6 implementation using GPT-5.6 Terra on 2026-08-27. They are binding scope for the implementation task. This authorization does not approve real-site operational values, expand Phase 6 beyond this contract, authorize Phase 7, or accept/close Phase 6 before independent QA and a master gate decision.
 
 Implementation-policy approval and real-project runtime input are separate gates:
 
