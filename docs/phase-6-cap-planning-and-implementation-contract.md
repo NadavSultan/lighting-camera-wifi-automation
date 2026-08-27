@@ -2,13 +2,13 @@
 
 Date: 2026-08-27
 
-Status: planning authorized; planning decisions unapproved; implementation unauthorized
+Status: planning decisions approved; implementation unauthorized
 
 Controlling repository state: `100d458a066caa28c19b48bee28d392eb9fbc073` (`docs: close Phase 5 after final QA pass`)
 
 ## 1. Authorization boundary
 
-This document is a planning contract only. It does not authorize Phase 6 implementation, generated-contract updates, catalog changes, runtime changes, or an implementation task. Every implementation-policy recommendation in section 16 requires explicit user approval or an explicit replacement, followed by separate explicit Phase 6 implementation authorization.
+The user explicitly approved all 20 implementation-policy recommendations in section 16 on 2026-08-27. They are binding scope for any future Phase 6 implementation. This approval does not authorize Phase 6 implementation, generated-contract updates, catalog changes, runtime changes, or an implementation task; separate explicit Phase 6 implementation authorization is still required.
 
 Implementation-policy approval and real-project runtime input are separate gates:
 
@@ -160,7 +160,7 @@ Goodput/load and latency are not MVP constraints unless the user supplies an app
 
 ## 6. Proposed data architecture
 
-Recommended additive versions, pending approval:
+Approved additive versions:
 
 - project schema `2.6.0` from `2.5.0`;
 - software/API `0.6.0`;
@@ -479,9 +479,9 @@ Ordered work packages:
 
 The production workflow must record exact inputs and outputs; it may use clearly labelled test-only planning assumptions but cannot claim those assumptions are approved for the real site.
 
-## 16. Decisions requiring user approval
+## 16. Approved implementation-policy decisions
 
-None of these recommendations is currently approved. These numbered items ask for implementation-policy approval: what the software may support, which fields/states it must model, how it behaves, and how it is accepted. If an implementation-policy choice remains unresolved, the future Terra task must stop or use an explicitly narrowed authorized scope.
+The user explicitly approved every recommended implementation-policy decision below on 2026-08-27. These decisions define what the software may support, which fields and states it must model, how it behaves, and how it is accepted. They are binding for the future Terra task, but they do not authorize implementation.
 
 They do **not** require the user to supply or approve actual Miracle Mile operational values before implementation. Unless the user separately records a real-site value as locked project input, product/variant mapping, fixture node dispositions, band/jurisdiction, link distance, node/child/hop limits, gateway/node counting convention, candidate inventory/feasibility, and redundancy selection may remain `unknown` during implementation. Unknown values must round-trip losslessly with provenance fields available and must block only the dependent runtime calculate/validate/recommend operation.
 

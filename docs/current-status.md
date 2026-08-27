@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope.
+Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning and all 20 implementation-policy decisions are approved; implementation is unauthorized and unstarted.
 
 ## Completed
 
@@ -53,7 +53,7 @@ Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independen
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. CAP recommendations, automatic pole placement, and reporting remain deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. Phase 6 CAP implementation, automatic pole placement, and reporting remain deferred and unauthorized.
 
 ## Phase 5 closure
 
@@ -62,6 +62,14 @@ Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independen
 - `docs/phase-5-final-focused-retest-2026-08-27.md` and `docs/phase-5-master-gate-decision-2026-08-27.md` are the controlling final Phase 5 evidence.
 - No source pole, source coordinate, supplied Input file, frozen catalog, CAP recommendation, or Phase 6 behavior was changed.
 
+## Phase 6 planning approval
+
+- The SOL planning task produced the reviewed planning contract, master Terra implementation prompt, and planning report on 2026-08-27.
+- The user explicitly approved all 20 recommended implementation-policy decisions in `docs/phase-6-cap-planning-and-implementation-contract.md`; they are binding for any future Phase 6 implementation.
+- This approval does not lock actual Miracle Mile operational values. Product mapping, fixture node dispositions, band/jurisdiction, link distance, node/child/hop limits, counting convention, candidate inventory/feasibility, and redundancy selection remain `unknown` unless separately approved and must be handled by the approved runtime preflight rules.
+- `docs/phase-6-master-implementation-prompt.md` remains a future Terra implementation prompt and is not executable until the user grants separate explicit Phase 6 implementation authorization.
+- Planning changed documentation only. No application code, tests, schemas, generated contracts, catalogs, supplied Input files, or runtime data were changed.
+
 ## Current gate
 
-Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 CAP planning and implementation, and all later phases, remain gated and unauthorized.
+Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 planning and all 20 implementation-policy decisions are approved. Phase 6 implementation still requires separate explicit authorization; it is unstarted, and Phase 7 remains gated and unauthorized.

@@ -51,6 +51,8 @@ Status: complete and formally closed on 2026-08-27 after the independent final r
 
 ## Phase 6 - CAP
 
+Status: planning and all 20 implementation-policy decisions approved on 2026-08-27; implementation unauthorized pending separate explicit authorization.
+
 - Convert the reviewed datasheet and clarified project rules into an editable constraint file.
 - Implement explainable clustering, candidate CAPs, manual locks/reassignment, topology checks, and revalidation.
 - Never move or generate lighting poles.
@@ -63,4 +65,4 @@ Status: complete and formally closed on 2026-08-27 after the independent final r
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 and later phases remain unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 planning and its 20 implementation-policy decisions are approved; Phase 6 implementation and Phase 7 remain unauthorized.

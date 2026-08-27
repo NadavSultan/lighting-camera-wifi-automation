@@ -14,7 +14,7 @@ Before planning or changing code, every future session must read these files in 
 6. `docs/data-model.md`
 7. `docs/phase-1-completion-report.md`
 
-Then inspect `git status` and preserve unrelated or user-owned changes. Phases 1-5 are accepted and formally closed. Phase 6 and later phases remain gated and unauthorized.
+Then inspect `git status` and preserve unrelated or user-owned changes. Phases 1-5 are accepted and formally closed. Phase 6 planning and all 20 implementation-policy decisions were approved on 2026-08-27; Phase 6 implementation and Phase 7 remain gated and unauthorized.
 
 ## Safety and engineering rules
 
@@ -23,7 +23,7 @@ Then inspect `git status` and preserve unrelated or user-owned changes. Phases 1
 - Treat WGS84 coordinates as interchange/display data only. Select a local projected CRS in metres for distance, area, coverage, or later photometric calculations.
 - Do not infer CAP limits, fixture applicability, photometric conventions, or analytics performance. Record an assumption or block the feature.
 - Camera downward angle is measured below horizontal: 0 degrees is horizontal and 90 degrees is vertically down.
-- Phase work must remain gated. Phases 1-5 are closed. Phase 6 planning and implementation require separate explicit authorization.
+- Phase work must remain gated. Phases 1-5 are closed. Phase 6 planning and all 20 implementation-policy decisions are approved, but Phase 6 implementation still requires separate explicit authorization.
 
 ## Development
 
@@ -40,4 +40,4 @@ Phase 1 includes project creation, KML/KMZ import, validation, map display, per-
 
 ## Phase boundary
 
-Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Do not add Phase 6 CAP or later calculation/recommendation engines without separate explicit authorization.
+Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Phase 6 implementation policy is locked by its approved planning contract; do not add Phase 6 CAP code or later calculation/recommendation engines without separate explicit implementation authorization.

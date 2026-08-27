@@ -4,7 +4,9 @@ Date: 2026-08-27
 
 Scope: planning and future implementation prompt only
 
-Outcome: **Planning artifacts complete; decisions unapproved; Phase 6 implementation remains unauthorized.**
+Outcome: **Planning artifacts complete; all 20 decisions subsequently approved; Phase 6 implementation remains unauthorized.**
+
+Post-planning gate update: the user explicitly approved every recommended implementation-policy decision on 2026-08-27 after the master review and corrective pass. This changes the planning-decision gate only; it does not retroactively authorize implementation or turn test-only values into approved Miracle Mile inputs.
 
 ## Authorization observed
 
@@ -158,7 +160,7 @@ No other file is authorized or intended to change in this planning task.
 
 ## Blockers and next gate
 
-Phase 6 implementation is blocked by the unapproved implementation-policy decisions above and the absence of separate explicit implementation authorization. It is **not** blocked merely because real-project engineering inputs are missing.
+The implementation-policy decisions above are approved. Phase 6 implementation remains blocked solely by the absence of separate explicit implementation authorization; it is **not** blocked merely because real-project engineering inputs are missing.
 
 The repository still has no approved Miracle Mile CAP/product mapping, node-membership matrix, band/variant/jurisdiction, planning link distance, conservative node/child/hop limits, gateway/node-count convention, site feasibility inventory, or redundancy selection. Those are legitimate runtime `unknown` values. After implementation they must prevent dependent calculate/validate/recommend operations until entered with required provenance, but they do not prevent implementation of the approved unknown-state models, UI, preflight, algorithms, and tests.
 
