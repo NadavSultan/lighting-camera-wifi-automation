@@ -8,7 +8,14 @@ Controlling repository state: `100d458a066caa28c19b48bee28d392eb9fbc073` (`docs:
 
 ## 1. Authorization boundary
 
-This document is a planning contract only. It does not authorize Phase 6 implementation, generated-contract updates, catalog changes, runtime changes, or an implementation task. Every recommendation in section 16 requires explicit user approval, followed by separate explicit Phase 6 implementation authorization.
+This document is a planning contract only. It does not authorize Phase 6 implementation, generated-contract updates, catalog changes, runtime changes, or an implementation task. Every implementation-policy recommendation in section 16 requires explicit user approval or an explicit replacement, followed by separate explicit Phase 6 implementation authorization.
+
+Implementation-policy approval and real-project runtime input are separate gates:
+
+- Before implementation, the user must approve the product/architecture boundary, allowed modes and site kinds, field schemas and unknown-state behavior, algorithms and tie-breaks, versions, application safety caps, terminology/disclaimers, export boundary, and acceptance matrix.
+- Actual Miracle Mile operational values - including product/variant mapping, LITE/WIFI/SMART node dispositions, band/jurisdiction, link distance, project node/child/hop limits, node-count convention, candidate inventory/feasibility, and redundancy selection - may remain `unknown` while the software is implemented. The model and UI must preserve those unknowns without defaults, and runtime preflight must block the dependent calculate/validate/recommend operation until the required values and provenance are entered.
+- Tests and rendered QA may use conspicuously labelled test-only inputs. They are fixtures for proving behavior and are not approvals or defaults for Miracle Mile.
+- If the user wants any real-site value frozen into the implementation contract, that must be recorded as a separate explicit project-input decision; implementation-policy approval alone never locks a Miracle Mile value.
 
 The safest useful Phase 6 MVP is explainable graph-and-constraint planning for a provisionally mapped JNET1 Gateway/Group Controller. It may validate a user-authored design and, only when separately enabled, rank and select from explicit user-approved candidate sites. It is not RF prediction and it does not establish professional, performance, service, legal, or standards compliance.
 
@@ -38,15 +45,18 @@ Existing-pole mode remains mandatory. Phase 6 must never create, redistribute, o
 
 ## 2. Source hierarchy and evidence
 
-When sources conflict, the future implementation must use this hierarchy and retain the conflict visibly:
+When sources conflict, the future implementation must apply this precedence and retain every conflict visibly:
 
-1. explicit user-approved project inputs, identified by approver/source/date;
-2. applicable authoritative manufacturer engineering documentation for the exact ordered hardware revision;
-3. applicable regulator or adopted standard for the installation jurisdiction;
-4. the supplied Juganu datasheet as a manufacturer claim/specification source;
-5. repository-derived values with a stated equation;
-6. user-editable engineering assumptions explicitly approved for this project;
-7. unknown, which blocks the dependent operation.
+1. applicable law, regulator, authority-having-jurisdiction (AHJ) requirement, and legally adopted standard for the installation jurisdiction;
+2. authoritative exact-product manufacturer hard constraints for the ordered hardware/firmware revision, except where a stricter applicable legal/AHJ rule controls;
+3. user-approved project design limits and policies, identified by approver/source/date, only when they are within every applicable item above;
+4. other authoritative manufacturer engineering guidance for the exact product/revision;
+5. the supplied Juganu datasheet as a manufacturer claim/specification source, with marketing claims kept non-operational unless independently qualified;
+6. repository-derived values with a stated equation whose inputs obey the higher-precedence bounds;
+7. user-editable engineering assumptions explicitly approved for this project, only within all higher-precedence bounds;
+8. unknown, which blocks the dependent operation.
+
+A user approval can make a project rule stricter but can never waive, enlarge, or override an applicable legal/AHJ/regulatory requirement or authoritative manufacturer hard limit. If applicability, revision, or precedence cannot be resolved, store the competing claims and block the dependent operational validation/recommendation. Do not select the more permissive value.
 
 Marketing language is never promoted into a design rule. The frozen `data/network/cap-constraints.json` and `schemas/cap-constraints.schema.json` remain reference evidence at `1.0.0`; Phase 6 should consume them read-only and store project-specific operational inputs separately.
 
@@ -135,7 +145,7 @@ The recommended MVP is a two-mode planning tool:
 
 The graph uses projected straight-line distance only. Phase 6 must say: “Conceptual graph-and-constraint planning only. Links are distance-qualified, not RF-predicted. Results do not establish coverage, throughput, latency, availability, service quality, legal compliance, or installation feasibility.”
 
-Required inputs before either mode may run:
+Required runtime inputs before either mode may run (they are not prerequisites for implementing the approved unknown-state workflow):
 
 - approved CAP-to-product mapping and exact product/variant record;
 - required band family and jurisdiction/approval provenance;
@@ -162,8 +172,8 @@ Do not change the seven frozen engineering catalogs or their schemas. Keep the c
 | Collection/model | Ownership and required content |
 |---|---|
 | `Project.cap_planning_inputs` | User data: profile, candidate sites, node overrides/exclusions, selected-CAP locks, parent/reassignment locks, prohibited/preferred-site flags, revisions, approval provenance, and field-survey notes. |
-| `CapPlanningProfile` | Product mapping, exact variant, band family/range, jurisdiction, operating mode, project design limits, redundancy policy, missing-input disposition, and permanent disclaimer. |
-| `CapConstraintValue` | `value`, explicit unit, classification (`manufacturer_maximum`, `project_design_limit`, `user_approved_assumption`, `unknown`), source/approver/date, notes. Unknown is nullable and blocks its dependent check. |
+| `CapPlanningProfile` | Product mapping, exact variant, band family/range, jurisdiction, operating mode, project design limits, explicit gateway/node-count convention, redundancy policy, missing-input disposition, and permanent disclaimer. |
+| `CapConstraintValue` | `value`, explicit unit, classification (`legal_regulatory_requirement`, `manufacturer_hard_constraint`, `manufacturer_guidance`, `project_design_limit`, `user_approved_assumption`, `derived_value`, `unknown`), source/approver/date, applicability/revision, conflict state, and notes. Unknown or unresolved conflict is nullable and blocks its dependent check. |
 | `CapCandidateSite` | Stable ID; kind `existing_pole` or `manual_non_pole`; pole reference or WGS84 coordinate; indoor/outdoor; mounting height if known; power/backhaul/enclosure/mounting/survey status; preferred/prohibited; user notes; revision/timestamps. |
 | `CapNodePolicy` | LITE/WIFI/SMART disposition `node`, `non_node`, or `unknown`; optional per-pole explicit exclusion; no inference from fixture Wi-Fi/camera capability. |
 | `CapManualConstraints` | Locked selected candidates, excluded candidates/nodes, locked primary CAP assignment, and optional locked parent. Every reference uses a stable ID and is atomically validated. |
@@ -191,11 +201,33 @@ The UI and persisted model must keep these categories visibly separate:
 
 If the user approves a planning margin, store it explicitly rather than hiding it in the range. Recommended representation is `approved_link_distance_m` plus an optional descriptive `margin_basis`; the engine uses the approved distance exactly.
 
-### 7.2 Band and legal applicability
+Every project design value must be checked against applicable law/AHJ/regulatory bounds and exact-product manufacturer hard constraints before it is accepted. A stricter project value is permitted; a more permissive one is 422. An unresolved applicability or source conflict is not a warning-only state: it blocks the dependent operation.
+
+### 7.2 Gateway and co-located fixture node accounting
+
+The datasheet says “nodes per gateway” but does not state whether the gateway appliance is included in the 1,000-node count. The project profile therefore needs a required, provenance-bearing `gateway_node_count_convention` object with two independently explicit fields:
+
+- `gateway_appliance_counting`: `excluded`, `included`, or `unknown`;
+- `colocated_fixture_counting`: `distinct_managed_node_once`, `merged_not_separate`, or `unknown`.
+
+Each field carries classification/source/approver/date/notes. Either `unknown` blocks dependent capacity/topology validation. If the appliance is `included`, it consumes one unit of the applicable nodes/CAP limit; a distinct co-located fixture consumes one additional unit. The engine must never count any fixture record more than once.
+
+Recommended planning convention pending manufacturer confirmation:
+
+- the gateway appliance itself is excluded from the managed-node count because the document describes nodes *per gateway*;
+- when an existing-pole candidate is selected as a CAP, a fixture on that same pole remains a distinct managed network node if its approved fixture-type/per-pole policy says `node`;
+- that co-located fixture is counted exactly once against the selected CAP's project/manufacturer node limit;
+- it is assigned to the co-located gateway at exactly `0.000000 m`, at primary hop `1`, with the gateway represented by a distinct root vertex ID rather than the fixture node ID;
+- the co-located fixture cannot be its own parent, cannot parent the gateway root, and participates in ordinary child/cycle validation if it parents other fixture nodes;
+- a manual non-pole gateway has no implicit fixture node and contributes only a gateway root, not a managed node.
+
+This is a project planning convention, not a verified manufacturer fact. If the runtime convention is `unknown`, or if the user selects an alternative without required provenance, capacity/topology validation and recommendation are blocked. A future authoritative manufacturer clarification supersedes the assumption subject to visible conflict review and migration/revalidation; it is never silently applied to stored results.
+
+### 7.3 Band and legal applicability
 
 Band is a required project input even though the MVP distance graph does not model RF. Allowed datasheet families are `433` (433.05-434.79 MHz) and `915` (902-928 MHz). The record must include exact ordered variant, country/jurisdiction, approval authority/source, and status. `unknown` blocks planning. The UI must state that product availability and legal operation require separate verification.
 
-### 7.3 Candidate feasibility
+### 7.4 Candidate feasibility
 
 A candidate is feasible only when all approved required dispositions pass:
 
@@ -208,7 +240,7 @@ A candidate is feasible only when all approved required dispositions pass:
 
 `unknown` is not equivalent to false. Recommended default is to exclude an unknown candidate from recommendation and show a blocking reason; Validate mode may retain it only as an explicit invalid candidate, never as passing.
 
-### 7.4 Redundancy
+### 7.5 Redundancy
 
 The policy is required and one of:
 
@@ -222,12 +254,12 @@ Roaming is not proof of failover. N+1 validation is a graph/capacity stress test
 
 ### 8.1 Canonical graph construction
 
-1. Resolve effective existing-pole coordinates without changing source data; transform all participating nodes and candidates into the validated projected CRS in metres.
+1. Resolve effective existing-pole coordinates without changing source data; transform all participating nodes and candidates into the validated projected CRS in metres. Represent each selected gateway appliance as a distinct root vertex `cap-root/<candidate_id>` even when it is co-located with a fixture node.
 2. Sort nodes by `(source.sequence_index, pole_id)`. Sort candidates by `(user_priority ascending, kind existing_pole before manual_non_pole, candidate_id)`; lower user-priority number is preferred.
 3. Build an undirected conceptual adjacency graph using a spatial index. Add an edge only when Euclidean projected distance is finite and `distance_m <= approved_link_distance_m + 1e-9 m`.
-4. Candidate-to-node edges and node-to-node edges are permitted. Candidate-to-candidate edges do not serve nodes and are excluded in MVP.
+4. Candidate-to-node edges and node-to-node edges are permitted. Candidate-to-candidate edges do not serve nodes and are excluded in MVP. Under the approved recommended counting convention, an existing-pole candidate and its distinct fixture node receive a canonical zero-distance root-to-node edge; the fixture counts once, at hop 1, and the gateway appliance does not count as a managed node. A manual non-pole root creates no implicit node.
 5. Persist link distances rounded to 6 decimal places; comparisons use unrounded values. Exact-boundary links pass. Never compute distance in WGS84 degrees.
-6. Stable link ID is `cap-link/<min-endpoint-id>/<max-endpoint-id>`. Order links lexicographically by endpoint IDs.
+6. Stable link ID is `cap-link/<min-endpoint-id>/<max-endpoint-id>`. Order links lexicographically by endpoint IDs. Root and fixture IDs must remain different, self-links are forbidden, roots cannot have parents, and cycle validation operates over the directed topology before persistence.
 
 This graph is a distance graph, not an RF connectivity graph. Obstruction, terrain, antenna, propagation, and interference are not modeled.
 
@@ -301,7 +333,7 @@ Use canonical JSON with sorted keys, compact separators, `allow_nan=false`, and 
 
 - model/contract versions and every safety limit that can change output;
 - projected/source CRS;
-- product mapping, variant, band, jurisdiction, every design constraint and its status/source;
+- product mapping, variant, band, jurisdiction, gateway/node-count convention, every design constraint and its status/source/applicability/conflict state;
 - node-type policy and every participating source pole's ID, sequence, exact source/effective coordinate, type, active state, and relevant explicit exclusion;
 - every candidate's stable ID, type/reference/coordinate, site-feasibility fields, preference/prohibition, priority, revision, and selected/excluded locks;
 - every assignment/parent lock and redundancy/operating-mode setting;
@@ -415,8 +447,10 @@ Ordered work packages:
 | ID | Type | Objective pass/fail condition |
 |---|---|---|
 | P6-DM-01 | model | Strict models reject unknown fields/non-finite values; user, calculated, and recommended collections remain distinct; source/recommended placeholder data are unchanged. |
-| P6-DM-02 | model | Unknown CAP identity, node policy, band, range, limits, redundancy, or candidate feasibility blocks the dependent operation with the exact field ID. |
+| P6-DM-02 | model | Unknown CAP identity, node policy, band, range, limits, gateway/node-count convention, redundancy, or candidate feasibility is valid storable runtime state but blocks only the dependent operation with the exact field ID. |
 | P6-DM-03 | model | Manufacturer maxima and project design limits are stored/displayed separately with explicit units/status/source; project node/child/hop values above 1,000/16/64 are rejected. |
+| P6-DM-04 | precedence | Applicable legal/AHJ/regulatory requirements and exact-product manufacturer hard constraints bound all project values; a stricter user limit passes, a more permissive user value fails 422, and an unresolved applicability/conflict blocks without choosing a permissive source. |
+| P6-CT-01 | counting/topology | Synthetic existing-pole CAP with a node-eligible co-located fixture creates distinct root/fixture IDs, counts the fixture exactly once, assigns it at `0.000000 m` and hop 1, excludes the appliance under the recommended convention, and rejects self-parent/root-parent/cycles; switching only appliance counting to `included` consumes exactly one additional nodes/CAP unit and exercises the exact capacity boundary. `merged_not_separate` omits the fixture node only when explicitly selected with provenance. A manual non-pole CAP creates no implicit node. Either convention field `unknown` is storable but blocks calculate/validate/recommend. |
 | P6-GR-01 | geometry | Exact-distance synthetic edge passes at `limit + 1e-9 m`; an edge above tolerance fails; WGS84 degree distance is never used. |
 | P6-GR-02 | geometry | Existing-pole candidate uses unchanged effective/source provenance; manual non-pole site remains separate and creates no source pole/edit. |
 | P6-GR-03 | graph | Disconnected node, chain, star, branching-limit, exact-hop-boundary, and cycle-lock cases yield deterministic expected topology/errors. |
@@ -441,43 +475,45 @@ Ordered work packages:
 | P6-UI-03 | rendered | CAP green layers are independent and accessible; manual sites are not pole symbols; LITE/WIFI/SMART remain exact red/yellow/blue. |
 | P6-UI-04 | rendered | Every result/link shows graph-only disclaimer and no RF, throughput, latency, availability, legal, professional, or standards-compliance claim. |
 | P6-REG-01 | regression | Full existing backend, engineering validator, rendered suite, TypeScript, ESLint, production build, generated-contract freshness, and browser-console checks pass. |
-| P6-PRD-01 | production workflow | Genuine production UI imports the supplied 74-pole KML, configures explicit synthetic/project-approved node/candidate inputs, runs validate and recommend, edits/locks/revalidates, undo/redoes, saves/reopens, and preserves exact source SHA/coordinates with zero console errors. |
+| P6-PRD-01 | production workflow | Genuine production UI imports the supplied 74-pole KML, first proves unknown runtime inputs persist and block operations, then configures conspicuously labelled test-only node/candidate/counting inputs, runs validate and recommend, edits/locks/revalidates, undo/redoes, saves/reopens, and preserves exact source SHA/coordinates with zero console errors. |
 
 The production workflow must record exact inputs and outputs; it may use clearly labelled test-only planning assumptions but cannot claim those assumptions are approved for the real site.
 
 ## 16. Decisions requiring user approval
 
-None of these recommendations is currently approved. Leaving a blocking decision unresolved means the future Terra task must stop before implementation.
+None of these recommendations is currently approved. These numbered items ask for implementation-policy approval: what the software may support, which fields/states it must model, how it behaves, and how it is accepted. If an implementation-policy choice remains unresolved, the future Terra task must stop or use an explicitly narrowed authorized scope.
+
+They do **not** require the user to supply or approve actual Miracle Mile operational values before implementation. Unless the user separately records a real-site value as locked project input, product/variant mapping, fixture node dispositions, band/jurisdiction, link distance, node/child/hop limits, gateway/node counting convention, candidate inventory/feasibility, and redundancy selection may remain `unknown` during implementation. Unknown values must round-trip losslessly with provenance fields available and must block only the dependent runtime calculate/validate/recommend operation.
 
 ### Decision 1 - Product identity and terminology
 
-**Recommended:** Approve project CAP as the supplied Juganu `JNET1 Gateway (Group Controller)`, model family `JGW-JNET1`, while displaying `CAP / JNET1 Gateway` and retaining Rev 1.2 provenance.
+**Recommended:** Approve support for the supplied Juganu `JNET1 Gateway (Group Controller)`, model family `JGW-JNET1`, as the provisional initial product record, while displaying `CAP / JNET1 Gateway` and retaining Rev 1.2 provenance. Require a runtime product-mapping field that may remain `unknown`; do not hardcode that Miracle Mile CAP definitively uses this product.
 
 **Alternatives:** Treat CAP as a different/abstract gateway and supply its authoritative specification; or defer Phase 6.
 
 **Tradeoff:** Approval gives the model a concrete product ceiling set, but it does not confirm hardware revision or project suitability.
 
-**If unresolved:** Block all CAP calculations and recommendations.
+**If implementation policy is unresolved:** Stop before implementing product-specific constraints. **If only the runtime Miracle Mile mapping is unresolved:** store `unknown` and block CAP calculate/validate/recommend at preflight.
 
 ### Decision 2 - Network-node membership
 
-**Recommended:** Require explicit `node/non_node/unknown` approval for LITE, WIFI, and SMART; block only when an active fixture type present in the project remains unknown. Do not infer node status from Wi-Fi or camera capability.
+**Recommended:** Approve the `node/non_node/unknown` field contract for LITE, WIFI, and SMART; block runtime operations only when an active fixture type present in that project remains unknown. Do not infer node status from Wi-Fi or camera capability. Do not lock the Miracle Mile type values during implementation unless separately directed.
 
 **Alternatives:** Approve a fixed type matrix now; or require per-pole node flags only.
 
 **Tradeoff:** Type policy is efficient but depends on BOM truth; per-pole flags are precise but burdensome.
 
-**If unresolved:** No node graph can be built.
+**If implementation policy is unresolved:** Stop before implementing node membership. **If only runtime values are unresolved:** preserve `unknown`; no runtime node graph can be built.
 
 ### Decision 3 - Candidate-site scope and hosting
 
-**Recommended:** Permit both explicit existing-pole candidates and user-placed manual non-pole equipment sites. Hosting is allowed only with confirmed mounting, power, backhaul, enclosure, and non-prohibited status. Manual sites remain separate user data and never become poles.
+**Recommended:** Approve both explicit existing-pole candidates and user-placed manual non-pole equipment sites as allowed schema/workflow kinds. At runtime, hosting passes only with confirmed mounting, power, backhaul, enclosure, and non-prohibited status. Manual sites remain separate user data and never become poles; implementation does not require a real Miracle Mile candidate inventory.
 
 **Alternatives:** Existing customer poles only; or manual non-pole sites only.
 
 **Tradeoff:** Mixed sites reflect indoor/wall/pole forms but add coordinate/site-data UI. Existing-pole-only is simpler and may exclude feasible backhaul locations.
 
-**If unresolved:** Candidate creation and recommendation remain blocked.
+**If implementation policy is unresolved:** Stop before implementing candidate-site workflows. **If only runtime candidate facts are unresolved:** persist the incomplete inventory and block/exclude candidates according to preflight.
 
 ### Decision 4 - Engine authority
 
@@ -491,35 +527,45 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 ### Decision 5 - Required band and jurisdiction input
 
-**Recommended:** Require exact `433` or `915` family, ordered variant, jurisdiction, and approval source before planning; store 915 with its exact 902-928 MHz datasheet range.
+**Recommended:** Approve required runtime fields for exact `433` or `915` family, ordered variant, jurisdiction, and approval source before an operational run; store 915 with its exact 902-928 MHz datasheet range. These fields may remain `unknown` during implementation.
 
 **Alternatives:** Allow unknown band with warning because distance graph is band-agnostic.
 
 **Tradeoff:** Required provenance prevents a misleading deployable-looking result; it does not itself establish legality.
 
-**If unresolved:** Block validate/recommend.
+**If implementation policy is unresolved:** Stop before implementing band preflight. **If only runtime values are unresolved:** block validate/recommend at preflight.
 
 ### Decision 6 - Project link distance
 
-**Recommended:** Require a positive finite user-approved design link distance in metres with source/status. Do not default from 10 km open-air or 8 km dense-urban claims and do not infer a hidden margin.
+**Recommended:** Approve a nullable runtime field that requires a positive finite user-approved design link distance in metres with source/status before graph construction. Do not supply an implementation default from 10 km open-air or 8 km dense-urban claims and do not infer a hidden margin.
 
 **Alternatives:** Provide a user-approved temporary planning assumption; or operate without distance edges, which makes topology impossible.
 
 **Tradeoff:** An assumption enables conceptual work but carries high RF risk and must remain prominent/editable.
 
-**If unresolved:** Block graph construction.
+**If implementation policy is unresolved:** Stop before implementing distance semantics. **If only the runtime distance is unresolved:** store `unknown` and block graph construction.
 
 ### Decision 7 - Conservative capacity, child, and hop limits
 
-**Recommended:** Require project values `<= 1,000 nodes/CAP`, `<= 16 children/parent`, and `<= 64 hops`, each with source/approval. Do not supply automatic conservative defaults.
+**Recommended:** Approve nullable runtime fields and bound validation for project values `<= 1,000 nodes/CAP`, `<= 16 children/parent`, and `<= 64 hops`, each with source/approval. Do not supply automatic conservative defaults or require actual Miracle Mile values during implementation.
 
 **Alternatives:** User approves temporary lower planning assumptions; or use manufacturer maxima directly as project limits with a strong warning.
 
 **Tradeoff:** Maxima maximize apparent feasibility but provide no engineering margin. Lower assumptions are safer but need an owner.
 
-**If unresolved:** Block topology validation/recommendation.
+**If implementation policy is unresolved:** Stop before implementing capacity/hop semantics. **If only runtime values are unresolved:** preserve `unknown` and block topology validation/recommendation.
 
-### Decision 8 - Load, goodput, and latency
+### Decision 8 - Gateway appliance and co-located fixture counting
+
+**Recommended:** Approve the required provenance-bearing runtime convention object with separate `gateway_appliance_counting` and `colocated_fixture_counting` fields and `unknown` support. Recommend `excluded` for the appliance because the datasheet says nodes per gateway, and `distinct_managed_node_once` for an approved node-eligible fixture on the same existing pole. The fixture is assigned to the distinct gateway root at `0.000000 m` and hop 1. Self-parenting/root-parenting/cycles are forbidden. A manual non-pole gateway creates no implicit fixture node. Label both selections as project planning assumptions pending manufacturer confirmation, not facts. Do not hardcode them for Miracle Mile unless separately approved as real-site input.
+
+**Alternatives:** Count the gateway appliance within the 1,000 total; treat a co-located fixture as part of the appliance and not a separate node; or defer capacity/topology validation pending manufacturer confirmation.
+
+**Tradeoff:** The recommended convention follows the document's “nodes per gateway” wording and preserves the fixture as a real managed endpoint, but the manufacturer has not confirmed the accounting. Counting the appliance is more conservative by one; merging the fixture risks undercounting a managed endpoint.
+
+**If implementation policy is unresolved:** Stop before implementing node accounting/topology capacity. **If only the runtime convention is unresolved:** store `unknown` and block dependent capacity/topology calculate/validate/recommend operations.
+
+### Decision 9 - Load, goodput, and latency
 
 **Recommended:** Exclude them from MVP enforcement/optimization; display manufacturer values and persistent `not evaluated` warnings. Require a later approved traffic/message model and manufacturer clarification before operational use.
 
@@ -529,7 +575,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Treat as out of scope, not silently passed.
 
-### Decision 9 - RF/environmental model boundary
+### Decision 10 - RF/environmental model boundary
 
 **Recommended:** Approve Phase 6 as projected-distance graph planning only. Antenna, mounting height, LOS/obstruction, terrain, propagation, and interference remain field inputs/warnings and are not simulated.
 
@@ -539,27 +585,27 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Do not implement graph links or recommendations.
 
-### Decision 10 - Site feasibility and field survey policy
+### Decision 11 - Site feasibility and field survey policy
 
-**Recommended:** Require confirmed power, backhaul, enclosure, mounting, prohibited/preferred disposition, and exact indoor/outdoor variant for a candidate to be recommended. Require field survey `confirmed` for a passing final validation; allow `pending` only in exploratory results with a warning.
+**Recommended:** Approve runtime feasibility fields and preflight rules requiring confirmed power, backhaul, enclosure, mounting, prohibited/preferred disposition, and exact indoor/outdoor variant for a candidate to be recommended. Require field survey `confirmed` for a passing final validation; allow `pending` only in exploratory results with a warning. Actual Miracle Mile site records may remain absent/unknown during implementation.
 
 **Alternatives:** Permit unknown site facts with warnings; or omit manual sites.
 
 **Tradeoff:** Confirmation reduces uninstallable recommendations but requires field data.
 
-**If unresolved:** Candidates with unknown facts remain excluded and may leave no feasible result.
+**If implementation policy is unresolved:** Stop before implementing candidate-feasibility acceptance. **If only runtime site facts are unresolved:** candidates remain excluded and may leave no feasible result.
 
-### Decision 11 - Redundancy and single-CAP policy
+### Decision 12 - Redundancy and single-CAP policy
 
-**Recommended:** Make policy required. Allow `single_allowed_with_warning`, `n_plus_one_validation`, or `user_supplied_only`; never infer one. N+1 recomputes full constrained assignment after each single CAP removal and remains graph-only.
+**Recommended:** Approve a required nullable runtime policy field with `single_allowed_with_warning`, `n_plus_one_validation`, or `user_supplied_only`; never infer a Miracle Mile selection. N+1 recomputes full constrained assignment after each single CAP removal and remains graph-only.
 
 **Alternatives:** Require N+1 for every project; or permit one CAP without a warning, which is not recommended.
 
 **Tradeoff:** Policy flexibility supports conceptual work while keeping single-point-of-failure truth visible. N+1 adds compute and still cannot guarantee real failover.
 
-**If unresolved:** Engine may report raw adjacency only, not an acceptable design.
+**If implementation policy is unresolved:** Stop before implementing redundancy acceptance. **If only the runtime selection is unresolved:** preflight blocks a redundancy/design verdict; do not infer a policy.
 
-### Decision 12 - Deterministic algorithm and tie-breaks
+### Decision 13 - Deterministic algorithm and tie-breaks
 
 **Recommended:** Approve sections 8.1-8.4: capacity-constrained BFS, greedy marginal candidate selection, bounded deterministic improvement, explicit objective tuple, and non-optimal label.
 
@@ -569,7 +615,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** No selection algorithm may be implemented.
 
-### Decision 13 - Manual locks, reassignment, exclusions, and atomic rejection
+### Decision 14 - Manual locks, reassignment, exclusions, and atomic rejection
 
 **Recommended:** Approve all four manual control types and reject contradictions atomically without auto-repair.
 
@@ -579,7 +625,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Implement no ambiguous partial subset; narrow the scope explicitly first.
 
-### Decision 14 - Data/version/migration target
+### Decision 15 - Data/version/migration target
 
 **Recommended:** Project `2.6.0`, software/API `0.6.0`, model `jnet1-graph-planning-1.0.0`; add strict first-class user/calculated/recommended collections and retain the generic `recommended_layers` losslessly.
 
@@ -589,7 +635,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Stop before model/schema changes.
 
-### Decision 15 - API, errors, undo/redo, and stale policy
+### Decision 16 - API, errors, undo/redo, and stale policy
 
 **Recommended:** Approve sections 10-12, including complete-project responses, 404/409/422 semantics, atomic failure preservation, fingerprint invalidation, and no stale-result resurrection through undo/redo/open.
 
@@ -599,7 +645,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Stop before API/frontend implementation.
 
-### Decision 16 - Safety caps
+### Decision 17 - Safety caps
 
 **Recommended:** Approve all section 9 caps as application protections, visibly separate from product design constraints.
 
@@ -609,7 +655,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Stop before graph/recommendation implementation.
 
-### Decision 17 - UI terminology, colors, disclaimers, and warning/error semantics
+### Decision 18 - UI terminology, colors, disclaimers, and warning/error semantics
 
 **Recommended:** Approve sections 3, 10, and 12, including CAP green, exact fixture-color preservation, explicit graph-only language, and blocking-versus-warning rules.
 
@@ -619,7 +665,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Stop before rendered UI work.
 
-### Decision 18 - Export and reporting boundary
+### Decision 19 - Export and reporting boundary
 
 **Recommended:** Persist Phase 6 only in portable JSON; keep updated KML free of CAP data; defer CAP schedules, KML layers, spreadsheets, PDFs, and presentations to Phase 7.
 
@@ -629,7 +675,7 @@ None of these recommendations is currently approved. Leaving a blocking decision
 
 **If unresolved:** Do not add exports.
 
-### Decision 19 - Acceptance matrix and independent gate
+### Decision 20 - Acceptance matrix and independent gate
 
 **Recommended:** Make every row in section 15 mandatory and require a separate independent QA PASS before Phase 6 closure or Phase 7 planning.
 

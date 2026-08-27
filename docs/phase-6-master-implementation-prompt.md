@@ -1,6 +1,8 @@
 # Phase 6 master implementation prompt for GPT-5.6 Terra
 
-> **NOT EXECUTABLE YET.** This prompt may be used only after the user explicitly approves every applicable decision in `docs/phase-6-cap-planning-and-implementation-contract.md`, section 16, and separately authorizes Phase 6 implementation. Planning authorization and approval of planning decisions are not implementation authorization. If governance or any required decision remains unresolved, stop without editing implementation files.
+> **NOT EXECUTABLE YET.** This prompt may be used only after the user explicitly approves every applicable implementation-policy decision in `docs/phase-6-cap-planning-and-implementation-contract.md`, section 16, and separately authorizes Phase 6 implementation. Planning authorization and approval of planning decisions are not implementation authorization. If governance or a required implementation-policy decision remains unresolved, stop without editing implementation files.
+
+Actual Miracle Mile operational inputs are not prerequisites to implement the approved model and workflow. Product/variant mapping, fixture node dispositions, band/jurisdiction, link distance, project node/child/hop limits, gateway/node-count convention, site inventory/feasibility, and redundancy selection may remain `unknown`. Implement those states without defaults; runtime preflight must block only the dependent calculate/validate/recommend operation. Test and rendered-QA inputs must be conspicuously labelled test-only and must never be recorded as real-project approval.
 
 ## Mission
 
@@ -26,11 +28,12 @@ Then inspect `git status --short --branch`, exact `git rev-parse HEAD`, and rece
 Stop immediately without code changes if any of these is true:
 
 - Phase 6 implementation was not separately and explicitly authorized;
-- any required section 16 decision is missing, conditional, or different from the contract without a recorded replacement;
-- CAP is not confirmed as the intended product or an authoritative replacement contract is absent;
-- node membership, candidate-site scope, band/jurisdiction, design distance, node/child/hop limits, redundancy policy, algorithm authority, version target, or safety caps remain unknown;
+- any required section 16 implementation-policy decision is missing, conditional, or different from the contract without a recorded replacement;
+- the supported product/reference-product policy, allowed candidate-site kinds and operation modes, unknown/blocking field semantics, source precedence, counting schema, algorithm/tie-breaks, version target, safety caps, wording/export boundary, or acceptance matrix is not approved;
 - the repository base differs from the approved base and the difference is not explicitly authorized;
 - implementation would require editing an `Input/` file, a frozen engineering catalog/schema, or accepted Phase 1-5 behavior outside an approved compatibility correction.
+
+Do **not** stop merely because real-site values are absent. Implement their explicit `unknown` state, provenance fields, UI blockers, persistence, migration, and runtime preflight. If the user separately directs that a real-site value be locked into the implementation contract, require an explicit project-input decision and record it separately from implementation-policy approval.
 
 ## 2. Read-only evidence before coding
 
@@ -60,8 +63,10 @@ Do not edit `Input/CAP/CAP datasheet.pdf`. If reinspection is necessary, read th
 - WGS84 is display/interchange only. All distances and graph geometry use the validated projected CRS with metre axes.
 - Manual non-pole sites, if approved, are separate user records and never source poles or pole edits.
 - Do not infer product identity, fixture/node participation, candidate feasibility, band, range, margins, capacity targets, hop target, load, latency, redundancy, or compliance.
-- Keep manufacturer maxima, project design limits, approved assumptions, derived values, and unknowns visibly/status-separated with explicit units and provenance.
+- Applicable law/regulator/AHJ/adopted-standard requirements have first precedence; exact-product authoritative manufacturer hard constraints bound all project values next. User-approved project limits/policies and assumptions may be stricter but can never override or enlarge those bounds. Preserve conflicts visibly and block when applicability/precedence is unresolved.
+- Keep regulatory requirements, manufacturer hard constraints/guidance, project design limits, approved assumptions, derived values, conflicts, and unknowns visibly/status-separated with explicit units, applicability, revision, and provenance.
 - The 10 km/8 km claims are not a design range. The 1,000-node, 16-child, and 64-hop values are ceilings, not defaults or targets.
+- Gateway/node accounting is a required runtime convention object, not a manufacturer fact or implementation default. Model `gateway_appliance_counting` (`excluded/included/unknown`) separately from `colocated_fixture_counting` (`distinct_managed_node_once/merged_not_separate/unknown`), each with provenance. Under the recommended selectable convention, the appliance is excluded and a node-eligible co-located fixture is a distinct node counted once at `0.000000 m` and hop 1. Roots and fixtures have distinct IDs; self-parent/root-parent/cycles are forbidden; manual non-pole gateways create no implicit fixture node.
 - Do not implement RF prediction, link budgets, terrain/obstruction/antenna/interference models, throughput/latency/availability guarantees, or standards/legal conclusions.
 - Keep CAP user inputs, calculated graph facts, and recommended topology separate. Retain legacy/generic `recommended_layers` losslessly.
 - Preserve fixture colors exactly: LITE `#ef4444`, WIFI `#facc15`, SMART `#3b82f6`. CAP uses its distinct approved green treatment.
@@ -98,7 +103,7 @@ Do not edit the seven frozen catalogs/schemas, `Input/`, prior-phase reports, or
 
 ### WP1 - Governance and exact contracts
 
-Record the approved section 16 decisions without rewriting them as if they were always approved. Confirm the approved target versions, terminology, exact disclaimer, mode, algorithm, caps, and acceptance IDs. Add no behavior yet if a decision is missing.
+Record the approved section 16 implementation-policy decisions without rewriting them as if they were always approved. Confirm the approved target versions, terminology, exact disclaimer, allowed modes/site kinds, field/unknown semantics, source precedence, counting schema, algorithm, caps, export boundary, and acceptance IDs. Do not require real Miracle Mile values to be populated. Add no behavior yet if an implementation-policy decision is missing.
 
 ### WP2 - Strict data model and lossless migration
 
@@ -106,14 +111,14 @@ Implement the approved additive schema/software/model versions, expected to be p
 
 Add strict models for:
 
-- `CapConstraintValue` with value/unit/classification/source/approver/date/notes;
-- `CapPlanningProfile` with product mapping, exact variant, band/range, jurisdiction, mode, design limits, redundancy, disclaimer;
+- `CapConstraintValue` with value/unit/classification/source/approver/date/applicability/revision/conflict state/notes and the approved legal/manufacturer/project precedence categories;
+- `CapPlanningProfile` with nullable product mapping, exact variant, band/range, jurisdiction, mode, design limits, gateway/node-count convention, redundancy, and disclaimer;
 - `CapCandidateSite` with `existing_pole` or `manual_non_pole` identity and complete site-feasibility fields;
 - explicit LITE/WIFI/SMART node policy and per-node exclusions;
 - selected-CAP, candidate/node exclusion, primary assignment, and parent locks;
 - separate `cap_planning_inputs`, `cap_calculations`, and `cap_recommendations`.
 
-All IDs are stable; all numbers are finite; all units are explicit; strict models reject unknown fields. Keep a narrowly named legacy metadata field only where required for lossless migration.
+All operational fields identified as runtime inputs must support an explicit `unknown` state without an invented default. All IDs are stable; all numbers are finite; all units are explicit; strict models reject unknown fields. Keep a narrowly named legacy metadata field only where required for lossless migration.
 
 Migration must accept every currently supported version through `2.5.0`, add empty CAP collections/layers only, and infer nothing. Preserve exact source bytes/Base64/raw coordinates/coordinates/IDs and every Phase 1-5 collection, plus unknown existing `recommended_layers` content. Migration must be idempotent and must not change timestamps on a canonical new-version payload.
 
@@ -127,15 +132,16 @@ Implement exactly the approved contract:
 2. canonical projected node/candidate snapshots;
 3. spatial-index adjacency using the approved distance/tolerance;
 4. stable edge IDs and canonical order;
-5. capacity-constrained BFS with approved parent/child ordering;
-6. candidate ranking with every score component and tie-break;
-7. Validate mode;
-8. recommend-from-approved-pool greedy selection and bounded improvement;
-9. manual locks/exclusions/reassignment/parent handling with cycle and contradiction detection;
-10. approved redundancy scenarios, including full N+1 reassignment if selected;
-11. exact safety/operation caps and controlled failures;
-12. canonical SHA-256 fingerprints, provenance, warnings/errors, and disclaimer;
-13. stale-result invalidation.
+5. distinct gateway-root and fixture-node identities, approved runtime node-count convention, zero-distance/hop-1 co-location semantics, no implicit manual-site node, and self-parent/root-parent/cycle prevention;
+6. capacity-constrained BFS with approved parent/child ordering;
+7. candidate ranking with every score component and tie-break;
+8. Validate mode;
+9. recommend-from-approved-pool greedy selection and bounded improvement;
+10. manual locks/exclusions/reassignment/parent handling with cycle and contradiction detection;
+11. approved redundancy scenarios, including full N+1 reassignment if selected;
+12. exact safety/operation caps and controlled failures;
+13. canonical SHA-256 fingerprints, provenance, warnings/errors, and disclaimer;
+14. stale-result invalidation.
 
 Use unrounded projected values for comparisons/calculations; persist distances at the approved precision. Never calculate distance in degrees. Never invent a coordinate, candidate, node type, site fact, band, range, margin, or network target. Label the heuristic non-optimal.
 
@@ -179,7 +185,9 @@ Implement every stable acceptance row `P6-DM-01` through `P6-PRD-01`. At minimum
 - synthetic disconnected, chain, star, tie, exact-distance, boundary+epsilon, child-cap, node-cap, hop-cap, locked, cycle, capacity-stranded, and N+1 cases;
 - input-order permutation/repeated-run determinism;
 - every documented ranking tie-break;
-- unknown/NaN/Infinity/invalid CRS/invalid coordinate/invalid variant and missing-approval cases;
+- source-precedence cases proving legal/AHJ and exact-product manufacturer hard bounds cannot be overridden by user approval, including unresolved-conflict blocking;
+- gateway/node-count cases proving both convention fields, the recommended convention, the one-unit appliance delta when `included`, explicit merged-fixture behavior, distinct co-located root/fixture identities, count-once, zero-distance/hop-1 assignment, manual-site no-implicit-node behavior, self-parent/root-parent/cycle rejection, exact capacity boundaries, and runtime `unknown` blocking required by `P6-CT-01`;
+- unknown/NaN/Infinity/invalid CRS/invalid coordinate/invalid variant and missing-runtime-input cases;
 - boundary and boundary+1 tests for every safety cap;
 - 404/409/422 and exact stored-byte atomic-preservation probes;
 - significant/non-significant fingerprint invalidation and undo/redo stale-result probes;
@@ -221,18 +229,20 @@ Generated schema/OpenAPI freshness, frozen engineering-data/source hashes, and t
 Run a production Vinext build against the exact implementation worktree and an isolated FastAPI project store. Through visible UI controls:
 
 1. import `Input/Miracle_Mile_Lighting_Poles.kml` and confirm 74 poles, five folders, expected CRS, and unchanged locked source coordinate;
-2. enter explicitly labelled test-only CAP identity/node/band/design-limit/redundancy inputs;
-3. create at least one existing-pole candidate and one manual non-pole candidate if that decision was approved; complete feasibility fields;
-4. confirm Recommend is disabled for each missing blocker and enabled only after preflight;
-5. run candidate calculation/ranking, Validate mode, and recommendation mode;
-6. inspect deterministic score/topology/provenance/disclaimer and layer separation;
-7. exercise preferred/prohibited status, CAP lock, node exclusion, primary reassignment, parent lock, invalid contradiction, and atomic preservation;
-8. exercise N+1 or the approved single-CAP warning policy;
-9. undo/redo a significant input without resurrecting stale output;
-10. save, export portable JSON and updated KML, reopen JSON, and confirm exact current state;
-11. verify updated KML has 74 source placemarks and zero CAP/manual-site/link geometry;
-12. verify exact input KML SHA-256/bytes and source pole IDs/raw coordinates/numeric coordinates;
-13. inspect browser console and require zero new errors.
+2. confirm absent real-site operational values persist as explicit unknowns and calculate/validate/recommend are blocked by exact preflight messages without preventing project save/reopen;
+3. enter explicitly labelled test-only CAP identity/node/band/design-limit/counting/redundancy inputs;
+4. create at least one existing-pole candidate whose co-located fixture is node-eligible and one manual non-pole candidate if that site kind was approved; complete feasibility fields;
+5. confirm the co-located fixture/root count-once, `0.000000 m`, hop-1, distinct-ID behavior and manual-site no-implicit-node behavior;
+6. confirm Recommend is disabled for each missing blocker and enabled only after preflight;
+7. run candidate calculation/ranking, Validate mode, and recommendation mode;
+8. inspect deterministic score/topology/provenance/disclaimer and layer separation;
+9. exercise preferred/prohibited status, CAP lock, node exclusion, primary reassignment, parent lock, invalid contradiction, and atomic preservation;
+10. exercise N+1 or the approved single-CAP warning policy;
+11. undo/redo a significant input without resurrecting stale output;
+12. save, export portable JSON and updated KML, reopen JSON, and confirm exact current state;
+13. verify updated KML has 74 source placemarks and zero CAP/manual-site/link geometry;
+14. verify exact input KML SHA-256/bytes and source pole IDs/raw coordinates/numeric coordinates;
+15. inspect browser console and require zero new errors.
 
 Record exact inputs, visible outcomes, screenshots or durable equivalent evidence, console result, servers/ports, and limitations. Do not call the test-only inputs real-site approvals.
 
@@ -266,11 +276,13 @@ Commit only authorized Phase 6 implementation/handoff files with a clear commit.
 
 Stop, preserve the worktree, and ask the user rather than guessing if:
 
-- code requires a value not explicitly approved;
+- an implementation-policy value or behavior is required but was not explicitly approved, and the gap cannot be represented as an approved runtime `unknown` state;
 - the approved algorithm cannot satisfy a lock/constraint contract deterministically;
-- the supplied datasheet conflicts with the approved project rule and the source hierarchy does not resolve it;
+- an applicable legal/AHJ/regulatory requirement or exact-product manufacturer hard constraint conflicts with a project value, or source applicability/precedence is unresolved; do not accept a user waiver or the more permissive value;
 - a new dependency, optimizer, RF model, export, schema-major change, or Phase 1-5 behavior change is needed;
 - exact source/migration preservation fails;
 - any safety cap would be silently bypassed, truncated, or partially calculated;
 - a required rendered workflow cannot be verified;
 - implementation would overstate RF, performance, redundancy, legal, professional, or standards claims.
+
+Missing real-site band/jurisdiction, distance, node/child/hop values, gateway/node-count convention, candidate inventory/feasibility, or redundancy selection is not an implementation stop condition. Preserve the value as `unknown`, prove persistence and preflight blocking, and continue implementing the approved architecture.
