@@ -127,7 +127,7 @@ def test_migration_is_additive_lossless_and_idempotent():
     migrated = migrate_project_payload(copy.deepcopy(payload))
     opened = Project.model_validate(migrated)
     wifi = opened.pole_edits["p-0"].fixture_configuration.wifi_configuration
-    assert opened.schema_version == "2.5.0"
+    assert opened.schema_version == "2.6.0"
     assert wifi is not None and wifi.notes == "legacy" and wifi.legacy_metadata["future_key"] == "preserve"
     assert migrate_project_payload(opened.model_dump(mode="json")) == opened.model_dump(mode="json")
 

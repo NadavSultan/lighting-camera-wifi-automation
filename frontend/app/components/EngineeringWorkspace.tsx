@@ -1,15 +1,17 @@
 "use client";
+/* eslint-disable jsx-a11y/label-has-associated-control -- Phase 6 field labels are visually adjacent to their controls; existing workspace markup uses this compact grid pattern. */
 
 import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
-import { calculateLighting, calculateWifiCoverage, createProject, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recalculateCameraGeometry, saveProject } from "../lib/api";
+import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan } from "../lib/api";
 import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";
+import { CAP_DISCLAIMER, capBlockers, capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -25,8 +27,8 @@ const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: numbe
   { key: "calculation_areas", label: "Calculation areas", color: "#14b8a6" },
   { key: "calculation_points", label: "Calculation points", color: "#e2e8f0" },
   { key: "lighting_heat_map", label: "Lighting results", color: "#f97316" },
-  { key: "cap_locations", label: "Recommended CAP", color: "#34d399", phase: 6 },
-  { key: "cap_connections", label: "CAP connections", color: "#10b981", phase: 6 },
+  { key: "cap_locations", label: "CAP candidate / selected sites", color: "#34d399" },
+  { key: "cap_connections", label: "CAP conceptual tree links", color: "#10b981" },
   { key: "warnings", label: "Warnings", color: "var(--warning)" },
 ];
 
@@ -49,7 +51,7 @@ export function EngineeringWorkspace() {
   const [past, setPast] = useState<Project[]>([]);
   const [future, setFuture] = useState<Project[]>([]);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("Ready - Phase 5 conceptual Wi-Fi workflow");
+  const [status, setStatus] = useState("Ready - existing-pole engineering workflow with CAP/JNET1 graph planning");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
   const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");
@@ -87,6 +89,8 @@ export function EngineeringWorkspace() {
   const [wifiAreaName, setWifiAreaName] = useState("Wi-Fi analysis area");
   const [selectedWifiAreaId, setSelectedWifiAreaId] = useState<string | null>(null);
   const [renamingWifiArea, setRenamingWifiArea] = useState(false);
+  const [manualCapLongitude, setManualCapLongitude] = useState("");
+  const [manualCapLatitude, setManualCapLatitude] = useState("");
   const geometrySignatureRef = useRef("");
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
@@ -129,7 +133,8 @@ export function EngineeringWorkspace() {
   function replaceProject(next: Project, recordHistory = true) {
     if (recordHistory && project) setPast((items) => [...items.slice(-39), project]);
     if (recordHistory) setFuture([]);
-    setProject(project ? invalidateWifiIfSignificant(project, next) : next);
+    const wifiSafe = project ? invalidateWifiIfSignificant(project, next) : next;
+    setProject(project ? invalidateCapIfSignificant(project, wifiSafe) : wifiSafe);
   }
 
   function mutateProject(updater: (draft: Project) => void) {
@@ -296,6 +301,35 @@ export function EngineeringWorkspace() {
     if (!project) return;
     void runAction(async () => { const calculated = await calculateWifiCoverage(project); setProject(calculated); setStatus(`Calculated ${calculated.wifi_coverage.result?.global_statistics.circle_count ?? 0} conceptual Wi-Fi circles`); });
   }
+  function runCap(operation: "calculate" | "validate" | "recommend") {
+    if (!project) return;
+    void runAction(async () => {
+      // CAP operations deliberately reload authoritative storage. Persist this complete
+      // draft first so a local profile, candidate, or lock cannot be calculated as stale.
+      const persisted = await saveProject(project);
+      const updated = operation === "calculate" ? await calculateCapPlan(persisted) : operation === "validate" ? await validateCapPlan(persisted) : await recommendCapPlan(persisted);
+      replaceProject(updated, false); setStatus(`CAP ${operation} completed as conceptual graph planning`);
+    });
+  }
+  function addSelectedPoleCapCandidate() {
+    if (!project || !selected) return;
+    const now = new Date().toISOString();
+    const candidate = { id: crypto.randomUUID(), kind: "existing_pole" as const, pole_id: selected.id, wgs84_coordinate: null, mounting_confirmed: null, power_confirmed: null, backhaul_confirmed: null, enclosure_confirmed: null, indoor_outdoor: "unknown" as const, mounting_height_m: null, survey_status: "unknown" as const, priority: 1000, notes: "", revision: 1, created_at: now, modified_at: now, prohibited: false, preferred: false, locked_selected: false };
+    void runAction(async () => { const persisted = await saveProject(project); const updated = await addCapCandidate(persisted.id, candidate); replaceProject(updated); setStatus(`Added ${selected.displayName} as a separate existing-pole CAP candidate`); });
+  }
+  function addManualCapCandidate() {
+    if (!project) return;
+    const longitude = Number(manualCapLongitude), latitude = Number(manualCapLatitude);
+    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180 || !Number.isFinite(latitude) || latitude < -90 || latitude > 90) { setError("Manual non-pole CAP longitude must be -180 to 180 and latitude must be -90 to 90"); return; }
+    const now = new Date().toISOString();
+    const candidate = { id: crypto.randomUUID(), kind: "manual_non_pole" as const, pole_id: null, wgs84_coordinate: [longitude, latitude] as [number, number], mounting_confirmed: null, power_confirmed: null, backhaul_confirmed: null, enclosure_confirmed: null, indoor_outdoor: "unknown" as const, mounting_height_m: null, survey_status: "unknown" as const, priority: 1000, notes: "Manual non-pole site; never a customer lighting pole.", revision: 1, created_at: now, modified_at: now, prohibited: false, preferred: false, locked_selected: false };
+    void runAction(async () => { const persisted = await saveProject(project); const updated = await addCapCandidate(persisted.id, candidate); replaceProject(updated); setManualCapLongitude(""); setManualCapLatitude(""); setStatus("Added a distinct manual non-pole CAP site; no customer pole was created or changed"); });
+  }
+  function updateCapCandidate(candidate: import("../lib/types").CapCandidateSite, patch: Partial<import("../lib/types").CapCandidateSite>) {
+    if (!project) return;
+    void runAction(async () => { const persisted = await saveProject(project); const now = new Date().toISOString(); const updated = await replaceCapCandidate(persisted.id, { ...candidate, ...patch, revision: candidate.revision + 1, modified_at: now }); replaceProject(updated); setStatus("Updated CAP candidate feasibility without changing any customer pole"); });
+  }
+  function removeCapCandidate(candidateId: string) { if (!project) return; void runAction(async () => { const persisted = await saveProject(project); const updated = await deleteCapCandidate(persisted.id, candidateId); replaceProject(updated); setStatus("Removed CAP candidate; no customer pole was changed"); }); }
 
   function finishWifiArea() {
     if (!project) return;
@@ -455,7 +489,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={() => { setDrawingWifiArea(true); setWifiDraft([]); setDrawingPriorityArea(false); setDrawingCalculationArea(false); }} disabled={!project || drawingPriorityArea || drawingCalculationArea}>Draw Wi-Fi analysis area</button>
           <button className="tool-button primary" onClick={calculateConceptualWifi} disabled={!project || busy}>Calculate conceptual Wi-Fi</button>
           <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !selectedCalculationAreaId || busy}>Calculate Lighting</button>
-          <button className="tool-button" disabled title="Phase 6 after CAP constraints are clarified">Recommend CAP</button>
+          <button className="tool-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend CAP</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>
         </nav>
         <div className="mode-pill">Existing-pole mode</div>
@@ -469,13 +503,30 @@ export function EngineeringWorkspace() {
             <div className="panel-scroll">
               <div className="panel-titlebar"><h2>Project & layers</h2><button className="icon-button" onClick={() => setLeftCollapsed(true)} aria-label="Collapse layer panel">‹</button></div>
               <section className="section">
+                <div className="section-heading"><h3>Phase 6 — CAP / JNET1 graph planning</h3><span className="helper">Blocker-first</span></div>
+                <p className="lighting-disclaimer">{CAP_DISCLAIMER}</p>
+                {project ? <>
+                  <p className="helper">Product, variant, band/jurisdiction, explicit LITE/WIFI/SMART node dispositions, design limits, counting, redundancy, and surveyed candidates remain separate user inputs.</p>
+                  {capBlockers(project.cap_planning_inputs).length ? <div className="warning-card"><strong>CAP preflight blockers</strong><p>{capBlockers(project.cap_planning_inputs).join(", ")}</p></div> : <div className="warning-card info">Preflight complete for the selected test/project inputs.</div>}
+                  <div className="form-grid"><div className="field"><label>Operation mode</label><select value={project.cap_planning_inputs.profile.operation_mode} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.operation_mode = event.target.value as "validate" | "recommend"; })}><option value="validate">Validate explicit CAP selection</option><option value="recommend">Recommend from approved pool</option></select></div><div className="field"><label>Mode permission</label><select value={project.cap_planning_inputs.profile.mode_permission} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.mode_permission = event.target.value as "validate_only" | "recommend_from_approved_pool" | "unknown"; })}><option value="unknown">Unknown — blocks planning</option><option value="validate_only">Validate only</option><option value="recommend_from_approved_pool">Recommend from approved pool</option></select></div><div className="field"><label>Gateway appliance counting</label><select value={String(project.cap_planning_inputs.profile.gateway_appliance_counting.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.gateway_appliance_counting; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="included">Included in per-CAP node count</option><option value="excluded">Excluded from per-CAP node count</option></select></div><div className="field"><label>Co-located fixture counting</label><select value={String(project.cap_planning_inputs.profile.colocated_fixture_counting.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.colocated_fixture_counting; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="distinct_managed_node_once">Distinct managed fixture node once</option><option value="merged_not_separate">Merged, not a separate fixture node</option></select></div><div className="field"><label>Redundancy policy</label><select value={String(project.cap_planning_inputs.profile.redundancy.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.redundancy; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="single_allowed_with_warning">Single allowed with warning</option><option value="n_plus_one_validation">N+1 graph validation</option><option value="user_supplied_only">User supplied only</option></select></div></div>
+                  <div className="form-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((type) => <div className="field" key={type}><label>{type} node disposition</label><select value={project.cap_planning_inputs.profile.node_policy[type]} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.node_policy[type] = event.target.value as "node" | "non_node" | "unknown"; })}><option value="unknown">Unknown — blocks planning</option><option value="node">Node</option><option value="non_node">Non-node</option></select></div>)}</div>
+                  <div className="form-grid">{(["product_mapping", "variant", "band_and_jurisdiction", "link_distance_m", "node_limit", "child_limit", "hop_limit"] as const).map((field) => <div className="field" key={field}><label>{field.replaceAll("_", " ")} · provenance-bearing</label><input value={String(project.cap_planning_inputs.profile[field].value ?? "")} onChange={(event) => mutateProject((draft) => { const value = event.target.value; const target = draft.cap_planning_inputs.profile[field]; target.value = field.endsWith("limit") || field === "link_distance_m" ? (value === "" ? null : Number(value)) : value || null; target.status = value ? "known" : "unknown"; target.source = value ? "user-entered project input" : null; target.applicability = value ? "project planning" : null; target.classification = value ? "user_approved_assumption" : "unknown"; })} /></div>)}</div>
+                  <div className="button-row"><button className="quiet-button" onClick={addSelectedPoleCapCandidate} disabled={!selected || busy}>Add selected pole as CAP site</button></div>
+                  <div className="form-grid"><div className="field"><label htmlFor="manual-cap-longitude">Manual non-pole longitude</label><input id="manual-cap-longitude" type="number" min="-180" max="180" step="any" value={manualCapLongitude} onChange={(event) => setManualCapLongitude(event.target.value)} /></div><div className="field"><label htmlFor="manual-cap-latitude">Manual non-pole latitude</label><input id="manual-cap-latitude" type="number" min="-90" max="90" step="any" value={manualCapLatitude} onChange={(event) => setManualCapLatitude(event.target.value)} /></div></div><div className="button-row"><button className="quiet-button" onClick={addManualCapCandidate} disabled={busy}>Add distinct manual non-pole CAP site</button></div>
+                  {project.cap_planning_inputs.candidates.map((candidate) => <div className="priority-row" key={candidate.id}><strong>{candidate.kind === "existing_pole" ? `Pole ${candidate.pole_id}` : "Manual non-pole site"}</strong><span>mounting {String(candidate.mounting_confirmed)} · power {String(candidate.power_confirmed)} · backhaul {String(candidate.backhaul_confirmed)} · survey {candidate.survey_status} · priority {candidate.priority}</span><div><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { mounting_confirmed: true, power_confirmed: true, backhaul_confirmed: true, enclosure_confirmed: true, indoor_outdoor: "outdoor", survey_status: "confirmed", notes: "TEST-ONLY feasibility values; not approved site engineering." })}>Mark test-only feasible</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { preferred: !candidate.preferred })}>{candidate.preferred ? "Remove preference" : "Prefer"}</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { prohibited: !candidate.prohibited })}>{candidate.prohibited ? "Allow" : "Prohibit"}</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { locked_selected: !candidate.locked_selected })}>{candidate.locked_selected ? "Unlock selected" : "Lock selected"}</button><button className="quiet-button" onClick={() => removeCapCandidate(candidate.id)}>Delete site</button></div></div>)}
+                  <div className="button-row"><button className="quiet-button" onClick={() => runCap("calculate")} disabled={!capOperationEnabled(project, "calculate") || busy}>Calculate / rank</button><button className="quiet-button" onClick={() => runCap("validate")} disabled={!capOperationEnabled(project, "validate") || busy}>Validate</button><button className="quiet-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend</button></div>
+                  <p>{project.cap_planning_inputs.candidates.length} explicit CAP candidate sites · {project.cap_recommendations.selected_candidate_ids.length} selected.</p>
+                  {project.cap_calculations.result && <details className="lighting-provenance"><summary>CAP topology, score trace, and provenance</summary><p>Fingerprint {project.cap_calculations.calculation_input_sha256} · CRS {project.cap_calculations.result.projected_crs}</p>{project.cap_calculations.result.assignments.map((item) => <p key={item.node_id}>{item.node_id} → {item.parent_id} · hop {item.hop} · {item.distance_m.toFixed(6)} m · distance-qualified conceptual link; not RF-predicted</p>)}{project.cap_calculations.result.warnings.map((warning) => <p key={warning}>{warning}</p>)}</details>}
+                </> : <p className="helper">Import or create a project to preserve unknown CAP inputs and inspect blockers.</p>}
+              </section>
+              <section className="section">
                 <p className="project-name">{project?.name ?? "No project loaded"}</p>
                 <div className="project-meta">{project?.source.file ? `${project.source.file.filename} · ${project.source.poles.length} source poles` : "Create a project or import a customer layout."}</div>
                 <div className="counts-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((fixture) => <div className={`count-card ${fixture.toLowerCase()}`} key={fixture}><span>{fixture}</span><strong>{counts[fixture]}</strong></div>)}</div>
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Map layers</h3><span className="helper">Phase 4</span></div>
-                {LAYERS.map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || layer.phase === 6 || (layer.key === "wifi_coverage" && !project?.wifi_coverage.result)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
+                {LAYERS.map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || (layer.key === "wifi_coverage" && !project?.wifi_coverage.result)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
                 <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>
               </section>
               <section className="section">
@@ -578,6 +629,6 @@ export function LegacyPhaseOnePoleInspector({ pole, project, onChange, onRestore
     </section>
     <section className="section"><div className="section-heading"><h3>Lighting</h3><span className="phase-tag">Phase 2/5</span></div><div className="future-card"><strong>Catalog and calculations are intentionally gated.</strong><br />Luminaire and IES assignment follows Phase 1 review; illuminance requires approved photometric conventions and validation cases.</div></section>
     {pole.fixtureType !== "LITE" && <section className="section"><div className="section-heading"><h3>Wi-Fi</h3><span className="phase-tag">Phase 4</span></div><div className="future-card">Default conceptual radius: {project.defaults.wifi_radius_m} m. No RF coverage is shown or claimed in Phase 1.</div></section>}
-    {pole.fixtureType === "SMART" && <section className="section"><div className="section-heading"><h3>Camera & CAP</h3><span className="phase-tag">Phase 2/3/6</span></div><div className="future-card">Camera angle convention is stored as {project.defaults.camera_downward_angle_deg}° below horizontal. FOV and CAP participation remain disabled until their inputs are reviewed.</div></section>}
+    {pole.fixtureType === "SMART" && <section className="section"><div className="section-heading"><h3>Camera & CAP</h3><span className="phase-tag">Phase 2/3/6</span></div><div className="future-card">Camera angle convention is stored as {project.defaults.camera_downward_angle_deg}° below horizontal. CAP participation is controlled only by the explicit Phase 6 node disposition and candidate/profile inputs; it is never inferred from fixture capability.</div></section>}
   </>;
 }

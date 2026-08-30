@@ -16,8 +16,8 @@ from shapely.validation import explain_validity
 from app.crs import validate_projected_metre_crs
 
 
-SCHEMA_VERSION = "2.5.0"
-SOFTWARE_VERSION = "0.5.0"
+SCHEMA_VERSION = "2.6.0"
+SOFTWARE_VERSION = "0.6.0"
 WIFI_MODEL_VERSION = "conceptual-circle-1.0.0"
 WIFI_RING_RESOLUTION = 32
 MAX_WIFI_CIRCLES = 500
@@ -503,8 +503,189 @@ class CameraGeometryLayer(StrictModel):
     priority_area_summaries: list[PriorityAreaCoverageSummary] = Field(default_factory=list)
 
 
+# Phase 6 deliberately keeps operational values nullable/unknown.  The supplied
+# JNET1 evidence is not a Miracle Mile design approval.
+class CapKnowledge(str, Enum):
+    UNKNOWN = "unknown"
+    KNOWN = "known"
+
+
+class CapNodeDisposition(str, Enum):
+    NODE = "node"
+    NON_NODE = "non_node"
+    UNKNOWN = "unknown"
+
+
+class CapNodePolicy(StrictModel):
+    LITE: CapNodeDisposition = CapNodeDisposition.UNKNOWN
+    WIFI: CapNodeDisposition = CapNodeDisposition.UNKNOWN
+    SMART: CapNodeDisposition = CapNodeDisposition.UNKNOWN
+
+
+class CapConstraintValue(StrictModel):
+    status: CapKnowledge = CapKnowledge.UNKNOWN
+    value: str | float | int | bool | None = None
+    unit: str | None = None
+    classification: Literal["legal_regulatory_requirement", "manufacturer_hard_constraint", "manufacturer_guidance", "project_design_limit", "user_approved_assumption", "derived_value", "unknown"] = "unknown"
+    source: str | None = None
+    approver: str | None = None
+    date: str | None = None
+    applicability: str | None = None
+    revision: str | None = None
+    conflict_state: Literal["none", "unresolved"] = "none"
+    notes: str = ""
+
+    @model_validator(mode="after")
+    def known_values_are_traceable(self) -> "CapConstraintValue":
+        if self.status is CapKnowledge.UNKNOWN and self.value is not None:
+            raise ValueError("unknown CAP values cannot carry an operational value")
+        if self.status is CapKnowledge.KNOWN and (self.value is None or not self.source or not self.applicability):
+            raise ValueError("known CAP values require value, source, and applicability provenance")
+        return self
+
+
+class CapCandidateSite(StrictModel):
+    id: Annotated[str, Field(min_length=1, max_length=120)]
+    kind: Literal["existing_pole", "manual_non_pole"]
+    pole_id: str | None = None
+    wgs84_coordinate: tuple[float, float] | None = None
+    mounting_confirmed: bool | None = None
+    power_confirmed: bool | None = None
+    backhaul_confirmed: bool | None = None
+    enclosure_confirmed: bool | None = None
+    indoor_outdoor: Literal["indoor", "outdoor", "unknown"] = "unknown"
+    mounting_height_m: float | None = Field(default=None, ge=0, le=500)
+    survey_status: Literal["confirmed", "unknown", "failed"] = "unknown"
+    priority: Annotated[int, Field(ge=0, le=100000)] = 1000
+    notes: Annotated[str, Field(max_length=2000)] = ""
+    revision: Annotated[int, Field(ge=1)] = 1
+    created_at: datetime = Field(default_factory=utc_now)
+    modified_at: datetime = Field(default_factory=utc_now)
+    prohibited: bool = False
+    preferred: bool = False
+    locked_selected: bool = False
+
+    @model_validator(mode="after")
+    def identity_is_explicit(self) -> "CapCandidateSite":
+        if self.kind == "existing_pole" and (not self.pole_id or self.wgs84_coordinate is not None):
+            raise ValueError("existing-pole CAP candidates require only a source pole ID")
+        if self.kind == "manual_non_pole" and (self.pole_id is not None or self.wgs84_coordinate is None):
+            raise ValueError("manual non-pole CAP candidates require only an explicit coordinate")
+        if self.wgs84_coordinate and not all(math.isfinite(value) for value in self.wgs84_coordinate):
+            raise ValueError("manual CAP coordinates must be finite")
+        if self.wgs84_coordinate and not (-180 <= self.wgs84_coordinate[0] <= 180 and -90 <= self.wgs84_coordinate[1] <= 90):
+            raise ValueError("manual CAP coordinate is outside WGS84 bounds")
+        return self
+
+
+class CapPlanningProfile(StrictModel):
+    model_version: Literal["jnet1-graph-planning-1.0.0"] = "jnet1-graph-planning-1.0.0"
+    operation_mode: Literal["validate", "recommend"] = "recommend"
+    product_mapping: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    variant: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    band_and_jurisdiction: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    link_distance_m: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    node_limit: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    child_limit: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    hop_limit: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    gateway_appliance_counting: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    colocated_fixture_counting: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    redundancy: CapConstraintValue = Field(default_factory=CapConstraintValue)
+    node_policy: CapNodePolicy = Field(default_factory=CapNodePolicy)
+    mode_permission: Literal["validate_only", "recommend_from_approved_pool", "unknown"] = "unknown"
+    auto_assign_unlocked_nodes: bool = False
+    disclaimer: Literal["Distance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance."] = "Distance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance."
+
+
+class CapPlanningInputs(StrictModel):
+    profile: CapPlanningProfile = Field(default_factory=CapPlanningProfile)
+    candidates: list[CapCandidateSite] = Field(default_factory=list)
+    excluded_node_ids: list[str] = Field(default_factory=list)
+    excluded_candidate_ids: list[str] = Field(default_factory=list)
+    locked_selected_candidate_ids: list[str] = Field(default_factory=list)
+    primary_assignment_locks: dict[str, str] = Field(default_factory=dict)
+    parent_locks: dict[str, str] = Field(default_factory=dict)
+
+
+class CapManualConstraints(StrictModel):
+    excluded_node_ids: list[str] = Field(default_factory=list)
+    excluded_candidate_ids: list[str] = Field(default_factory=list)
+    locked_selected_candidate_ids: list[str] = Field(default_factory=list)
+    primary_assignment_locks: dict[str, str] = Field(default_factory=dict)
+    parent_locks: dict[str, str] = Field(default_factory=dict)
+
+
+class CapAssignment(StrictModel):
+    node_id: str
+    gateway_id: str
+    parent_id: str
+    hop: Annotated[int, Field(ge=1, le=64)]
+    distance_m: Annotated[float, Field(ge=0)]
+
+
+class CapScoreTrace(StrictModel):
+    candidate_id: str
+    marginal_serviceable_nodes: Annotated[int, Field(ge=0)]
+    priority: Annotated[int, Field(ge=0)]
+
+
+class CapGraphLink(StrictModel):
+    id: str
+    left_id: str
+    right_id: str
+    distance_m: Annotated[float, Field(ge=0)]
+
+
+class CapVertexSnapshot(StrictModel):
+    id: str
+    kind: Literal["fixture_node", "gateway_root"]
+    source_pole_id: str | None = None
+    candidate_id: str | None = None
+    projected_x_m: float
+    projected_y_m: float
+
+
+class CapPlanningLimits(StrictModel):
+    link_distance_m: Annotated[float, Field(gt=0)]
+    node_limit: Annotated[int, Field(ge=1, le=1000)]
+    child_limit: Annotated[int, Field(ge=1, le=16)]
+    hop_limit: Annotated[int, Field(ge=1, le=64)]
+    edge_evaluations: Annotated[int, Field(ge=0)]
+    canonical_link_count: Annotated[int, Field(ge=0)]
+
+
+class CapPlanningResult(StrictModel):
+    model_version: Literal["jnet1-graph-planning-1.0.0"] = "jnet1-graph-planning-1.0.0"
+    projected_crs: str
+    disclaimer: str
+    heuristic: str
+    selected_candidate_ids: list[str] = Field(default_factory=list)
+    assignments: list[CapAssignment] = Field(default_factory=list)
+    canonical_links: list[CapGraphLink] = Field(default_factory=list)
+    node_snapshots: list[CapVertexSnapshot] = Field(default_factory=list)
+    candidate_snapshots: list[CapVertexSnapshot] = Field(default_factory=list)
+    unresolved_node_ids: list[str] = Field(default_factory=list)
+    objective_trace: list[CapScoreTrace] = Field(default_factory=list)
+    limits: CapPlanningLimits
+    warnings: list[str] = Field(default_factory=list)
+    result_sha256: str
+
+
+class CapPlanningLayer(StrictModel):
+    status: Literal["not-calculated", "calculated", "error"] = "not-calculated"
+    calculation_input_sha256: str | None = None
+    calculated_at: datetime | None = None
+    result: CapPlanningResult | None = None
+    warnings: list[str] = Field(default_factory=list)
+
+
+class CapRecommendations(StrictModel):
+    selected_candidate_ids: list[str] = Field(default_factory=list)
+    result_sha256: str | None = None
+
+
 class Project(StrictModel):
-    schema_version: Literal["2.5.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.6.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -524,6 +705,9 @@ class Project(StrictModel):
     lighting_calculations: LightingCalculationLayer = Field(default_factory=LightingCalculationLayer)
     wifi_analysis_areas: list[WifiAnalysisArea] = Field(default_factory=list)
     wifi_coverage: WifiCoverageLayer = Field(default_factory=WifiCoverageLayer)
+    cap_planning_inputs: CapPlanningInputs = Field(default_factory=CapPlanningInputs)
+    cap_calculations: CapPlanningLayer = Field(default_factory=CapPlanningLayer)
+    cap_recommendations: CapRecommendations = Field(default_factory=CapRecommendations)
     legacy_invalid_priority_areas: list[dict[str, Any]] = Field(default_factory=list)
     camera_geometry: CameraGeometryLayer = Field(default_factory=CameraGeometryLayer)
     assumptions: list[str] = Field(default_factory=lambda: [
@@ -553,6 +737,21 @@ class Project(StrictModel):
         unknown = set(self.pole_edits) - source_ids
         if unknown:
             raise ValueError(f"pole edits reference unknown source poles: {sorted(unknown)}")
+        candidate_ids = set()
+        for candidate in self.cap_planning_inputs.candidates:
+            if candidate.id in candidate_ids:
+                raise ValueError(f"CAP candidate IDs must be unique: {candidate.id}")
+            candidate_ids.add(candidate.id)
+            if candidate.pole_id and candidate.pole_id not in source_ids:
+                raise ValueError(f"CAP candidate references unknown source pole: {candidate.pole_id}")
+        inputs = self.cap_planning_inputs
+        node_ids = {f"fixture/{pole_id}" for pole_id in source_ids}
+        unknown_nodes = set(inputs.excluded_node_ids) - node_ids
+        unknown_candidates = (set(inputs.excluded_candidate_ids) | set(inputs.locked_selected_candidate_ids)) - candidate_ids
+        if unknown_nodes:
+            raise ValueError(f"CAP constraints reference unknown nodes: {sorted(unknown_nodes)}")
+        if unknown_candidates:
+            raise ValueError(f"CAP constraints reference unknown candidates: {sorted(unknown_candidates)}")
         for key, edit in self.pole_edits.items():
             if edit.pole_id != key:
                 raise ValueError(f"pole edit key {key!r} does not match pole_id")
@@ -576,7 +775,7 @@ class ProjectSummary(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    phase: Literal[5] = 5
+    phase: Literal[6] = 6
     version: str = SOFTWARE_VERSION
 
 
@@ -585,7 +784,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
@@ -596,6 +795,9 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     migrated.setdefault("lighting_calculations", {})
     migrated.setdefault("wifi_analysis_areas", [])
     migrated.setdefault("wifi_coverage", {})
+    migrated.setdefault("cap_planning_inputs", {})
+    migrated.setdefault("cap_calculations", {})
+    migrated.setdefault("cap_recommendations", {})
     migrated.setdefault("legacy_invalid_priority_areas", [])
     if version == "2.2.0":
         valid_areas: list[dict[str, Any]] = []

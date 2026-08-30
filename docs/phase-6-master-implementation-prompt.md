@@ -93,9 +93,12 @@ Unless the explicit implementation authorization narrows or expands this list, i
 - `frontend/app/components/PoleInspector.tsx` only if approved node controls require it
 - `frontend/app/globals.css`
 - `frontend/tests/rendered-html.test.mjs`
+- `frontend/pnpm-workspace.yaml` only for the approved locked-dependency build-script policy: `esbuild: true`, `sharp: false`, and `workerd: false`; do not add, remove, or upgrade dependencies or make unrelated workspace-policy changes
 - generated `schemas/project.schema.json` and `schemas/openapi.json`
 - `backend/pyproject.toml` and `frontend/package.json` for approved `0.6.0` metadata
 - Phase 6 decision, implementation-completion, and rendered-QA documents explicitly required by the implementation authorization
+
+This pnpm workspace-policy exception is the explicit boundary amendment recorded in `docs/decision-log.md` DL-017. It resolves required frontend dependency materialization and verification only; it does not expand product scope or authorize dependency changes.
 
 Do not edit the seven frozen catalogs/schemas, `Input/`, prior-phase reports, or runtime project data. Do not commit caches, build output, virtual environments, `node_modules`, ad-hoc uploads, or generated runtime exports.
 

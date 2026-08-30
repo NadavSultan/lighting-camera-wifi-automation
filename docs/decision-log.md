@@ -119,3 +119,11 @@
 - Decision: the user explicitly authorized Phase 6 implementation using GPT-5.6 Terra. The implementation must follow all 20 approved decisions in `docs/phase-6-cap-planning-and-implementation-contract.md` and the controlling `docs/phase-6-master-implementation-prompt.md`.
 - Runtime boundary: implementation authorization does not approve or infer any actual Miracle Mile CAP operational value. Unknown values and provenance must be preserved and dependent runtime operations must be blocked exactly as specified by the planning contract.
 - Gate: the Terra task may change only the authorized Phase 6 scope and must provide full automated and rendered evidence plus a completion report. Phase 6 remains unaccepted until independent QA and a master gate decision pass. Phase 7 remains unauthorized.
+
+## DL-017 — Phase 6 pnpm build-policy boundary amendment
+
+- Date: 2026-08-30
+- Status: explicitly authorized implementation-boundary correction; Phase 6 remains open and unaccepted
+- Decision: the user explicitly authorized adding `frontend/pnpm-workspace.yaml` to the Phase 6 file boundary solely to materialize the existing locked dependency graph with `allowBuilds` values `esbuild: true`, `sharp: false`, and `workerd: false`. This resolves the environment/file-boundary preflight defect that prevented deterministic frontend verification.
+- Boundary: this decision does not authorize any dependency addition, removal, upgrade, lockfile change, unrelated workspace-policy change, application-scope expansion, or Phase 7 work. Temporary package stores, `node_modules`, caches, and build output remain uncommitted.
+- Execution consequence: the prior pnpm boundary interruption is resolved authority, not a valid continuing blocker. Phase 6 execution must correct stale blocker text, resume at the first incomplete milestone, and apply the proven-blocker protocol before any future early stop.

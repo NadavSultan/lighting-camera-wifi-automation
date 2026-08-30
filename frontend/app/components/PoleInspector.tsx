@@ -94,6 +94,6 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
       <p className="helper">Both cameras rotate only with fixture azimuth. Camera direction and tilt are immutable catalog geometry. Footprints are flat-ground geometric results, not analytics-quality claims.</p>
     </section>}
     {model && !model.capabilities.cameras && <section className="section"><div className="future-card">This {model.capability_variant} model has no camera capability. Camera controls are intentionally unavailable.</div></section>}
-    <section className="section"><div className="future-card"><strong>Phase 4 lighting and Phase 5 conceptual Wi-Fi are available.</strong><br />CAP recommendation, reporting, and automatic pole placement remain gated.</div><p className="helper">Lighting requires an explicit compatible IES revision, mounting height, and fixture azimuth. Conceptual Wi-Fi default: {project.defaults.wifi_radius_m} m.</p></section>
+    <section className="section"><div className="future-card"><strong>Lighting, conceptual Wi-Fi, and CAP/JNET1 graph planning are available.</strong><br />CAP plans are distance-qualified conceptual links only; reporting and automatic pole placement remain gated.</div><p className="helper">Lighting requires an explicit compatible IES revision, mounting height, and fixture azimuth. Conceptual Wi-Fi default: {project.defaults.wifi_radius_m} m.</p></section>
   </>;
 }

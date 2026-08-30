@@ -74,6 +74,27 @@ function cameraWarningFeatures(project: Project | null): FeatureCollection<Point
   return { type: "FeatureCollection", features: project.source.poles.filter((pole) => warningPoleIds.has(pole.id)).map((pole) => ({ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } })) };
 }
 
+function capCandidateFeatures(project: Project | null): FeatureCollection<Point> {
+  if (!project) return EMPTY;
+  const selected = new Set(project.cap_recommendations.selected_candidate_ids);
+  return { type: "FeatureCollection", features: project.cap_planning_inputs.candidates.flatMap((candidate) => {
+    const coordinate = candidate.kind === "existing_pole" ? project.source.poles.find((pole) => pole.id === candidate.pole_id) : null;
+    const point = coordinate ? [coordinate.longitude, coordinate.latitude] as [number, number] : candidate.wgs84_coordinate;
+    return point ? [{ type: "Feature" as const, id: candidate.id, properties: { id: candidate.id, kind: candidate.kind, selected: selected.has(candidate.id), prohibited: candidate.prohibited, priority: candidate.priority, survey_status: candidate.survey_status, disclaimer: "Distance-qualified conceptual link; not RF-predicted. Manual non-pole sites are not customer lighting poles." }, geometry: { type: "Point" as const, coordinates: point } }] : [];
+  }) };
+}
+
+function capTreeFeatures(project: Project | null): FeatureCollection<LineString> {
+  const result = project?.cap_calculations.result;
+  if (!project || !result) return EMPTY_GEOMETRY as FeatureCollection<LineString>;
+  const coordinate = (id: string): [number, number] | null => {
+    if (id.startsWith("fixture/")) { const pole = project.source.poles.find((item) => item.id === id.slice(8)); return pole ? [pole.longitude, pole.latitude] : null; }
+    if (id.startsWith("gateway/")) { const candidate = project.cap_planning_inputs.candidates.find((item) => item.id === id.slice(8)); if (!candidate) return null; if (candidate.kind === "manual_non_pole") return candidate.wgs84_coordinate; const pole = project.source.poles.find((item) => item.id === candidate.pole_id); return pole ? [pole.longitude, pole.latitude] : null; }
+    return null;
+  };
+  return { type: "FeatureCollection", features: result.assignments.flatMap((assignment) => { const a = coordinate(assignment.node_id), b = coordinate(assignment.parent_id); return a && b ? [{ type: "Feature" as const, id: `${assignment.node_id}/${assignment.parent_id}`, properties: { hop: assignment.hop, distance_m: assignment.distance_m, disclaimer: "distance-qualified conceptual link; not RF-predicted" }, geometry: { type: "LineString" as const, coordinates: [a, b] } }] : []; }) };
+}
+
 function draftFeature(points: Array<[number, number]>): FeatureCollection<LineString | Polygon> {
   if (points.length < 2) return { type: "FeatureCollection", features: [] };
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: points.length >= 3 ? { type: "Polygon", coordinates: [[...points, points[0]]] } : { type: "LineString", coordinates: points } }] };
@@ -117,6 +138,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("wifi-draft", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("lighting-points", { type: "geojson", data: EMPTY });
       map.addSource("camera-warnings", { type: "geojson", data: EMPTY });
+      map.addSource("cap-candidates", { type: "geojson", data: EMPTY });
+      map.addSource("cap-tree", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addLayer({ id: "priority-area-fill", type: "fill", source: "priority-areas", paint: { "fill-color": "#f59e0b", "fill-opacity": .15 } });
       map.addLayer({ id: "priority-area-line", type: "line", source: "priority-areas", paint: { "line-color": "#fbbf24", "line-width": 2, "line-dasharray": [2, 1] } });
       map.addLayer({ id: "calculation-area-fill", type: "fill", source: "calculation-areas", paint: { "fill-color": "#14b8a6", "fill-opacity": .13 } });
@@ -144,6 +167,11 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         });
       }
       map.addLayer({ id: "camera-warning-indicator", type: "circle", source: "camera-warnings", paint: { "circle-radius": 12, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 4, "circle-stroke-color": "#ff7a59", "circle-opacity": .95 } });
+      map.addLayer({ id: "cap-tree-links", type: "line", source: "cap-tree", paint: { "line-color": "#10b981", "line-width": 3, "line-opacity": .86 } });
+      map.addLayer({ id: "cap-candidate-sites", type: "circle", source: "cap-candidates", paint: { "circle-radius": ["case", ["boolean", ["get", "selected"], false], 9, 6], "circle-color": ["case", ["boolean", ["get", "prohibited"], false], "#ff7a59", "#34d399"], "circle-stroke-width": 2, "circle-stroke-color": "#062b25" } });
+      // Deliberately use a second circle rather than a glyph: this local raster basemap
+      // has no glyph source. The double ring remains visually distinct from a pole site.
+      map.addLayer({ id: "cap-manual-candidate-sites", type: "circle", source: "cap-candidates", filter: ["==", ["get", "kind"], "manual_non_pole"], paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 3, "circle-stroke-color": "#ecfdf5" } });
       map.addLayer({ id: "selected-pole", type: "circle", source: "selection", paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 2, "circle-stroke-color": "#5de2c2", "circle-blur": .1 } });
       for (const layer of CLICKABLE_LAYERS) {
         map.on("click", layer, (event) => {
@@ -154,6 +182,16 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
       }
       map.on("click", "camera-warning-indicator", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
+      map.on("click", "cap-candidate-sites", (event) => {
+        const feature = event.features?.[0];
+        if (!feature) return;
+        const props = feature.properties ?? {};
+        // GeoJSON properties are runtime map data, not React component props.
+        // eslint-disable-next-line react/prop-types
+        new maplibregl.Popup({ closeButton: true, closeOnClick: true }).setLngLat(event.lngLat).setHTML(`<strong>${props.kind === "manual_non_pole" ? "Manual non-pole CAP site" : "Existing-pole CAP candidate"}</strong><br/>Priority: ${props.priority ?? "—"} · survey: ${props.survey_status ?? "unknown"}<br/><small>${props.disclaimer ?? "Distance-qualified conceptual link; not RF-predicted."}</small>`).addTo(map);
+      });
+      map.on("mouseenter", "cap-candidate-sites", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "cap-candidate-sites", () => { map.getCanvas().style.cursor = ""; });
       map.on("click", "priority-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
       map.on("click", "calculation-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
       map.on("click", "wifi-analysis-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onWifiAreaSelectRef.current(id); });
@@ -180,6 +218,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("wifi-draft") as GeoJSONSource | undefined)?.setData(draftFeature(wifiDraft));
       (map.getSource("lighting-points") as GeoJSONSource | undefined)?.setData(calculationPointFeatures(project));
       (map.getSource("camera-warnings") as GeoJSONSource | undefined)?.setData(cameraWarningFeatures(project));
+      (map.getSource("cap-candidates") as GeoJSONSource | undefined)?.setData(capCandidateFeatures(project));
+      (map.getSource("cap-tree") as GeoJSONSource | undefined)?.setData(capTreeFeatures(project));
       const states: Array<[string, boolean]> = [
         ["poles-original", project?.layer_state.original_customer_poles ?? true],
         ["poles-lite", project?.layer_state.lite_fixtures ?? true],
@@ -198,6 +238,9 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["wifi-analysis-area-line", project?.layer_state.wifi_coverage ?? false],
         ["wifi-analysis-area-fill", project?.layer_state.wifi_coverage ?? false],
         ["camera-warning-indicator", project?.layer_state.warnings ?? true],
+        ["cap-candidate-sites", project?.layer_state.cap_locations ?? false],
+        ["cap-manual-candidate-sites", project?.layer_state.cap_locations ?? false],
+        ["cap-tree-links", project?.layer_state.cap_connections ?? false],
       ];
       for (const [layer, visible] of states) if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
       if (project && project.source.poles.length && fittedProjectRef.current !== project.id) {

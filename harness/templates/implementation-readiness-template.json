@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "phase": "XX",
+  "goal": {
+    "objective": "REPLACE",
+    "status": "ACTIVE",
+    "stopping_condition": "REPLACE"
+  },
+  "implementation_commit": "0000000000000000000000000000000000000000",
+  "allowed_evidence_paths_after_implementation_commit": [
+    "harness/",
+    "docs/phase-XX-",
+    "docs/current-status.md",
+    "GOALS.md",
+    "PLANS.md",
+    "OPERATIONS.md"
+  ],
+  "expected_milestone_ids": [
+    "M0"
+  ],
+  "milestones": [
+    {
+      "id": "M0",
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "expected_acceptance_ids": [
+    "REPLACE"
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "REPLACE",
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "commands": [
+    {
+      "id": "final-verification",
+      "command": "REPLACE",
+      "ran": false,
+      "exit_code": null,
+      "tested_commit": "0000000000000000000000000000000000000000",
+      "evidence": []
+    }
+  ],
+  "required_checks": [
+    {
+      "id": "final_verification",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "generated_artifact_freshness",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "source_preservation",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "file_boundary",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "rendered_workflow",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "regression",
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "reports": {
+    "phase_work_record": "REPLACE",
+    "execution_log": "REPLACE",
+    "verification_summary": "REPLACE",
+    "completion_report": "REPLACE",
+    "rendered_evidence": "REPLACE"
+  },
+  "blockers": [],
+  "gate": {
+    "implementation": "ACTIVE",
+    "independent_qa": "PENDING",
+    "master": "PENDING",
+    "phase_seal": "ABSENT"
+  }
+}

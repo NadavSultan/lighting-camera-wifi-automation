@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from copy import deepcopy
 
 from fastapi import Body, FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +18,8 @@ from app.catalog_models import (
     IesLibrary,
     LensConfiguration,
 )
-from app.models import HealthResponse, Project, ProjectSummary, WifiAnalysisArea, migrate_project_payload
+from app.models import CapCandidateSite, CapManualConstraints, CapPlanningInputs, HealthResponse, Project, ProjectSummary, WifiAnalysisArea, migrate_project_payload
+from app.services.cap_planning import apply_cap_result, calculate_cap_plan, invalidate_stale_cap_results
 from app.services.catalogs import CatalogNotFoundError, CatalogStore
 from app.services.configuration import (
     BulkPoleConfigurationRequest,
@@ -38,8 +40,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.5.0",
-        description="Phase 5 conceptual projected-plane Wi-Fi geometry and existing-pole engineering workflow.",
+        version="0.6.0",
+        description="Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning.",
     )
     app.state.project_store = project_store
     app.state.catalog_store = catalogs
@@ -108,6 +110,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
                 project_store.save(project)
             if invalidate_stale_wifi_results(project):
                 project_store.save(project)
+            if invalidate_stale_cap_results(project):
+                project_store.save(project)
             validate_wifi_analysis_areas(project)
             return recalculate(project)
         except ProjectNotFoundError:
@@ -135,6 +139,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project = pin_revisions(project)
             invalidate_stale_lighting_results(project)
             invalidate_stale_wifi_results(project)
+            invalidate_stale_cap_results(project)
             validate_wifi_analysis_areas(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -150,6 +155,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             validate_embedded_source(project)
             invalidate_stale_lighting_results(project)
             invalidate_stale_wifi_results(project)
+            invalidate_stale_cap_results(project)
             validate_wifi_analysis_areas(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -165,6 +171,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             updated = pin_revisions(apply_bulk_configuration(project, request, catalogs.fixtures(), catalogs.cameras(), catalogs.ies()))
             invalidate_stale_lighting_results(updated)
             invalidate_stale_wifi_results(updated)
+            invalidate_stale_cap_results(updated)
             validate_wifi_analysis_areas(updated)
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -183,6 +190,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             project = pin_revisions(project)
             invalidate_stale_lighting_results(project)
             invalidate_stale_wifi_results(project)
+            invalidate_stale_cap_results(project)
             validate_wifi_analysis_areas(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -235,6 +243,126 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
         except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.put("/api/projects/{project_id}/cap-planning-inputs", response_model=Project)
+    def replace_cap_inputs(project_id: str, inputs: CapPlanningInputs) -> Project:
+        try:
+            stored = project_store.load(project_id)
+            project = deepcopy(stored)
+            project.cap_planning_inputs = inputs
+            project = Project.model_validate(project.model_dump(mode="json"))
+            invalidate_stale_cap_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/cap-planning/calculate", response_model=Project)
+    def calculate_project_cap(project_id: str, project: Project) -> Project:
+        if project.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            stored = project_store.load(project_id)
+            if project.updated_at != stored.updated_at:
+                raise HTTPException(status_code=409, detail="CAP calculation uses a stale project revision")
+            # Inputs come from the authoritative stored project.  This prevents a
+            # caller from overwriting unrelated state through a calculate request.
+            current = deepcopy(stored)
+            result = calculate_cap_plan(current)
+            return project_store.save(apply_cap_result(current, result))
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError, ArithmeticError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    def _run_cap_operation(project_id: str, submitted: Project, operation: str) -> Project:
+        if submitted.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            stored = project_store.load(project_id)
+            if submitted.updated_at != stored.updated_at:
+                raise HTTPException(status_code=409, detail="CAP operation uses a stale project revision")
+            if stored.cap_planning_inputs.profile.operation_mode != operation:
+                raise HTTPException(status_code=409, detail="CAP operation conflicts with the persisted profile mode")
+            return project_store.save(apply_cap_result(deepcopy(stored), calculate_cap_plan(deepcopy(stored))))
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError, ArithmeticError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/cap-planning/validate", response_model=Project)
+    def validate_project_cap(project_id: str, project: Project) -> Project:
+        return _run_cap_operation(project_id, project, "validate")
+
+    @app.post("/api/projects/{project_id}/cap-planning/recommend", response_model=Project)
+    def recommend_project_cap(project_id: str, project: Project) -> Project:
+        return _run_cap_operation(project_id, project, "recommend")
+
+    @app.put("/api/projects/{project_id}/cap-planning/manual-constraints", response_model=Project)
+    def replace_cap_manual_constraints(project_id: str, constraints: CapManualConstraints) -> Project:
+        try:
+            project = deepcopy(project_store.load(project_id))
+            for field, value in constraints.model_dump().items():
+                setattr(project.cap_planning_inputs, field, value)
+            project = Project.model_validate(project.model_dump(mode="json"))
+            invalidate_stale_cap_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/cap-planning/candidates", response_model=Project, status_code=201)
+    def add_cap_candidate(project_id: str, candidate: CapCandidateSite) -> Project:
+        try:
+            project = deepcopy(project_store.load(project_id))
+            if any(item.id == candidate.id for item in project.cap_planning_inputs.candidates):
+                raise HTTPException(status_code=409, detail="CAP candidate ID already exists")
+            project.cap_planning_inputs.candidates.append(candidate)
+            project = Project.model_validate(project.model_dump(mode="json"))
+            invalidate_stale_cap_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.put("/api/projects/{project_id}/cap-planning/candidates/{candidate_id}", response_model=Project)
+    def replace_cap_candidate(project_id: str, candidate_id: str, candidate: CapCandidateSite) -> Project:
+        if candidate.id != candidate_id:
+            raise HTTPException(status_code=409, detail="CAP candidate ID does not match request path")
+        try:
+            project = deepcopy(project_store.load(project_id))
+            index = next((i for i, item in enumerate(project.cap_planning_inputs.candidates) if item.id == candidate_id), None)
+            if index is None:
+                raise HTTPException(status_code=404, detail="CAP candidate not found")
+            if candidate.revision != project.cap_planning_inputs.candidates[index].revision + 1:
+                raise HTTPException(status_code=409, detail="CAP candidate replacement uses a stale or non-monotonic revision")
+            project.cap_planning_inputs.candidates[index] = candidate
+            project = Project.model_validate(project.model_dump(mode="json"))
+            invalidate_stale_cap_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.delete("/api/projects/{project_id}/cap-planning/candidates/{candidate_id}", response_model=Project)
+    def delete_cap_candidate(project_id: str, candidate_id: str) -> Project:
+        try:
+            project = deepcopy(project_store.load(project_id))
+            candidates = project.cap_planning_inputs.candidates
+            if not any(item.id == candidate_id for item in candidates):
+                raise HTTPException(status_code=404, detail="CAP candidate not found")
+            project.cap_planning_inputs.candidates = [item for item in candidates if item.id != candidate_id]
+            project = Project.model_validate(project.model_dump(mode="json"))
+            invalidate_stale_cap_results(project)
+            return project_store.save(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/api/projects/{project_id}/wifi-analysis-areas", response_model=Project)

@@ -424,6 +424,7 @@ Likely authorized implementation files are bounded to:
 - backend: `backend/app/models.py`, `backend/app/main.py`, `backend/app/services/store.py` only if atomic behavior requires a focused correction, new `backend/app/services/cap_planning.py`, and focused configuration/recalculation hooks;
 - backend tests: new `backend/tests/test_phase6_cap_planning.py` plus focused model/API/migration regressions;
 - frontend: `frontend/app/lib/types.ts`, `api.ts`, new `phase6-cap-workflows.mjs`, `EngineeringWorkspace.tsx`, `EngineeringMap.tsx`, `PoleInspector.tsx` only if node controls are placed there, and `globals.css`;
+- frontend build policy: `frontend/pnpm-workspace.yaml` only for the approved locked-dependency `allowBuilds` values (`esbuild: true`, `sharp: false`, `workerd: false`), with no dependency addition, removal, or upgrade;
 - generated contracts: `schemas/project.schema.json`, `schemas/openapi.json`;
 - version metadata: `backend/pyproject.toml`, `frontend/package.json`;
 - governance/handoff documentation explicitly authorized by the later implementation task.

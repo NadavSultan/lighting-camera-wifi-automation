@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning, all 20 implementation-policy decisions, and implementation are explicitly authorized; implementation is the current open task.
+Phase state last changed: 2026-08-27. Documentation consistency reviewed: 2026-08-30. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning, all 20 implementation-policy decisions, and implementation are explicitly authorized; implementation is the current open task.
 
 ## Completed
 
@@ -53,7 +53,7 @@ Last updated: 2026-08-27. Phase 1 remains frozen. Phase 2 received an independen
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. Phase 6 CAP implementation, automatic pole placement, and reporting remain deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. Phase 6 CAP implementation is authorized but open and unaccepted; automatic pole placement remains prohibited, and Phase 7 reporting remains deferred and unauthorized.
 
 ## Phase 5 closure
 

@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Lighting Camera WiFi Automation API",
-    "description": "Phase 5 conceptual projected-plane Wi-Fi geometry and existing-pole engineering workflow.",
-    "version": "0.5.0"
+    "description": "Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning.",
+    "version": "0.6.0"
   },
   "paths": {
     "/api/health": {
@@ -492,6 +492,404 @@
             "schema": {
               "type": "string",
               "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning-inputs": {
+      "put": {
+        "summary": "Replace Cap Inputs",
+        "operationId": "replace_cap_inputs_api_projects__project_id__cap_planning_inputs_put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapPlanningInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/calculate": {
+      "post": {
+        "summary": "Calculate Project Cap",
+        "operationId": "calculate_project_cap_api_projects__project_id__cap_planning_calculate_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/validate": {
+      "post": {
+        "summary": "Validate Project Cap",
+        "operationId": "validate_project_cap_api_projects__project_id__cap_planning_validate_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/recommend": {
+      "post": {
+        "summary": "Recommend Project Cap",
+        "operationId": "recommend_project_cap_api_projects__project_id__cap_planning_recommend_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/manual-constraints": {
+      "put": {
+        "summary": "Replace Cap Manual Constraints",
+        "operationId": "replace_cap_manual_constraints_api_projects__project_id__cap_planning_manual_constraints_put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapManualConstraints"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/candidates": {
+      "post": {
+        "summary": "Add Cap Candidate",
+        "operationId": "add_cap_candidate_api_projects__project_id__cap_planning_candidates_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapCandidateSite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/cap-planning/candidates/{candidate_id}": {
+      "put": {
+        "summary": "Replace Cap Candidate",
+        "operationId": "replace_cap_candidate_api_projects__project_id__cap_planning_candidates__candidate_id__put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Candidate Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapCandidateSite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Cap Candidate",
+        "operationId": "delete_cap_candidate_api_projects__project_id__cap_planning_candidates__candidate_id__delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Candidate Id"
             }
           }
         ],
@@ -2314,6 +2712,888 @@
         ],
         "title": "CameraOverlapResult"
       },
+      "CapAssignment": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "gateway_id": {
+            "type": "string",
+            "title": "Gateway Id"
+          },
+          "parent_id": {
+            "type": "string",
+            "title": "Parent Id"
+          },
+          "hop": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Hop"
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Distance M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "node_id",
+          "gateway_id",
+          "parent_id",
+          "hop",
+          "distance_m"
+        ],
+        "title": "CapAssignment"
+      },
+      "CapCandidateSite": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "existing_pole",
+              "manual_non_pole"
+            ],
+            "title": "Kind"
+          },
+          "pole_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pole Id"
+          },
+          "wgs84_coordinate": {
+            "anyOf": [
+              {
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 2,
+                "minItems": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wgs84 Coordinate"
+          },
+          "mounting_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mounting Confirmed"
+          },
+          "power_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Power Confirmed"
+          },
+          "backhaul_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backhaul Confirmed"
+          },
+          "enclosure_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enclosure Confirmed"
+          },
+          "indoor_outdoor": {
+            "type": "string",
+            "enum": [
+              "indoor",
+              "outdoor",
+              "unknown"
+            ],
+            "title": "Indoor Outdoor",
+            "default": "unknown"
+          },
+          "mounting_height_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 500.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mounting Height M"
+          },
+          "survey_status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "unknown",
+              "failed"
+            ],
+            "title": "Survey Status",
+            "default": "unknown"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "default": 1000
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Notes",
+            "default": ""
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision",
+            "default": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "prohibited": {
+            "type": "boolean",
+            "title": "Prohibited",
+            "default": false
+          },
+          "preferred": {
+            "type": "boolean",
+            "title": "Preferred",
+            "default": false
+          },
+          "locked_selected": {
+            "type": "boolean",
+            "title": "Locked Selected",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "title": "CapCandidateSite"
+      },
+      "CapConstraintValue": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/CapKnowledge",
+            "default": "unknown"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "legal_regulatory_requirement",
+              "manufacturer_hard_constraint",
+              "manufacturer_guidance",
+              "project_design_limit",
+              "user_approved_assumption",
+              "derived_value",
+              "unknown"
+            ],
+            "title": "Classification",
+            "default": "unknown"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "approver": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "applicability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applicability"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "conflict_state": {
+            "type": "string",
+            "enum": [
+              "none",
+              "unresolved"
+            ],
+            "title": "Conflict State",
+            "default": "none"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapConstraintValue"
+      },
+      "CapGraphLink": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "left_id": {
+            "type": "string",
+            "title": "Left Id"
+          },
+          "right_id": {
+            "type": "string",
+            "title": "Right Id"
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Distance M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "left_id",
+          "right_id",
+          "distance_m"
+        ],
+        "title": "CapGraphLink"
+      },
+      "CapKnowledge": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "known"
+        ],
+        "title": "CapKnowledge"
+      },
+      "CapManualConstraints": {
+        "properties": {
+          "excluded_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Node Ids"
+          },
+          "excluded_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Candidate Ids"
+          },
+          "locked_selected_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Locked Selected Candidate Ids"
+          },
+          "primary_assignment_locks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Primary Assignment Locks"
+          },
+          "parent_locks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Parent Locks"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapManualConstraints"
+      },
+      "CapNodeDisposition": {
+        "type": "string",
+        "enum": [
+          "node",
+          "non_node",
+          "unknown"
+        ],
+        "title": "CapNodeDisposition"
+      },
+      "CapNodePolicy": {
+        "properties": {
+          "LITE": {
+            "$ref": "#/components/schemas/CapNodeDisposition",
+            "default": "unknown"
+          },
+          "WIFI": {
+            "$ref": "#/components/schemas/CapNodeDisposition",
+            "default": "unknown"
+          },
+          "SMART": {
+            "$ref": "#/components/schemas/CapNodeDisposition",
+            "default": "unknown"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapNodePolicy"
+      },
+      "CapPlanningInputs": {
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/CapPlanningProfile"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CapCandidateSite"
+            },
+            "type": "array",
+            "title": "Candidates"
+          },
+          "excluded_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Node Ids"
+          },
+          "excluded_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Candidate Ids"
+          },
+          "locked_selected_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Locked Selected Candidate Ids"
+          },
+          "primary_assignment_locks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Primary Assignment Locks"
+          },
+          "parent_locks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Parent Locks"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapPlanningInputs"
+      },
+      "CapPlanningLayer": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not-calculated",
+              "calculated",
+              "error"
+            ],
+            "title": "Status",
+            "default": "not-calculated"
+          },
+          "calculation_input_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Input Sha256"
+          },
+          "calculated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated At"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CapPlanningResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapPlanningLayer"
+      },
+      "CapPlanningLimits": {
+        "properties": {
+          "link_distance_m": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Link Distance M"
+          },
+          "node_limit": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Node Limit"
+          },
+          "child_limit": {
+            "type": "integer",
+            "maximum": 16.0,
+            "minimum": 1.0,
+            "title": "Child Limit"
+          },
+          "hop_limit": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Hop Limit"
+          },
+          "edge_evaluations": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Edge Evaluations"
+          },
+          "canonical_link_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Canonical Link Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "link_distance_m",
+          "node_limit",
+          "child_limit",
+          "hop_limit",
+          "edge_evaluations",
+          "canonical_link_count"
+        ],
+        "title": "CapPlanningLimits"
+      },
+      "CapPlanningProfile": {
+        "properties": {
+          "model_version": {
+            "type": "string",
+            "const": "jnet1-graph-planning-1.0.0",
+            "title": "Model Version",
+            "default": "jnet1-graph-planning-1.0.0"
+          },
+          "operation_mode": {
+            "type": "string",
+            "enum": [
+              "validate",
+              "recommend"
+            ],
+            "title": "Operation Mode",
+            "default": "recommend"
+          },
+          "product_mapping": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "variant": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "band_and_jurisdiction": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "link_distance_m": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "node_limit": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "child_limit": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "hop_limit": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "gateway_appliance_counting": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "colocated_fixture_counting": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "redundancy": {
+            "$ref": "#/components/schemas/CapConstraintValue"
+          },
+          "node_policy": {
+            "$ref": "#/components/schemas/CapNodePolicy"
+          },
+          "mode_permission": {
+            "type": "string",
+            "enum": [
+              "validate_only",
+              "recommend_from_approved_pool",
+              "unknown"
+            ],
+            "title": "Mode Permission",
+            "default": "unknown"
+          },
+          "auto_assign_unlocked_nodes": {
+            "type": "boolean",
+            "title": "Auto Assign Unlocked Nodes",
+            "default": false
+          },
+          "disclaimer": {
+            "type": "string",
+            "const": "Distance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance.",
+            "title": "Disclaimer",
+            "default": "Distance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapPlanningProfile"
+      },
+      "CapPlanningResult": {
+        "properties": {
+          "model_version": {
+            "type": "string",
+            "const": "jnet1-graph-planning-1.0.0",
+            "title": "Model Version",
+            "default": "jnet1-graph-planning-1.0.0"
+          },
+          "projected_crs": {
+            "type": "string",
+            "title": "Projected Crs"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "heuristic": {
+            "type": "string",
+            "title": "Heuristic"
+          },
+          "selected_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Selected Candidate Ids"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/CapAssignment"
+            },
+            "type": "array",
+            "title": "Assignments"
+          },
+          "canonical_links": {
+            "items": {
+              "$ref": "#/components/schemas/CapGraphLink"
+            },
+            "type": "array",
+            "title": "Canonical Links"
+          },
+          "node_snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/CapVertexSnapshot"
+            },
+            "type": "array",
+            "title": "Node Snapshots"
+          },
+          "candidate_snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/CapVertexSnapshot"
+            },
+            "type": "array",
+            "title": "Candidate Snapshots"
+          },
+          "unresolved_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unresolved Node Ids"
+          },
+          "objective_trace": {
+            "items": {
+              "$ref": "#/components/schemas/CapScoreTrace"
+            },
+            "type": "array",
+            "title": "Objective Trace"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/CapPlanningLimits"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "result_sha256": {
+            "type": "string",
+            "title": "Result Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "projected_crs",
+          "disclaimer",
+          "heuristic",
+          "limits",
+          "result_sha256"
+        ],
+        "title": "CapPlanningResult"
+      },
+      "CapRecommendations": {
+        "properties": {
+          "selected_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Selected Candidate Ids"
+          },
+          "result_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapRecommendations"
+      },
+      "CapScoreTrace": {
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "title": "Candidate Id"
+          },
+          "marginal_serviceable_nodes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Marginal Serviceable Nodes"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Priority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "candidate_id",
+          "marginal_serviceable_nodes",
+          "priority"
+        ],
+        "title": "CapScoreTrace"
+      },
+      "CapVertexSnapshot": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "fixture_node",
+              "gateway_root"
+            ],
+            "title": "Kind"
+          },
+          "source_pole_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Pole Id"
+          },
+          "candidate_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Id"
+          },
+          "projected_x_m": {
+            "type": "number",
+            "title": "Projected X M"
+          },
+          "projected_y_m": {
+            "type": "number",
+            "title": "Projected Y M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "projected_x_m",
+          "projected_y_m"
+        ],
+        "title": "CapVertexSnapshot"
+      },
       "FixtureCapabilities": {
         "properties": {
           "lighting": {
@@ -2516,14 +3796,14 @@
           },
           "phase": {
             "type": "integer",
-            "const": 5,
+            "const": 6,
             "title": "Phase",
-            "default": 5
+            "default": 6
           },
           "version": {
             "type": "string",
             "title": "Version",
-            "default": "0.5.0"
+            "default": "0.6.0"
           }
         },
         "additionalProperties": false,
@@ -3843,14 +5123,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "2.5.0",
+            "const": "2.6.0",
             "title": "Schema Version",
-            "default": "2.5.0"
+            "default": "2.6.0"
           },
           "software_version": {
             "type": "string",
             "title": "Software Version",
-            "default": "0.5.0"
+            "default": "0.6.0"
           },
           "id": {
             "type": "string",
@@ -3946,6 +5226,15 @@
           },
           "wifi_coverage": {
             "$ref": "#/components/schemas/WifiCoverageLayer"
+          },
+          "cap_planning_inputs": {
+            "$ref": "#/components/schemas/CapPlanningInputs"
+          },
+          "cap_calculations": {
+            "$ref": "#/components/schemas/CapPlanningLayer"
+          },
+          "cap_recommendations": {
+            "$ref": "#/components/schemas/CapRecommendations"
           },
           "legacy_invalid_priority_areas": {
             "items": {

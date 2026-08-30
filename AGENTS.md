@@ -13,8 +13,35 @@ Before planning or changing code, every future session must read these files in 
 5. `docs/architecture.md`
 6. `docs/data-model.md`
 7. `docs/phase-1-completion-report.md`
+8. `GOALS.md`
+9. `PLANS.md`
+10. `OPERATIONS.md`
 
-Then inspect `git status` and preserve unrelated or user-owned changes. Phases 1-5 are accepted and formally closed. Phase 6 planning, all 20 implementation-policy decisions, and Phase 6 implementation were explicitly authorized on 2026-08-27. Phase 6 remains open until implementation, independent QA, and master acceptance are complete; Phase 7 remains gated and unauthorized.
+Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-5 are accepted and formally closed. Phase 6 planning, all 20 implementation-policy decisions, and Phase 6 implementation were explicitly authorized on 2026-08-27. Phase 6 remains open until implementation, independent QA, and master acceptance are complete; Phase 7 remains gated and unauthorized.
+
+## Durable execution workflow
+
+Use `GOALS.md`, `PLANS.md`, and `OPERATIONS.md` as the repository's execution index. They record workflow state and verification procedure; the controlling product and phase requirements remain the existing documents they link to. Do not duplicate or silently supersede those documents.
+
+Active-phase implementation is long-running work. When the execution environment provides a durable goal mechanism, the implementation session must create and activate one before changing product files. The goal must name one objective and one verifiable implementation-readiness stopping condition. Writing `/goal` or "do not stop" inside ordinary prose is not evidence that a durable goal exists. Record the goal state in the phase work record and execution log.
+
+Keep launch prompts outcome-focused and short. Point to the repository contract, state the authorized action boundary, name the final readiness command, and define the proven-blocker rule once. Repository documents carry the detailed requirements. A progress report, completed response turn, partial pass, commit, or completion report is not a stopping event while the durable goal remains unfinished.
+
+Before active-phase implementation, create a dated work record under `harness/phases/` from `harness/templates/phase-work-record-template.md`. It must link the controlling contract, state scope and non-goals, list milestones and acceptance IDs, define the authorized file boundary, and identify the exact base commit and starting diff. Do not copy or reinterpret the controlling requirements.
+
+Before the file boundary is treated as final, run and record an environment preflight from the work-record template. It must test runtime discovery, locked dependency materialization, build/test/lint/typecheck entry points, generated-artifact commands, browser/runtime availability when required, and every supporting configuration file those commands may legitimately update. A missing required build-tool configuration path is a contract defect to resolve before implementation, not a surprise boundary expansion during the phase.
+
+During execution, append exact command records from `harness/templates/execution-log-template.md` under `harness/logs/`. Before independent QA, create a verification summary under `harness/verify/`; independent QA must use `harness/templates/qa-review-template.md`. Never state that a command passed unless it was run against the recorded commit/worktree, exited successfully, and its result and warnings are preserved. Historical evidence must be labelled historical and cannot substitute for current deterministic verification.
+
+If work is interrupted or a command fails, preserve the worktree, inspect status/diff and the last verified milestone, record the failure and affected artifacts, and resume only from that evidence. Never discard, overwrite, auto-resolve, or rerun a destructive step to recover.
+
+Failing tests, missing tests, incomplete acceptance coverage, incomplete milestones, compiler/lint/typecheck/build failures, missing generated output, temporary process/cache/file locks, occupied local ports, runtime `PATH` problems, recoverable dependency installation, dirty implementation files, absent reports, and the end of a normal response turn are not stopping conditions. Diagnose, repair, rerun, and continue. If one condition appears blocking, make and log at least three materially different safe recovery attempts before requesting direction. A blocker is valid only when the same condition still prevents meaningful in-scope progress and requires new authority, a product decision, an external-state change, or a prohibited scope expansion. Use `harness/templates/blocker-record-template.md`; vague blocker summaries are invalid.
+
+Stop and request direction only when the proven-blocker rule is satisfied for unresolved authority, requirements, source precedence, file boundary, source preservation, or a required product decision; when continuing would enter a gated phase; or when required verification cannot be completed truthfully after safe in-scope recovery is exhausted. Otherwise record the checkpoint and continue the durable goal.
+
+Implementation readiness is separate from phase acceptance. Before implementation handoff, complete `harness/templates/implementation-readiness-template.json` and run `harness/verify/verify_phase_readiness.py`. The verifier must pass against the recorded implementation commit and a clean worktree. It does not create a phase seal and cannot replace independent QA or the master gate.
+
+A phase is not complete merely because implementation is committed or a completion report exists. A seal under `harness/seals/` is valid only when created from `harness/templates/phase-seal-template.md` after all contract-required deterministic checks pass on the sealed commit, every required acceptance item has objective evidence, independent QA records PASS, and the master gate decision records PASS. Any missing, failed, skipped, stale, or unverified required check makes the seal invalid. A seal is evidence only; it never authorizes the next phase.
 
 ## Safety and engineering rules
 

@@ -61,7 +61,7 @@ export interface PoleWifiConfiguration {
 }
 
 export interface Project {
-  schema_version: "2.5.0";
+  schema_version: "2.6.0";
   software_version: string;
   id: string;
   name: string;
@@ -93,6 +93,9 @@ export interface Project {
   lighting_calculations: LightingCalculationLayer;
   wifi_analysis_areas: WifiAnalysisArea[];
   wifi_coverage: WifiCoverageLayer;
+  cap_planning_inputs: CapPlanningInputs;
+  cap_calculations: CapPlanningLayer;
+  cap_recommendations: { selected_candidate_ids: string[]; result_sha256: string | null };
   legacy_invalid_priority_areas: Array<Record<string, unknown>>;
   camera_geometry: CameraGeometryLayer;
   assumptions: string[];
@@ -101,6 +104,14 @@ export interface Project {
   source_references: Record<string, string>;
   legacy_fixture_assignments_require_model_selection: boolean;
 }
+
+export type CapKnowledge = "unknown" | "known";
+export type CapNodeDisposition = "node" | "non_node" | "unknown";
+export interface CapConstraintValue { status: CapKnowledge; value: string | number | boolean | null; unit: string | null; classification: "legal_regulatory_requirement" | "manufacturer_hard_constraint" | "manufacturer_guidance" | "project_design_limit" | "user_approved_assumption" | "derived_value" | "unknown"; source: string | null; approver: string | null; date: string | null; applicability: string | null; revision: string | null; conflict_state: "none" | "unresolved"; notes: string; }
+export interface CapCandidateSite { id: string; kind: "existing_pole" | "manual_non_pole"; pole_id: string | null; wgs84_coordinate: [number, number] | null; mounting_confirmed: boolean | null; power_confirmed: boolean | null; backhaul_confirmed: boolean | null; enclosure_confirmed: boolean | null; indoor_outdoor: "indoor" | "outdoor" | "unknown"; mounting_height_m: number | null; survey_status: "confirmed" | "unknown" | "failed"; priority: number; notes: string; revision: number; created_at: string; modified_at: string; prohibited: boolean; preferred: boolean; locked_selected: boolean; }
+export interface CapPlanningInputs { profile: { model_version: "jnet1-graph-planning-1.0.0"; operation_mode: "validate" | "recommend"; product_mapping: CapConstraintValue; variant: CapConstraintValue; band_and_jurisdiction: CapConstraintValue; link_distance_m: CapConstraintValue; node_limit: CapConstraintValue; child_limit: CapConstraintValue; hop_limit: CapConstraintValue; gateway_appliance_counting: CapConstraintValue; colocated_fixture_counting: CapConstraintValue; redundancy: CapConstraintValue; node_policy: Record<FixtureType, CapNodeDisposition>; mode_permission: "validate_only" | "recommend_from_approved_pool" | "unknown"; disclaimer: string }; candidates: CapCandidateSite[]; excluded_node_ids: string[]; excluded_candidate_ids: string[]; locked_selected_candidate_ids: string[]; primary_assignment_locks: Record<string, string>; parent_locks: Record<string, string>; }
+export interface CapPlanningResult { model_version: "jnet1-graph-planning-1.0.0"; projected_crs: string; disclaimer: string; heuristic: string; selected_candidate_ids: string[]; assignments: Array<{ node_id: string; gateway_id: string; parent_id: string; hop: number; distance_m: number }>; unresolved_node_ids: string[]; objective_trace: Array<{ candidate_id: string; marginal_serviceable_nodes: number; priority: number }>; limits: Record<string, number>; warnings: string[]; result_sha256: string; }
+export interface CapPlanningLayer { status: "not-calculated" | "calculated" | "error"; calculation_input_sha256: string | null; calculated_at: string | null; result: CapPlanningResult | null; warnings: string[]; }
 
 export interface PriorityArea { id: string; name: string; wgs84_coordinates: Array<[number, number]>; created_at: string; modified_at: string }
 export type CalculationAreaClassification = "ROAD" | "SIDEWALK" | "PARKING" | "OTHER";

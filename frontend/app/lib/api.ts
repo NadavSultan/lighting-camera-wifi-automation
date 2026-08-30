@@ -1,4 +1,4 @@
-import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, WifiAnalysisArea } from "./types";
+import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, WifiAnalysisArea } from "./types";
 import { formatApiErrorDetail } from "./phase2-workflows.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
@@ -59,6 +59,19 @@ export function calculateWifiCoverage(project: Project) {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),
   });
 }
+
+export function saveCapPlanningInputs(projectId: string, inputs: CapPlanningInputs) {
+  return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/cap-planning-inputs`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(inputs) });
+}
+
+export function calculateCapPlan(project: Project) {
+  return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/cap-planning/calculate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project) });
+}
+export function validateCapPlan(project: Project) { return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/cap-planning/validate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project) }); }
+export function recommendCapPlan(project: Project) { return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/cap-planning/recommend`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project) }); }
+export function addCapCandidate(projectId: string, candidate: CapCandidateSite) { return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/cap-planning/candidates`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(candidate) }); }
+export function replaceCapCandidate(projectId: string, candidate: CapCandidateSite) { return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/cap-planning/candidates/${encodeURIComponent(candidate.id)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(candidate) }); }
+export function deleteCapCandidate(projectId: string, candidateId: string) { return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/cap-planning/candidates/${encodeURIComponent(candidateId)}`, { method: "DELETE" }); }
 
 export function addWifiAnalysisArea(projectId: string, area: WifiAnalysisArea) {
   return api<Project>(`/api/projects/${encodeURIComponent(projectId)}/wifi-analysis-areas`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(area) });

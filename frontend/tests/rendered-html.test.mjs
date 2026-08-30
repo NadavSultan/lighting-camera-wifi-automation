@@ -5,6 +5,7 @@ import { formatApiErrorDetail, selectBulkPoleIds, uploadIesAndRefresh, withoutCa
 import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, formatEngineeringAzimuth, normalizeFixtureAzimuth, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../app/lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
+import { CAP_DISCLAIMER, capBlockers, capOperationEnabled, capSignificantProjectChange, invalidateCapIfSignificant, isCapResultStale } from "../app/lib/phase6-cap-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -28,7 +29,7 @@ test("server-renders the Phase 5 engineering workspace", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
-test("exposes Phase 5 conceptual Wi-Fi while keeping CAP gated", async () => {
+test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
   const inspector = await readFile(new URL("../app/components/PoleInspector.tsx", import.meta.url), "utf8");
   const catalogs = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
@@ -47,8 +48,10 @@ test("exposes Phase 5 conceptual Wi-Fi while keeping CAP gated", async () => {
   assert.match(workspace, /Calculate conceptual Wi-Fi/);
   assert.match(workspace, /Clear radius to project default/);
   assert.match(workspace, /wifiBoundaryGapMessage/);
+  assert.match(workspace, /Phase 6 — CAP \/ JNET1 graph planning/);
+  assert.match(workspace, /CAP_DISCLAIMER/);
   assert.match(workspace, /Recommend CAP/);
-  assert.match(workspace, /disabled title="Phase 6/);
+  assert.match(workspace, /CAP candidate \/ selected sites/);
   assert.match(inspector, /Restore source\/default values/);
   assert.match(workspace, /Apply selected fields/);
   assert.match(inspector, /Explicit model selection required/);
@@ -101,6 +104,26 @@ test("Phase 5 workflow helpers preserve safe drafts, inheritance, and precise in
   const changed = structuredClone(base); changed.defaults.wifi_radius_m = 31;
   assert.equal(wifiSignificantProjectChange(base, changed), true);
   assert.equal(invalidateWifiIfSignificant(base, changed).wifi_coverage.result, null);
+});
+
+test("Phase 6 CAP helper keeps unknowns blocker-first and does not compare unrelated digests", () => {
+  const unknown = { profile: { node_policy: { LITE: "unknown", WIFI: "unknown", SMART: "unknown" }, mode_permission: "unknown" }, candidates: [] };
+  assert.ok(capBlockers(unknown).includes("product_mapping"));
+  const ready = { profile: { operation_mode: "recommend", mode_permission: "recommend_from_approved_pool", node_policy: { LITE: "node", WIFI: "non_node", SMART: "non_node" }, ...Object.fromEntries(["product_mapping", "variant", "band_and_jurisdiction", "link_distance_m", "node_limit", "child_limit", "hop_limit", "gateway_appliance_counting", "colocated_fixture_counting", "redundancy"].map((key) => [key, { status: "known", conflict_state: "none" }])) }, candidates: [{ prohibited: false, mounting_confirmed: true, power_confirmed: true, backhaul_confirmed: true, enclosure_confirmed: true, survey_status: "confirmed", indoor_outdoor: "outdoor" }] };
+  assert.equal(capOperationEnabled({ cap_planning_inputs: ready }, "recommend"), true);
+  assert.equal(isCapResultStale({ cap_calculations: { status: "calculated", calculation_input_sha256: "input", result: { result_sha256: "result" } } }), false);
+  assert.equal(isCapResultStale({ cap_calculations: { status: "not-calculated", calculation_input_sha256: null, result: { result_sha256: "result" } } }), true);
+  assert.match(CAP_DISCLAIMER, /not RF-predicted/);
+});
+
+test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {
+  const base = { projected_crs: "EPSG:32617", defaults: { fixture_type: "LITE" }, source: { poles: [{ id: "p1", sequence_index: 0, longitude: -80, latitude: 25 }] }, pole_edits: {}, cap_planning_inputs: { profile: { product_mapping: { status: "known" }, node_policy: {} }, candidates: [{ id: "cap-1", notes: "note", priority: 1 }], excluded_node_ids: [], excluded_candidate_ids: [], locked_selected_candidate_ids: [], primary_assignment_locks: {}, parent_locks: {} }, cap_calculations: { status: "calculated", calculation_input_sha256: "x", calculated_at: "now", result: { result_sha256: "y" }, warnings: [] }, cap_recommendations: { selected_candidate_ids: ["cap-1"], result_sha256: "y" } };
+  const note = structuredClone(base); note.cap_planning_inputs.candidates[0].notes = "new note";
+  assert.equal(capSignificantProjectChange(base, note), false);
+  assert.equal(invalidateCapIfSignificant(base, note).cap_calculations.status, "calculated");
+  const changed = structuredClone(base); changed.pole_edits.p1 = { active: false };
+  assert.equal(capSignificantProjectChange(base, changed), true);
+  assert.equal(invalidateCapIfSignificant(base, changed).cap_calculations.result, null);
 });
 
 test("Phase 5 Wi-Fi drafts reject every invalid ring and preserve both winding directions", () => {
