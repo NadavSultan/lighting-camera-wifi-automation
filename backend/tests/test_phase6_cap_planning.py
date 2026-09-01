@@ -485,6 +485,18 @@ def test_p6_sf_01_real_participating_node_boundary_and_boundary_plus_one_are_ato
     assert project.cap_calculations.result is None
 
 
+def test_p6_sf_01_topology_link_cap_accepts_2000_and_rejects_2001():
+    root = {"id": "gateway/cap-a"}
+    nodes = [{"id": f"fixture/p{index}", "pole_id": f"p{index}"} for index in range(2000)]
+    adjacency = {root["id"]: [(node["id"], 1.0) for node in nodes]}
+    adjacency.update({node["id"]: [(root["id"], 1.0)] for node in nodes})
+    assignments = cap_planning._forest([root], nodes, adjacency, 2001, 2001, 1, "excluded", {}, {})
+    assert len(assignments) == 2000
+    extra = {"id": "fixture/p2000", "pole_id": "p2000"}
+    with pytest.raises(ValueError, match="persisted topology links exceed safety cap 2000"):
+        cap_planning._forest([root], [*nodes, extra], {**adjacency, root["id"]: [*adjacency[root["id"]], (extra["id"], 1.0)], extra["id"]: [(root["id"], 1.0)]}, 2002, 2002, 1, "excluded", {}, {})
+
+
 def test_p6_sf_01_text_cap_accepts_boundary_and_rejects_boundary_plus_one():
     candidate = CapCandidateSite(id="cap-boundary", kind="manual_non_pole", wgs84_coordinate=(-80.0, 25.0), notes="x" * 2000)
     assert len(candidate.notes) == 2000
