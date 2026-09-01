@@ -435,6 +435,16 @@ def test_p6_sf_01_graph_caps_and_serialized_payload_fail_before_any_result(monke
     assert project.cap_calculations.result is None
 
 
+def test_p6_sf_01_vertex_cap_accepts_2500_and_rejects_2501_without_all_pairs_work():
+    vertices = [{"id": f"v{index}", "x": float(index * 10), "y": 0.0} for index in range(2500)]
+    adjacency, evaluations, links = _adjacency(vertices, 1.0)
+    assert len(adjacency) == 2500
+    assert evaluations == 0
+    assert links == []
+    with pytest.raises(ValueError, match="vertices exceed safety cap 2500"):
+        _adjacency([*vertices, {"id": "v2500", "x": 25000.0, "y": 0.0}], 1.0)
+
+
 def test_p6_sf_01_real_participating_node_boundary_and_boundary_plus_one_are_atomic():
     project = project_with_test_only_inputs()
     project.source.poles = [SourcePole(id=f"p{index}", sequence_index=index, name=f"P{index}", longitude=-80 + index * 0.0003, latitude=25, raw_coordinates=f"{-80 + index * 0.0003},25,0") for index in range(2000)]
