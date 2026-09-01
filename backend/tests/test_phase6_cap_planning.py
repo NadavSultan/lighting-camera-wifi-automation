@@ -1,3 +1,5 @@
+import base64
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -5,7 +7,7 @@ from fastapi.testclient import TestClient
 from pyproj import Transformer
 
 from app.main import create_app
-from app.models import CapCandidateSite, CapConstraintValue, CapKnowledge, CapNodeDisposition, CapPlanningInputs, FixtureType, PoleEdit, Project, SourceLayer, SourcePole, migrate_project_payload
+from app.models import CapCandidateSite, CapConstraintValue, CapKnowledge, CapNodeDisposition, CapPlanningInputs, FixtureType, PoleEdit, Project, SourceFile, SourceLayer, SourcePole, migrate_project_payload, utc_now
 from app.services import cap_planning
 from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, cap_input_sha256, invalidate_stale_cap_results
 from app.services.store import ProjectStore
@@ -532,6 +534,26 @@ def test_p6_ap_01_p6_ap_02_cap_api_missing_and_mode_conflicts_are_atomic(tmp_pat
     conflict = client.post(f"/api/projects/{saved.id}/cap-planning/validate", json=saved.model_dump(mode="json"))
     assert conflict.status_code == 409
     assert project_path.read_bytes() == before
+
+
+def test_p6_ap_02_failed_candidate_operations_preserve_project_result_and_source_archive(tmp_path: Path):
+    project = project_with_test_only_inputs()
+    source_bytes = b"<kml><Document><name>immutable CAP test source</name></Document></kml>"
+    project.source.file = SourceFile(filename="source.kml", media_type="application/vnd.google-earth.kml+xml", sha256=hashlib.sha256(source_bytes).hexdigest(), size_bytes=len(source_bytes), imported_at=utc_now(), content_base64=base64.b64encode(source_bytes).decode())
+    project = apply_cap_result(project, calculate_cap_plan(project))
+    store = ProjectStore(tmp_path / "projects")
+    saved = store.save(project)
+    project_path = tmp_path / "projects" / saved.id / "project.json"
+    source_path = tmp_path / "projects" / saved.id / "sources" / "source.kml"
+    before_project, before_source = project_path.read_bytes(), source_path.read_bytes()
+    client = TestClient(create_app(store))
+    duplicate = client.post(f"/api/projects/{saved.id}/cap-planning/candidates", json=saved.cap_planning_inputs.candidates[0].model_dump(mode="json"))
+    stale = client.put(f"/api/projects/{saved.id}/cap-planning/candidates/cap-a", json=saved.cap_planning_inputs.candidates[0].model_dump(mode="json"))
+    missing = client.delete(f"/api/projects/{saved.id}/cap-planning/candidates/missing")
+    assert [response.status_code for response in (duplicate, stale, missing)] == [409, 409, 404]
+    assert project_path.read_bytes() == before_project
+    assert source_path.read_bytes() == before_source
+    assert store.load(saved.id).cap_calculations.result is not None
 
 
 def test_p6_ex_01_kml_export_excludes_cap_candidate_data(tmp_path: Path):
