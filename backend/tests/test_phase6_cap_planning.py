@@ -402,6 +402,21 @@ def test_p6_sf_01_graph_caps_and_serialized_payload_fail_before_any_result(monke
     assert project.cap_calculations.result is None
 
 
+def test_p6_sf_01_real_participating_node_boundary_and_boundary_plus_one_are_atomic():
+    project = project_with_test_only_inputs()
+    project.source.poles = [SourcePole(id=f"p{index}", sequence_index=index, name=f"P{index}", longitude=-80 + index * 0.0003, latitude=25, raw_coordinates=f"{-80 + index * 0.0003},25,0") for index in range(2000)]
+    project.pole_edits = {pole.id: PoleEdit(pole_id=pole.id, fixture_type=FixtureType.WIFI) for pole in project.source.poles}
+    project.cap_planning_inputs.candidates[0].pole_id = "p0"
+    result = calculate_cap_plan(project)
+    assert len(result.node_snapshots) == 2000
+    extra = SourcePole(id="p2000", sequence_index=2000, name="P2000", longitude=-79.3, latitude=25, raw_coordinates="-79.3,25,0")
+    project.source.poles.append(extra)
+    project.pole_edits[extra.id] = PoleEdit(pole_id=extra.id, fixture_type=FixtureType.WIFI)
+    with pytest.raises(ValueError, match="eligible nodes exceed safety cap 2000"):
+        calculate_cap_plan(project)
+    assert project.cap_calculations.result is None
+
+
 def test_p6_fp_01_input_fingerprint_invalidates_results_without_mutating_inputs():
     project = project_with_test_only_inputs()
     applied = apply_cap_result(project, calculate_cap_plan(project))
