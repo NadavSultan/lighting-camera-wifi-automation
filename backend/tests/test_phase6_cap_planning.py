@@ -480,6 +480,34 @@ def test_p6_fp_01_input_fingerprint_invalidates_results_without_mutating_inputs(
     assert before["candidates"][0]["id"] == "cap-a"
 
 
+@pytest.mark.parametrize("mutate", [
+    lambda project: setattr(project.cap_planning_inputs.profile.link_distance_m, "value", 19),
+    lambda project: setattr(project.cap_planning_inputs.profile.node_policy, "WIFI", CapNodeDisposition.NON_NODE),
+    lambda project: setattr(project.cap_planning_inputs.candidates[0], "priority", 1),
+    lambda project: project.cap_planning_inputs.excluded_node_ids.append("fixture/p1"),
+    lambda project: project.cap_planning_inputs.primary_assignment_locks.update({"fixture/p0": "gateway/cap-a"}),
+    lambda project: project.cap_planning_inputs.parent_locks.update({"fixture/p0": "gateway/cap-a"}),
+    lambda project: setattr(project.pole_edits["p1"], "active", False),
+    lambda project: project.pole_edits.__setitem__("p1", project.pole_edits["p1"].model_copy(update={"location_edit_authorized": True, "longitude": project.source.poles[1].longitude + 0.0001, "latitude": project.source.poles[1].latitude})),
+])
+def test_p6_fp_01_every_material_cap_input_clears_calculated_and_recommended_state(mutate):
+    project = apply_cap_result(project_with_test_only_inputs(), calculate_cap_plan(project_with_test_only_inputs()))
+    mutate(project)
+    assert invalidate_stale_cap_results(project) is True
+    assert project.cap_calculations.result is None
+    assert project.cap_recommendations.selected_candidate_ids == []
+    assert project.cap_recommendations.result_sha256 is None
+
+
+def test_p6_fp_01_notes_and_presentation_state_do_not_invalidate_a_current_result():
+    source = project_with_test_only_inputs()
+    project = apply_cap_result(source, calculate_cap_plan(source))
+    project.cap_planning_inputs.candidates[0].notes = "non-feasibility field-survey note"
+    project.recommended_layers["cap_visibility"] = {"visible": True}
+    assert invalidate_stale_cap_results(project) is False
+    assert project.cap_calculations.result is not None
+
+
 def test_p6_pr_01_provenance_captures_catalog_datasheet_constraints_and_crs():
     result = calculate_cap_plan(project_with_test_only_inputs())
     provenance = result.provenance

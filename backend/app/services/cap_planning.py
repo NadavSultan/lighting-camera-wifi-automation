@@ -46,6 +46,14 @@ def _effective_coordinate(project: Project, pole) -> tuple[float, float]:
 
 def cap_input_sha256(project: Project) -> str:
     payload = project.cap_planning_inputs.model_dump(mode="json")
+    # Candidate notes and audit timestamps are displayed live from user data but
+    # cannot affect feasibility, geometry, constraints, or CAP selection.
+    # Excluding them prevents a presentation edit from invalidating a current
+    # calculation while retaining all engineering-relevant candidate fields.
+    for candidate in payload["candidates"]:
+        candidate.pop("notes", None)
+        candidate.pop("created_at", None)
+        candidate.pop("modified_at", None)
     payload["projected_crs"] = project.projected_crs
     payload["model_version"] = "jnet1-graph-planning-1.0.0"
     payload["constants"] = {"tolerance_m": EDGE_TOLERANCE_M, "participating_nodes": MAX_PARTICIPATING_NODES, "candidates": MAX_CANDIDATES, "selected_caps": MAX_SELECTED_CAPS, "vertices": MAX_VERTICES, "edge_evaluations": MAX_EDGE_EVALUATIONS, "edges": MAX_EDGES, "topology_links": MAX_TOPOLOGY_LINKS, "improvement_passes": MAX_IMPROVEMENT_PASSES, "n_plus_one_scenarios": MAX_N_PLUS_ONE_SCENARIOS, "serialized_payload_bytes": MAX_SERIALIZED_PAYLOAD_BYTES}
