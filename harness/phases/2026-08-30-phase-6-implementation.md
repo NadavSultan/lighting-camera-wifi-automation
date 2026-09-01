@@ -2,7 +2,7 @@
 
 Status: active
 
-Durable goal: environment goal `01a052ee-b09d-7153-9c98-982e1c91129a` already exists and remains unfinished; a replacement cannot be created while it is active.
+Durable goal: environment goal for this execution thread is active as of 2026-09-01 Asia/Jerusalem. Objective: complete Phase 6 M1–M9, all acceptance evidence, deterministic and production-rendered verification, the implementation-readiness manifest, and the independent-QA handoff. Verifiable normal stopping condition: `python harness/verify/verify_phase_readiness.py --manifest harness/verify/phase-06-readiness.json` passes on the recorded implementation commit with a clean worktree and the independent-QA handoff is ready.
 
 ## Scope, authority, and non-goals
 
@@ -18,7 +18,12 @@ Durable goal: environment goal `01a052ee-b09d-7153-9c98-982e1c91129a` already ex
 | Milestone | Contract reference | Expected evidence | Status |
 |---|---|---|---|
 | M0 | WP1 | recorded baseline, authority, unknowns, boundary | complete |
-| M1–M9 | Phase 6 execution contract | implementation and current verification records | pending recovery |
+| M1 | WP2; `P6-DM-01..04`, `P6-CT-01`, `P6-MG-01` | `backend/tests/test_phase6_cap_planning.py` selector; current execution log | complete — 2026-09-01 evidence at `673af51e` worktree state; implementation commit still pending |
+| M2 | WP3 graph/ranking; `P6-GR-01..03`, `P6-AL-01..02` | `backend/tests/test_phase6_cap_planning.py` selector; current execution log | complete — 2026-09-01 evidence at `673af51e` worktree state; implementation commit still pending |
+| M3 | WP3 selection/manual/redundancy/safety/fingerprint/provenance | current M3 selector; current execution log | in progress — complete safety boundary matrix remains |
+| M4 | WP4 API/persistence lifecycle | current M4 selector; current execution log | in progress — export/complete atomic matrix remains |
+| M5 | WP5 generated contracts/version metadata | module schema export and freshness selector; current execution log | complete — 2026-09-01 evidence at `673af51e` worktree state; implementation commit still pending |
+| M6–M9 | Phase 6 execution contract | implementation and current verification records | pending |
 
 ## Acceptance criteria
 

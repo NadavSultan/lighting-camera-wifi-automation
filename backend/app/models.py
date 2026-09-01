@@ -667,6 +667,7 @@ class CapPlanningResult(StrictModel):
     unresolved_node_ids: list[str] = Field(default_factory=list)
     objective_trace: list[CapScoreTrace] = Field(default_factory=list)
     limits: CapPlanningLimits
+    provenance: dict[str, Any] = Field(default_factory=dict)
     warnings: list[str] = Field(default_factory=list)
     result_sha256: str
 

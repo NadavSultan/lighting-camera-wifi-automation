@@ -1261,6 +1261,11 @@
         "limits": {
           "$ref": "#/$defs/CapPlanningLimits"
         },
+        "provenance": {
+          "additionalProperties": true,
+          "title": "Provenance",
+          "type": "object"
+        },
         "warnings": {
           "items": {
             "type": "string"

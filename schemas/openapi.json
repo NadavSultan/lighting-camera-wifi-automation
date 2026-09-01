@@ -3465,6 +3465,11 @@
           "limits": {
             "$ref": "#/components/schemas/CapPlanningLimits"
           },
+          "provenance": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Provenance"
+          },
           "warnings": {
             "items": {
               "type": "string"
