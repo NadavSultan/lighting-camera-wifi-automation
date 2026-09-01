@@ -652,6 +652,7 @@ class CapPlanningLimits(StrictModel):
     hop_limit: Annotated[int, Field(ge=1, le=64)]
     edge_evaluations: Annotated[int, Field(ge=0)]
     canonical_link_count: Annotated[int, Field(ge=0)]
+    improvement_passes: Annotated[int, Field(ge=1)]
 
 
 class CapPlanningResult(StrictModel):

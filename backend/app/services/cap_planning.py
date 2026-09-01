@@ -208,6 +208,30 @@ def _forest(roots: list[dict], nodes: list[dict], adjacency: dict[str, list[tupl
     return assignment
 
 
+def _assignment_signature(assignments: dict[str, dict]) -> tuple[tuple[str, str, str, int, float], ...]:
+    """A canonical comparison that never treats insertion order as an improvement."""
+    return tuple(
+        (item["node_id"], item["gateway_id"], item["parent_id"], item["hop"], item["distance_m"])
+        for _, item in sorted(assignments.items())
+    )
+
+
+def _improve_assignments(roots: list[dict], nodes: list[dict], adjacency: dict[str, list[tuple[str, float]]], node_limit: int, child_limit: int, hop_limit: int, appliance_counting: str, primary_locks: dict[str, str], parent_locks: dict[str, str], auto_assign: bool, initial: dict[str, dict]) -> tuple[dict[str, dict], int, list[str]]:
+    """Bounded deterministic constrained rebuilds after greedy CAP selection.
+
+    The forest builder applies every hard limit and lock on each pass.  A stable
+    canonical result ends the phase immediately; a future implementation change
+    cannot silently make this an unbounded improvement loop.
+    """
+    current = initial
+    for pass_number in range(1, MAX_IMPROVEMENT_PASSES + 1):
+        rebuilt = _forest(roots, nodes, adjacency, node_limit, child_limit, hop_limit, appliance_counting, primary_locks, parent_locks, auto_assign)
+        if _assignment_signature(rebuilt) == _assignment_signature(current):
+            return rebuilt, pass_number, []
+        current = rebuilt
+    return current, MAX_IMPROVEMENT_PASSES, ["CAP deterministic improvement reached its safety pass cap; result remains non-optimal."]
+
+
 def _nodes_for_roots(nodes: list[dict], roots: list[dict], colocated_counting: str) -> list[dict]:
     if colocated_counting == "distinct_managed_node_once":
         return nodes
@@ -324,10 +348,15 @@ def calculate_cap_plan(project: Project) -> CapPlanningResult:
     else:
         score_trace = []
     active_nodes = _nodes_for_roots(nodes, selected, str(profile.colocated_fixture_counting.value))
-    assignments = _forest(selected, active_nodes, adjacency, node_limit, child_limit, hop_limit, str(profile.gateway_appliance_counting.value), inputs.primary_assignment_locks, inputs.parent_locks, auto_assign=profile.operation_mode == "recommend" or profile.auto_assign_unlocked_nodes)
+    auto_assign = profile.operation_mode == "recommend" or profile.auto_assign_unlocked_nodes
+    assignments = _forest(selected, active_nodes, adjacency, node_limit, child_limit, hop_limit, str(profile.gateway_appliance_counting.value), inputs.primary_assignment_locks, inputs.parent_locks, auto_assign=auto_assign)
+    improvement_passes = 1
+    improvement_warnings: list[str] = []
+    if profile.operation_mode == "recommend":
+        assignments, improvement_passes, improvement_warnings = _improve_assignments(selected, active_nodes, adjacency, node_limit, child_limit, hop_limit, str(profile.gateway_appliance_counting.value), inputs.primary_assignment_locks, inputs.parent_locks, auto_assign, assignments)
     unresolved = sorted(node["id"] for node in active_nodes if node["id"] not in assignments)
-    warnings = _redundancy(str(profile.redundancy.value), selected, active_nodes, adjacency, (node_limit, child_limit, hop_limit), str(profile.gateway_appliance_counting.value), inputs.primary_assignment_locks, inputs.parent_locks)
-    payload = {"model_version": "jnet1-graph-planning-1.0.0", "projected_crs": project.projected_crs, "disclaimer": DISCLAIMER, "heuristic": "deterministic non-optimal graph heuristic", "selected_candidate_ids": [r["candidate_id"] for r in selected], "assignments": [assignments[key] for key in sorted(assignments)], "canonical_links": [{"left_id": left, "right_id": right, "id": link_id, "distance_m": distance} for left, right, link_id, distance in canonical_links], "node_snapshots": [{"id": node["id"], "kind": "fixture_node", "source_pole_id": node["pole_id"], "candidate_id": None, "projected_x_m": node["x"], "projected_y_m": node["y"]} for node in nodes], "candidate_snapshots": [{"id": root["id"], "kind": "gateway_root", "source_pole_id": root["pole_id"], "candidate_id": root["candidate_id"], "projected_x_m": root["x"], "projected_y_m": root["y"]} for root in roots], "unresolved_node_ids": unresolved, "objective_trace": score_trace, "limits": {"link_distance_m": distance_limit, "node_limit": node_limit, "child_limit": child_limit, "hop_limit": hop_limit, "edge_evaluations": evaluations, "canonical_link_count": len(canonical_links)}, "provenance": {"constraints_catalog": {"version": CAP_CONSTRAINTS_VERSION, "sha256": CAP_CONSTRAINTS_SHA256}, "datasheet_revision": CAP_DATASHEET_REVISION, "profile_constraints": {name: getattr(profile, name).model_dump(mode="json") for name in ("product_mapping", "variant", "band_and_jurisdiction", "link_distance_m", "node_limit", "child_limit", "hop_limit", "gateway_appliance_counting", "colocated_fixture_counting", "redundancy")}, "operation_mode": profile.operation_mode, "projected_crs": project.projected_crs, "safety_caps": {"participating_nodes": MAX_PARTICIPATING_NODES, "candidate_sites": MAX_CANDIDATES, "selected_caps": MAX_SELECTED_CAPS, "vertices": MAX_VERTICES, "edge_evaluations": MAX_EDGE_EVALUATIONS, "edges": MAX_EDGES, "topology_links": MAX_TOPOLOGY_LINKS, "improvement_passes": MAX_IMPROVEMENT_PASSES, "n_plus_one_scenarios": MAX_N_PLUS_ONE_SCENARIOS, "serialized_payload_bytes": MAX_SERIALIZED_PAYLOAD_BYTES}}, "warnings": warnings}
+    warnings = [*_redundancy(str(profile.redundancy.value), selected, active_nodes, adjacency, (node_limit, child_limit, hop_limit), str(profile.gateway_appliance_counting.value), inputs.primary_assignment_locks, inputs.parent_locks), *improvement_warnings]
+    payload = {"model_version": "jnet1-graph-planning-1.0.0", "projected_crs": project.projected_crs, "disclaimer": DISCLAIMER, "heuristic": "deterministic non-optimal graph heuristic", "selected_candidate_ids": [r["candidate_id"] for r in selected], "assignments": [assignments[key] for key in sorted(assignments)], "canonical_links": [{"left_id": left, "right_id": right, "id": link_id, "distance_m": distance} for left, right, link_id, distance in canonical_links], "node_snapshots": [{"id": node["id"], "kind": "fixture_node", "source_pole_id": node["pole_id"], "candidate_id": None, "projected_x_m": node["x"], "projected_y_m": node["y"]} for node in nodes], "candidate_snapshots": [{"id": root["id"], "kind": "gateway_root", "source_pole_id": root["pole_id"], "candidate_id": root["candidate_id"], "projected_x_m": root["x"], "projected_y_m": root["y"]} for root in roots], "unresolved_node_ids": unresolved, "objective_trace": score_trace, "limits": {"link_distance_m": distance_limit, "node_limit": node_limit, "child_limit": child_limit, "hop_limit": hop_limit, "edge_evaluations": evaluations, "canonical_link_count": len(canonical_links), "improvement_passes": improvement_passes}, "provenance": {"constraints_catalog": {"version": CAP_CONSTRAINTS_VERSION, "sha256": CAP_CONSTRAINTS_SHA256}, "datasheet_revision": CAP_DATASHEET_REVISION, "profile_constraints": {name: getattr(profile, name).model_dump(mode="json") for name in ("product_mapping", "variant", "band_and_jurisdiction", "link_distance_m", "node_limit", "child_limit", "hop_limit", "gateway_appliance_counting", "colocated_fixture_counting", "redundancy")}, "operation_mode": profile.operation_mode, "projected_crs": project.projected_crs, "safety_caps": {"participating_nodes": MAX_PARTICIPATING_NODES, "candidate_sites": MAX_CANDIDATES, "selected_caps": MAX_SELECTED_CAPS, "vertices": MAX_VERTICES, "edge_evaluations": MAX_EDGE_EVALUATIONS, "edges": MAX_EDGES, "topology_links": MAX_TOPOLOGY_LINKS, "improvement_passes": MAX_IMPROVEMENT_PASSES, "n_plus_one_scenarios": MAX_N_PLUS_ONE_SCENARIOS, "serialized_payload_bytes": MAX_SERIALIZED_PAYLOAD_BYTES}}, "warnings": warnings}
     digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
     result = CapPlanningResult(result_sha256=digest, assignments=[CapAssignment(**item) for item in payload["assignments"]], canonical_links=[CapGraphLink(**item) for item in payload["canonical_links"]], node_snapshots=[CapVertexSnapshot(**item) for item in payload["node_snapshots"]], candidate_snapshots=[CapVertexSnapshot(**item) for item in payload["candidate_snapshots"]], objective_trace=[CapScoreTrace(**item) for item in payload["objective_trace"]], limits=CapPlanningLimits(**payload["limits"]), **{key: value for key, value in payload.items() if key not in {"assignments", "canonical_links", "node_snapshots", "candidate_snapshots", "objective_trace", "limits"}})
     if len(result.model_dump_json().encode("utf-8")) > MAX_SERIALIZED_PAYLOAD_BYTES:

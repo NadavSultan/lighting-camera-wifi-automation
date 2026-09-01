@@ -361,6 +361,22 @@ def test_p6_al_04_rebuild_enforces_node_child_hop_and_distance_limits_together()
     assert result.unresolved_node_ids == ["fixture/p1"]
 
 
+def test_p6_al_04_deterministic_improvement_rebuild_is_bounded_and_recorded(monkeypatch):
+    project = project_with_test_only_inputs()
+    result = calculate_cap_plan(project)
+    assert result.limits.improvement_passes == 1
+    assert result.limits.improvement_passes <= result.provenance["safety_caps"]["improvement_passes"]
+
+    assignment = {"fixture/p0": {"node_id": "fixture/p0", "gateway_id": "gateway/cap-a", "parent_id": "gateway/cap-a", "hop": 1, "distance_m": 0.0}}
+    changed = {"fixture/p0": {**assignment["fixture/p0"], "distance_m": 1.0}}
+    calls = iter([changed, assignment])
+    monkeypatch.setattr(cap_planning, "MAX_IMPROVEMENT_PASSES", 1)
+    monkeypatch.setattr(cap_planning, "_forest", lambda *args, **kwargs: next(calls))
+    _, passes, warnings = cap_planning._improve_assignments([], [], {}, 1, 1, 1, "excluded", {}, {}, True, assignment)
+    assert passes == 1
+    assert warnings == ["CAP deterministic improvement reached its safety pass cap; result remains non-optimal."]
+
+
 def test_p6_rd_02_n_plus_one_reassigns_or_fails_for_capacity_stranding():
     project = project_with_test_only_inputs()
     project.cap_planning_inputs.candidates = [
@@ -374,18 +390,22 @@ def test_p6_rd_02_n_plus_one_reassigns_or_fails_for_capacity_stranding():
         calculate_cap_plan(project)
 
 
-def test_p6_sf_01_candidate_safety_boundary_is_atomic():
+def test_p6_sf_01_candidate_safety_boundary_and_boundary_plus_one_are_atomic():
     project = project_with_test_only_inputs()
     candidate = project.cap_planning_inputs.candidates[0]
+    project.cap_planning_inputs.candidates = [candidate.model_copy(update={"id": f"cap-{index}"}) for index in range(500)]
+    assert calculate_cap_plan(project).selected_candidate_ids == ["cap-0"]
     project.cap_planning_inputs.candidates = [candidate.model_copy(update={"id": f"cap-{index}"}) for index in range(501)]
     with pytest.raises(ValueError, match="candidate sites exceed safety cap 500"):
         calculate_cap_plan(project)
     assert project.cap_calculations.result is None
 
 
-def test_p6_sf_01_selected_cap_boundary_plus_one_is_atomic():
+def test_p6_sf_01_selected_cap_boundary_and_boundary_plus_one_are_atomic():
     project = project_with_test_only_inputs()
     candidate = project.cap_planning_inputs.candidates[0]
+    project.cap_planning_inputs.candidates = [candidate.model_copy(update={"id": f"cap-{index}", "locked_selected": True}) for index in range(64)]
+    assert len(calculate_cap_plan(project).selected_candidate_ids) == 64
     project.cap_planning_inputs.candidates = [candidate.model_copy(update={"id": f"cap-{index}", "locked_selected": True}) for index in range(65)]
     with pytest.raises(ValueError, match="selected candidates exceed safety cap 64"):
         calculate_cap_plan(project)
@@ -428,6 +448,13 @@ def test_p6_sf_01_real_participating_node_boundary_and_boundary_plus_one_are_ato
     with pytest.raises(ValueError, match="eligible nodes exceed safety cap 2000"):
         calculate_cap_plan(project)
     assert project.cap_calculations.result is None
+
+
+def test_p6_sf_01_text_cap_accepts_boundary_and_rejects_boundary_plus_one():
+    candidate = CapCandidateSite(id="cap-boundary", kind="manual_non_pole", wgs84_coordinate=(-80.0, 25.0), notes="x" * 2000)
+    assert len(candidate.notes) == 2000
+    with pytest.raises(ValueError, match="at most 2000 characters"):
+        CapCandidateSite(id="cap-boundary-plus-one", kind="manual_non_pole", wgs84_coordinate=(-80.0, 25.0), notes="x" * 2001)
 
 
 def test_p6_fp_01_input_fingerprint_invalidates_results_without_mutating_inputs():

@@ -3303,6 +3303,11 @@
             "type": "integer",
             "minimum": 0.0,
             "title": "Canonical Link Count"
+          },
+          "improvement_passes": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Improvement Passes"
           }
         },
         "additionalProperties": false,
@@ -3313,7 +3318,8 @@
           "child_limit",
           "hop_limit",
           "edge_evaluations",
-          "canonical_link_count"
+          "canonical_link_count",
+          "improvement_passes"
         ],
         "title": "CapPlanningLimits"
       },
