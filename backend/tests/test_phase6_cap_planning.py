@@ -6,6 +6,7 @@ from pyproj import Transformer
 
 from app.main import create_app
 from app.models import CapCandidateSite, CapConstraintValue, CapKnowledge, CapNodeDisposition, CapPlanningInputs, FixtureType, PoleEdit, Project, SourceLayer, SourcePole, migrate_project_payload
+from app.services import cap_planning
 from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, invalidate_stale_cap_results
 from app.services.store import ProjectStore
 
@@ -333,6 +334,38 @@ def test_p6_sf_01_candidate_safety_boundary_is_atomic():
     assert project.cap_calculations.result is None
 
 
+def test_p6_sf_01_selected_cap_boundary_plus_one_is_atomic():
+    project = project_with_test_only_inputs()
+    candidate = project.cap_planning_inputs.candidates[0]
+    project.cap_planning_inputs.candidates = [candidate.model_copy(update={"id": f"cap-{index}", "locked_selected": True}) for index in range(65)]
+    with pytest.raises(ValueError, match="selected candidates exceed safety cap 64"):
+        calculate_cap_plan(project)
+    assert project.cap_calculations.result is None
+
+
+def test_p6_sf_01_graph_caps_and_serialized_payload_fail_before_any_result(monkeypatch):
+    vertices = [{"id": "a", "x": 0.0, "y": 0.0}, {"id": "b", "x": 1.0, "y": 0.0}]
+    monkeypatch.setattr(cap_planning, "MAX_VERTICES", 1)
+    with pytest.raises(ValueError, match="vertices exceed safety cap 1"):
+        _adjacency(vertices, 2)
+    monkeypatch.setattr(cap_planning, "MAX_VERTICES", 2)
+    monkeypatch.setattr(cap_planning, "MAX_EDGE_EVALUATIONS", 0)
+    with pytest.raises(ValueError, match="distance evaluations exceed safety cap 0"):
+        _adjacency(vertices, 2)
+    monkeypatch.setattr(cap_planning, "MAX_EDGE_EVALUATIONS", 1)
+    monkeypatch.setattr(cap_planning, "MAX_EDGES", 0)
+    with pytest.raises(ValueError, match="graph edges exceed safety cap 0"):
+        _adjacency(vertices, 2)
+    monkeypatch.setattr(cap_planning, "MAX_VERTICES", 2500)
+    monkeypatch.setattr(cap_planning, "MAX_EDGE_EVALUATIONS", 250000)
+    monkeypatch.setattr(cap_planning, "MAX_EDGES", 250000)
+    monkeypatch.setattr(cap_planning, "MAX_SERIALIZED_PAYLOAD_BYTES", 1)
+    project = project_with_test_only_inputs()
+    with pytest.raises(ValueError, match="serialized planning payload exceeds safety cap 1 bytes"):
+        calculate_cap_plan(project)
+    assert project.cap_calculations.result is None
+
+
 def test_p6_fp_01_input_fingerprint_invalidates_results_without_mutating_inputs():
     project = project_with_test_only_inputs()
     applied = apply_cap_result(project, calculate_cap_plan(project))
@@ -353,6 +386,7 @@ def test_p6_pr_01_provenance_captures_catalog_datasheet_constraints_and_crs():
     assert provenance["projected_crs"] == "EPSG:32617"
     assert provenance["profile_constraints"]["link_distance_m"]["unit"] == "m"
     assert provenance["profile_constraints"]["node_limit"]["source"] == "test-only approved assumption"
+    assert provenance["safety_caps"]["serialized_payload_bytes"] == 25 * 1024 * 1024
 
 
 def test_p6_ap_01_and_p6_ex_01_successful_calculation_returns_complete_project_and_reopens(tmp_path: Path):
@@ -383,3 +417,19 @@ def test_p6_ap_02_invalid_manual_constraints_are_422_and_preserve_exact_project_
     })
     assert response.status_code == 422
     assert project_path.read_bytes() == before
+
+
+def test_p6_ex_01_kml_export_excludes_cap_candidate_data(tmp_path: Path):
+    client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
+    source_path = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+    imported = client.post("/api/projects/import", content=source_path.read_bytes(), headers={"X-Filename": source_path.name, "Content-Type": "application/octet-stream"})
+    assert imported.status_code == 201
+    project = imported.json()
+    inputs = project["cap_planning_inputs"]
+    inputs["candidates"] = [{"id": "cap-proof-not-exported", "kind": "existing_pole", "pole_id": project["source"]["poles"][0]["id"]}]
+    replaced = client.put(f"/api/projects/{project['id']}/cap-planning-inputs", json=inputs)
+    assert replaced.status_code == 200, replaced.text
+    exported = client.get(f"/api/projects/{project['id']}/export/kml")
+    assert exported.status_code == 200
+    assert b"cap-proof-not-exported" not in exported.content
+    assert exported.content.count(b"<Placemark") == 74
