@@ -36,12 +36,20 @@ CAP_CONSTRAINTS_VERSION = "1.0.0"
 CAP_DATASHEET_REVISION = "Juganu JNET1 Gateway data sheet Rev 1.2"
 
 
+def _effective_coordinate(project: Project, pole) -> tuple[float, float]:
+    """Return an authorized overlay coordinate without altering immutable source data."""
+    edit = project.pole_edits.get(pole.id)
+    if edit and edit.location_edit_authorized and edit.longitude is not None and edit.latitude is not None:
+        return edit.longitude, edit.latitude
+    return pole.longitude, pole.latitude
+
+
 def cap_input_sha256(project: Project) -> str:
     payload = project.cap_planning_inputs.model_dump(mode="json")
     payload["projected_crs"] = project.projected_crs
     payload["model_version"] = "jnet1-graph-planning-1.0.0"
     payload["constants"] = {"tolerance_m": EDGE_TOLERANCE_M, "participating_nodes": MAX_PARTICIPATING_NODES, "candidates": MAX_CANDIDATES, "selected_caps": MAX_SELECTED_CAPS, "vertices": MAX_VERTICES, "edge_evaluations": MAX_EDGE_EVALUATIONS, "edges": MAX_EDGES, "topology_links": MAX_TOPOLOGY_LINKS, "improvement_passes": MAX_IMPROVEMENT_PASSES, "n_plus_one_scenarios": MAX_N_PLUS_ONE_SCENARIOS, "serialized_payload_bytes": MAX_SERIALIZED_PAYLOAD_BYTES}
-    payload["poles"] = [[p.id, p.longitude, p.latitude, p.sequence_index, (project.pole_edits.get(p.id).fixture_type.value if project.pole_edits.get(p.id) and project.pole_edits.get(p.id).fixture_type else project.defaults.fixture_type.value), (project.pole_edits.get(p.id).active if project.pole_edits.get(p.id) and project.pole_edits.get(p.id).active is not None else True)] for p in project.source.poles]
+    payload["poles"] = [[p.id, *_effective_coordinate(project, p), p.sequence_index, (project.pole_edits.get(p.id).fixture_type.value if project.pole_edits.get(p.id) and project.pole_edits.get(p.id).fixture_type else project.defaults.fixture_type.value), (project.pole_edits.get(p.id).active if project.pole_edits.get(p.id) and project.pole_edits.get(p.id).active is not None else True)] for p in project.source.poles]
     return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
 
 
@@ -244,7 +252,7 @@ def calculate_cap_plan(project: Project) -> CapPlanningResult:
         active = edit.active if edit and edit.active is not None else True
         if not active or getattr(profile.node_policy, fixture.value) is not CapNodeDisposition.NODE or pole.id in inputs.excluded_node_ids:
             continue
-        x, y = transformer.transform(pole.longitude, pole.latitude)
+        x, y = transformer.transform(*_effective_coordinate(project, pole))
         if not all(math.isfinite(v) for v in (x, y)):
             raise ValueError(f"CAP node {pole.id} projected to non-finite coordinates")
         nodes.append({"id": f"fixture/{pole.id}", "pole_id": pole.id, "x": x, "y": y})
@@ -259,7 +267,7 @@ def calculate_cap_plan(project: Project) -> CapPlanningResult:
             if profile.operation_mode == "validate" and (candidate.locked_selected or candidate.id in inputs.locked_selected_candidate_ids):
                 raise ValueError(f"CAP selected candidate {candidate.id} has unresolved feasibility")
             continue
-        coordinate = (source[candidate.pole_id].longitude, source[candidate.pole_id].latitude) if candidate.kind == "existing_pole" else candidate.wgs84_coordinate
+        coordinate = _effective_coordinate(project, source[candidate.pole_id]) if candidate.kind == "existing_pole" else candidate.wgs84_coordinate
         try:
             x, y = transformer.transform(*coordinate)
         except ProjError as exc:

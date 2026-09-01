@@ -7,7 +7,7 @@ from pyproj import Transformer
 from app.main import create_app
 from app.models import CapCandidateSite, CapConstraintValue, CapKnowledge, CapNodeDisposition, CapPlanningInputs, FixtureType, PoleEdit, Project, SourceLayer, SourcePole, migrate_project_payload
 from app.services import cap_planning
-from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, invalidate_stale_cap_results
+from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, cap_input_sha256, invalidate_stale_cap_results
 from app.services.store import ProjectStore
 
 
@@ -272,6 +272,21 @@ def test_p6_gr_02_manual_non_pole_candidate_is_separate_user_data_and_not_a_fixt
     assert result.candidate_snapshots[0].source_pole_id is None
     assert result.candidate_snapshots[0].candidate_id == "manual-cap"
     assert all(snapshot.id.startswith("fixture/") for snapshot in result.node_snapshots)
+
+
+def test_p6_gr_02_authorized_effective_coordinate_changes_graph_and_fingerprint_without_source_mutation():
+    project = project_with_test_only_inputs()
+    source_coordinate = (project.source.poles[0].longitude, project.source.poles[0].latitude)
+    before = cap_input_sha256(project)
+    project.pole_edits["p0"] = project.pole_edits["p0"].model_copy(update={
+        "location_edit_authorized": True, "longitude": source_coordinate[0] + 0.0001, "latitude": source_coordinate[1],
+    })
+    result = calculate_cap_plan(project)
+    gateway = next(item for item in result.candidate_snapshots if item.id == "gateway/cap-a")
+    fixture = next(item for item in result.node_snapshots if item.id == "fixture/p0")
+    assert cap_input_sha256(project) != before
+    assert gateway.projected_x_m == fixture.projected_x_m
+    assert (project.source.poles[0].longitude, project.source.poles[0].latitude) == source_coordinate
 
 
 def test_p6_gr_03_chain_topology_and_shuffled_source_input_are_canonical():
