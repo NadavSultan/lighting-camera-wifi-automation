@@ -60,6 +60,8 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(workspace, /Exclude current CAP node/);
   assert.match(workspace, /Lock current node to this CAP/);
   assert.match(workspace, /primary_assignment_locks/);
+  assert.match(workspace, /Lock current parent to this CAP/);
+  assert.match(workspace, /parent_locks/);
   assert.match(workspace, /CAP topology, score trace, and provenance/);
   assert.match(workspace, /distance-qualified conceptual link; not RF-predicted/);
   assert.match(inspector, /Restore source\/default values/);
