@@ -455,6 +455,20 @@ def test_p6_ap_02_invalid_manual_constraints_are_422_and_preserve_exact_project_
     assert project_path.read_bytes() == before
 
 
+def test_p6_ap_01_p6_ap_02_cap_api_missing_and_mode_conflicts_are_atomic(tmp_path: Path):
+    project = project_with_test_only_inputs()
+    store = ProjectStore(tmp_path / "projects")
+    saved = store.save(project)
+    project_path = tmp_path / "projects" / saved.id / "project.json"
+    before = project_path.read_bytes()
+    client = TestClient(create_app(store))
+    missing = client.delete("/api/projects/missing/cap-planning/candidates/nope")
+    assert missing.status_code == 404
+    conflict = client.post(f"/api/projects/{saved.id}/cap-planning/validate", json=saved.model_dump(mode="json"))
+    assert conflict.status_code == 409
+    assert project_path.read_bytes() == before
+
+
 def test_p6_ex_01_kml_export_excludes_cap_candidate_data(tmp_path: Path):
     client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
     source_path = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
