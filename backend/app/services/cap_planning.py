@@ -277,6 +277,8 @@ def calculate_cap_plan(project: Project) -> CapPlanningResult:
     missing_locks = set(inputs.locked_selected_candidate_ids) - set(candidate_by_id)
     if missing_locks:
         raise ValueError(f"CAP selected lock references excluded or missing candidate: {sorted(missing_locks)}")
+    if not roots:
+        raise ValueError("CAP preflight blocked: no approved candidate sites remain after exclusions or feasibility checks")
     selected = [root for root in roots if root["locked"] or root["candidate_id"] in inputs.locked_selected_candidate_ids]
     if profile.operation_mode == "validate" and not selected:
         raise ValueError("CAP validate mode requires explicit selected CAP locks")

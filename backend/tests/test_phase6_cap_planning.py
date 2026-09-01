@@ -198,6 +198,19 @@ def test_p6_mn_01_parent_cycle_and_missing_selection_locks_fail_closed():
         calculate_cap_plan(project)
 
 
+def test_p6_mn_01_prohibited_or_excluded_candidate_is_never_silently_selected():
+    project = project_with_test_only_inputs()
+    project.cap_planning_inputs.candidates[0].prohibited = True
+    with pytest.raises(ValueError, match="selected lock references excluded or missing candidate"):
+        project.cap_planning_inputs.locked_selected_candidate_ids = ["cap-a"]
+        calculate_cap_plan(project)
+    project = project_with_test_only_inputs()
+    project.cap_planning_inputs.excluded_candidate_ids = ["cap-a"]
+    with pytest.raises(ValueError, match="no approved candidate sites"):
+        calculate_cap_plan(project)
+    assert project.cap_calculations.result is None
+
+
 def test_p6_ct_01_merged_colocated_fixture_is_not_an_implicit_node():
     project = project_with_test_only_inputs()
     project.cap_planning_inputs.profile.colocated_fixture_counting.value = "merged_not_separate"
