@@ -379,6 +379,15 @@ def test_p6_al_04_deterministic_improvement_rebuild_is_bounded_and_recorded(monk
     assert warnings == ["CAP deterministic improvement reached its safety pass cap; result remains non-optimal."]
 
 
+def test_p6_sf_01_improvement_pass_cap_exercises_all_eight_configured_passes(monkeypatch):
+    assignment = {"fixture/p0": {"node_id": "fixture/p0", "gateway_id": "gateway/cap-a", "parent_id": "gateway/cap-a", "hop": 1, "distance_m": 0.0}}
+    changing = iter([{**assignment, "fixture/p0": {**assignment["fixture/p0"], "distance_m": float(index + 1)}} for index in range(8)])
+    monkeypatch.setattr(cap_planning, "_forest", lambda *args, **kwargs: next(changing))
+    _, passes, warnings = cap_planning._improve_assignments([], [], {}, 1, 1, 1, "excluded", {}, {}, True, assignment)
+    assert passes == 8
+    assert warnings == ["CAP deterministic improvement reached its safety pass cap; result remains non-optimal."]
+
+
 def test_p6_rd_02_n_plus_one_reassigns_or_fails_for_capacity_stranding():
     project = project_with_test_only_inputs()
     project.cap_planning_inputs.candidates = [
@@ -390,6 +399,20 @@ def test_p6_rd_02_n_plus_one_reassigns_or_fails_for_capacity_stranding():
     project.cap_planning_inputs.profile.node_limit.value = 1
     with pytest.raises(ValueError, match=r"N\+1 graph validation failed"):
         calculate_cap_plan(project)
+
+
+def test_p6_sf_01_n_plus_one_scenario_cap_exercises_64_removals_and_rejects_65(monkeypatch):
+    selected = [{"id": f"gateway/cap-{index}", "candidate_id": f"cap-{index}"} for index in range(64)]
+    calls: list[tuple[str, ...]] = []
+    def successful_forest(roots, *args, **kwargs):
+        calls.append(tuple(root["id"] for root in roots))
+        return {}
+    monkeypatch.setattr(cap_planning, "_forest", successful_forest)
+    warnings = cap_planning._redundancy("n_plus_one_validation", selected, [], {}, (1, 1, 1), "excluded", {}, {})
+    assert len(calls) == 64
+    assert warnings == ["N+1 result is a deterministic distance-graph/capacity stress test only; it does not establish RF or failover behavior."]
+    with pytest.raises(ValueError, match="removal scenarios exceed safety cap 64"):
+        cap_planning._redundancy("n_plus_one_validation", [*selected, {"id": "gateway/cap-64", "candidate_id": "cap-64"}], [], {}, (1, 1, 1), "excluded", {}, {})
 
 
 def test_p6_sf_01_candidate_safety_boundary_and_boundary_plus_one_are_atomic():
