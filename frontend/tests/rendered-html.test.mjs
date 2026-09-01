@@ -52,6 +52,12 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(workspace, /CAP_DISCLAIMER/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /CAP candidate \/ selected sites/);
+  assert.match(workspace, /Add distinct manual non-pole CAP site/);
+  assert.match(workspace, /Manual non-pole site; never a customer lighting pole/);
+  assert.match(workspace, /Mark test-only feasible/);
+  assert.match(workspace, /Lock selected/);
+  assert.match(workspace, /CAP topology, score trace, and provenance/);
+  assert.match(workspace, /distance-qualified conceptual link; not RF-predicted/);
   assert.match(inspector, /Restore source\/default values/);
   assert.match(workspace, /Apply selected fields/);
   assert.match(inspector, /Explicit model selection required/);
@@ -89,6 +95,10 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(map, /calculation-area-fill/);
   assert.match(map, /lighting-calculation-points/);
   assert.match(map, /lighting-heat-points/);
+  assert.match(map, /cap-candidate-sites/);
+  assert.match(map, /cap-manual-candidate-sites/);
+  assert.match(map, /#34d399/);
+  assert.match(map, /Manual non-pole CAP site/);
   assert.match(packageJson, /maplibre-gl/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
@@ -114,6 +124,9 @@ test("Phase 6 CAP helper keeps unknowns blocker-first and does not compare unrel
   assert.equal(isCapResultStale({ cap_calculations: { status: "calculated", calculation_input_sha256: "input", result: { result_sha256: "result" } } }), false);
   assert.equal(isCapResultStale({ cap_calculations: { status: "not-calculated", calculation_input_sha256: null, result: { result_sha256: "result" } } }), true);
   assert.match(CAP_DISCLAIMER, /not RF-predicted/);
+  assert.equal(capOperationEnabled({ cap_planning_inputs: ready }, "validate"), false);
+  ready.profile.operation_mode = "validate";
+  assert.equal(capOperationEnabled({ cap_planning_inputs: ready }, "validate"), true);
 });
 
 test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {

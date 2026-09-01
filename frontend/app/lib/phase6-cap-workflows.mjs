@@ -22,7 +22,10 @@ export function isCapResultStale(project) {
 
 function significantCandidate(candidate) {
   if (!candidate) return candidate;
-  const { notes, created_at, modified_at, ...significant } = candidate;
+  const significant = { ...candidate };
+  delete significant.notes;
+  delete significant.created_at;
+  delete significant.modified_at;
   return significant;
 }
 
