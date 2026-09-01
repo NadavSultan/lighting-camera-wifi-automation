@@ -312,6 +312,27 @@ def test_p6_rd_01_and_p6_rd_03_use_exact_non_failover_diagnostics():
     assert result.warnings == ["Redundancy is user-supplied only; this result makes no redundancy acceptance statement."]
 
 
+def test_p6_al_04_rebuild_enforces_node_child_hop_and_distance_limits_together():
+    project = project_with_test_only_inputs()
+    profile = project.cap_planning_inputs.profile
+    profile.node_limit.value = 1
+    result = calculate_cap_plan(project)
+    assert len(result.assignments) == 1
+    assert result.unresolved_node_ids == ["fixture/p1"]
+    profile.node_limit.value = 100
+    profile.child_limit.value = 1
+    profile.hop_limit.value = 1
+    result = calculate_cap_plan(project)
+    assert len(result.assignments) == 1
+    assert result.unresolved_node_ids == ["fixture/p1"]
+    profile.child_limit.value = 16
+    profile.hop_limit.value = 64
+    profile.link_distance_m.value = 0.1
+    result = calculate_cap_plan(project)
+    assert result.assignments[0].node_id == "fixture/p0"
+    assert result.unresolved_node_ids == ["fixture/p1"]
+
+
 def test_p6_rd_02_n_plus_one_reassigns_or_fails_for_capacity_stranding():
     project = project_with_test_only_inputs()
     project.cap_planning_inputs.candidates = [
