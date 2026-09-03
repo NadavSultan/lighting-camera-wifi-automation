@@ -59,7 +59,7 @@ Status: complete and formally closed on 2026-09-03 after implementation readines
 
 ## Phase 7 - reporting
 
-Status: planning authorized on 2026-09-03; planning decisions and implementation are not yet approved.
+Status: all planning decisions approved on 2026-09-03; implementation is not authorized.
 
 - KML/KMZ layers, CSV/XLSX schedules, calculations, assumptions, validations, JSON archive, PDF summary, and future presentation model.
 

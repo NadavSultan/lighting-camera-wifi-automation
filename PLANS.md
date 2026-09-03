@@ -4,11 +4,11 @@ This is the execution plan index. The current proposed Phase 7 requirements, dec
 
 ## Active plan
 
-Phase 7 planning is active under `harness/phases/phase-07.md`. Review and explicitly approve or replace planning decisions `P7-D01` through `P7-D15`. Phase 7 implementation must not begin without a separate explicit implementation authorization.
+Phase 7 planning is complete under `harness/phases/phase-07.md`, and decisions `P7-D01` through `P7-D15` are approved. Phase 7 implementation must not begin without a separate explicit implementation authorization.
 
 ## Guardrails
 
-- No Phase 7 implementation while planning decisions remain unapproved.
+- No Phase 7 implementation until separately and explicitly authorized.
 - No source-pole creation, movement, redistribution, optimization, or deletion.
 - No invented CAP operational values, RF predictions, compliance claims, or reporting exports.
 - Ordinary failures enter the logged repair/retry loop and do not stop the phase. Only a blocker proven under `AGENTS.md` may pause execution for user direction.

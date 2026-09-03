@@ -2,9 +2,9 @@
 
 Contract prepared: 2026-09-03
 
-Status: **PLANNING COMPLETE — IMPLEMENTATION NOT AUTHORIZED**
+Status: **PLANNING DECISIONS APPROVED — IMPLEMENTATION NOT AUTHORIZED**
 
-Phase gate: planning authorized; policy decisions below await explicit approval; implementation remains gated.
+Phase gate: all policy decisions below were explicitly approved by the user on 2026-09-03; implementation remains gated pending separate authorization.
 
 ## Objective
 
@@ -22,11 +22,11 @@ Phase 7 completes the approved product roadmap. Later user-requested fixes, usab
 - The backend dependency set contains no dedicated XLSX or PDF generation library. Any dependency selection requires explicit approval and locked verification before implementation.
 - `README.md` remains historically stale and must be refreshed only inside an authorized Phase 7 documentation boundary.
 
-## Dependencies and decisions required before implementation
+## Approved dependencies and implementation-policy decisions
 
-The recommendations below are planning proposals, not approved decisions. Phase 7 implementation must not start until the user explicitly approves or replaces each item.
+The user explicitly approved every decision below on 2026-09-03. They are binding for future Phase 7 implementation but do not authorize implementation.
 
-| ID | Recommended policy | Reason / boundary |
+| ID | Approved policy | Reason / boundary |
 |---|---|---|
 | P7-D01 | Produce one `.zip` package containing a manifest, project JSON archive, derived engineering KMZ, CSV schedules, XLSX workbook, PDF summary, and presentation-model JSON. Individual downloads are views of the same canonical model. | One auditable artifact with hashes avoids mismatched exports. |
 | P7-D02 | Keep the existing `*-updated.kml` behavior unchanged and CAP-free. Put derived camera/lighting/Wi-Fi/CAP layers only in a separately named engineering KMZ with explicit conceptual/derived labels. | Preserves the accepted source/edit export contract. |
@@ -79,7 +79,7 @@ Implementation authorization should permit only a new `backend/app/services/repo
 
 | ID | Milestone | Required result | Verification command |
 |---|---|---|---|
-| M0 | Authority, decisions, preflight, boundary | P7-D01..D15 approved/replaced; base/diff/runtime/dependency/license/browser preflight recorded | Git status/HEAD/diff plus phase work-record preflight |
+| M0 | Authority, decisions, preflight, boundary | P7-D01..D15 approval verified; base/diff/runtime/dependency/license/browser preflight recorded | Git status/HEAD/diff plus phase work-record preflight |
 | M1 | Strict report model and migration | `2.7.0` strict models; all prior versions migrate losslessly/idempotently | backend selector `-k "p7_dm or p7_mg"` |
 | M2 | Snapshot, validation, fingerprint, manifest | Stable separation/order/status/hashes and fixed-clock byte determinism | backend selector `-k "p7_snapshot or p7_manifest or p7_fp"` |
 | M3 | CSV and XLSX | Same canonical rows/units/statuses; injection/path/text limits enforced | backend selector `-k "p7_csv or p7_xlsx or p7_security"` |
@@ -164,7 +164,7 @@ M9 must also validate ZIP paths/hashes, parse every CSV, open/inspect XLSX, pars
 
 ## Allowed stopping conditions
 
-- Stop before implementation while P7-D01..D15 remain unapproved/unreplaced.
+- Stop before implementation until a separate explicit Phase 7 implementation authorization is recorded.
 - Stop if continuing needs an unapproved dependency/license, external service, active-content format, prior-phase behavior change, source mutation, unsupported claim, new product decision, or boundary expansion.
 - Stop if required deterministic/rendered verification cannot pass truthfully after recovery is exhausted.
 - Normal implementation stop is a passing readiness manifest and independent-QA handoff. A later seal closes the roadmap but does not authorize post-roadmap changes.
@@ -179,4 +179,4 @@ M9 must also validate ZIP paths/hashes, parse every CSV, open/inspect XLSX, pars
 
 ## Exact next action
 
-Review and explicitly approve or replace planning decisions `P7-D01` through `P7-D15`. Do not start implementation until that decision record and a separate implementation authorization exist.
+Obtain separate explicit Phase 7 implementation authorization. Do not change product code, dependencies, versions, schemas, tests, or generated contracts before that authorization.

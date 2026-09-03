@@ -17,7 +17,7 @@ Before planning or changing code, every future session must read these files in 
 9. `PLANS.md`
 10. `OPERATIONS.md`
 
-Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-6 are accepted and formally closed. Phase 6 closed on 2026-09-03 after implementation readiness, independent QA PASS, master gate PASS, and a valid phase seal. Phase 7 planning is authorized; its proposed policy decisions and implementation remain unapproved and gated.
+Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-6 are accepted and formally closed. Phase 6 closed on 2026-09-03 after implementation readiness, independent QA PASS, master gate PASS, and a valid phase seal. Phase 7 planning decisions are approved; implementation remains unauthorized and gated.
 
 ## Durable execution workflow
 
@@ -50,7 +50,7 @@ A phase is not complete merely because implementation is committed or a completi
 - Treat WGS84 coordinates as interchange/display data only. Select a local projected CRS in metres for distance, area, coverage, or later photometric calculations.
 - Do not infer CAP limits, fixture applicability, photometric conventions, or analytics performance. Record an assumption or block the feature.
 - Camera downward angle is measured below horizontal: 0 degrees is horizontal and 90 degrees is vertically down.
-- Phase work must remain gated. Phases 1-6 are closed. Phase 7 planning is authorized, but its policy decisions and implementation require separate explicit approval.
+- Phase work must remain gated. Phases 1-6 are closed. All Phase 7 planning decisions are approved, but implementation requires separate explicit authorization.
 
 ## Development
 

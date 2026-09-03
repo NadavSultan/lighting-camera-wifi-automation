@@ -116,4 +116,4 @@ Phase 6 implementation is `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-o
 
 ## Current Phase 7 planning state
 
-The user authorized Phase 7 planning on 2026-09-03. `harness/phases/phase-07.md` records proposed decisions `P7-D01` through `P7-D15`. They are recommendations, not approvals. Phase 7 implementation, dependencies, versions/schema changes, and report generation remain unauthorized until the decisions and implementation are separately approved.
+The user authorized Phase 7 planning and then explicitly approved every decision `P7-D01` through `P7-D15` on 2026-09-03. `harness/phases/phase-07.md` is the binding planning contract and DL-018 records the approval. Phase 7 implementation, dependencies, versions/schema changes, and report generation remain unauthorized until a separate explicit implementation authorization.

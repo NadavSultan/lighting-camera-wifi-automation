@@ -4,11 +4,11 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-Complete and review the Phase 7 reporting/export plan while preserving existing-pole mode, immutable source data, and all accepted Phase 1-6 behaviour.
+Preserve the approved Phase 7 reporting/export plan while awaiting separate implementation authorization.
 
 Controlling planning record: `harness/phases/phase-07.md`.
 
-Status: planning complete; decisions `P7-D01` through `P7-D15` await explicit approval; implementation is unauthorized.
+Status: planning complete and decisions `P7-D01` through `P7-D15` approved on 2026-09-03; implementation is unauthorized.
 
 Phase 6 remains closed by its master decision and valid seal. Phase 7 planning evidence does not authorize product changes.
 
@@ -22,7 +22,7 @@ Phase 6 remains closed by its master decision and valid seal. Phase 7 planning e
 | 4 | closed | `docs/phase-4-master-gate-decision-2026-08-26.md` |
 | 5 | closed | `docs/phase-5-master-gate-decision-2026-08-27.md` |
 | 6 | closed | `docs/phase-6-master-gate-decision-2026-09-03.md`; `harness/seals/phase-06.md` |
-| 7 | planning authorized; implementation gated | `harness/phases/phase-07.md` |
+| 7 | planning decisions approved; implementation gated | `harness/phases/phase-07.md`; `docs/decision-log.md` DL-018 |
 
 ## Explicit unknowns
 

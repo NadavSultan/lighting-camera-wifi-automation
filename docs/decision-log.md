@@ -127,3 +127,11 @@
 - Decision: the user explicitly authorized adding `frontend/pnpm-workspace.yaml` to the Phase 6 file boundary solely to materialize the existing locked dependency graph with `allowBuilds` values `esbuild: true`, `sharp: false`, and `workerd: false`. This resolves the environment/file-boundary preflight defect that prevented deterministic frontend verification.
 - Boundary: this decision does not authorize any dependency addition, removal, upgrade, lockfile change, unrelated workspace-policy change, application-scope expansion, or Phase 7 work. Temporary package stores, `node_modules`, caches, and build output remain uncommitted.
 - Execution consequence: the prior pnpm boundary interruption is resolved authority, not a valid continuing blocker. Phase 6 execution must correct stale blocker text, resume at the first incomplete milestone, and apply the proven-blocker protocol before any future early stop.
+
+## DL-018 — Phase 7 reporting planning decisions approved
+
+- Date: 2026-09-03
+- Status: planning decisions approved; implementation not authorized
+- Decision: the user explicitly approved every planning decision `P7-D01` through `P7-D15` in `harness/phases/phase-07.md`. These decisions bind the future reporting implementation, including the canonical ZIP package and manifest, separate derived engineering KMZ, stale-result policy, canonical schedules, XLSX/PDF libraries subject to M0 dependency review, PDF/vector overview, presentation-model JSON boundary, versions, synchronous atomic API, safety caps, export security, report status, UI boundary, and deterministic timestamp policy.
+- Preservation boundary: the existing updated KML remains unchanged and CAP-free; generated reporting artifacts remain transient; source data and accepted Phase 1-6 behavior cannot be mutated or recalculated by reporting.
+- Gate: this approval resolves planning choices only. Product code, tests, dependencies, versions, schemas, generated contracts, and Phase 7 implementation remain unauthorized until the user grants a separate explicit implementation authorization.
