@@ -51,7 +51,7 @@ Status: complete and formally closed on 2026-08-27 after the independent final r
 
 ## Phase 6 - CAP
 
-Status: planning, all 20 implementation-policy decisions, and implementation explicitly authorized on 2026-08-27; implementation open and Phase 6 unaccepted pending completion and independent QA.
+Status: complete and formally closed on 2026-09-03 after implementation readiness, independent QA **PASS**, master gate **PASS**, and a valid Phase 6 seal.
 
 - Convert the reviewed datasheet and clarified project rules into an editable constraint file.
 - Implement explainable clustering, candidate CAPs, manual locks/reassignment, topology checks, and revalidation.
@@ -65,4 +65,4 @@ Status: planning, all 20 implementation-policy decisions, and implementation exp
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 implementation is authorized but remains unaccepted pending completion and independent QA. Phase 7 remains unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 is closed after the independent QA PASS in `harness/verify/2026-09-02-phase-6-independent-qa-review.md` and the master decision in `docs/phase-6-master-gate-decision-2026-09-03.md`. Phase 7 remains unauthorized.

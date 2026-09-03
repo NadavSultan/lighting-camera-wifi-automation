@@ -1,11 +1,11 @@
 # Current status
 
-Phase state last changed: 2026-08-27. Documentation consistency reviewed: 2026-08-30. Phase 1 remains frozen. Phase 2 received an independent **UNCONDITIONAL PASS** and is formally closed. Phase 3 received an independent final focused **PASS** and is formally closed. Phase 4 received independent passing evidence for P4-IR-01 through P4-IR-07 and a master **PASS**; it is formally closed at the explicitly simplified direct-lighting scope. Phase 5 received a focused independent **PASS** for its final QA-01 and QA-02 corrections and a master **PASS**; it is formally closed at the conceptual Wi-Fi scope. Phase 6 planning, all 20 implementation-policy decisions, and implementation are explicitly authorized; implementation is the current open task.
+Phase state last changed: 2026-09-03. Documentation consistency reviewed: 2026-09-03. Phases 1-5 retain their prior accepted closure. Phase 6 received independent QA **PASS** and master gate **PASS** and is formally closed at the conceptual CAP / JNET1 distance-graph and constraint-planning scope. Phase 7 remains gated and unauthorized.
 
 ## Completed
 
 - All Phase 1 KML/KMZ import, source preservation, map, edit-overlay, save/reopen, and KML export workflows remain operational.
-- Project schema `2.5.0` and software/API `0.5.0` migrate `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, and `2.4.0` JSON without changing coordinates, discarding legacy overrides, inferring Wi-Fi areas, or guessing a Phoenix 1/Solitaire family.
+- Project schema `2.6.0` and software/API `0.6.0` migrate `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, `2.4.0`, and `2.5.0` JSON without changing coordinates, discarding legacy overrides, inferring Wi-Fi/CAP data, or guessing a Phoenix 1/Solitaire family.
 - The seven approved Phase 1 engineering catalogs remain unchanged at `1.0.0`.
 - The operational IES contract is `1.2.0` with immutable file history; the camera contract remains `1.1.0`, and the fixture-model contract is `1.2.0` with the immutable fixed-zero-origin template revision.
 - Six required fixture models are seeded with structured family, variant, and capabilities.
@@ -53,7 +53,7 @@ Phase state last changed: 2026-08-27. Documentation consistency reviewed: 2026-0
 - For both supplied Solitaire files, 50 W is the controlling Phase 4 nominal input because the filename and LM-63 numeric input field agree; the preserved internal `60W` identifier remains a visible provenance warning and is not rewritten.
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
-- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. Phase 6 CAP implementation is authorized but open and unaccepted; automatic pole placement remains prohibited, and Phase 7 reporting remains deferred and unauthorized.
+- Terrain/DEM and occlusion remain excluded. Phase 3 uses the approved zero-offset, fixture-origin optical-center contract and flat local ground plane. Phase 4 simplified direct horizontal illuminance is accepted at its explicit limited scope but is not professionally reference-validated. Phase 5 is accepted only as conceptual projected geometry, not verified RF coverage, performance, capacity, service quality, or standards compliance. Phase 6 is accepted only as distance-qualified graph-and-constraint planning, not RF prediction, deployable design, performance, compliance, or installation validation. Automatic pole placement remains prohibited, and Phase 7 reporting remains deferred and unauthorized.
 
 ## Phase 5 closure
 
@@ -61,6 +61,13 @@ Phase state last changed: 2026-08-27. Documentation consistency reviewed: 2026-0
 - The original independent gate review failed QA-01/R-02 and QA-02/G-03; both received corrective implementation and independent focused passing evidence on 2026-08-27.
 - `docs/phase-5-final-focused-retest-2026-08-27.md` and `docs/phase-5-master-gate-decision-2026-08-27.md` are the controlling final Phase 5 evidence.
 - No source pole, source coordinate, supplied Input file, frozen catalog, CAP recommendation, or Phase 6 behavior was changed.
+
+## Phase 6 implementation
+
+- Project schema `2.6.0`, software/API `0.6.0`, and planning model `jnet1-graph-planning-1.0.0` add strict unknown-aware CAP inputs, separate calculated/recommended collections, additive lossless migration, and complete provenance.
+- Planning uses deterministic projected-metre distance graphs, explicit approved candidate sites, bounded non-optimal recommendation, Validate mode, manual locks/exclusions/reassignment, redundancy diagnostics, safety caps, and stale-result fingerprints.
+- Candidate/profile/manual-control and planning endpoints are atomic and preserve prior project/source/result bytes on 404/409/422 failures. Portable JSON retains CAP state; updated KML remains CAP-free.
+- The production UI keeps blockers first, retains exact fixture colours, and renders separate CAP candidate/selected/tree layers and distinct manual non-pole sites with permanent graph-only disclaimers.
 
 ## Phase 6 planning approval
 
@@ -70,6 +77,13 @@ Phase state last changed: 2026-08-27. Documentation consistency reviewed: 2026-0
 - `docs/phase-6-master-implementation-prompt.md` is the controlling executable prompt for the authorized GPT-5.6 Terra implementation task.
 - Planning changed documentation only. No application code, tests, schemas, generated contracts, catalogs, supplied Input files, or runtime data were changed.
 
+## Phase 6 closure
+
+- Accepted implementation commit: `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-only history through independent-QA commit `f9dcea2fcc9bd8fc4a5118793a383736e5d72695`.
+- Implementation readiness passed for M0-M9 and all 30 acceptance IDs. Independent QA completed deterministic, source, boundary, regression, and genuine production 74-pole checks with no product findings.
+- `docs/phase-6-master-gate-decision-2026-09-03.md` records the master **PASS**. `harness/seals/phase-06.md` is the controlling valid acceptance seal.
+- Real-site CAP identity, band/jurisdiction, design limits, node policy, counting convention, candidate feasibility, and redundancy remain explicit runtime inputs; no test-only value is approved for Miracle Mile.
+
 ## Current gate
 
-Phases 1-5 are formally closed. Phase 5 is closed by the master **PASS** in `docs/phase-5-master-gate-decision-2026-08-27.md` after independent closure of QA-01/R-02 and QA-02/G-03. Camera `priority_areas`, lighting `calculation_areas`, and Wi-Fi `wifi_analysis_areas` remain separate collections. Phase 6 implementation is explicitly authorized under all 20 approved implementation-policy decisions. It remains open until implementation evidence, independent QA, and a master gate decision are complete. Phase 7 remains gated and unauthorized.
+Phases 1-6 are formally closed. Phase 6 is closed by the master **PASS** in `docs/phase-6-master-gate-decision-2026-09-03.md` after independent QA **PASS** at `f9dcea2f`. Camera `priority_areas`, lighting `calculation_areas`, Wi-Fi `wifi_analysis_areas`, and CAP user/calculated/recommended collections remain separate. Phase 7 remains gated and unauthorized; its planning requires separate explicit user authorization.

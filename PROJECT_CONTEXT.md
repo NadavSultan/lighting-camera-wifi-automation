@@ -6,7 +6,7 @@ Lighting Camera WiFi Automation is a local, map-centred engineering application 
 
 ## Current repository state
 
-Phases 1 through 5 are accepted and formally closed after independent QA and their master gate decisions. The FastAPI and React/TypeScript MapLibre application includes operational catalogs, fixed SMART mounting templates, camera geometry, separate lighting calculation areas, deterministic Type C direct-light calculations, conceptual Wi-Fi circles/overlap/area statistics, and persisted provenance. Phase 4 remains explicitly simplified and is not professionally validated against AGi32 or another reference tool; Phase 5 remains conceptual geometry and is not verified RF design. Existing-pole mode is mandatory and proposed-layout mode is unavailable. Phase 6 planning, all 20 implementation-policy decisions, and implementation were explicitly authorized on 2026-08-27. Actual Miracle Mile CAP operational values remain unknown unless separately approved. Phase 6 is open for implementation and later independent QA; Phase 7 remains unauthorized.
+Phases 1 through 6 are accepted and formally closed after independent QA and their master gate decisions. The FastAPI and React/TypeScript MapLibre application includes operational catalogs, fixed SMART mounting templates, camera geometry, separate lighting calculation areas, deterministic Type C direct-light calculations, conceptual Wi-Fi circles/overlap/area statistics, and CAP / JNET1 distance-graph and constraint planning with persisted provenance. Phase 4 remains explicitly simplified and is not professionally validated against AGi32 or another reference tool; Phase 5 remains conceptual geometry and is not verified RF design; Phase 6 remains conceptual graph planning and is not RF, performance, compliance, or installation validation. Existing-pole mode is mandatory and proposed-layout mode is unavailable. Actual Miracle Mile CAP operational values remain unknown unless separately approved. Phase 7 remains unauthorized.
 
 New sessions must start with `AGENTS.md` and `docs/current-status.md`, then follow the remaining reading order recorded in `AGENTS.md`.
 
@@ -15,7 +15,7 @@ New sessions must start with `AGENTS.md` and `docs/current-status.md`, then foll
 - `Input/Miracle_Mile_Lighting_Poles.kml`: 74 valid WGS84 point placemarks in five folders; no exact coordinate or name duplicates found during initial inventory.
 - `Input/Lighting/`: four LM-63-2002 IES files. Photometric implementation is the gated Phase 4 scope.
 - `Input/Camera/VideoCAD Camera Models - Juganu.Xlsx`: three pinned IMX477-compatible camera/lens records used by the operational catalog and Phase 3 geometry.
-- `Input/CAP/CAP datasheet.pdf`: Juganu JNET1 Gateway data sheet Rev 1.2. CAP implementation is deferred to Phase 6.
+- `Input/CAP/CAP datasheet.pdf`: Juganu JNET1 Gateway data sheet Rev 1.2, retained as source evidence for the accepted Phase 6 planning model.
 
 The requested `$lighting-kml-planner` skill was not installed or discoverable during Phase 1. No application code depends on it.
 

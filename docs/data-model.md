@@ -6,8 +6,8 @@
 |---|---|---|
 | Original customer data | `source.poles` and immutable uploaded file | Never overwritten |
 | User-edited data | `pole_edits`, keyed by stable source pole ID | Explicit edits only; source values remain available |
-| Calculated data | `camera_geometry`, `lighting_calculations`, and `calculated_layers` | Reproducible derived results only; never a source or user-assignment mutation |
-| Recommended data | `recommended_layers` | Empty in Phase 1; no pole or CAP generation |
+| Calculated data | `camera_geometry`, `lighting_calculations`, `wifi_coverage`, `cap_calculations`, and `calculated_layers` | Reproducible derived results only; never a source or user-assignment mutation |
+| Recommended data | `cap_recommendations` and the losslessly retained generic `recommended_layers` | Explicit bounded recommendations only; never source-pole or free-space coordinate generation |
 | Exported data | Generated response plus export event | Never treated as source |
 
 ## Pole identity
@@ -46,6 +46,8 @@ Every project records source filename, SHA-256 hash, import timestamp, source CR
 
 Phase 4 `calculation_areas` are user configuration with a stable ID, classification, validated WGS84 exterior ring, calculation plane, grid spacing of `0.01 m` through `1000 m`, maintenance factor, timestamps, polygon revision, state, warnings, assumptions, and provenance. `lighting_calculations.results` stores deterministic ordered points, projected and WGS84 coordinates, maintained lux, payload-safe contributions, area statistics, exact fixture/IES revision and SHA provenance, a calculation-input SHA-256 used for deterministic stale-result invalidation, limitations, warnings, and the professional-reference disclaimer. Camera `priority_areas` remain structurally separate.
 
+Phase 6 `cap_planning_inputs` is user data containing the approval-bearing profile, node policy, explicit existing-pole/manual non-pole candidates, and manual constraints. `cap_calculations` stores bounded canonical graph and ranking facts; `cap_recommendations` stores selected candidate IDs and the current result identity. Unknown and unresolved values persist but block dependent operations. All graph geometry uses the project metre CRS, while WGS84 remains display/interchange data. CAP fingerprints exclude presentation-only state and invalidate both result collections after any planning-significant change.
+
 The formal JSON Schema is `schemas/project.schema.json` and is generated from the Pydantic `Project` model. HTTP input/output and error-response contracts are published in `schemas/openapi.json`.
 
 ## Phase 1 invariants
@@ -59,7 +61,7 @@ The formal JSON Schema is `schemas/project.schema.json` and is generated from th
 
 ## Versioning and regeneration
 
-The current project schema version is `2.5.0` and software version is `0.5.0`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, and `2.4.0` migrate losslessly without family inference, coordinate change, inferred boundaries, or inferred circles. Legacy camera orientation override bytes and unknown legacy Wi-Fi keys remain explicit. Fixture and IES selections pin exact revisions; the IES operational contract is `1.2.0` with immutable record history. The fixture operational contract remains `1.2.0`; the seven Phase 1 catalogs remain frozen. Conceptual Wi-Fi uses model `conceptual-circle-1.0.0`, 128-sided projected buffers, a 500-circle cap, 64,500 circle vertices, 50,000 indexed candidate operations, 200 areas, 10,000 vertices per area, and 250,000 total persisted geometry vertices. Regenerate checked-in contracts from the backend directory with:
+The current project schema version is `2.6.0` and software version is `0.6.0`. Project JSON `1.0.0`, `2.0.0`, `2.1.0`, `2.2.0`, `2.3.0`, `2.4.0`, and `2.5.0` migrate losslessly without family inference, coordinate change, inferred boundaries/circles, or inferred CAP inputs. Legacy camera orientation override bytes, unknown legacy Wi-Fi keys, and generic `recommended_layers` remain explicit. Fixture and IES selections pin exact revisions; the IES operational contract is `1.2.0` with immutable record history. The fixture operational contract remains `1.2.0`; the seven Phase 1 catalogs remain frozen. Conceptual Wi-Fi uses model `conceptual-circle-1.0.0` and its recorded geometry/index caps. CAP uses `jnet1-graph-planning-1.0.0` with application caps of 2,000 participating nodes, 500 candidates, 64 selected CAPs, 2,500 graph vertices, 250,000 distance evaluations/edges, 2,000 persisted topology links, 8 improvement passes, 64 N+1 scenarios, and a 25 MiB planning payload. Regenerate checked-in contracts from the backend directory with:
 
 ```powershell
 ..\.venv\Scripts\python.exe .\scripts\export_schema.py

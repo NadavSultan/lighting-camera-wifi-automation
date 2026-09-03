@@ -2,15 +2,15 @@
 
 This file is an execution index. It does not replace the product, architecture, data-model, planning, or gate documents in `PROJECT_CONTEXT.md` and `docs/`.
 
-## Current goal
+## Current goal state
 
-Deliver Phase 6 CAP / JNET1 graph-and-constraint planning only within the approved contract. Preserve existing-pole mode, immutable source data, and all accepted Phase 1-5 behaviour.
+Phase 6 CAP / JNET1 graph-and-constraint planning is delivered and formally closed. Preserve existing-pole mode, immutable source data, and all accepted Phase 1-6 behaviour.
 
 Controlling scope: `docs/phase-6-cap-planning-and-implementation-contract.md` and `docs/phase-6-master-implementation-prompt.md`.
 
-Status: authorized for implementation; not accepted.
+Status: achieved and accepted on 2026-09-03.
 
-Execution mode: implementation must run as one durable goal whose normal stopping condition is a passing implementation-readiness manifest plus the independent-QA handoff. A progress report, partial milestone, or ordinary response boundary does not complete that goal. Independent QA and master acceptance remain separate later gates.
+Execution evidence: implementation readiness, independent QA PASS, master gate PASS, and the valid Phase 6 seal are recorded in the linked Phase 6 harness and gate documents. No Phase 7 goal is active or authorized.
 
 ## Phase ledger
 
@@ -21,7 +21,7 @@ Execution mode: implementation must run as one durable goal whose normal stoppin
 | 3 | closed | `docs/phase-3-final-focused-retest-report.md` |
 | 4 | closed | `docs/phase-4-master-gate-decision-2026-08-26.md` |
 | 5 | closed | `docs/phase-5-master-gate-decision-2026-08-27.md` |
-| 6 | active, authorized, unaccepted | `docs/current-status.md`; Phase 6 contract |
+| 6 | closed | `docs/phase-6-master-gate-decision-2026-09-03.md`; `harness/seals/phase-06.md` |
 | 7 | gated and unauthorized | `docs/implementation-plan.md` |
 
 ## Explicit unknowns

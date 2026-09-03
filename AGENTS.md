@@ -17,7 +17,7 @@ Before planning or changing code, every future session must read these files in 
 9. `PLANS.md`
 10. `OPERATIONS.md`
 
-Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-5 are accepted and formally closed. Phase 6 planning, all 20 implementation-policy decisions, and Phase 6 implementation were explicitly authorized on 2026-08-27. Phase 6 remains open until implementation, independent QA, and master acceptance are complete; Phase 7 remains gated and unauthorized.
+Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-6 are accepted and formally closed. Phase 6 closed on 2026-09-03 after implementation readiness, independent QA PASS, master gate PASS, and a valid phase seal. Phase 7 remains gated and unauthorized.
 
 ## Durable execution workflow
 
@@ -50,7 +50,7 @@ A phase is not complete merely because implementation is committed or a completi
 - Treat WGS84 coordinates as interchange/display data only. Select a local projected CRS in metres for distance, area, coverage, or later photometric calculations.
 - Do not infer CAP limits, fixture applicability, photometric conventions, or analytics performance. Record an assumption or block the feature.
 - Camera downward angle is measured below horizontal: 0 degrees is horizontal and 90 degrees is vertically down.
-- Phase work must remain gated. Phases 1-5 are closed. Phase 6 implementation is explicitly authorized only within its approved planning contract; Phase 7 remains unauthorized.
+- Phase work must remain gated. Phases 1-6 are closed. Phase 7 remains unauthorized.
 
 ## Development
 
@@ -67,4 +67,4 @@ Phase 1 includes project creation, KML/KMZ import, validation, map display, per-
 
 ## Phase boundary
 
-Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Phase 6 CAP implementation is authorized only to the locked planning contract. Do not implement Phase 7 reporting or any later calculation/recommendation engine without separate explicit authorization.
+Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry; Phase 6 adds accepted CAP / JNET1 distance-graph and constraint planning. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Do not plan or implement Phase 7 reporting or any later calculation/recommendation engine without separate explicit authorization.

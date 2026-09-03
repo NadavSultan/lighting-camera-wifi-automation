@@ -2,7 +2,7 @@
 
 ## Source of truth and records
 
-Read the startup sequence in `AGENTS.md`. Use `docs/current-status.md` for current phase state and the Phase 6 contract for approved Phase 6 behaviour. Place phase work records in `harness/phases/`, command logs in `harness/logs/`, verification summaries in `harness/verify/`, and only completed gate seals in `harness/seals/`.
+Read the startup sequence in `AGENTS.md`. Use `docs/current-status.md` for current phase state and the accepted Phase 6 contract for Phase 6 behaviour. Place phase work records in `harness/phases/`, command logs in `harness/logs/`, verification summaries in `harness/verify/`, and only completed gate seals in `harness/seals/`.
 
 Known documentation conflict: `README.md` still describes a Phase 4 application and says Wi-Fi/CAP are not calculated. `docs/current-status.md`, the implementation plan, source tree, and recent Phase 5 gate evidence show Phase 5 is closed. Treat the dated status/gate records as controlling until the README is deliberately refreshed.
 
@@ -112,4 +112,4 @@ The verifier checks the goal state, milestone and acceptance dispositions, exact
 
 ## Current Phase 6 reconciliation evidence
 
-The current worktree preserves the historical execution entries in `harness/logs/phase-06-execution.md`, including the original pnpm failure and its subsequent successful locked installation/build/test/typecheck/lint results. DL-017 resolves that authority issue; M1 acceptance depth remains the first incomplete work.
+Phase 6 implementation is `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-only history reaches independent-QA commit `f9dcea2fcc9bd8fc4a5118793a383736e5d72695`. The readiness verifier passed all 10 milestones and 30 acceptance IDs. Independent QA passed the full deterministic and genuine production 74-pole workflow with no findings. The 2026-09-03 master gate reran the backend suite before and after schema generation using isolated pytest temp paths, the engineering/source validator, frontend production build, 15 rendered tests, strict TypeScript, ESLint, diff/source checks, and readiness verification; all passed. The initial master backend attempt hit only a Windows permission error in the shared pytest temp root and was replaced by the recorded isolated-temp reruns. `docs/phase-6-master-gate-decision-2026-09-03.md` and `harness/seals/phase-06.md` close Phase 6. Phase 7 remains unauthorized.
