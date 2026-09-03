@@ -1,14 +1,14 @@
 # Plans
 
-This is the execution plan index. Detailed requirements and acceptance IDs remain in `docs/phase-6-cap-planning-and-implementation-contract.md`; implementation instructions remain in `docs/phase-6-master-implementation-prompt.md`.
+This is the execution plan index. The current proposed Phase 7 requirements, decisions, milestones, verification, and acceptance IDs are in `harness/phases/phase-07.md`.
 
 ## Active plan
 
-No product phase is currently active. Phase 6 is formally closed. The next permitted action is to obtain explicit user authorization for Phase 7 planning; preparation or implementation of Phase 7 must not begin before that authorization.
+Phase 7 planning is active under `harness/phases/phase-07.md`. Review and explicitly approve or replace planning decisions `P7-D01` through `P7-D15`. Phase 7 implementation must not begin without a separate explicit implementation authorization.
 
 ## Guardrails
 
-- No Phase 7 work.
+- No Phase 7 implementation while planning decisions remain unapproved.
 - No source-pole creation, movement, redistribution, optimization, or deletion.
 - No invented CAP operational values, RF predictions, compliance claims, or reporting exports.
 - Ordinary failures enter the logged repair/retry loop and do not stop the phase. Only a blocker proven under `AGENTS.md` may pause execution for user direction.

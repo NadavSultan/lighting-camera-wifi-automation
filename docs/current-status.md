@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-03. Documentation consistency reviewed: 2026-09-03. Phases 1-5 retain their prior accepted closure. Phase 6 received independent QA **PASS** and master gate **PASS** and is formally closed at the conceptual CAP / JNET1 distance-graph and constraint-planning scope. Phase 7 remains gated and unauthorized.
+Phase state last changed: 2026-09-03. Documentation consistency reviewed: 2026-09-03. Phases 1-5 retain their prior accepted closure. Phase 6 received independent QA **PASS** and master gate **PASS** and is formally closed at the conceptual CAP / JNET1 distance-graph and constraint-planning scope. Phase 7 planning is authorized; its proposed policy decisions and implementation remain gated.
 
 ## Completed
 
@@ -86,4 +86,4 @@ Phase state last changed: 2026-09-03. Documentation consistency reviewed: 2026-0
 
 ## Current gate
 
-Phases 1-6 are formally closed. Phase 6 is closed by the master **PASS** in `docs/phase-6-master-gate-decision-2026-09-03.md` after independent QA **PASS** at `f9dcea2f`. Camera `priority_areas`, lighting `calculation_areas`, Wi-Fi `wifi_analysis_areas`, and CAP user/calculated/recommended collections remain separate. Phase 7 remains gated and unauthorized; its planning requires separate explicit user authorization.
+Phases 1-6 are formally closed. Phase 6 is closed by the master **PASS** in `docs/phase-6-master-gate-decision-2026-09-03.md` after independent QA **PASS** at `f9dcea2f`. Camera `priority_areas`, lighting `calculation_areas`, Wi-Fi `wifi_analysis_areas`, and CAP user/calculated/recommended collections remain separate. Phase 7 planning is authorized under `harness/phases/phase-07.md`; policy approval and implementation authorization remain pending.

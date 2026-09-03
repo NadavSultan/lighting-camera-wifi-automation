@@ -2,15 +2,15 @@
 
 This file is an execution index. It does not replace the product, architecture, data-model, planning, or gate documents in `PROJECT_CONTEXT.md` and `docs/`.
 
-## Current goal state
+## Current goal
 
-Phase 6 CAP / JNET1 graph-and-constraint planning is delivered and formally closed. Preserve existing-pole mode, immutable source data, and all accepted Phase 1-6 behaviour.
+Complete and review the Phase 7 reporting/export plan while preserving existing-pole mode, immutable source data, and all accepted Phase 1-6 behaviour.
 
-Controlling scope: `docs/phase-6-cap-planning-and-implementation-contract.md` and `docs/phase-6-master-implementation-prompt.md`.
+Controlling planning record: `harness/phases/phase-07.md`.
 
-Status: achieved and accepted on 2026-09-03.
+Status: planning complete; decisions `P7-D01` through `P7-D15` await explicit approval; implementation is unauthorized.
 
-Execution evidence: implementation readiness, independent QA PASS, master gate PASS, and the valid Phase 6 seal are recorded in the linked Phase 6 harness and gate documents. No Phase 7 goal is active or authorized.
+Phase 6 remains closed by its master decision and valid seal. Phase 7 planning evidence does not authorize product changes.
 
 ## Phase ledger
 
@@ -22,7 +22,7 @@ Execution evidence: implementation readiness, independent QA PASS, master gate P
 | 4 | closed | `docs/phase-4-master-gate-decision-2026-08-26.md` |
 | 5 | closed | `docs/phase-5-master-gate-decision-2026-08-27.md` |
 | 6 | closed | `docs/phase-6-master-gate-decision-2026-09-03.md`; `harness/seals/phase-06.md` |
-| 7 | gated and unauthorized | `docs/implementation-plan.md` |
+| 7 | planning authorized; implementation gated | `harness/phases/phase-07.md` |
 
 ## Explicit unknowns
 
