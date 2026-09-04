@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "phase": "07",
+  "goal": {
+    "objective": "Complete Phase 7 reporting/export implementation per harness/phases/phase-07.md through M0-M9.",
+    "status": "ACHIEVED",
+    "stopping_condition": "Passing Phase 7 implementation-readiness manifest and independent-QA handoff."
+  },
+  "implementation_commit": "044c013b2fa23a29bee6fc2b8779896084daae44",
+  "allowed_evidence_paths_after_implementation_commit": [
+    "harness/",
+    "docs/phase-7-",
+    "docs/current-status.md",
+    "GOALS.md",
+    "PLANS.md",
+    "OPERATIONS.md",
+    "PROJECT_CONTEXT.md"
+  ],
+  "expected_milestone_ids": [
+    "M0",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5",
+    "M6",
+    "M7",
+    "M8",
+    "M9"
+  ],
+  "milestones": [
+    {
+      "id": "M0",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M1",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M2",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M3",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M4",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M5",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M6",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M7",
+      "status": "PASS",
+      "evidence": [
+        "frontend/tests/rendered-html.test.mjs",
+        "frontend/app/components/ReportPanel.tsx"
+      ]
+    },
+    {
+      "id": "M8",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "M9",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-m9-summary.json",
+        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+      ]
+    }
+  ],
+  "expected_acceptance_ids": [
+    "P7-DM-01",
+    "P7-SN-01",
+    "P7-ST-01",
+    "P7-FP-01",
+    "P7-MF-01",
+    "P7-CSV-01",
+    "P7-XL-01",
+    "P7-KM-01",
+    "P7-KM-02",
+    "P7-PDF-01",
+    "P7-PR-01",
+    "P7-SC-01",
+    "P7-AP-01",
+    "P7-AT-01",
+    "P7-UI-01",
+    "P7-UI-02",
+    "P7-REG-01",
+    "P7-PRD-01"
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "P7-DM-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-SN-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-ST-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-FP-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-MF-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-CSV-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-XL-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-KM-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-KM-02",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-PDF-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-PR-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-SC-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-AP-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-AT-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-UI-01",
+      "status": "PASS",
+      "evidence": [
+        "frontend/tests/rendered-html.test.mjs",
+        "frontend/app/components/ReportPanel.tsx"
+      ]
+    },
+    {
+      "id": "P7-UI-02",
+      "status": "PASS",
+      "evidence": [
+        "frontend/tests/rendered-html.test.mjs",
+        "frontend/app/components/ReportPanel.tsx"
+      ]
+    },
+    {
+      "id": "P7-REG-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md",
+        "backend/tests/test_phase7_reporting.py"
+      ]
+    },
+    {
+      "id": "P7-PRD-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-m9-summary.json",
+        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "id": "final-verification",
+      "command": "backend pytest --basetemp harness/tmp/pytest/run; validate_engineering_data; export_schema; frontend test/typecheck/lint/build; Input/CAP schema diff check; M9 74-pole report package",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "044c013b2fa23a29bee6fc2b8779896084daae44",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-04-phase-7-m9-summary.json"
+      ]
+    }
+  ],
+  "required_checks": [
+    {
+      "id": "final_verification",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+      ]
+    },
+    {
+      "id": "generated_artifact_freshness",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "schemas/project.schema.json"
+      ]
+    },
+    {
+      "id": "source_preservation",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-04-phase-7-m9-summary.json"
+      ]
+    },
+    {
+      "id": "file_boundary",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-09-04-phase-7-implementation.md",
+        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+      ]
+    },
+    {
+      "id": "rendered_workflow",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-m9-summary.json",
+        "frontend/tests/rendered-html.test.mjs"
+      ]
+    },
+    {
+      "id": "regression",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+      ]
+    }
+  ],
+  "reports": {
+    "phase_work_record": "harness/phases/2026-09-04-phase-7-implementation.md",
+    "execution_log": "harness/logs/2026-09-04-phase-7-execution.md",
+    "verification_summary": "harness/verify/2026-09-04-phase-7-verification-summary.md",
+    "completion_report": "docs/phase-7-implementation-completion-2026-09-04.md",
+    "rendered_evidence": "harness/verify/2026-09-04-phase-7-m9-summary.json"
+  },
+  "blockers": [],
+  "gate": {
+    "implementation": "IMPLEMENTATION_COMPLETE_AWAITING_QA",
+    "independent_qa": "PENDING",
+    "master": "PENDING",
+    "phase_seal": "ABSENT"
+  }
+}
