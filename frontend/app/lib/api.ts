@@ -1,4 +1,4 @@
-import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, WifiAnalysisArea } from "./types";
+import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, ReportPackageRequest, WifiAnalysisArea } from "./types";
 import { formatApiErrorDetail } from "./phase2-workflows.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
@@ -24,6 +24,10 @@ export function createProject(name = "Untitled lighting project") {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
   });
+}
+
+export function getProject(projectId: string) {
+  return api<Project>(`/api/projects/${encodeURIComponent(projectId)}`);
 }
 
 export function importProjectFile(file: File) {
@@ -127,6 +131,29 @@ export async function downloadUpdatedKml(project: Project) {
   const response = await fetch(`${API_URL}/api/projects/${encodeURIComponent(project.id)}/export/kml`);
   if (!response.ok) throw new Error(`KML export failed: ${response.statusText}`);
   downloadBlob(await response.blob(), `${baseName(project.source.file?.filename ?? project.name)}-updated.kml`);
+}
+
+export function previewReport(projectId: string) {
+  return api<Record<string, unknown>>(`/api/projects/${encodeURIComponent(projectId)}/reports/preview`);
+}
+
+export async function downloadReportPackage(project: Project, request?: ReportPackageRequest | null) {
+  const response = await fetch(`${API_URL}/api/projects/${encodeURIComponent(project.id)}/reports/package`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request ?? {}),
+  });
+  if (!response.ok) {
+    let message = `Report package failed: ${response.status} ${response.statusText}`;
+    try {
+      const body = (await response.json()) as { detail?: unknown };
+      if (body.detail) message = formatApiErrorDetail(body.detail);
+    } catch {
+      // Keep HTTP status when body is not JSON.
+    }
+    throw new Error(message);
+  }
+  downloadBlob(await response.blob(), `${baseName(project.source.file?.filename ?? project.name)}-report-package.zip`);
 }
 
 export function downloadProjectJson(project: Project) {

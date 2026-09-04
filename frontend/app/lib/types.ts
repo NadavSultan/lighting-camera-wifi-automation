@@ -61,7 +61,7 @@ export interface PoleWifiConfiguration {
 }
 
 export interface Project {
-  schema_version: "2.6.0";
+  schema_version: "2.7.0";
   software_version: string;
   id: string;
   name: string;
@@ -103,6 +103,65 @@ export interface Project {
   recommended_layers: Record<string, unknown>;
   source_references: Record<string, string>;
   legacy_fixture_assignments_require_model_selection: boolean;
+  report_preferences: ReportPreferences;
+  last_report: LastReportMetadata | null;
+}
+
+export type ReportStatus = "complete" | "complete_with_warnings" | "incomplete";
+export interface ReportSectionSelection {
+  project_inventory: boolean;
+  poles_fixtures: boolean;
+  cameras: boolean;
+  lighting: boolean;
+  wifi: boolean;
+  cap: boolean;
+  warnings_assumptions: boolean;
+  validation_findings: boolean;
+  provenance: boolean;
+}
+export interface ReportFormatSelection {
+  project_json: boolean;
+  engineering_kmz: boolean;
+  csv_schedules: boolean;
+  xlsx_workbook: boolean;
+  pdf_summary: boolean;
+  presentation_model: boolean;
+}
+export interface ReportKmzLayerSelection {
+  camera_geometry: boolean;
+  lighting: boolean;
+  wifi: boolean;
+  cap: boolean;
+  priority_areas: boolean;
+  calculation_areas: boolean;
+  wifi_analysis_areas: boolean;
+}
+export interface ReportPreferences {
+  model_version: "report-package-1.0.0";
+  formats: ReportFormatSelection;
+  sections: ReportSectionSelection;
+  kmz_layers: ReportKmzLayerSelection;
+}
+export interface LastReportMetadata {
+  model_version: "report-package-1.0.0";
+  generated_at: string;
+  status: ReportStatus;
+  report_input_sha256: string;
+  package_sha256: string;
+  package_size_bytes: number;
+  member_count: number;
+  member_sha256: Record<string, string>;
+  included_sections: string[];
+  omitted_sections: string[];
+  warnings: string[];
+  validation_finding_count: number;
+}
+export interface ReportPackageRequest {
+  formats?: ReportFormatSelection | null;
+  sections?: ReportSectionSelection | null;
+  kmz_layers?: ReportKmzLayerSelection | null;
+  persist_last_report_metadata?: boolean;
+  generation_time?: string | null;
 }
 
 export type CapKnowledge = "unknown" | "known";

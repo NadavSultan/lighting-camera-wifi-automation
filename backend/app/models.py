@@ -16,9 +16,18 @@ from shapely.validation import explain_validity
 from app.crs import validate_projected_metre_crs
 
 
-SCHEMA_VERSION = "2.6.0"
-SOFTWARE_VERSION = "0.6.0"
+SCHEMA_VERSION = "2.7.0"
+SOFTWARE_VERSION = "0.7.0"
+REPORT_MODEL_VERSION = "report-package-1.0.0"
 WIFI_MODEL_VERSION = "conceptual-circle-1.0.0"
+MAX_REPORT_PACKAGE_BYTES = 50 * 1024 * 1024
+MAX_REPORT_MEMBER_BYTES = 25 * 1024 * 1024
+MAX_REPORT_TABULAR_ROWS = 250_000
+MAX_REPORT_KML_FEATURES = 100_000
+MAX_REPORT_PDF_TABLE_ROWS = 20_000
+MAX_REPORT_SHEETS = 100
+MAX_REPORT_SHEET_NAME_LEN = 31
+MAX_REPORT_CELL_CHARS = 2_000
 WIFI_RING_RESOLUTION = 32
 MAX_WIFI_CIRCLES = 500
 MAX_WIFI_CIRCLE_VERTICES = 64500
@@ -686,8 +695,71 @@ class CapRecommendations(StrictModel):
     result_sha256: str | None = None
 
 
+class ReportSectionSelection(StrictModel):
+    project_inventory: bool = True
+    poles_fixtures: bool = True
+    cameras: bool = True
+    lighting: bool = True
+    wifi: bool = True
+    cap: bool = True
+    warnings_assumptions: bool = True
+    validation_findings: bool = True
+    provenance: bool = True
+
+
+class ReportFormatSelection(StrictModel):
+    project_json: bool = True
+    engineering_kmz: bool = True
+    csv_schedules: bool = True
+    xlsx_workbook: bool = True
+    pdf_summary: bool = True
+    presentation_model: bool = True
+
+
+class ReportKmzLayerSelection(StrictModel):
+    camera_geometry: bool = True
+    lighting: bool = True
+    wifi: bool = True
+    cap: bool = True
+    priority_areas: bool = True
+    calculation_areas: bool = True
+    wifi_analysis_areas: bool = True
+
+
+class ReportPreferences(StrictModel):
+    model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
+    formats: ReportFormatSelection = Field(default_factory=ReportFormatSelection)
+    sections: ReportSectionSelection = Field(default_factory=ReportSectionSelection)
+    kmz_layers: ReportKmzLayerSelection = Field(default_factory=ReportKmzLayerSelection)
+
+
+class LastReportMetadata(StrictModel):
+    model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
+    generated_at: datetime
+    status: Literal["complete", "complete_with_warnings", "incomplete"]
+    report_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    package_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    package_size_bytes: Annotated[int, Field(ge=1, le=MAX_REPORT_PACKAGE_BYTES)]
+    member_count: Annotated[int, Field(ge=1)]
+    member_sha256: dict[str, Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]] = Field(default_factory=dict)
+    included_sections: list[str] = Field(default_factory=list)
+    omitted_sections: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    validation_finding_count: Annotated[int, Field(ge=0)] = 0
+
+
+class ReportPackageRequest(StrictModel):
+    """Synchronous report generation options. Defaults mirror project preferences when omitted by callers."""
+
+    formats: ReportFormatSelection | None = None
+    sections: ReportSectionSelection | None = None
+    kmz_layers: ReportKmzLayerSelection | None = None
+    persist_last_report_metadata: bool = True
+    generation_time: datetime | None = None
+
+
 class Project(StrictModel):
-    schema_version: Literal["2.6.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -720,6 +792,8 @@ class Project(StrictModel):
     recommended_layers: dict[str, Any] = Field(default_factory=dict)
     source_references: dict[str, str] = Field(default_factory=dict)
     legacy_fixture_assignments_require_model_selection: bool = True
+    report_preferences: ReportPreferences = Field(default_factory=ReportPreferences)
+    last_report: LastReportMetadata | None = None
 
     @field_validator("projected_crs")
     @classmethod
@@ -777,7 +851,7 @@ class ProjectSummary(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    phase: Literal[6] = 6
+    phase: Literal[7] = 7
     version: str = SOFTWARE_VERSION
 
 
@@ -786,7 +860,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
@@ -801,6 +875,8 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     migrated.setdefault("cap_calculations", {})
     migrated.setdefault("cap_recommendations", {})
     migrated.setdefault("legacy_invalid_priority_areas", [])
+    migrated.setdefault("report_preferences", {})
+    migrated.setdefault("last_report", None)
     if version == "2.2.0":
         valid_areas: list[dict[str, Any]] = []
         legacy_areas = list(migrated["legacy_invalid_priority_areas"])

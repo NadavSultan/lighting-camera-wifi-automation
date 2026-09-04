@@ -6,6 +6,7 @@ import { closePriorityRing, emptyPriorityRedrawDraft, fixtureAzimuthFromHandle, 
 import { invalidateLightingResults, lightingSignificantPoleChange, MIN_GRID_SPACING_M, staleCalculationState, validateCalculationAreaDraft } from "../app/lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage, wifiEffectiveValues, wifiSignificantProjectChange } from "../app/lib/phase5-workflows.mjs";
 import { CAP_DISCLAIMER, capBlockers, capOperationEnabled, capSignificantProjectChange, invalidateCapIfSignificant, isCapResultStale } from "../app/lib/phase6-cap-workflows.mjs";
+import { REPORT_DISCLAIMER, defaultReportFormats, mergeReportPreferences, reportCanGenerate, reportStatusLabel } from "../app/lib/phase7-report-workflows.mjs";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -64,6 +65,22 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(workspace, /parent_locks/);
   assert.match(workspace, /CAP topology, score trace, and provenance/);
   assert.match(workspace, /distance-qualified conceptual link; not RF-predicted/);
+  assert.match(workspace, /Report Package/);
+  assert.match(workspace, /ReportPanel/);
+  const reportPanel = await readFile(new URL("../app/components/ReportPanel.tsx", import.meta.url), "utf8");
+  assert.match(reportPanel, /Phase 7 — Report package/);
+  assert.match(reportPanel, /Generate \/ Download report package/);
+  assert.match(reportPanel, /REPORT_DISCLAIMER/);
+  assert.match(reportPanel, /previewReport/);
+  assert.match(reportPanel, /downloadReportPackage/);
+  assert.match(reportPanel, /does not recalculate engineering results/);
+  assert.match(api, /previewReport/);
+  assert.match(api, /downloadReportPackage/);
+  assert.match(api, /getProject/);
+  assert.match(types, /report_preferences/);
+  assert.match(types, /last_report/);
+  assert.match(types, /report-package-1\.0\.0/);
+  assert.match(packageJson, /"version": "0\.7\.0"/);
   assert.match(inspector, /Restore source\/default values/);
   assert.match(workspace, /Apply selected fields/);
   assert.match(inspector, /Explicit model selection required/);
@@ -133,6 +150,19 @@ test("Phase 6 CAP helper keeps unknowns blocker-first and does not compare unrel
   assert.equal(capOperationEnabled({ cap_planning_inputs: ready }, "validate"), false);
   ready.profile.operation_mode = "validate";
   assert.equal(capOperationEnabled({ cap_planning_inputs: ready }, "validate"), true);
+});
+
+test("Phase 7 report helpers keep disclaimer and presentation-only preference merges", () => {
+  assert.match(REPORT_DISCLAIMER, /engineering review only/);
+  const formats = defaultReportFormats();
+  assert.equal(formats.pdf_summary, true);
+  const project = { id: "p", report_preferences: { model_version: "report-package-1.0.0", formats, sections: {}, kmz_layers: {} }, last_report: null };
+  const merged = mergeReportPreferences(project, { pdf_summary: false }, { lighting: false });
+  assert.equal(merged.report_preferences.formats.pdf_summary, false);
+  assert.equal(merged.report_preferences.sections.lighting, false);
+  assert.equal(reportCanGenerate({ can_generate: true, blockers: [] }), true);
+  assert.equal(reportCanGenerate({ can_generate: false, blockers: ["x"] }), false);
+  assert.equal(reportStatusLabel("complete_with_warnings"), "Complete with warnings");
 });
 
 test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {

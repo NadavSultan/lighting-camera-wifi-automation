@@ -1,0 +1,77 @@
+{
+  "health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "project_id": "7ed91e15-daac-4798-8d1c-5676bd5610ea",
+  "poles": 74,
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "package_bytes": 107218,
+  "package_sha256": "2db2e171367178b44286cff83741ad969cc7bef46a57fc8dffc34cc9418fc8bd",
+  "manifest_status": "complete_with_warnings",
+  "members": {
+    "engineering/Miracle_Mile_Lighting_Poles-7ed91e15-engineering.kmz": {
+      "size": 2194,
+      "sha256": "a8c2aaba072457a5b66552c57409129960ae306bdbe6b82069abb957347c2738"
+    },
+    "presentation-model.json": {
+      "size": 2033,
+      "sha256": "8f1403ae9694078856f0e788f53d879b255ba6ade67f6fe026e83603e7ddec85"
+    },
+    "project/Miracle_Mile_Lighting_Poles-7ed91e15.json": {
+      "size": 61811,
+      "sha256": "208cc2559755af177bc42fab16cacdfdc91a8a60b00e42d10d90bc7f19433f28"
+    },
+    "report-manifest.json": {
+      "size": 4884,
+      "sha256": "36bf1f8ca4b1db6d16b4cb2565c6664b90a89309b1dc1c5771a0402720e7e626"
+    },
+    "schedules/01-project-inventory.csv": {
+      "size": 351,
+      "sha256": "e92cba8b335ae150df5f9815a349ae0d0a9945c25a84ebd44a85ef81c2018f04"
+    },
+    "schedules/02-poles-fixtures.csv": {
+      "size": 5892,
+      "sha256": "db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e"
+    },
+    "schedules/03-cameras.csv": {
+      "size": 284,
+      "sha256": "6599de168a60d851cff70ced87f29d3639892a604b100b5b2cd8fc2fbf89ac2f"
+    },
+    "schedules/04-lighting.csv": {
+      "size": 305,
+      "sha256": "5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282"
+    },
+    "schedules/05-wifi.csv": {
+      "size": 225,
+      "sha256": "0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5"
+    },
+    "schedules/06-cap.csv": {
+      "size": 334,
+      "sha256": "73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45"
+    },
+    "schedules/07-warnings-assumptions.csv": {
+      "size": 886,
+      "sha256": "b6a905cb5d90a71f70665f2479b6e457799f08dadb6c78ea6e840a10b025c105"
+    },
+    "schedules/08-validation-findings.csv": {
+      "size": 153,
+      "sha256": "095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156"
+    },
+    "schedules/09-provenance.csv": {
+      "size": 433,
+      "sha256": "28c545872f89f133a0f1f123d9cbfc829198721ef52cf60b56b2c93ec89018eb"
+    },
+    "summary.pdf": {
+      "size": 8914,
+      "sha256": "0ac642788ee34d8e698d4e67d936cd4b19237f08140253200c72ed95e7dd7db5"
+    },
+    "workbook.xlsx": {
+      "size": 16487,
+      "sha256": "4fc0ebf7f154ad8e3dbbcd9589ac0b083b82c6c4a32b12e8e7e13efdb210cf56"
+    }
+  },
+  "last_report_status": "complete_with_warnings",
+  "frontend_has_report_controls": true
+}

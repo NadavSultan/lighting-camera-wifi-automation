@@ -569,7 +569,7 @@ def test_phase4_additive_migration_preserves_prior_data_and_starts_empty(version
     payload["schema_version"] = version
     payload.pop("calculation_areas", None); payload.pop("lighting_calculations", None)
     migrated = migrate_project_payload(payload)
-    assert migrated["schema_version"] == "2.6.0"
+    assert migrated["schema_version"] == "2.7.0"
     assert migrated["calculation_areas"] == [] and migrated["lighting_calculations"] == {}
     assert migrated["source"] == payload["source"] and migrated["priority_areas"] == payload["priority_areas"]
     assert migrated["pole_edits"]["pole-1"]["fixture_configuration"]["ies_file_revision"] == record.revision

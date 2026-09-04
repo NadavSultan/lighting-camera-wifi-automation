@@ -5,6 +5,7 @@ import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useSt
 import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
+import { ReportPanel } from "./ReportPanel";
 import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan } from "../lib/api";
 import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
@@ -51,7 +52,7 @@ export function EngineeringWorkspace() {
   const [past, setPast] = useState<Project[]>([]);
   const [future, setFuture] = useState<Project[]>([]);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("Ready - existing-pole engineering workflow with CAP/JNET1 graph planning");
+  const [status, setStatus] = useState("Ready - existing-pole engineering workflow with CAP/JNET1 graph planning and Phase 7 reporting");
   const [error, setError] = useState<string | null>(null);
   const [bulkFolder, setBulkFolder] = useState("all");
   const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");
@@ -491,6 +492,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !selectedCalculationAreaId || busy}>Calculate Lighting</button>
           <button className="tool-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend CAP</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>
+          <button className="tool-button primary" onClick={() => setLeftCollapsed(false)} disabled={!project || busy}>Report Package</button>
         </nav>
         <div className="mode-pill">Existing-pole mode</div>
         <input ref={importRef} className="sr-only" type="file" accept=".kml,.kmz" onChange={handleImport} />
@@ -519,6 +521,17 @@ export function EngineeringWorkspace() {
                   {project.cap_calculations.result && <details className="lighting-provenance"><summary>CAP topology, score trace, and provenance</summary><p>Fingerprint {project.cap_calculations.calculation_input_sha256} · CRS {project.cap_calculations.result.projected_crs}</p>{project.cap_calculations.result.assignments.map((item) => <p key={item.node_id}>{item.node_id} → {item.parent_id} · hop {item.hop} · {item.distance_m.toFixed(6)} m · distance-qualified conceptual link; not RF-predicted</p>)}{project.cap_calculations.result.warnings.map((warning) => <p key={warning}>{warning}</p>)}</details>}
                 </> : <p className="helper">Import or create a project to preserve unknown CAP inputs and inspect blockers.</p>}
               </section>
+              {project && (
+                <ReportPanel
+                  key={`${project.id}:${project.updated_at}`}
+                  project={project}
+                  busy={busy}
+                  onBusy={setBusy}
+                  onStatus={setStatus}
+                  onError={setError}
+                  onProjectRefreshed={(next) => replaceProject(next, false)}
+                />
+              )}
               <section className="section">
                 <p className="project-name">{project?.name ?? "No project loaded"}</p>
                 <div className="project-meta">{project?.source.file ? `${project.source.file.filename} · ${project.source.poles.length} source poles` : "Create a project or import a customer layout."}</div>

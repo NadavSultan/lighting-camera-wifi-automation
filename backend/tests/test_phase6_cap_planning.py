@@ -56,7 +56,7 @@ def test_p6_mg_01_migration_adds_only_empty_cap_collections_losslessly():
     payload.pop("cap_planning_inputs"); payload.pop("cap_calculations"); payload.pop("cap_recommendations")
     payload["recommended_layers"] = {"future": {"preserve": True}}
     migrated = migrate_project_payload(payload)
-    assert migrated["schema_version"] == "2.6.0"
+    assert migrated["schema_version"] == "2.7.0"
     assert migrated["source"] == payload["source"]
     assert migrated["recommended_layers"] == payload["recommended_layers"]
     assert Project.model_validate(migrated).cap_calculations.result is None

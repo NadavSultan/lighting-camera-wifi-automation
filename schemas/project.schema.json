@@ -1412,6 +1412,97 @@
       "title": "FixtureType",
       "type": "string"
     },
+    "LastReportMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "model_version": {
+          "const": "report-package-1.0.0",
+          "default": "report-package-1.0.0",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "complete_with_warnings",
+            "incomplete"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "report_input_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Report Input Sha256",
+          "type": "string"
+        },
+        "package_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Package Sha256",
+          "type": "string"
+        },
+        "package_size_bytes": {
+          "maximum": 52428800,
+          "minimum": 1,
+          "title": "Package Size Bytes",
+          "type": "integer"
+        },
+        "member_count": {
+          "minimum": 1,
+          "title": "Member Count",
+          "type": "integer"
+        },
+        "member_sha256": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Member Sha256",
+          "type": "object"
+        },
+        "included_sections": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Included Sections",
+          "type": "array"
+        },
+        "omitted_sections": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Omitted Sections",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "validation_finding_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Validation Finding Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "generated_at",
+        "status",
+        "report_input_sha256",
+        "package_sha256",
+        "package_size_bytes",
+        "member_count"
+      ],
+      "title": "LastReportMetadata",
+      "type": "object"
+    },
     "LayerState": {
       "additionalProperties": false,
       "properties": {
@@ -2497,6 +2588,159 @@
       "title": "ProjectWarning",
       "type": "object"
     },
+    "ReportFormatSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "project_json": {
+          "default": true,
+          "title": "Project Json",
+          "type": "boolean"
+        },
+        "engineering_kmz": {
+          "default": true,
+          "title": "Engineering Kmz",
+          "type": "boolean"
+        },
+        "csv_schedules": {
+          "default": true,
+          "title": "Csv Schedules",
+          "type": "boolean"
+        },
+        "xlsx_workbook": {
+          "default": true,
+          "title": "Xlsx Workbook",
+          "type": "boolean"
+        },
+        "pdf_summary": {
+          "default": true,
+          "title": "Pdf Summary",
+          "type": "boolean"
+        },
+        "presentation_model": {
+          "default": true,
+          "title": "Presentation Model",
+          "type": "boolean"
+        }
+      },
+      "title": "ReportFormatSelection",
+      "type": "object"
+    },
+    "ReportKmzLayerSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "camera_geometry": {
+          "default": true,
+          "title": "Camera Geometry",
+          "type": "boolean"
+        },
+        "lighting": {
+          "default": true,
+          "title": "Lighting",
+          "type": "boolean"
+        },
+        "wifi": {
+          "default": true,
+          "title": "Wifi",
+          "type": "boolean"
+        },
+        "cap": {
+          "default": true,
+          "title": "Cap",
+          "type": "boolean"
+        },
+        "priority_areas": {
+          "default": true,
+          "title": "Priority Areas",
+          "type": "boolean"
+        },
+        "calculation_areas": {
+          "default": true,
+          "title": "Calculation Areas",
+          "type": "boolean"
+        },
+        "wifi_analysis_areas": {
+          "default": true,
+          "title": "Wifi Analysis Areas",
+          "type": "boolean"
+        }
+      },
+      "title": "ReportKmzLayerSelection",
+      "type": "object"
+    },
+    "ReportPreferences": {
+      "additionalProperties": false,
+      "properties": {
+        "model_version": {
+          "const": "report-package-1.0.0",
+          "default": "report-package-1.0.0",
+          "title": "Model Version",
+          "type": "string"
+        },
+        "formats": {
+          "$ref": "#/$defs/ReportFormatSelection"
+        },
+        "sections": {
+          "$ref": "#/$defs/ReportSectionSelection"
+        },
+        "kmz_layers": {
+          "$ref": "#/$defs/ReportKmzLayerSelection"
+        }
+      },
+      "title": "ReportPreferences",
+      "type": "object"
+    },
+    "ReportSectionSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "project_inventory": {
+          "default": true,
+          "title": "Project Inventory",
+          "type": "boolean"
+        },
+        "poles_fixtures": {
+          "default": true,
+          "title": "Poles Fixtures",
+          "type": "boolean"
+        },
+        "cameras": {
+          "default": true,
+          "title": "Cameras",
+          "type": "boolean"
+        },
+        "lighting": {
+          "default": true,
+          "title": "Lighting",
+          "type": "boolean"
+        },
+        "wifi": {
+          "default": true,
+          "title": "Wifi",
+          "type": "boolean"
+        },
+        "cap": {
+          "default": true,
+          "title": "Cap",
+          "type": "boolean"
+        },
+        "warnings_assumptions": {
+          "default": true,
+          "title": "Warnings Assumptions",
+          "type": "boolean"
+        },
+        "validation_findings": {
+          "default": true,
+          "title": "Validation Findings",
+          "type": "boolean"
+        },
+        "provenance": {
+          "default": true,
+          "title": "Provenance",
+          "type": "boolean"
+        }
+      },
+      "title": "ReportSectionSelection",
+      "type": "object"
+    },
     "SourceFile": {
       "additionalProperties": false,
       "properties": {
@@ -3211,13 +3455,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.6.0",
-      "default": "2.6.0",
+      "const": "2.7.0",
+      "default": "2.7.0",
       "title": "Schema Version",
       "type": "string"
     },
     "software_version": {
-      "default": "0.6.0",
+      "default": "0.7.0",
       "title": "Software Version",
       "type": "string"
     },
@@ -3365,6 +3609,20 @@
       "default": true,
       "title": "Legacy Fixture Assignments Require Model Selection",
       "type": "boolean"
+    },
+    "report_preferences": {
+      "$ref": "#/$defs/ReportPreferences"
+    },
+    "last_report": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LastReportMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "title": "Project",

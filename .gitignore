@@ -12,5 +12,6 @@ frontend/.open-next/
 frontend/.vinext/
 frontend/tsconfig.tsbuildinfo
 tmp/
+harness/tmp/
 Output/*
 !Output/.gitkeep

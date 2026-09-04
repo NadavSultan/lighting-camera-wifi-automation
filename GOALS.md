@@ -4,13 +4,13 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-Preserve the approved Phase 7 reporting/export plan while awaiting separate implementation authorization.
+Complete Phase 7 reporting/export implementation readiness and independent-QA handoff per `harness/phases/phase-07.md`.
 
-Controlling planning record: `harness/phases/phase-07.md`.
+Controlling planning/implementation record: `harness/phases/phase-07.md` and `harness/phases/2026-09-04-phase-7-implementation.md`.
 
-Status: planning complete and decisions `P7-D01` through `P7-D15` approved on 2026-09-03; implementation is unauthorized.
+Status: implementation authorized 2026-09-04 and executed through M0–M9; awaiting implementation-readiness verifier PASS confirmation and independent QA.
 
-Phase 6 remains closed by its master decision and valid seal. Phase 7 planning evidence does not authorize product changes.
+Phase 6 remains closed by its master decision and valid seal.
 
 ## Phase ledger
 
@@ -22,7 +22,7 @@ Phase 6 remains closed by its master decision and valid seal. Phase 7 planning e
 | 4 | closed | `docs/phase-4-master-gate-decision-2026-08-26.md` |
 | 5 | closed | `docs/phase-5-master-gate-decision-2026-08-27.md` |
 | 6 | closed | `docs/phase-6-master-gate-decision-2026-09-03.md`; `harness/seals/phase-06.md` |
-| 7 | planning decisions approved; implementation gated | `harness/phases/phase-07.md`; `docs/decision-log.md` DL-018 |
+| 7 | implementation complete awaiting QA | `harness/phases/phase-07.md`; `docs/phase-7-independent-qa-handoff-2026-09-04.md`; DL-018 |
 
 ## Explicit unknowns
 

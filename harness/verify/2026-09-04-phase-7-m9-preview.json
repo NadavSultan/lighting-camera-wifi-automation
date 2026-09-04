@@ -1,0 +1,109 @@
+{
+  "status": "complete_with_warnings",
+  "checklist": [
+    {
+      "section": "project_inventory",
+      "title": "Project Inventory",
+      "enabled": true,
+      "disposition": "included"
+    },
+    {
+      "section": "poles_fixtures",
+      "title": "Poles and Fixtures",
+      "enabled": true,
+      "disposition": "included"
+    },
+    {
+      "section": "cameras",
+      "title": "Cameras",
+      "enabled": true,
+      "disposition": "omitted"
+    },
+    {
+      "section": "lighting",
+      "title": "Lighting",
+      "enabled": true,
+      "disposition": "not_configured"
+    },
+    {
+      "section": "wifi",
+      "title": "Wi-Fi",
+      "enabled": true,
+      "disposition": "not_configured"
+    },
+    {
+      "section": "cap",
+      "title": "CAP",
+      "enabled": true,
+      "disposition": "not_configured"
+    },
+    {
+      "section": "warnings_assumptions",
+      "title": "Warnings and Assumptions",
+      "enabled": true,
+      "disposition": "included"
+    },
+    {
+      "section": "validation_findings",
+      "title": "Validation Findings",
+      "enabled": true,
+      "disposition": "included"
+    },
+    {
+      "section": "provenance",
+      "title": "Provenance",
+      "enabled": true,
+      "disposition": "included"
+    }
+  ],
+  "formats": [
+    {
+      "format": "project_json",
+      "enabled": true
+    },
+    {
+      "format": "engineering_kmz",
+      "enabled": true
+    },
+    {
+      "format": "csv_schedules",
+      "enabled": true
+    },
+    {
+      "format": "xlsx_workbook",
+      "enabled": true
+    },
+    {
+      "format": "pdf_summary",
+      "enabled": true
+    },
+    {
+      "format": "presentation_model",
+      "enabled": true
+    }
+  ],
+  "blockers": [],
+  "section_dispositions": {
+    "lighting": "not_configured",
+    "wifi": "not_configured",
+    "cap": "not_configured",
+    "cameras": "omitted",
+    "project_inventory": "included",
+    "poles_fixtures": "included",
+    "warnings_assumptions": "included",
+    "validation_findings": "included",
+    "provenance": "included"
+  },
+  "warnings": [
+    "Report package for engineering review only. Conceptual Phase 4-6 outputs are not professionally validated photometry, verified RF design, compliance determinations, optimal layouts, or installation-ready deliverables.",
+    "Camera geometry included when calculated_at is present; no separate fingerprint field exists. Footprints are treated as current with this disclaimer.",
+    "Imported 74 point placemarks without geometry or coordinate errors."
+  ],
+  "validation_findings": [
+    "Camera geometry has calculated_at but no footprints; treated as not calculated."
+  ],
+  "report_input_sha256": "30a35ee36d86025903a38970ce7cb0b2d03b12333ca38cdfed64c32ad73b9bd4",
+  "generation_time": "2026-09-04T08:39:05.321704Z",
+  "can_generate": true,
+  "disclaimer": "Report package for engineering review only. Conceptual Phase 4-6 outputs are not professionally validated photometry, verified RF design, compliance determinations, optimal layouts, or installation-ready deliverables."
+}

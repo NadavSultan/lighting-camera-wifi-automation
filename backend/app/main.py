@@ -18,7 +18,7 @@ from app.catalog_models import (
     IesLibrary,
     LensConfiguration,
 )
-from app.models import CapCandidateSite, CapManualConstraints, CapPlanningInputs, HealthResponse, Project, ProjectSummary, WifiAnalysisArea, migrate_project_payload
+from app.models import CapCandidateSite, CapManualConstraints, CapPlanningInputs, HealthResponse, Project, ProjectSummary, ReportPackageRequest, WifiAnalysisArea, migrate_project_payload
 from app.services.cap_planning import apply_cap_result, calculate_cap_plan, invalidate_stale_cap_results
 from app.services.catalogs import CatalogNotFoundError, CatalogStore
 from app.services.configuration import (
@@ -32,6 +32,7 @@ from app.services.lighting_calculation import calculate_lighting_area, invalidat
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results, validate_wifi_analysis_areas
 from app.services.ies import IesValidationError, parse_ies_upload
 from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_kml, import_project, validate_embedded_source
+from app.services.reporting import ReportGenerationError, generate_report_package, preview_report
 from app.services.store import ProjectNotFoundError, ProjectStore
 
 
@@ -40,8 +41,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.6.0",
-        description="Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning.",
+        version="0.7.0",
+        description="Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning and Phase 7 reporting.",
     )
     app.state.project_store = project_store
     app.state.catalog_store = catalogs
@@ -565,6 +566,48 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             media_type="application/vnd.google-earth.kml+xml",
             headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
+
+    @app.get("/api/projects/{project_id}/reports/preview")
+    def report_preview(project_id: str) -> dict:
+        try:
+            project = pin_revisions(project_store.load(project_id))
+            return preview_report(project)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/reports/package")
+    def report_package(project_id: str, body: ReportPackageRequest | None = Body(default=None)) -> Response:
+        try:
+            stored = pin_revisions(project_store.load(project_id))
+            zip_bytes, _manifest, metadata = generate_report_package(stored, body)
+            if metadata is not None and (body is None or body.persist_last_report_metadata):
+                updated = deepcopy(stored)
+                if body is not None:
+                    if body.formats is not None:
+                        updated.report_preferences.formats = body.formats
+                    if body.sections is not None:
+                        updated.report_preferences.sections = body.sections
+                    if body.kmz_layers is not None:
+                        updated.report_preferences.kmz_layers = body.kmz_layers
+                updated.last_report = metadata
+                # Preserve engineering timestamps; only touch updated_at for metadata persistence.
+                from app.models import utc_now
+                updated.updated_at = utc_now()
+                project_store.save(updated)
+            filename = f"{Path(stored.source.file.filename).stem if stored.source.file else stored.name}-report-package.zip"
+            return Response(
+                content=zip_bytes,
+                media_type="application/zip",
+                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+            )
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except ReportGenerationError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     return app
 

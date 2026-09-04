@@ -197,7 +197,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     phase_one.pop("legacy_fixture_assignments_require_model_selection")
     phase_one["pole_edits"][pole.id] = {"pole_id": pole.id, "fixture_type": "SMART", "location_edit_authorized": False}
     migrated = Project.model_validate(migrate_project_payload(json.loads(json.dumps(phase_one))))
-    assert migrated.schema_version == "2.6.0"
+    assert migrated.schema_version == "2.7.0"
     assert migrated.legacy_fixture_assignments_require_model_selection is True
     assert migrated.pole_edits[pole.id].fixture_type.value == "SMART"
     assert migrated.pole_edits[pole.id].fixture_configuration is None
@@ -207,7 +207,7 @@ def test_phase_one_migration_preserves_coordinates_and_requires_model_selection(
     initial_phase_two = migrated.model_dump(mode="json")
     initial_phase_two["schema_version"] = "2.0.0"
     remigrated = Project.model_validate(migrate_project_payload(initial_phase_two))
-    assert remigrated.schema_version == "2.6.0"
+    assert remigrated.schema_version == "2.7.0"
     assert remigrated.source == migrated.source
 
 
