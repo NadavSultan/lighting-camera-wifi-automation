@@ -1,0 +1,218 @@
+{
+  "generated_at": "2026-09-05T17:54:45.853997Z",
+  "implementation_commit_hint": "e24b6a1",
+  "health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "project_id": "b3307438-154d-44a8-b2ec-766688dadaa7",
+  "poles": 74,
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "package_bytes": 109921,
+  "package_sha256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
+  "package_response_sha256_header": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
+  "manifest_status": "complete_with_warnings",
+  "member_count": 15,
+  "members": {
+    "engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz": {
+      "size": 2194,
+      "sha256": "184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2"
+    },
+    "presentation-model.json": {
+      "size": 2060,
+      "sha256": "af84ba7b84d1a7a0b64065f615d81e049a98666f7e397581d1d1efb02bfb9a4f"
+    },
+    "project/Miracle_Mile_M9_Remediation-b3307438.json": {
+      "size": 61911,
+      "sha256": "323eb3081cb4192e8384efcdd85053ce13c38cc78b0e392544308fbf36abd876"
+    },
+    "report-manifest.json": {
+      "size": 4766,
+      "sha256": "7173f396b7e413c58b09fca249f5127f592b2501d649345d8e3f53c382fafcdb"
+    },
+    "schedules/01-project-inventory.csv": {
+      "size": 351,
+      "sha256": "49de678901f0198fff5eb5958b45e514b285aab1faec6a7466c113b3135038f2"
+    },
+    "schedules/02-poles-fixtures.csv": {
+      "size": 5892,
+      "sha256": "db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e"
+    },
+    "schedules/03-cameras.csv": {
+      "size": 311,
+      "sha256": "aae645b2a4182be203dc338eea38707dfc07f010ddbf468c42e535c0561ce896"
+    },
+    "schedules/04-lighting.csv": {
+      "size": 305,
+      "sha256": "5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282"
+    },
+    "schedules/05-wifi.csv": {
+      "size": 225,
+      "sha256": "0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5"
+    },
+    "schedules/06-cap.csv": {
+      "size": 334,
+      "sha256": "73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45"
+    },
+    "schedules/07-warnings-assumptions.csv": {
+      "size": 913,
+      "sha256": "f39a906821e03bf05194c5dcd863a81edcbc8d184ec9d665457a645cf85c1433"
+    },
+    "schedules/08-validation-findings.csv": {
+      "size": 153,
+      "sha256": "095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156"
+    },
+    "schedules/09-provenance.csv": {
+      "size": 433,
+      "sha256": "f018670850448772a058bcd8997c363b29c5ecafef31a84bc5726e9d5ceebc1f"
+    },
+    "summary.pdf": {
+      "size": 11467,
+      "sha256": "268e08cb24c1d6f67cfd4da09606a0fee9418ff4493c06bbab25bd4ebd7b441c"
+    },
+    "workbook.xlsx": {
+      "size": 16574,
+      "sha256": "952d41e87788c85119513ca17495a8e912c968232e502cee3fd674fa5acf5549"
+    }
+  },
+  "pdf_page_count": 2,
+  "checks": [
+    {
+      "id": "health",
+      "ok": true,
+      "body": {
+        "status": "ok",
+        "phase": 7,
+        "version": "0.7.0"
+      }
+    },
+    {
+      "id": "import",
+      "ok": true,
+      "poles": 74,
+      "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328"
+    },
+    {
+      "id": "preview",
+      "ok": true,
+      "status_code": 200,
+      "can_generate": true,
+      "blockers": []
+    },
+    {
+      "id": "package_download",
+      "ok": true,
+      "status_code": 200,
+      "package_bytes": 109921,
+      "package_sha256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
+      "headers": {
+        "X-Report-Package-SHA256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
+        "X-Report-Status": "complete_with_warnings",
+        "X-Report-Generated-At": "2026-09-05T17:00:00Z",
+        "X-Project-Updated-At": "2026-09-05T17:54:45.815477Z",
+        "X-Report-Last-Metadata": "{\"model_version\":\"report-package-1.0.0\",\"generated_at\":\"2026-09-05T17:00:00Z\",\"status\":\"complete_with_warnings\",\"report_input_sha256\":\"037c8d54b5db26e85209fe25a29acd792d9fbc3ac6ee4ec66454c50a6d446768\",\"package_sha256\":\"e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b\",\"package_size_bytes\":109921,\"member_count\":15,\"member_sha256\":{\"project/Miracle_Mile_M9_Remediation-b3307438.json\":\"323eb3081cb4192e8384efcdd85053ce13c38cc78b0e392544308fbf36abd876\",\"engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz\":\"184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2\",\"schedules/01-project-inventory.csv\":\"49de678901f0198fff5eb5958b45e514b285aab1faec6a7466c113b3135038f2\",\"schedules/02-poles-fixtures.csv\":\"db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e\",\"schedules/03-cameras.csv\":\"aae645b2a4182be203dc338eea38707dfc07f010ddbf468c42e535c0561ce896\",\"schedules/04-lighting.csv\":\"5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282\",\"schedules/05-wifi.csv\":\"0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5\",\"schedules/06-cap.csv\":\"73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45\",\"schedules/07-warnings-assumptions.csv\":\"f39a906821e03bf05194c5dcd863a81edcbc8d184ec9d665457a645cf85c1433\",\"schedules/08-validation-findings.csv\":\"095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156\",\"schedules/09-provenance.csv\":\"f018670850448772a058bcd8997c363b29c5ecafef31a84bc5726e9d5ceebc1f\",\"workbook.xlsx\":\"952d41e87788c85119513ca17495a8e912c968232e502cee3fd674fa5acf5549\",\"summary.pdf\":\"268e08cb24c1d6f67cfd4da09606a0fee9418ff4493c06bbab25bd4ebd7b441c\",\"presentation-model.json\":\"af84ba7b84d1a7a0b64065f615d81e049a98666f7e397581d1d1efb02bfb9a4f\",\"report-manifest.json\":\"7173f396b7e413c58b09fca249f5127f592b2501d649345d8e3f53c382fafcdb\"},\"included_sections\":[\"project_inventory\",\"poles_fixtures\",\"warnings_assumptions\",\"validation_findings\",\"provenance\"],\"omitted_sections\":[\"lighting\",\"wifi\",\"cap\",\"cameras\"],\"warnings\":[\"Report package for engineering review only. Conceptual Phase 4-6 outputs are not professionally validated photometry, verified RF design, compliance determinations, optimal layouts, or installation-ready deliverables.\",\"Camera geometry is included only when calculation_input_sha256 matches current geometry-significant inputs. Legacy results without a fingerprint are omitted until recalculated.\",\"Imported 74 point placemarks without geometry or coordinate errors.\"],\"validation_finding_count\":1}"
+      }
+    },
+    {
+      "id": "csv_parse",
+      "ok": true,
+      "files": {
+        "schedules/01-project-inventory.csv": {
+          "row_count": 2,
+          "col_count": 10,
+          "crlf": true
+        },
+        "schedules/02-poles-fixtures.csv": {
+          "row_count": 75,
+          "col_count": 10,
+          "crlf": true
+        },
+        "schedules/03-cameras.csv": {
+          "row_count": 2,
+          "col_count": 10,
+          "crlf": true
+        },
+        "schedules/04-lighting.csv": {
+          "row_count": 2,
+          "col_count": 10,
+          "crlf": true
+        },
+        "schedules/05-wifi.csv": {
+          "row_count": 2,
+          "col_count": 6,
+          "crlf": true
+        },
+        "schedules/06-cap.csv": {
+          "row_count": 2,
+          "col_count": 8,
+          "crlf": true
+        },
+        "schedules/07-warnings-assumptions.csv": {
+          "row_count": 7,
+          "col_count": 5,
+          "crlf": true
+        },
+        "schedules/08-validation-findings.csv": {
+          "row_count": 2,
+          "col_count": 4,
+          "crlf": true
+        },
+        "schedules/09-provenance.csv": {
+          "row_count": 8,
+          "col_count": 3,
+          "crlf": true
+        }
+      }
+    },
+    {
+      "id": "xlsx_active_content",
+      "ok": true,
+      "member_count": 18,
+      "has_shared_strings": true,
+      "forbidden_hits": []
+    },
+    {
+      "id": "kmz_labels",
+      "ok": true,
+      "kmz_member": "engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz",
+      "kml_bytes": 2082
+    },
+    {
+      "id": "pdf_vector",
+      "ok": true,
+      "pdf_bytes": 11467,
+      "page_count": 2,
+      "has_projected_overview": true
+    },
+    {
+      "id": "presentation_strict",
+      "ok": true,
+      "extra_rejected": true,
+      "inventory_poles": 74
+    },
+    {
+      "id": "cross_format",
+      "ok": true,
+      "manifest_status": "complete_with_warnings",
+      "presentation_status": "complete_with_warnings",
+      "report_input_sha256": "037c8d54b5db26e85209fe25a29acd792d9fbc3ac6ee4ec66454c50a6d446768"
+    },
+    {
+      "id": "updated_kml",
+      "ok": true,
+      "placemarks": 74
+    },
+    {
+      "id": "frontend_report_controls",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "ok": true,
+  "browser_workflow": {
+    "status": "deferred_to_http_recovery",
+    "note": "API TestClient package + static ReportPanel evidence recorded; live browser attempts follow in execution log."
+  },
+  "artifacts_dir": "harness/tmp/m9-remediation"
+}

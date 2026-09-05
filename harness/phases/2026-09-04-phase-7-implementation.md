@@ -1,14 +1,14 @@
 # Phase work record — 2026-09-04 — Phase 7
 
-Status: independent QA failed on 2026-09-05; bounded remediation active through Task 7 contracts/regression; Task 8 (M9/readiness/handoff) still pending
+Status: remediation Tasks 1–8 complete through readiness handoff; independent QA pending fresh review; no Phase 7 seal
 
 Original durable goal: Cursor durable goal ACHIEVED / complete on 2026-09-04 after readiness verifier PASS; that readiness evidence was superseded by the independent QA FAIL.
-Remediation durable goal: active. Resolve `P7-QA-01`–`P7-QA-09`, pass readiness on a clean remediation implementation commit, and record a new independent-QA handoff.
-Implementation commit: `044c013b2fa23a29bee6fc2b8779896084daae44`
-Readiness evidence commit: `094fc49c34ab1a350f433effc881634a9ffb1e71`
+Remediation durable goal: ACHIEVED for implementation readiness + handoff (Task 8). Fresh independent QA remains pending.
+Original implementation commit: `044c013b2fa23a29bee6fc2b8779896084daae44`
+Remediation implementation commit: `e24b6a16add314393574257a08e539a27673a505`
 Independent QA FAIL baseline: `fd8a43d34177ab558e2da898b989b067a0677cd6`
 Remediation product HEAD before Task 7: `f7f776e66e0be77e0f0b985cb452e082f9e52b28`
-Readiness manifest: `harness/verify/phase-07-readiness.json` — historical **PASS**, invalidated for current gate purposes by the later QA FAIL
+Readiness manifest: `harness/verify/phase-07-readiness.json` — refreshed for remediation commit `e24b6a1` after Task 8 M9
 
 
 ## Scope, authority, and non-goals
@@ -51,14 +51,14 @@ Product changes must not begin until every required supporting path is either in
 | M5 | M5; `P7-PDF-01`, `P7-PR-01` | backend `-k "p7_pdf or p7_presentation"` | remediation product complete; Task 7 full suite PASS |
 | M6 | M6; `P7-AP-01`, `P7-AT-01`, `P7-SC-01` limits | backend `-k "p7_api or p7_atomic or p7_limits"` | remediation product complete; Task 7 full suite PASS |
 | M7 | M7; `P7-UI-01`, `P7-UI-02` | frontend build/test/typecheck/lint | remediation product complete; Task 7 frontend block PASS (20 rendered tests) |
-| M8 | M8; `P7-REG-01` | final verification block | Task 7 deterministic block executed and recorded; readiness/M9 still Task 8 |
-| M9 | M9; `P7-PRD-01` | production 74-pole package QA + readiness | pending Task 8; not claimed PASS |
+| M8 | M8; `P7-REG-01` | final verification block | Task 7 deterministic block PASS (281 backend / 20 frontend) |
+| M9 | M9; `P7-PRD-01` | production 74-pole package QA + readiness | Task 8 PASS — `harness/verify/2026-09-05-phase-7-remediation-m9-summary.json` |
 
 ## Acceptance criteria
 
 | Acceptance ID / criterion | Verification method | Evidence location | Status |
 |---|---|---|---|
-| `P7-DM-01`–`P7-PRD-01` | Contract milestone and final commands | `harness/logs/2026-09-04-phase-7-execution.md`, `harness/verify/` | product remediation Tasks 1–6 complete; Task 7 deterministic regression recorded; `P7-PRD-01`/M9 and readiness pending Task 8 |
+| `P7-DM-01`–`P7-PRD-01` | Contract milestone and final commands | `harness/logs/2026-09-04-phase-7-execution.md`, `harness/verify/2026-09-05-phase-7-remediation-verification-summary.md`, M9 summary | remediation Tasks 1–8 complete; readiness awaiting clean evidence commit; independent QA pending |
 
 ## Changes and evidence
 
@@ -78,14 +78,14 @@ Product changes must not begin until every required supporting path is either in
 
 ## Definition of Done
 
-- [ ] All authorized remediation milestones are complete.
-- [ ] Every required acceptance item has objective PASS evidence.
-- [ ] Every required deterministic command passed on the recorded commit/worktree.
-- [ ] Source, prior-phase behavior, and file-boundary invariants are verified.
-- [ ] Completion and rendered evidence reports are present if required.
-- [ ] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree.
-- [ ] A fresh remediation independent-QA handoff is recorded; QA itself remains pending.
-- [ ] No later phase has begun.
+- [x] All authorized remediation milestones are complete.
+- [x] Every required acceptance item has objective PASS evidence.
+- [x] Every required deterministic command passed on the recorded commit/worktree.
+- [x] Source, prior-phase behavior, and file-boundary invariants are verified.
+- [x] Completion and rendered evidence reports are present if required.
+- [ ] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree. (pending evidence commit + verifier run)
+- [x] A fresh remediation independent-QA handoff is recorded; QA itself remains pending.
+- [x] No later phase has begun.
 
 ## Unknowns, conflicts, and blockers
 
@@ -115,9 +115,9 @@ Failing/missing tests, incomplete coverage/milestones, compiler/build/lint/typec
 ## Gate state
 
 - Original implementation: complete at `044c013b`; independent QA later failed.
-- Remediation: authorized and active (2026-09-05); product Tasks 1–6 through `f7f776e`; Task 7 contracts/control/regression in this checkpoint.
-- Durable goal: active for bounded remediation until readiness PASS + new independent-QA handoff (Task 8).
-- Implementation-readiness verifier: historical PASS superseded; fresh remediation run pending Task 8.
-- Independent QA: FAIL recorded at `fd8a43d`; fresh review pending after Task 8 handoff.
+- Remediation: product Tasks 1–6 through `f7f776e`; Task 7 at `63e6b31`; implementation commit `e24b6a1`; Task 8 M9/readiness/handoff recorded.
+- Durable goal: ACHIEVED for readiness+handoff stopping condition once verifier PASS on clean evidence commit.
+- Implementation-readiness verifier: refreshed manifest for `e24b6a1`; run after evidence commit.
+- Independent QA: FAIL recorded at `fd8a43d`; fresh review pending on the clean evidence commit.
 - Master decision: pending / ineligible until fresh QA PASS.
 - Seal status: absent and ineligible until later gates.

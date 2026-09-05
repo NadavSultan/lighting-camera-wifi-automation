@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-6 retain their prior accepted closure. Phase 7 original implementation failed independent QA at `fd8a43d`; bounded remediation under amended `P7-D08` is authorized and product remediation through Task 6 is committed. Full deterministic regression (Task 7) is the current control/schema checkpoint. Production M9, readiness, and a new independent-QA handoff remain Task 8. No Phase 7 gate PASS or seal exists.
+Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-6 retain their prior accepted closure. Phase 7 original implementation failed independent QA at `fd8a43d`; bounded remediation under amended `P7-D08` is complete through Task 8 readiness handoff on implementation commit `e24b6a1`. Independent QA is pending fresh review. No Phase 7 gate PASS or seal exists.
 
 ## Completed
 
@@ -38,8 +38,8 @@ Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-0
 - Remediation authorized 2026-09-05 under amended `P7-D08`. Design: `docs/superpowers/specs/2026-09-05-phase-7-remediation-design.md`. Plan: `docs/superpowers/plans/2026-09-05-phase-7-remediation.md`.
 - Controlling contract: `harness/phases/phase-07.md`. Work record: `harness/phases/2026-09-04-phase-7-implementation.md`.
 - Historical original completion/handoff records remain evidence of the pre-QA attempt only and do not authorize a seal after the FAIL.
-- Remediation product HEAD before Task 7 contracts commit: `f7f776e` (Tasks 1–6). Task 7 regenerates schemas, reconciles control docs, and records full deterministic regression. Task 8 owns production M9, readiness, and the new independent-QA handoff.
+- Remediation product HEAD before Task 7 contracts commit: `f7f776e` (Tasks 1–6). Task 7 regenerated schemas, reconciled control docs, and recorded full deterministic regression at `63e6b31`. Task 8 completed production M9, readiness refresh, and `docs/phase-7-independent-qa-remediation-handoff-2026-09-05.md` against implementation commit `e24b6a1`.
 
 ## Current gate
 
-Phases 1-6 remain formally closed. Phase 7 has no gate PASS and no seal. Remediation product work is committed; readiness verifier PASS and a fresh independent-QA handoff are still required before any master gate or seal. Report packages are transient derived artifacts and do not mutate source or engineering results.
+Phases 1-6 remain formally closed. Phase 7 has no gate PASS and no seal. Remediation implementation readiness handoff is recorded; fresh independent QA must PASS before any master gate or seal. Report packages are transient derived artifacts and do not mutate source or engineering results.

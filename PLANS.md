@@ -4,7 +4,7 @@ This is the execution plan index. The current Phase 7 requirements, decisions, m
 
 ## Active plan
 
-Phase 7 original implementation was authorized on 2026-09-04 and executed under `harness/phases/2026-09-04-phase-7-implementation.md`. Independent QA **FAIL**ed at `fd8a43d` for `P7-QA-01`–`P7-QA-09`. Bounded remediation was authorized on 2026-09-05 under amended `P7-D08`. Decisions `P7-D01` through `P7-D15` remain binding with the amended `P7-D08`. Remediation product Tasks 1–6 are committed; Task 7 reconciles generated contracts and control state with full deterministic regression; Task 8 owns production M9, readiness, and the new independent-QA handoff. Master gate remains ineligible until fresh QA PASS; no Phase 7 seal yet.
+Phase 7 original implementation was authorized on 2026-09-04 and executed under `harness/phases/2026-09-04-phase-7-implementation.md`. Independent QA **FAIL**ed at `fd8a43d` for `P7-QA-01`–`P7-QA-09`. Bounded remediation was authorized on 2026-09-05 under amended `P7-D08`. Decisions `P7-D01` through `P7-D15` remain binding with the amended `P7-D08`. Remediation Tasks 1–8 are complete through readiness handoff on `e24b6a1`. Master gate remains ineligible until fresh QA PASS; no Phase 7 seal yet.
 
 ## Guardrails
 
@@ -12,7 +12,7 @@ Phase 7 original implementation was authorized on 2026-09-04 and executed under 
 - No invented CAP operational values, RF predictions, compliance claims, or unsupported report claims.
 - Ordinary failures enter the logged repair/retry loop and do not stop the phase. Only a blocker proven under `AGENTS.md` may pause execution for user direction.
 - Progress reports and response-turn boundaries do not end an unfinished durable goal.
-- Independent QA PASS and master PASS are required before sealing Phase 7. Do not create a seal from remediation Task 7 alone.
+- Independent QA PASS and master PASS are required before sealing Phase 7. Do not create a seal from remediation readiness alone.
 
 ## Bootstrap record
 

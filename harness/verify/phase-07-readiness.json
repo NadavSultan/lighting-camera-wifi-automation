@@ -2,11 +2,11 @@
   "schema_version": 1,
   "phase": "07",
   "goal": {
-    "objective": "Complete Phase 7 reporting/export implementation per harness/phases/phase-07.md through M0-M9.",
+    "objective": "Complete Phase 7 remediation under amended P7-D08 through M0-M9, readiness PASS, and independent-QA handoff.",
     "status": "ACHIEVED",
-    "stopping_condition": "Passing Phase 7 implementation-readiness manifest and independent-QA handoff."
+    "stopping_condition": "Passing Phase 7 remediation implementation-readiness manifest and independent-QA handoff."
   },
-  "implementation_commit": "044c013b2fa23a29bee6fc2b8779896084daae44",
+  "implementation_commit": "e24b6a16add314393574257a08e539a27673a505",
   "allowed_evidence_paths_after_implementation_commit": [
     "harness/",
     "docs/phase-7-",
@@ -33,16 +33,16 @@
       "id": "M0",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
-        "backend/tests/test_phase7_reporting.py"
+        "harness/phases/2026-09-04-phase-7-implementation.md"
       ]
     },
     {
       "id": "M1",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -51,7 +51,7 @@
       "id": "M2",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -60,7 +60,7 @@
       "id": "M3",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -69,7 +69,7 @@
       "id": "M4",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -78,7 +78,7 @@
       "id": "M5",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -87,7 +87,7 @@
       "id": "M6",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -97,14 +97,15 @@
       "status": "PASS",
       "evidence": [
         "frontend/tests/rendered-html.test.mjs",
-        "frontend/app/components/ReportPanel.tsx"
+        "frontend/app/components/ReportPanel.tsx",
+        "harness/logs/2026-09-04-phase-7-execution.md"
       ]
     },
     {
       "id": "M8",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -113,8 +114,8 @@
       "id": "M9",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-m9-summary.json",
-        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md"
       ]
     }
   ],
@@ -143,7 +144,7 @@
       "id": "P7-DM-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -152,7 +153,7 @@
       "id": "P7-SN-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -161,7 +162,7 @@
       "id": "P7-ST-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -170,7 +171,7 @@
       "id": "P7-FP-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -179,7 +180,7 @@
       "id": "P7-MF-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -188,7 +189,7 @@
       "id": "P7-CSV-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -197,7 +198,7 @@
       "id": "P7-XL-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -206,7 +207,7 @@
       "id": "P7-KM-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -215,7 +216,7 @@
       "id": "P7-KM-02",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -224,7 +225,7 @@
       "id": "P7-PDF-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -233,7 +234,7 @@
       "id": "P7-PR-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -242,7 +243,7 @@
       "id": "P7-SC-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -251,7 +252,7 @@
       "id": "P7-AP-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -260,7 +261,7 @@
       "id": "P7-AT-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "harness/logs/2026-09-04-phase-7-execution.md",
         "backend/tests/test_phase7_reporting.py"
       ]
@@ -270,7 +271,8 @@
       "status": "PASS",
       "evidence": [
         "frontend/tests/rendered-html.test.mjs",
-        "frontend/app/components/ReportPanel.tsx"
+        "frontend/app/components/ReportPanel.tsx",
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json"
       ]
     },
     {
@@ -278,37 +280,38 @@
       "status": "PASS",
       "evidence": [
         "frontend/tests/rendered-html.test.mjs",
-        "frontend/app/components/ReportPanel.tsx"
+        "frontend/app/components/ReportPanel.tsx",
+        "harness/logs/2026-09-04-phase-7-execution.md"
       ]
     },
     {
       "id": "P7-REG-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
-        "harness/logs/2026-09-04-phase-7-execution.md",
-        "backend/tests/test_phase7_reporting.py"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md"
       ]
     },
     {
       "id": "P7-PRD-01",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-m9-summary.json",
-        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md"
       ]
     }
   ],
   "commands": [
     {
       "id": "final-verification",
-      "command": "backend pytest --basetemp harness/tmp/pytest/run; validate_engineering_data; export_schema; frontend test/typecheck/lint/build; Input/CAP schema diff check; M9 74-pole report package",
+      "command": "Task 7 deterministic block on 63e6b31 (product-identical to e24b6a1) + Task 8 M9 on e24b6a1: backend pytest 281; validate_engineering_data; export_schema; frontend test/typecheck/lint/build; Input/CAP schema diff; production 74-pole M9 API+browser",
       "ran": true,
       "exit_code": 0,
-      "tested_commit": "044c013b2fa23a29bee6fc2b8779896084daae44",
+      "tested_commit": "e24b6a16add314393574257a08e539a27673a505",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
-        "harness/verify/2026-09-04-phase-7-m9-summary.json"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json",
+        "harness/logs/2026-09-04-phase-7-execution.md"
       ]
     }
   ],
@@ -317,14 +320,15 @@
       "id": "final_verification",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
+        "harness/logs/2026-09-04-phase-7-execution.md"
       ]
     },
     {
       "id": "generated_artifact_freshness",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
         "schemas/project.schema.json"
       ]
     },
@@ -332,8 +336,8 @@
       "id": "source_preservation",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md",
-        "harness/verify/2026-09-04-phase-7-m9-summary.json"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json"
       ]
     },
     {
@@ -341,14 +345,14 @@
       "status": "PASS",
       "evidence": [
         "harness/phases/2026-09-04-phase-7-implementation.md",
-        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md"
       ]
     },
     {
       "id": "rendered_workflow",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-m9-summary.json",
+        "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json",
         "frontend/tests/rendered-html.test.mjs"
       ]
     },
@@ -356,16 +360,16 @@
       "id": "regression",
       "status": "PASS",
       "evidence": [
-        "harness/verify/2026-09-04-phase-7-verification-summary.md"
+        "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md"
       ]
     }
   ],
   "reports": {
     "phase_work_record": "harness/phases/2026-09-04-phase-7-implementation.md",
     "execution_log": "harness/logs/2026-09-04-phase-7-execution.md",
-    "verification_summary": "harness/verify/2026-09-04-phase-7-verification-summary.md",
-    "completion_report": "docs/phase-7-implementation-completion-2026-09-04.md",
-    "rendered_evidence": "harness/verify/2026-09-04-phase-7-m9-summary.json"
+    "verification_summary": "harness/verify/2026-09-05-phase-7-remediation-verification-summary.md",
+    "completion_report": "docs/phase-7-remediation-implementation-completion-2026-09-05.md",
+    "rendered_evidence": "harness/verify/2026-09-05-phase-7-remediation-m9-summary.json"
   },
   "blockers": [],
   "gate": {

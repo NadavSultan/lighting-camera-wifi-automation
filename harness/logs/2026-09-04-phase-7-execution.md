@@ -277,6 +277,34 @@ Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0
 
 - Product remediation Tasks 1–6: committed through `f7f776e`.
 - Task 7: contracts + control docs + deterministic M8 block recorded on this commit.
-- M9 production 74-pole workflow, readiness verifier, and new independent-QA handoff: **pending Task 8**.
-- Independent QA FAIL at `fd8a43d` remains the last QA disposition; no seal.
-- Next action: Task 8 M9 / readiness / handoff only.
+- M9 production 74-pole workflow, readiness verifier, and new independent-QA handoff: completed in Task 8 below.
+- Independent QA FAIL at `fd8a43d` remains the last QA disposition until fresh QA; no seal.
+
+## Task 8 — Production M9, readiness, and independent-QA handoff (2026-09-05)
+
+- Starting HEAD: `e24b6a16add314393574257a08e539a27673a505` (Task 7 + UTF-8 log fix; remediation implementation commit).
+- Python: `C:\Users\Nadav\Desktop\Nadav\lighting-camera-wifi-automation\.venv\Scripts\python.exe`
+
+### Exact command evidence
+
+| Order | Exact command/action | Exit/result | Notes |
+|---|---|---|---|
+| 1 | Port discovery: `Get-NetTCPConnection` for 3000/8000 | occupied | Used free ports **53780** (backend) and **53781** (frontend) |
+| 2 | Backend: `python -m uvicorn app.main:app --host 127.0.0.1 --port 53780` with `LCWA_DATA_DIR=harness/tmp/m9/data` | 0 / health ok | `{"status":"ok","phase":7,"version":"0.7.0"}` |
+| 3 | Frontend: `corepack pnpm run dev -- --port 53781` with `NEXT_PUBLIC_API_URL=http://127.0.0.1:53780` | 0 | Bound to `http://localhost:53781/` (IPv6 localhost; 127.0.0.1 probe failed) |
+| 4 | `python harness/tmp/m9/run_m9_api_validate.py` | 0 | API import/preview/package + ZIP/CSV/XLSX/KMZ/PDF/presentation/cross-format/updated-KML validations **PASS**; package SHA-256 `7d2f17891add98bf4032f0302712949e38a9870838fd667fc23aec4996561d5c` |
+| 5 | Browser recovery 1: Playwright import | fail | `No module named 'playwright'` |
+| 6 | Browser recovery 2: `pip install playwright==1.48.0` + `playwright install chromium` then workflow | partial | Install OK; first selector pass hit ambiguous `Report Package` match |
+| 7 | Browser recovery 3: Chrome headless `--dump-dom` | 0 | Confirmed Import KML/KMZ + Report Package controls in DOM |
+| 8 | `python harness/tmp/m9/run_m9_browser_pass.py` | 0 | Playwright: import Miracle Mile KML, refresh checklist, toggle PDF option, download package; **zero console errors**; download SHA-256 `9ecfd89b53ac0479e294abd7d1d8577afa71fe0ab2a4ee6dcdf45901d81bde8a` |
+| 9 | Evidence records written under `harness/verify/` + handoff doc | n/a | Dated M9 summary + verification summary + readiness refresh + QA handoff |
+
+### Controlling state after Task 8
+
+```
+Implementation: remediation complete
+Independent QA: pending fresh review
+Master gate: ineligible until QA PASS
+Phase 7 seal: absent
+Next action: fresh independent QA on the exact clean evidence commit
+```
