@@ -204,6 +204,66 @@ test("Phase 7 conflict-safe merge keeps engineering fields and history lengths u
   assert.equal(engineering.updated_at, "2026-09-05T10:00:00Z");
 });
 
+test("Phase 7 post-generate merge keeps sent preferences for remount hydration", async () => {
+  const {
+    applyLastReportMetadata,
+    defaultReportFormats,
+    defaultReportSections,
+    mergeReportPreferences,
+  } = await import("../app/lib/phase7-report-workflows.mjs");
+  const formats = { ...defaultReportFormats(), pdf_summary: false };
+  const sections = { ...defaultReportSections(), cap: false };
+  const project = {
+    id: "p7",
+    name: "Local draft",
+    updated_at: "2026-09-05T10:00:00Z",
+    source: { poles: [{ id: "p1", name: "unsaved rename" }] },
+    report_preferences: {
+      model_version: "report-package-1.0.0",
+      formats: defaultReportFormats(),
+      sections: defaultReportSections(),
+      kmz_layers: {},
+    },
+    last_report: null,
+  };
+  const lastReport = {
+    model_version: "report-package-1.0.0",
+    generated_at: "2026-09-05T12:00:00Z",
+    status: "complete",
+    report_input_sha256: "a".repeat(64),
+    package_sha256: "b".repeat(64),
+    package_size_bytes: 12,
+    member_count: 1,
+    member_sha256: {},
+    included_sections: ["project_inventory"],
+    omitted_sections: ["cap"],
+    warnings: [],
+    validation_finding_count: 0,
+  };
+  // ReportPanel: merge sent selections, then metadata (updated_at remount key).
+  const panelNext = applyLastReportMetadata(
+    mergeReportPreferences(project, formats, sections),
+    lastReport,
+    "2026-09-05T12:00:01Z",
+  );
+  // Workspace: re-apply onto current engineering state without dropping preferences.
+  const current = {
+    ...project,
+    source: { poles: [{ id: "p1", name: "still unsaved" }] },
+  };
+  const withMeta = applyLastReportMetadata(current, panelNext.last_report, panelNext.updated_at);
+  const workspaceNext = {
+    ...withMeta,
+    report_preferences: panelNext.report_preferences,
+  };
+  assert.equal(workspaceNext.report_preferences.formats.pdf_summary, false);
+  assert.equal(workspaceNext.report_preferences.sections.cap, false);
+  assert.equal(workspaceNext.source.poles[0].name, "still unsaved");
+  assert.equal(workspaceNext.updated_at, "2026-09-05T12:00:01Z");
+  assert.equal(workspaceNext.last_report.package_sha256, "b".repeat(64));
+  assert.equal(project.report_preferences.formats.pdf_summary, true);
+});
+
 test("Phase 7 report panel posts selections for preview and merges metadata without getProject", async () => {
   const reportPanel = await readFile(new URL("../app/components/ReportPanel.tsx", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/lib/api.ts", import.meta.url), "utf8");
@@ -221,6 +281,7 @@ test("Phase 7 report panel posts selections for preview and merges metadata with
   assert.match(reportPanel, /formats,/);
   assert.match(reportPanel, /sections,/);
   assert.match(reportPanel, /expected_project_updated_at:\s*project\.updated_at/);
+  assert.match(reportPanel, /mergeReportPreferences/);
   assert.match(reportPanel, /applyLastReportMetadata/);
   assert.match(reportPanel, /onReportMetadataApplied/);
   assert.doesNotMatch(reportPanel, /getProject/);
@@ -231,6 +292,7 @@ test("Phase 7 report panel posts selections for preview and merges metadata with
   assert.match(workspace, /onReportMetadataApplied/);
   assert.doesNotMatch(workspace, /onProjectRefreshed=\{\(next\) => replaceProject\(next,\s*false\)\}/);
   assert.match(workspace, /applyLastReportMetadata/);
+  assert.match(workspace, /report_preferences:\s*next\.report_preferences/);
 });
 
 test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {

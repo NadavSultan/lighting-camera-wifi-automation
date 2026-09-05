@@ -7,6 +7,7 @@ import {
   applyLastReportMetadata,
   defaultReportFormats,
   defaultReportSections,
+  mergeReportPreferences,
   reportCanGenerate,
   reportStatusLabel,
 } from "../lib/phase7-report-workflows.mjs";
@@ -133,8 +134,10 @@ export function ReportPanel({ project, busy, onBusy, onStatus, onError, onReport
         expected_project_updated_at: project.updated_at,
       };
       const result = await downloadReportPackage(project, request);
+      // Persist selection into client prefs before remount (updated_at key) rehydrates checkboxes.
+      const withPrefs = mergeReportPreferences(project, formats, sections) ?? project;
       const merged = applyLastReportMetadata(
-        project,
+        withPrefs,
         result.last_report as LastReportMetadata | null,
         result.project_updated_at,
       );

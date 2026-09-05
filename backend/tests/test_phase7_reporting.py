@@ -971,6 +971,25 @@ def _preview_format(payload: dict, format_name: str) -> dict:
     return next(item for item in payload["formats"] if item["format"] == format_name)
 
 
+def test_p7_qa_04_missing_expected_timestamp_when_persist_returns_422():
+    with _temp_project_store() as root:
+        store = ProjectStore(Path(root) / "projects")
+        project = bare_project(name="Missing Token")
+        store.save(project)
+        before = store.load(project.id).model_dump(mode="json")
+        client = TestClient(create_app(store))
+        response = client.post(
+            f"/api/projects/{project.id}/reports/package",
+            json={
+                "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
+                "persist_last_report_metadata": True,
+            },
+        )
+        assert response.status_code == 422
+        assert "expected_project_updated_at" in str(response.json().get("detail", "")).lower()
+        assert store.load(project.id).model_dump(mode="json") == before
+
+
 def test_p7_qa_04_stale_expected_timestamp_returns_409_without_output_or_write():
     with _temp_project_store() as root:
         store = ProjectStore(Path(root) / "projects")

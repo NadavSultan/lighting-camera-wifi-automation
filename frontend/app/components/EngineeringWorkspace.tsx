@@ -531,11 +531,15 @@ export function EngineeringWorkspace() {
                   onStatus={setStatus}
                   onError={setError}
                   onReportMetadataApplied={(next) => {
-                    setProject((current) =>
-                      current
-                        ? applyLastReportMetadata(current, next.last_report, next.updated_at) ?? current
-                        : next,
-                    );
+                    setProject((current) => {
+                      if (!current) return next;
+                      const withMeta =
+                        applyLastReportMetadata(current, next.last_report, next.updated_at) ?? current;
+                      // Keep server-persisted report selections across remount; do not touch engineering fields.
+                      return next.report_preferences
+                        ? { ...withMeta, report_preferences: next.report_preferences }
+                        : withMeta;
+                    });
                   }}
                 />
               )}
