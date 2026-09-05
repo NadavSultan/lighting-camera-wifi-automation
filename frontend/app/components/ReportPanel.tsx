@@ -134,7 +134,7 @@ export function ReportPanel({ project, busy, onBusy, onStatus, onError, onReport
         expected_project_updated_at: project.updated_at,
       };
       const result = await downloadReportPackage(project, request);
-      // Persist selection into client prefs before remount (updated_at key) rehydrates checkboxes.
+      // Sync request selections into report_preferences so client matches server-persisted prefs.
       const withPrefs = mergeReportPreferences(project, formats, sections) ?? project;
       const merged = applyLastReportMetadata(
         withPrefs,

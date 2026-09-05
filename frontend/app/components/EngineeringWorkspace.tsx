@@ -524,7 +524,7 @@ export function EngineeringWorkspace() {
               </section>
               {project && (
                 <ReportPanel
-                  key={`${project.id}:${project.updated_at}`}
+                  key={project.id}
                   project={project}
                   busy={busy}
                   onBusy={setBusy}
@@ -535,7 +535,7 @@ export function EngineeringWorkspace() {
                       if (!current) return next;
                       const withMeta =
                         applyLastReportMetadata(current, next.last_report, next.updated_at) ?? current;
-                      // Keep server-persisted report selections across remount; do not touch engineering fields.
+                      // Keep generate-time selections as presentation state; do not touch engineering fields.
                       return next.report_preferences
                         ? { ...withMeta, report_preferences: next.report_preferences }
                         : withMeta;

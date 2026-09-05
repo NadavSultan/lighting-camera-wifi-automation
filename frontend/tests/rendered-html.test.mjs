@@ -204,15 +204,16 @@ test("Phase 7 conflict-safe merge keeps engineering fields and history lengths u
   assert.equal(engineering.updated_at, "2026-09-05T10:00:00Z");
 });
 
-test("Phase 7 post-generate merge keeps sent preferences for remount hydration", async () => {
+test("Phase 7 post-generate merge keeps sent preferences after metadata apply", async () => {
   const {
     applyLastReportMetadata,
     defaultReportFormats,
     defaultReportSections,
     mergeReportPreferences,
   } = await import("../app/lib/phase7-report-workflows.mjs");
-  const formats = { ...defaultReportFormats(), pdf_summary: false };
-  const sections = { ...defaultReportSections(), cap: false };
+  const formats = { ...defaultReportFormats(), pdf_summary: false, presentation_model: false };
+  const sections = { ...defaultReportSections(), cap: false, lighting: false };
+  const kmzLayers = { wifi: false, cap: false };
   const project = {
     id: "p7",
     name: "Local draft",
@@ -222,7 +223,15 @@ test("Phase 7 post-generate merge keeps sent preferences for remount hydration",
       model_version: "report-package-1.0.0",
       formats: defaultReportFormats(),
       sections: defaultReportSections(),
-      kmz_layers: {},
+      kmz_layers: {
+        camera_geometry: true,
+        lighting: true,
+        wifi: true,
+        cap: true,
+        priority_areas: true,
+        calculation_areas: true,
+        wifi_analysis_areas: true,
+      },
     },
     last_report: null,
   };
@@ -236,17 +245,17 @@ test("Phase 7 post-generate merge keeps sent preferences for remount hydration",
     member_count: 1,
     member_sha256: {},
     included_sections: ["project_inventory"],
-    omitted_sections: ["cap"],
+    omitted_sections: ["cap", "lighting"],
     warnings: [],
     validation_finding_count: 0,
   };
-  // ReportPanel: merge sent selections, then metadata (updated_at remount key).
+  // ReportPanel: sync request selections into prefs, then merge last_report metadata only.
   const panelNext = applyLastReportMetadata(
-    mergeReportPreferences(project, formats, sections),
+    mergeReportPreferences(project, formats, sections, kmzLayers),
     lastReport,
     "2026-09-05T12:00:01Z",
   );
-  // Workspace: re-apply onto current engineering state without dropping preferences.
+  // Workspace: re-apply onto current engineering state without dropping synced preferences.
   const current = {
     ...project,
     source: { poles: [{ id: "p1", name: "still unsaved" }] },
@@ -257,11 +266,25 @@ test("Phase 7 post-generate merge keeps sent preferences for remount hydration",
     report_preferences: panelNext.report_preferences,
   };
   assert.equal(workspaceNext.report_preferences.formats.pdf_summary, false);
+  assert.equal(workspaceNext.report_preferences.formats.presentation_model, false);
   assert.equal(workspaceNext.report_preferences.sections.cap, false);
+  assert.equal(workspaceNext.report_preferences.sections.lighting, false);
+  assert.equal(workspaceNext.report_preferences.kmz_layers.wifi, false);
+  assert.equal(workspaceNext.report_preferences.kmz_layers.cap, false);
+  assert.equal(workspaceNext.report_preferences.kmz_layers.lighting, true);
   assert.equal(workspaceNext.source.poles[0].name, "still unsaved");
   assert.equal(workspaceNext.updated_at, "2026-09-05T12:00:01Z");
   assert.equal(workspaceNext.last_report.package_sha256, "b".repeat(64));
+  // Stale pre-generate defaults must not win after metadata apply.
   assert.equal(project.report_preferences.formats.pdf_summary, true);
+  assert.notEqual(workspaceNext.report_preferences.formats.pdf_summary, project.report_preferences.formats.pdf_summary);
+});
+
+test("Phase 7 ReportPanel remount key is project id only (not updated_at)", async () => {
+  const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /<ReportPanel\s+[\s\S]*?key=\{project\.id\}/);
+  assert.doesNotMatch(workspace, /key=\{`\$\{project\.id\}:\$\{project\.updated_at\}`\}/);
+  assert.doesNotMatch(workspace, /key=\{project\.id\s*\+\s*.*updated_at/);
 });
 
 test("Phase 7 report panel posts selections for preview and merges metadata without getProject", async () => {
@@ -293,6 +316,7 @@ test("Phase 7 report panel posts selections for preview and merges metadata with
   assert.doesNotMatch(workspace, /onProjectRefreshed=\{\(next\) => replaceProject\(next,\s*false\)\}/);
   assert.match(workspace, /applyLastReportMetadata/);
   assert.match(workspace, /report_preferences:\s*next\.report_preferences/);
+  assert.match(workspace, /key=\{project\.id\}/);
 });
 
 test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {
