@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import tempfile
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -393,6 +394,15 @@ def test_p7_fp_01_significant_input_changes_fingerprint_fixed_clock_byte_identic
     assert manifest_edited["report_input_sha256"] != manifest_a["report_input_sha256"]
 
 
+def test_p7_qa_01_fixed_clock_remains_byte_identical_after_delay():
+    project = bare_project()
+    request = fixed_request()
+    package_a, _, _ = generate_report_package(project, request)
+    time.sleep(2.1)
+    package_b, _, _ = generate_report_package(project, request)
+    assert package_a == package_b
+
+
 # ---------------------------------------------------------------------------
 # P7-MF-01 — manifest integrity
 # ---------------------------------------------------------------------------
@@ -410,30 +420,28 @@ def test_p7_manifest_01_versions_member_hashes_status_and_tampering_detection():
     assert "members" in manifest
     members = _zip_members(package)
     assert "report-manifest.json" in members
+    assert set(manifest["members"]) == set(members) - {"report-manifest.json"}
     for path, meta in manifest["members"].items():
         assert path in members
-        if path == "report-manifest.json":
-            # Manifest self-entry hashes/sizes the sibling-only body (without the self entry);
-            # the ZIP member is the expanded document and is intentionally larger.
-            body = {key: value for key, value in manifest.items() if key != "members"}
-            body["members"] = {
-                member_path: member_meta
-                for member_path, member_meta in manifest["members"].items()
-                if member_path != "report-manifest.json"
-            }
-            body_bytes = (json.dumps(body, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
-            assert meta["sha256"] == hashlib.sha256(body_bytes).hexdigest()
-            assert meta["size_bytes"] == len(body_bytes)
-            assert len(members[path]) > meta["size_bytes"]
-        else:
-            assert meta["size_bytes"] == len(members[path])
-            assert meta["sha256"] == hashlib.sha256(members[path]).hexdigest()
+        assert meta["size_bytes"] == len(members[path])
+        assert meta["sha256"] == hashlib.sha256(members[path]).hexdigest()
 
     # Tampering: flip one byte of a schedule member and recompute — hash must mismatch.
     target = next(path for path in members if path.startswith("schedules/"))
     tampered = bytearray(members[target])
     tampered[0] = (tampered[0] + 1) % 256
     assert hashlib.sha256(bytes(tampered)).hexdigest() != manifest["members"][target]["sha256"]
+
+
+def test_p7_qa_02_manifest_hashes_every_payload_member_without_self_entry():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    members = _zip_members(package)
+    assert "report-manifest.json" in members
+    assert "report-manifest.json" not in manifest["members"]
+    assert set(manifest["members"]) == set(members) - {"report-manifest.json"}
+    for path, integrity in manifest["members"].items():
+        assert integrity["size_bytes"] == len(members[path])
+        assert integrity["sha256"] == hashlib.sha256(members[path]).hexdigest()
 
 
 def test_p7_mf_01_preview_exposes_checklist_without_mutation():

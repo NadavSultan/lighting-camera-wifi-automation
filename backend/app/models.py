@@ -733,10 +733,56 @@ class ReportPreferences(StrictModel):
     kmz_layers: ReportKmzLayerSelection = Field(default_factory=ReportKmzLayerSelection)
 
 
+ReportStatus = Literal["complete", "complete_with_warnings", "incomplete"]
+ReportSectionDisposition = Literal[
+    "included",
+    "omitted",
+    "not_configured",
+    "not_calculated",
+    "stale_omitted",
+    "disabled",
+]
+ReportMemberPath = Annotated[str, Field(min_length=1, pattern=r"^[^\\\x00-\x1f]+$")]
+
+
+class ReportMemberIntegrity(StrictModel):
+    sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    size_bytes: Annotated[int, Field(ge=0, le=MAX_REPORT_MEMBER_BYTES)]
+
+
+class ReportManifest(StrictModel):
+    report_model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
+    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
+    software_version: Literal["0.7.0"] = SOFTWARE_VERSION
+    generator: Literal["lcwa-report-package"]
+    project_id: str
+    project_name: str
+    generation_time: datetime
+    status: ReportStatus
+    report_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    source_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")]
+    formats: ReportFormatSelection
+    sections: ReportSectionSelection
+    kmz_layers: ReportKmzLayerSelection
+    section_dispositions: dict[str, ReportSectionDisposition]
+    included_sections: list[str]
+    omitted_sections: list[str]
+    warnings: list[str]
+    validation_findings: list[str]
+    members: dict[ReportMemberPath, ReportMemberIntegrity]
+    disclaimer: str
+
+    @model_validator(mode="after")
+    def reject_manifest_self_entry(self) -> "ReportManifest":
+        if "report-manifest.json" in self.members:
+            raise ValueError("report manifest must not contain a self-entry")
+        return self
+
+
 class LastReportMetadata(StrictModel):
     model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
     generated_at: datetime
-    status: Literal["complete", "complete_with_warnings", "incomplete"]
+    status: ReportStatus
     report_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     package_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     package_size_bytes: Annotated[int, Field(ge=1, le=MAX_REPORT_PACKAGE_BYTES)]

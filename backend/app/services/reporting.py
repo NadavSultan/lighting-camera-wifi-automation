@@ -45,6 +45,7 @@ from app.models import (
     Project,
     ReportFormatSelection,
     ReportKmzLayerSelection,
+    ReportManifest,
     ReportPackageRequest,
     ReportSectionSelection,
     utc_now,
@@ -760,11 +761,22 @@ def _build_schedule_rows(project: Project, snapshot: dict[str, Any]) -> dict[str
 # ---------------------------------------------------------------------------
 
 
-def _build_workbook(schedules: dict[str, tuple[list[str], list[list[Any]]]], snapshot: dict[str, Any]) -> bytes:
+def _build_workbook(
+    schedules: dict[str, tuple[list[str], list[list[Any]]]],
+    snapshot: dict[str, Any],
+    generation_time: datetime,
+) -> bytes:
     if len(schedules) > MAX_REPORT_SHEETS:
         raise ReportGenerationError(f"Report workbook exceeds the {MAX_REPORT_SHEETS}-sheet limit")
     buffer = io.BytesIO()
     workbook = xlsxwriter.Workbook(buffer, {"in_memory": True, "strings_to_urls": False, "strings_to_formulas": False})
+    workbook.set_properties(
+        {
+            "title": f"Engineering report — {snapshot['project_name']}",
+            "author": "Lighting Camera WiFi Automation",
+            "created": _ensure_utc(generation_time).replace(tzinfo=None),
+        }
+    )
     header_format = workbook.add_format({"bold": True, "bg_color": "#E8EEF5"})
     used_names: set[str] = set()
     name_by_key = {key: title for key, _filename, title in CSV_SPECS}
@@ -1211,7 +1223,7 @@ def _build_pdf(project: Project, snapshot: dict[str, Any], schedules: dict[str, 
 
     class _DeterministicCanvas(Canvas):
         def __init__(self, *args, **kwargs):
-            kwargs.setdefault("invariant", 1)
+            kwargs["invariant"] = 1
             super().__init__(*args, **kwargs)
 
     doc.build(story, canvasmaker=_DeterministicCanvas)
@@ -1432,7 +1444,11 @@ def generate_report_package(
                     )
 
             if formats.xlsx_workbook:
-                _write_member(members, safe_zip_path("workbook.xlsx"), _build_workbook(schedules, snapshot))
+                _write_member(
+                    members,
+                    safe_zip_path("workbook.xlsx"),
+                    _build_workbook(schedules, snapshot, generation_time),
+                )
 
             if formats.pdf_summary:
                 _write_member(members, safe_zip_path("summary.pdf"), _build_pdf(working, snapshot, schedules))
@@ -1444,8 +1460,7 @@ def generate_report_package(
                     _build_presentation_model(working, snapshot),
                 )
 
-            # Manifest always included on success. Member hashes cover sibling members;
-            # the manifest entry records the hash of the sibling-only document body.
+            # Manifest always included on success and hashes every non-manifest payload member.
             manifest_path = safe_zip_path("report-manifest.json")
             sibling_hashes = {
                 path: {"sha256": _sha256_bytes(data), "size_bytes": len(data)}
@@ -1457,39 +1472,26 @@ def generate_report_package(
             omitted_sections = [
                 key for key, value in snapshot["dispositions"].items() if value != "included"
             ]
-            manifest_body = {
-                "report_model_version": REPORT_MODEL_VERSION,
-                "schema_version": SCHEMA_VERSION,
-                "software_version": SOFTWARE_VERSION,
-                "generator": REPORT_GENERATOR,
-                "project_id": working.id,
-                "project_name": working.name,
-                "generation_time": snapshot["generation_time_iso"],
-                "status": snapshot["status"],
-                "report_input_sha256": snapshot["report_input_sha256"],
-                "source_sha256": snapshot["source_sha256"],
-                "formats": formats.model_dump(mode="json"),
-                "sections": sections.model_dump(mode="json"),
-                "kmz_layers": kmz_layers.model_dump(mode="json"),
-                "section_dispositions": snapshot["dispositions"],
-                "included_sections": included_sections,
-                "omitted_sections": omitted_sections,
-                "warnings": snapshot["warnings"],
-                "validation_findings": snapshot["findings"],
-                "members": sibling_hashes,
-                "disclaimer": DISCLAIMER_REPORT,
-            }
-            body_bytes = _encode_manifest(manifest_body)
-            written_manifest = {
-                **manifest_body,
-                "members": {
-                    **sibling_hashes,
-                    manifest_path: {
-                        "sha256": _sha256_bytes(body_bytes),
-                        "size_bytes": len(body_bytes),
-                    },
-                },
-            }
+            manifest = ReportManifest(
+                generator=REPORT_GENERATOR,
+                project_id=working.id,
+                project_name=working.name,
+                generation_time=generation_time,
+                status=snapshot["status"],
+                report_input_sha256=snapshot["report_input_sha256"],
+                source_sha256=snapshot["source_sha256"],
+                formats=formats,
+                sections=sections,
+                kmz_layers=kmz_layers,
+                section_dispositions=snapshot["dispositions"],
+                included_sections=included_sections,
+                omitted_sections=omitted_sections,
+                warnings=snapshot["warnings"],
+                validation_findings=snapshot["findings"],
+                members=sibling_hashes,
+                disclaimer=DISCLAIMER_REPORT,
+            )
+            written_manifest = manifest.model_dump(mode="json")
             manifest_bytes = _encode_manifest(written_manifest)
             _write_member(members, manifest_path, manifest_bytes)
 
