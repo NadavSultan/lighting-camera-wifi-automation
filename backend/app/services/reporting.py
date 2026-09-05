@@ -895,9 +895,42 @@ def _add_line_placemark(
     folder.append(placemark)
 
 
+def _kmz_feature_description(
+    *,
+    labels: str,
+    summary: str,
+    source_pole_id: str | None = None,
+    source_wgs84_raw: str | None = None,
+    source_wgs84_lon: float | None = None,
+    source_wgs84_lat: float | None = None,
+    model_version: str | None = None,
+    result_fingerprint: str | None = None,
+) -> str:
+    """Build derived KMZ placemark description with exact source provenance fields."""
+    parts = [labels, summary]
+    if source_pole_id:
+        parts.append(f"source_pole_id={source_pole_id}")
+    if source_wgs84_raw:
+        parts.append(f"source_wgs84_raw={source_wgs84_raw}")
+    if source_wgs84_lon is not None:
+        parts.append(f"source_wgs84_lon={source_wgs84_lon}")
+    if source_wgs84_lat is not None:
+        parts.append(f"source_wgs84_lat={source_wgs84_lat}")
+    if model_version:
+        parts.append(f"calculation_model_version={model_version}")
+    if result_fingerprint:
+        parts.append(f"result_fingerprint={result_fingerprint}")
+    return " | ".join(parts)
+
+
+def _source_pole_by_id(project: Project) -> dict[str, Any]:
+    return {pole.id: pole for pole in project.source.poles}
+
+
 def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
     layers: ReportKmzLayerSelection = snapshot["kmz_layers"]
     feature_count = 0
+    poles = _source_pole_by_id(project)
 
     def _count(n: int = 1) -> None:
         nonlocal feature_count
@@ -906,6 +939,19 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             raise ReportGenerationError(
                 f"Engineering KMZ exceeds the {MAX_REPORT_KML_FEATURES:,}-feature limit"
             )
+
+    def _pole_fields(pole_id: str | None) -> dict[str, Any]:
+        if not pole_id:
+            return {}
+        pole = poles.get(pole_id)
+        if pole is None:
+            return {"source_pole_id": pole_id}
+        return {
+            "source_pole_id": pole_id,
+            "source_wgs84_raw": pole.raw_coordinates,
+            "source_wgs84_lon": pole.longitude,
+            "source_wgs84_lat": pole.latitude,
+        }
 
     root = _kml_el("kml")
     document = _kml_el("Document")
@@ -946,7 +992,10 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_polygon_placemark(
                 folder,
                 name=f"[DERIVED] {area.name}",
-                description="User priority area. DERIVED export layer; not source KML.",
+                description=_kmz_feature_description(
+                    labels="DERIVED",
+                    summary="User priority area. DERIVED export layer; not source KML.",
+                ),
                 ring=area.wgs84_coordinates,
                 style_url="#lcwa-derived-priority",
             )
@@ -960,7 +1009,10 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_polygon_placemark(
                 folder,
                 name=f"[DERIVED] {area.name}",
-                description="Lighting calculation area. CONCEPTUAL / DERIVED; not professionally validated.",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary="Lighting calculation area. CONCEPTUAL / DERIVED; not professionally validated.",
+                ),
                 ring=area.wgs84_coordinates,
                 style_url="#lcwa-derived-calc-area",
             )
@@ -974,7 +1026,10 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_polygon_placemark(
                 folder,
                 name=f"[DERIVED] {area.name}",
-                description="Wi-Fi analysis area. CONCEPTUAL geometry only; not verified RF.",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary="Wi-Fi analysis area. CONCEPTUAL geometry only; not verified RF.",
+                ),
                 ring=area.wgs84_coordinates,
                 style_url="#lcwa-derived-wifi-area",
             )
@@ -984,15 +1039,24 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
     if layers.camera_geometry and camera is not None:
         folder = _kml_el("Folder")
         folder.append(_kml_el("name", "DERIVED — Camera Footprints (CONCEPTUAL)"))
+        camera_fp = camera.get("calculation_input_sha256")
+        camera_model = camera.get("geometry_model_version") or "flat-ground-pinhole-1.0.0"
         for footprint in camera.get("footprints", []):
             ring = footprint.get("wgs84_coordinates")
             if not ring:
                 continue
             _count()
+            pole_id = footprint.get("pole_id")
             _add_polygon_placemark(
                 folder,
-                name=f"[DERIVED] camera {footprint.get('pole_id')} / {footprint.get('camera_slot_id')}",
-                description=CAMERA_DISCLAIMER,
+                name=f"[DERIVED] camera {pole_id} / {footprint.get('camera_slot_id')}",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary=CAMERA_DISCLAIMER,
+                    model_version=footprint.get("geometry_model_version") or camera_model,
+                    result_fingerprint=camera_fp,
+                    **_pole_fields(pole_id),
+                ),
                 ring=[(float(lon), float(lat)) for lon, lat in ring],
                 style_url="#lcwa-derived-camera",
             )
@@ -1011,9 +1075,14 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_polygon_placemark(
                 folder,
                 name=f"[DERIVED] lighting {result.get('calculation_area_name')}",
-                description=(
-                    f"CONCEPTUAL direct-lighting summary. avg={stats.get('average_illuminance_lux')} lux. "
-                    "Not independently validated against AGi32."
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary=(
+                        f"CONCEPTUAL direct-lighting summary. avg={stats.get('average_illuminance_lux')} lux. "
+                        "Not independently validated against AGi32."
+                    ),
+                    model_version=result.get("calculation_model_version"),
+                    result_fingerprint=result.get("calculation_input_sha256"),
                 ),
                 ring=area.wgs84_coordinates,
                 style_url="#lcwa-derived-lighting",
@@ -1024,15 +1093,24 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
     if layers.wifi and wifi is not None:
         folder = _kml_el("Folder")
         folder.append(_kml_el("name", "DERIVED — Wi-Fi Circles (CONCEPTUAL)"))
+        wifi_fp = wifi.get("calculation_input_sha256")
+        wifi_model = wifi.get("model_version") or "conceptual-circle-1.0.0"
         for circle in wifi.get("circles", []):
             ring = circle.get("wgs84_ring")
             if not ring:
                 continue
             _count()
+            pole_id = circle.get("pole_id")
             _add_polygon_placemark(
                 folder,
-                name=f"[DERIVED/CONCEPTUAL] wifi {circle.get('pole_id')}",
-                description="Conceptual geometric circle only; not verified RF coverage.",
+                name=f"[DERIVED/CONCEPTUAL] wifi {pole_id}",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary="Conceptual geometric circle only; not verified RF coverage.",
+                    model_version=circle.get("model_version") or wifi_model,
+                    result_fingerprint=wifi_fp,
+                    **_pole_fields(pole_id),
+                ),
                 ring=[(float(lon), float(lat)) for lon, lat in ring],
                 style_url="#lcwa-derived-wifi",
             )
@@ -1056,6 +1134,8 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
                 candidate_coords[candidate.id] = pole_coords[candidate.pole_id]
             elif candidate.wgs84_coordinate is not None:
                 candidate_coords[candidate.id] = candidate.wgs84_coordinate
+        cap_fp = cap.get("result_sha256")
+        cap_model = cap.get("model_version") or "jnet1-graph-planning-1.0.0"
         for snapshot_row in cap.get("candidate_snapshots") or []:
             candidate_id = snapshot_row.get("candidate_id") or snapshot_row.get("id")
             pole_id = snapshot_row.get("source_pole_id")
@@ -1069,7 +1149,13 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_point_placemark(
                 folder,
                 name=f"[DERIVED/CONCEPTUAL] CAP {candidate_id}",
-                description=cap.get("disclaimer") or "Conceptual CAP graph vertex.",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary=cap.get("disclaimer") or "Conceptual CAP graph vertex.",
+                    model_version=cap_model,
+                    result_fingerprint=cap_fp,
+                    **_pole_fields(pole_id),
+                ),
                 lon=float(lon),
                 lat=float(lat),
                 style_url="#lcwa-derived-cap",
@@ -1079,8 +1165,8 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             pole_id = node.get("source_pole_id")
             if pole_id and pole_id in pole_coords:
                 id_to_xy[node["id"]] = pole_coords[pole_id]
-        for root in cap.get("candidate_snapshots") or []:
-            cid = root.get("id")
+        for root_row in cap.get("candidate_snapshots") or []:
+            cid = root_row.get("id")
             if cid in candidate_coords:
                 id_to_xy[cid] = candidate_coords[cid]
         for link in cap.get("canonical_links") or []:
@@ -1092,7 +1178,12 @@ def _build_engineering_kmz(project: Project, snapshot: dict[str, Any]) -> bytes:
             _add_line_placemark(
                 folder,
                 name=f"[DERIVED/CONCEPTUAL] link {link.get('id')}",
-                description="Distance-qualified conceptual link; not RF-predicted.",
+                description=_kmz_feature_description(
+                    labels="DERIVED / CONCEPTUAL",
+                    summary="Distance-qualified conceptual link; not RF-predicted.",
+                    model_version=cap_model,
+                    result_fingerprint=cap_fp,
+                ),
                 coordinates=[left, right],
                 style_url="#lcwa-derived-cap",
             )

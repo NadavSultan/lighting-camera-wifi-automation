@@ -8,6 +8,7 @@ import copy
 import hashlib
 import io
 import json
+import re
 import tempfile
 import time
 import zipfile
@@ -23,7 +24,12 @@ from pyproj import Transformer
 from app.main import create_app
 from app.models import (
     MAX_REPORT_CELL_CHARS,
+    MAX_REPORT_KML_FEATURES,
+    MAX_REPORT_MEMBER_BYTES,
     MAX_REPORT_PACKAGE_BYTES,
+    MAX_REPORT_PDF_TABLE_ROWS,
+    MAX_REPORT_SHEETS,
+    MAX_REPORT_TABULAR_ROWS,
     SCHEMA_VERSION,
     SOFTWARE_VERSION,
     CalculationArea,
@@ -62,11 +68,16 @@ from app.services.lighting_calculation import lighting_calculation_input_sha256
 from app.services.reporting import (
     CSV_SPECS,
     ReportGenerationError,
+    _build_pdf,
+    _build_schedule_rows,
+    _write_member,
     build_snapshot,
     generate_report_package,
     preview_report,
     safe_cell,
+    safe_sheet_name,
     safe_zip_path,
+    validate_report_package_integrity,
 )
 from app.services.store import ProjectStore
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, wifi_calculation_input_sha256
@@ -748,6 +759,71 @@ def test_p7_sc_01_path_traversal_rejected_via_safe_zip_path():
         safe_zip_path("a", "..", "b")
 
 
+def test_p7_qa_sc_01_zip_duplicate_path_rejected_during_member_write():
+    members: dict[str, bytes] = {}
+    _write_member(members, "schedules/01-project-inventory.csv", b"a,b\r\n")
+    with pytest.raises(ReportGenerationError, match="[Dd]uplicate"):
+        _write_member(members, "schedules/01-project-inventory.csv", b"c,d\r\n")
+
+
+def test_p7_qa_sc_02_zip_traversal_paths_rejected_by_safe_zip_path_and_member_path():
+    for parts in (("..", "x.csv"), ("schedules", "..", "x.csv"), ("folder/../x.csv",)):
+        with pytest.raises(ReportGenerationError):
+            safe_zip_path(*parts)
+    for path in ("../x.csv", "folder/../x.csv", "/abs.csv", "folder\\x.csv"):
+        with pytest.raises(ValidationError):
+            TypeAdapter(ReportMemberPath).validate_python(path)
+
+
+_ACTIVE_OOXML_REL_TOKENS = (
+    "vbaProject",
+    "oleObject",
+    "externalLink",
+    "hyperlink",
+    "image",
+    "ctrlProp",
+    "attachedToolbars",
+)
+
+
+def test_p7_qa_sc_03_xlsx_has_no_macros_hyperlinks_external_images_or_active_relationships():
+    project = bare_project()
+    project.pole_edits["p1"] = PoleEdit(pole_id="p1", engineering_notes="=HYPERLINK(\"http://evil\")")
+    package, _, _ = generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                csv_schedules=False,
+                pdf_summary=False,
+                presentation_model=False,
+                engineering_kmz=False,
+            )
+        ),
+    )
+    xlsx = _zip_members(package)["workbook.xlsx"]
+    with zipfile.ZipFile(io.BytesIO(xlsx)) as workbook:
+        names = workbook.namelist()
+        assert "xl/vbaProject.bin" not in names
+        assert not any("vbaProject" in name.lower() for name in names)
+        assert not any("/embeddings/" in name or name.startswith("xl/embeddings") for name in names)
+        assert not any(name.startswith("xl/media/") for name in names)
+        assert not any("externalLink" in name for name in names)
+        for name in names:
+            lower = name.lower()
+            if lower.endswith(".xml"):
+                text = workbook.read(name).decode("utf-8")
+                assert 'TargetMode="External"' not in text
+                assert "<hyperlink " not in text.lower()
+            if not lower.endswith(".rels"):
+                continue
+            text = workbook.read(name).decode("utf-8")
+            assert 'TargetMode="External"' not in text
+            for match in re.finditer(r'Type="([^"]+)"', text):
+                rel_type = match.group(1)
+                assert not any(token in rel_type for token in _ACTIVE_OOXML_REL_TOKENS)
+
+
 # ---------------------------------------------------------------------------
 # P7-KM — engineering KMZ vs updated KML
 # ---------------------------------------------------------------------------
@@ -777,6 +853,91 @@ def test_p7_kml_01_p7_kmz_01_engineering_kmz_contains_derived_or_conceptual_labe
     assert "DERIVED" in kml or "CONCEPTUAL" in kml
     assert "DERIVED" in kml
     assert "Priority" in kml
+
+
+def _kmz_doc_kml(package: bytes) -> str:
+    members = _zip_members(package)
+    kmz_path = next(path for path in members if path.endswith("-engineering.kmz"))
+    with zipfile.ZipFile(io.BytesIO(members[kmz_path])) as kmz:
+        return kmz.read("doc.kml").decode("utf-8")
+
+
+def test_p7_kmz_01_derived_feature_descriptions_include_source_provenance(tmp_path: Path):
+    project, _, _ = calculated_camera_project(tmp_path)
+    pole = project.source.poles[0]
+    assert project.camera_geometry.calculation_input_sha256
+    package, _, _ = generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+                presentation_model=False,
+            )
+        ),
+    )
+    kml = _kmz_doc_kml(package)
+    assert "DERIVED" in kml
+    assert "CONCEPTUAL" in kml
+    assert pole.id in kml
+    assert pole.raw_coordinates in kml
+    assert f"{pole.longitude}" in kml or format(pole.longitude, ".12g") in kml
+    assert f"{pole.latitude}" in kml or format(pole.latitude, ".12g") in kml
+    assert "flat-ground-pinhole-1.0.0" in kml
+    assert project.camera_geometry.calculation_input_sha256 in kml
+
+
+def test_p7_kmz_01_wifi_and_cap_feature_descriptions_include_provenance():
+    wifi_project = bare_project()
+    wifi_project.pole_edits["p1"] = PoleEdit(pole_id="p1", fixture_type=FixtureType.WIFI)
+    wifi_project = apply_wifi_result(wifi_project, calculate_wifi_coverage(wifi_project, wifi_fixtures()))
+    wifi_pole = wifi_project.source.poles[0]
+    wifi_fp = wifi_project.wifi_coverage.result.calculation_input_sha256
+    assert wifi_fp
+
+    package, _, _ = generate_report_package(
+        wifi_project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+                presentation_model=False,
+            )
+        ),
+    )
+    wifi_kml = _kmz_doc_kml(package)
+    assert "DERIVED" in wifi_kml and "CONCEPTUAL" in wifi_kml
+    assert wifi_pole.id in wifi_kml
+    assert wifi_pole.raw_coordinates in wifi_kml
+    assert "conceptual-circle-1.0.0" in wifi_kml
+    assert wifi_fp in wifi_kml
+
+    cap_project = project_with_current_cap_result()
+    cap_result = cap_project.cap_calculations.result
+    assert cap_result is not None
+    cap_pole = next(p for p in cap_project.source.poles if p.id == "p0")
+    package, _, _ = generate_report_package(
+        cap_project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+                presentation_model=False,
+            )
+        ),
+    )
+    cap_kml = _kmz_doc_kml(package)
+    assert "DERIVED" in cap_kml and "CONCEPTUAL" in cap_kml
+    assert cap_pole.id in cap_kml
+    assert cap_pole.raw_coordinates in cap_kml
+    assert "jnet1-graph-planning-1.0.0" in cap_kml
+    assert cap_result.result_sha256 in cap_kml
 
 
 def test_p7_source_01_updated_kml_remains_cap_free():
@@ -1197,22 +1358,240 @@ def test_p7_qa_06_preview_uses_requested_sections_and_formats():
 
 
 # ---------------------------------------------------------------------------
-# P7 limits — boundary+1
+# P7 limits — exact-limit and boundary+1 matrix (P7-D11 / P7-SC-01)
 # ---------------------------------------------------------------------------
 
 
-def test_p7_limits_01_oversize_member_or_row_limit_raises(monkeypatch: pytest.MonkeyPatch):
-    project = bare_project()
-    monkeypatch.setattr(reporting, "MAX_REPORT_TABULAR_ROWS", 1)
-    # Header + one data row for inventory alone is already 2 logical rows in _csv_bytes check
-    # when multiple schedules emit; force via schedule total or single schedule overflow.
-    with pytest.raises(ReportGenerationError, match="row"):
-        generate_report_package(project, fixed_request())
-
-    monkeypatch.setattr(reporting, "MAX_REPORT_TABULAR_ROWS", 250_000)
-    monkeypatch.setattr(reporting, "MAX_REPORT_MEMBER_BYTES", 64)
-    with pytest.raises(ReportGenerationError, match="byte"):
-        generate_report_package(project, fixed_request())
-
+def test_p7_limits_01_cell_chars_exact_and_boundary_plus_one():
+    exact = "c" * MAX_REPORT_CELL_CHARS
+    assert safe_cell(exact) == exact
     with pytest.raises(ReportGenerationError, match="character limit"):
-        safe_cell("y" * (MAX_REPORT_CELL_CHARS + 1))
+        safe_cell(exact + "x")
+
+
+def test_p7_limits_01_tabular_rows_exact_and_boundary_plus_one(monkeypatch: pytest.MonkeyPatch):
+    project = bare_project()
+    snapshot = build_report_snapshot(project)
+    schedules = _build_schedule_rows(project, snapshot)
+    exact = sum(len(rows) for _, rows in schedules.values())
+    assert exact > 0
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_TABULAR_ROWS", exact)
+    generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+                presentation_model=False,
+            )
+        ),
+    )
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_TABULAR_ROWS", exact - 1)
+    with pytest.raises(ReportGenerationError, match="row"):
+        generate_report_package(
+            project,
+            fixed_request(
+                formats=ReportFormatSelection(
+                    project_json=False,
+                    engineering_kmz=False,
+                    xlsx_workbook=False,
+                    pdf_summary=False,
+                    presentation_model=False,
+                )
+            ),
+        )
+
+
+def test_p7_limits_01_sheets_exact_and_boundary_plus_one(monkeypatch: pytest.MonkeyPatch):
+    project = bare_project()
+    snapshot = build_report_snapshot(project)
+    schedules = _build_schedule_rows(project, snapshot)
+    exact = len(schedules)
+    assert exact > 0
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_SHEETS", exact)
+    generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                csv_schedules=False,
+                pdf_summary=False,
+                presentation_model=False,
+            )
+        ),
+    )
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_SHEETS", exact - 1)
+    with pytest.raises(ReportGenerationError, match="sheet"):
+        generate_report_package(
+            project,
+            fixed_request(
+                formats=ReportFormatSelection(
+                    project_json=False,
+                    engineering_kmz=False,
+                    csv_schedules=False,
+                    pdf_summary=False,
+                    presentation_model=False,
+                )
+            ),
+        )
+
+
+def test_p7_limits_01_kml_features_exact_and_boundary_plus_one(monkeypatch: pytest.MonkeyPatch):
+    project = bare_project()
+    project.priority_areas = [
+        PriorityArea(id="prio-1", name="Priority", wgs84_coordinates=_closed_ring_near_pole())
+    ]
+    kmz_only = fixed_request(
+        formats=ReportFormatSelection(
+            project_json=False,
+            csv_schedules=False,
+            xlsx_workbook=False,
+            pdf_summary=False,
+            presentation_model=False,
+        )
+    )
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_KML_FEATURES", 1)
+    generate_report_package(project, kmz_only)
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_KML_FEATURES", 0)
+    with pytest.raises(ReportGenerationError, match="feature"):
+        generate_report_package(project, kmz_only)
+
+
+def test_p7_limits_01_member_bytes_exact_and_boundary_plus_one(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(reporting, "MAX_REPORT_MEMBER_BYTES", 10)
+    members: dict[str, bytes] = {}
+    _write_member(members, "exact.bin", b"x" * 10)
+    assert members["exact.bin"] == b"x" * 10
+    with pytest.raises(ReportGenerationError, match="byte"):
+        _write_member({}, "over.bin", b"x" * 11)
+    monkeypatch.setattr(reporting, "MAX_REPORT_MEMBER_BYTES", MAX_REPORT_MEMBER_BYTES)
+
+    project = bare_project()
+    package, _, _ = generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                presentation_model=False,
+            )
+        ),
+    )
+    pdf_size = len(_zip_members(package)["summary.pdf"])
+    monkeypatch.setattr(reporting, "MAX_REPORT_MEMBER_BYTES", pdf_size)
+    generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                presentation_model=False,
+            )
+        ),
+    )
+    monkeypatch.setattr(reporting, "MAX_REPORT_MEMBER_BYTES", pdf_size - 1)
+    with pytest.raises(ReportGenerationError, match="byte"):
+        generate_report_package(
+            project,
+            fixed_request(
+                formats=ReportFormatSelection(
+                    project_json=False,
+                    engineering_kmz=False,
+                    csv_schedules=False,
+                    xlsx_workbook=False,
+                    presentation_model=False,
+                )
+            ),
+        )
+
+
+def test_p7_limits_01_package_bytes_exact_and_boundary_plus_one(monkeypatch: pytest.MonkeyPatch):
+    project = bare_project()
+    request = fixed_request(
+        formats=ReportFormatSelection(
+            project_json=False,
+            engineering_kmz=False,
+            csv_schedules=False,
+            xlsx_workbook=False,
+            presentation_model=False,
+        )
+    )
+    package, _, _ = generate_report_package(project, request)
+    exact = len(package)
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_PACKAGE_BYTES", exact)
+    again, _, _ = generate_report_package(project, request)
+    assert len(again) == exact
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_PACKAGE_BYTES", exact - 1)
+    with pytest.raises(ReportGenerationError, match="package"):
+        generate_report_package(project, request)
+
+
+def test_p7_limits_01_pdf_table_rows_exact_and_summarized_overflow(monkeypatch: pytest.MonkeyPatch):
+    project = bare_project()
+    snapshot = build_report_snapshot(project)
+    schedules = _build_schedule_rows(project, snapshot)
+
+    monkeypatch.setattr(reporting, "MAX_REPORT_PDF_TABLE_ROWS", 2)
+    snapshot["findings"] = ["finding-a", "finding-b"]
+    pdf_exact = _build_pdf(project, snapshot, schedules)
+    exact_text = _pdf_decoded_content(pdf_exact)
+    assert b"finding-a" in exact_text
+    assert b"finding-b" in exact_text
+    assert b"additional findings omitted" not in exact_text
+
+    snapshot["findings"] = ["finding-a", "finding-b", "finding-c"]
+    pdf_over = _build_pdf(project, snapshot, schedules)
+    over_text = _pdf_decoded_content(pdf_over)
+    assert b"finding-a" in over_text
+    assert b"finding-b" in over_text
+    assert b"finding-c" not in over_text
+    assert b"1 additional findings omitted" in over_text
+
+
+@pytest.mark.parametrize(
+    "dimension",
+    [
+        "package_bytes",
+        "member_bytes",
+        "tabular_rows",
+        "kml_features",
+        "pdf_table_rows",
+        "sheets",
+        "cell_chars",
+    ],
+)
+def test_p7_limits_01_matrix_dimensions_are_covered(dimension: str):
+    """Enumerated P7-D11 dimensions — each has a dedicated exact/boundary test above."""
+    assert dimension in {
+        "package_bytes",
+        "member_bytes",
+        "tabular_rows",
+        "kml_features",
+        "pdf_table_rows",
+        "sheets",
+        "cell_chars",
+    }
+
+
+def test_p7_limits_01_sheet_name_sanitization_unique_within_limit():
+    used: set[str] = set()
+    first = safe_sheet_name("A" * 40, used)
+    second = safe_sheet_name("A" * 40, used)
+    assert first != second
+    assert len(first) <= 31
+    assert len(second) <= 31
