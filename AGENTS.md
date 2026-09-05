@@ -17,7 +17,7 @@ Before planning or changing code, every future session must read these files in 
 9. `PLANS.md`
 10. `OPERATIONS.md`
 
-Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-6 are accepted and formally closed. Phase 6 closed on 2026-09-03 after implementation readiness, independent QA PASS, master gate PASS, and a valid phase seal. Phase 7 planning decisions are approved; original Phase 7 implementation was authorized on 2026-09-04, failed independent QA at `fd8a43d`, and bounded remediation was authorized on 2026-09-05 under amended `P7-D08`. Remediation product work is in progress toward readiness and a new independent QA; there is no Phase 7 gate PASS or seal, and later phases remain unauthorized.
+Then read the active phase's controlling contract and gate records, inspect `git status --short --branch`, the exact `HEAD`, and the current diff, and preserve unrelated or user-owned changes. Phases 1-7 are accepted and formally closed. Phase 6 closed on 2026-09-03; Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. Post-roadmap work remains unauthorized and gated.
 
 ## Durable execution workflow
 
@@ -50,7 +50,7 @@ A phase is not complete merely because implementation is committed or a completi
 - Treat WGS84 coordinates as interchange/display data only. Select a local projected CRS in metres for distance, area, coverage, or later photometric calculations.
 - Do not infer CAP limits, fixture applicability, photometric conventions, or analytics performance. Record an assumption or block the feature.
 - Camera downward angle is measured below horizontal: 0 degrees is horizontal and 90 degrees is vertically down.
-- Phase work must remain gated. Phases 1-6 are closed. Phase 7 planning and original implementation were authorized; independent QA failed at `fd8a43d`; remediation under amended `P7-D08` is authorized. Do not create a Phase 7 seal or start later phases without separate explicit authorization.
+- Phase work must remain gated. Phases 1-7 are closed. Do not plan or implement post-roadmap work without separate explicit authorization.
 
 ## Development
 
@@ -67,4 +67,4 @@ Phase 1 includes project creation, KML/KMZ import, validation, map display, per-
 
 ## Phase boundary
 
-Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry; Phase 6 adds accepted CAP / JNET1 distance-graph and constraint planning; Phase 7 adds deterministic multi-format report packages under remediation after the `fd8a43d` QA FAIL. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Do not plan or implement any later calculation/recommendation engine without separate explicit authorization.
+Phase 2 adds operational fixture-model, IES, and camera/lens catalogs; Phase 3 adds fixed-mount camera geometry; Phase 4 adds the accepted simplified direct-lighting engine; Phase 5 adds accepted conceptual Wi-Fi geometry; Phase 6 adds accepted CAP / JNET1 distance-graph and constraint planning; Phase 7 adds accepted deterministic multi-format report packages. The seven approved Phase 1 engineering catalogs remain frozen at `1.0.0`. Do not plan or implement any later calculation/recommendation engine without separate explicit authorization.

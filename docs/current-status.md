@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-6 retain their prior accepted closure. Phase 7 original implementation failed independent QA at `fd8a43d`; bounded remediation under amended `P7-D08` is complete through Task 8 readiness handoff on implementation commit `e24b6a1`. Independent QA is pending fresh review. No Phase 7 gate PASS or seal exists.
+Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8 or post-roadmap work is authorized.
 
 ## Completed
 
@@ -31,15 +31,21 @@ Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-0
 - Accepted implementation commit: `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-only history through independent-QA commit `f9dcea2fcc9bd8fc4a5118793a383736e5d72695`.
 - `docs/phase-6-master-gate-decision-2026-09-03.md` records the master **PASS**. `harness/seals/phase-06.md` is the controlling valid acceptance seal.
 
-## Phase 7 implementation and remediation
+## Phase 7 implementation and remediation (historical)
 
 - Planning decisions `P7-D01`–`P7-D15` approved 2026-09-03 (DL-018); original implementation authorized 2026-09-04.
-- Independent QA **FAIL** at `fd8a43d34177ab558e2da898b989b067a0677cd6` for `P7-QA-01`–`P7-QA-09`.
-- Remediation authorized 2026-09-05 under amended `P7-D08`. Design: `docs/superpowers/specs/2026-09-05-phase-7-remediation-design.md`. Plan: `docs/superpowers/plans/2026-09-05-phase-7-remediation.md`.
-- Controlling contract: `harness/phases/phase-07.md`. Work record: `harness/phases/2026-09-04-phase-7-implementation.md`.
-- Historical original completion/handoff records remain evidence of the pre-QA attempt only and do not authorize a seal after the FAIL.
-- Remediation product HEAD before Task 7 contracts commit: `f7f776e` (Tasks 1–6). Task 7 regenerated schemas, reconciled control docs, and recorded full deterministic regression at `63e6b31`. Task 8 completed production M9, readiness refresh, and `docs/phase-7-independent-qa-remediation-handoff-2026-09-05.md` against implementation commit `e24b6a1`.
+- Independent QA **FAIL** (historical) at `fd8a43d34177ab558e2da898b989b067a0677cd6` for `P7-QA-01`–`P7-QA-09`.
+- Remediation authorized 2026-09-05 under amended `P7-D08`. Controlling contract: `harness/phases/phase-07.md`.
+- Remediation implementation commit `e24b6a1` closed by Independent QA PASS and master gate PASS on 2026-09-05.
+
+## Phase 7 closure
+
+- Accepted implementation commit: `e24b6a16add314393574257a08e539a27673a505`.
+- Evidence tip through Independent QA packaging: `dc9e1b57709ced30ba78799674331734af6cbc8c` (includes prior tip `a050007` plus QA artifacts and `P7-QA-10` whitespace cleanup).
+- Independent QA PASS: `harness/verify/2026-09-05-phase-7-remediation-independent-qa-review.md`.
+- Master gate PASS: `docs/phase-7-master-gate-decision-2026-09-05.md`.
+- Valid seal: `harness/seals/phase-07.md`.
 
 ## Current gate
 
-Phases 1-6 remain formally closed. Phase 7 has no gate PASS and no seal. Remediation implementation readiness handoff is recorded; fresh independent QA must PASS before any master gate or seal. Report packages are transient derived artifacts and do not mutate source or engineering results.
+Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Post-roadmap work requires separate explicit authorization.

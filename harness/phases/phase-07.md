@@ -2,9 +2,9 @@
 
 Contract prepared: 2026-09-03
 
-Status: **IMPLEMENTATION COMPLETE — AWAITING INDEPENDENT QA**
+Status: **CLOSED — ACCEPTED**
 
-Phase gate: decisions `P7-D01`–`P7-D15` were approved on 2026-09-03; implementation was separately authorized and executed on 2026-09-04. Independent QA, master gate, and seal remain pending.
+Phase gate: decisions `P7-D01`–`P7-D15` were approved on 2026-09-03; implementation was authorized 2026-09-04, failed Independent QA at `fd8a43d`, and was remediated under amended `P7-D08`. Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md` close Phase 7 on 2026-09-05. Post-roadmap work remains unauthorized.
 
 ## Objective
 
