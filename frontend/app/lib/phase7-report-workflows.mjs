@@ -62,7 +62,11 @@ export function mergeReportPreferences(project, formats, sections, kmzLayers) {
 }
 
 /** Apply last_report metadata without touching engineering collections (undo-safe when applied outside history). */
-export function applyLastReportMetadata(project, lastReport) {
+export function applyLastReportMetadata(project, lastReport, projectUpdatedAt) {
   if (!project) return project;
-  return { ...project, last_report: lastReport ?? null };
+  const next = { ...project, last_report: lastReport ?? null };
+  if (typeof projectUpdatedAt === "string" && projectUpdatedAt) {
+    next.updated_at = projectUpdatedAt;
+  }
+  return next;
 }

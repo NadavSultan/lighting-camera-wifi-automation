@@ -11,4 +11,8 @@ export declare function mergeReportPreferences(
   sections?: Partial<ReportSectionSelection>,
   kmzLayers?: Partial<ReportKmzLayerSelection>,
 ): Project | null;
-export declare function applyLastReportMetadata(project: Project | null, lastReport: LastReportMetadata | null): Project | null;
+export declare function applyLastReportMetadata(
+  project: Project | null,
+  lastReport: LastReportMetadata | null,
+  projectUpdatedAt?: string | null,
+): Project | null;

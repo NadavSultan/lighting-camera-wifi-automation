@@ -825,6 +825,7 @@ class ReportPackageRequest(StrictModel):
     kmz_layers: ReportKmzLayerSelection | None = None
     persist_last_report_metadata: bool = True
     generation_time: datetime | None = None
+    expected_project_updated_at: datetime | None = None
 
 
 class Project(StrictModel):

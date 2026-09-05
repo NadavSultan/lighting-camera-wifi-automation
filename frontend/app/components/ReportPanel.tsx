@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { downloadReportPackage, getProject, previewReport } from "../lib/api";
+import { downloadReportPackage, previewReport } from "../lib/api";
 import {
   REPORT_DISCLAIMER,
+  applyLastReportMetadata,
   defaultReportFormats,
   defaultReportSections,
   reportCanGenerate,
   reportStatusLabel,
 } from "../lib/phase7-report-workflows.mjs";
-import type { Project, ReportFormatSelection, ReportPackageRequest, ReportSectionSelection } from "../lib/types";
+import type { LastReportMetadata, Project, ReportFormatSelection, ReportPackageRequest, ReportSectionSelection } from "../lib/types";
 
 type Preview = {
   status: string;
@@ -50,10 +51,10 @@ type Props = {
   onBusy: (value: boolean) => void;
   onStatus: (value: string) => void;
   onError: (value: string | null) => void;
-  onProjectRefreshed: (project: Project) => void;
+  onReportMetadataApplied: (project: Project) => void;
 };
 
-export function ReportPanel({ project, busy, onBusy, onStatus, onError, onProjectRefreshed }: Props) {
+export function ReportPanel({ project, busy, onBusy, onStatus, onError, onReportMetadataApplied }: Props) {
   const [formats, setFormats] = useState<ReportFormatSelection>({
     ...defaultReportFormats(),
     ...project.report_preferences?.formats,
@@ -68,26 +69,54 @@ export function ReportPanel({ project, busy, onBusy, onStatus, onError, onProjec
     let cancelled = false;
     void (async () => {
       try {
-        const next = await previewReport(project.id);
+        const next = await previewReport(project.id, { formats, sections });
         if (!cancelled) setPreview(next as Preview);
-      } catch {
-        if (!cancelled) setPreview(null);
+      } catch (error) {
+        if (!cancelled) {
+          const message = error instanceof Error ? error.message : String(error);
+          setPreview({
+            status: "incomplete",
+            checklist: [],
+            formats: [],
+            blockers: [message],
+            warnings: [],
+            validation_findings: [],
+            can_generate: false,
+            disclaimer: REPORT_DISCLAIMER,
+            report_input_sha256: null,
+          });
+          onError(message);
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
+    // Automatic preview follows saved project identity; selection-aware refresh uses the button.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: avoid preview storms on every checkbox toggle
   }, [project.id, project.updated_at]);
 
   async function refreshPreview() {
     onBusy(true);
     onError(null);
     try {
-      const next = await previewReport(project.id);
+      const next = await previewReport(project.id, { formats, sections });
       setPreview(next as Preview);
       onStatus(`Report preview · ${reportStatusLabel((next as Preview).status)}`);
     } catch (error) {
-      onError(error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      setPreview({
+        status: "incomplete",
+        checklist: [],
+        formats: [],
+        blockers: [message],
+        warnings: [],
+        validation_findings: [],
+        can_generate: false,
+        disclaimer: REPORT_DISCLAIMER,
+        report_input_sha256: null,
+      });
+      onError(message);
     } finally {
       onBusy(false);
     }
@@ -101,15 +130,32 @@ export function ReportPanel({ project, busy, onBusy, onStatus, onError, onProjec
         formats,
         sections,
         persist_last_report_metadata: true,
+        expected_project_updated_at: project.updated_at,
       };
-      await downloadReportPackage(project, request);
-      const refreshed = await getProject(project.id);
-      onProjectRefreshed(refreshed);
-      onStatus(`Report package downloaded · ${reportStatusLabel(refreshed.last_report?.status)}`);
-      const next = await previewReport(project.id);
+      const result = await downloadReportPackage(project, request);
+      const merged = applyLastReportMetadata(
+        project,
+        result.last_report as LastReportMetadata | null,
+        result.project_updated_at,
+      );
+      if (merged) onReportMetadataApplied(merged);
+      onStatus(`Report package downloaded · ${reportStatusLabel(result.status || result.last_report?.status)}`);
+      const next = await previewReport(project.id, { formats, sections });
       setPreview(next as Preview);
     } catch (error) {
-      onError(error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      setPreview({
+        status: "incomplete",
+        checklist: [],
+        formats: [],
+        blockers: [message],
+        warnings: [],
+        validation_findings: [],
+        can_generate: false,
+        disclaimer: REPORT_DISCLAIMER,
+        report_input_sha256: null,
+      });
+      onError(message);
     } finally {
       onBusy(false);
     }

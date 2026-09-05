@@ -1,4 +1,4 @@
-import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LensConfiguration, Project, ReportPackageRequest, WifiAnalysisArea } from "./types";
+import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LastReportMetadata, LensConfiguration, Project, ReportPackageDownloadResult, ReportPackageRequest, WifiAnalysisArea } from "./types";
 import { formatApiErrorDetail } from "./phase2-workflows.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
@@ -133,15 +133,26 @@ export async function downloadUpdatedKml(project: Project) {
   downloadBlob(await response.blob(), `${baseName(project.source.file?.filename ?? project.name)}-updated.kml`);
 }
 
-export function previewReport(projectId: string) {
-  return api<Record<string, unknown>>(`/api/projects/${encodeURIComponent(projectId)}/reports/preview`);
+export function previewReport(projectId: string, options?: ReportPackageRequest | null) {
+  return api<Record<string, unknown>>(`/api/projects/${encodeURIComponent(projectId)}/reports/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(options ?? {}),
+  });
 }
 
-export async function downloadReportPackage(project: Project, request?: ReportPackageRequest | null) {
+export async function downloadReportPackage(
+  project: Project,
+  request?: ReportPackageRequest | null,
+): Promise<ReportPackageDownloadResult> {
+  const payload: ReportPackageRequest = {
+    ...(request ?? {}),
+    expected_project_updated_at: request?.expected_project_updated_at ?? project.updated_at,
+  };
   const response = await fetch(`${API_URL}/api/projects/${encodeURIComponent(project.id)}/reports/package`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(request ?? {}),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     let message = `Report package failed: ${response.status} ${response.statusText}`;
@@ -153,7 +164,23 @@ export async function downloadReportPackage(project: Project, request?: ReportPa
     }
     throw new Error(message);
   }
+  const packageSha = response.headers.get("X-Report-Package-SHA256") ?? "";
+  const status = response.headers.get("X-Report-Status") ?? "";
+  const generatedAt = response.headers.get("X-Report-Generated-At") ?? "";
+  const projectUpdatedAt = response.headers.get("X-Project-Updated-At") ?? "";
+  const metadataHeader = response.headers.get("X-Report-Last-Metadata");
+  let lastReport: LastReportMetadata | null = null;
+  if (metadataHeader) {
+    lastReport = JSON.parse(metadataHeader) as LastReportMetadata;
+  }
   downloadBlob(await response.blob(), `${baseName(project.source.file?.filename ?? project.name)}-report-package.zip`);
+  return {
+    package_sha256: packageSha,
+    status,
+    generated_at: generatedAt,
+    project_updated_at: projectUpdatedAt,
+    last_report: lastReport,
+  };
 }
 
 export function downloadProjectJson(project: Project) {

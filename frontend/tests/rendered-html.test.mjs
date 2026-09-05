@@ -165,6 +165,74 @@ test("Phase 7 report helpers keep disclaimer and presentation-only preference me
   assert.equal(reportStatusLabel("complete_with_warnings"), "Complete with warnings");
 });
 
+test("Phase 7 conflict-safe merge keeps engineering fields and history lengths unchanged", async () => {
+  const { applyLastReportMetadata } = await import("../app/lib/phase7-report-workflows.mjs");
+  const engineering = {
+    id: "p7",
+    name: "Local draft",
+    updated_at: "2026-09-05T10:00:00Z",
+    source: { poles: [{ id: "p1", name: "unsaved rename" }] },
+    pole_edits: { p1: { pole_id: "p1", notes: "local-only" } },
+    lighting_calculations: { results: { a1: { status: "calculated" } } },
+    last_report: null,
+  };
+  const past = [structuredClone(engineering)];
+  const future = [];
+  const lastReport = {
+    model_version: "report-package-1.0.0",
+    generated_at: "2026-09-05T12:00:00Z",
+    status: "complete",
+    report_input_sha256: "a".repeat(64),
+    package_sha256: "b".repeat(64),
+    package_size_bytes: 12,
+    member_count: 1,
+    member_sha256: {},
+    included_sections: ["cap"],
+    omitted_sections: [],
+    warnings: [],
+    validation_finding_count: 0,
+  };
+  const next = applyLastReportMetadata(engineering, lastReport, "2026-09-05T12:00:01Z");
+  assert.equal(next.last_report.package_sha256, "b".repeat(64));
+  assert.equal(next.updated_at, "2026-09-05T12:00:01Z");
+  assert.equal(next.source.poles[0].name, "unsaved rename");
+  assert.equal(next.pole_edits.p1.notes, "local-only");
+  assert.deepEqual(next.lighting_calculations, engineering.lighting_calculations);
+  assert.equal(past.length, 1);
+  assert.equal(future.length, 0);
+  assert.equal(engineering.last_report, null);
+  assert.equal(engineering.updated_at, "2026-09-05T10:00:00Z");
+});
+
+test("Phase 7 report panel posts selections for preview and merges metadata without getProject", async () => {
+  const reportPanel = await readFile(new URL("../app/components/ReportPanel.tsx", import.meta.url), "utf8");
+  const api = await readFile(new URL("../app/lib/api.ts", import.meta.url), "utf8");
+  const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  const types = await readFile(new URL("../app/lib/types.ts", import.meta.url), "utf8");
+
+  assert.match(api, /previewReport\(projectId:\s*string,\s*options\?/);
+  assert.match(api, /method:\s*["']POST["']/);
+  assert.match(api, /X-Report-Package-SHA256/);
+  assert.match(api, /X-Report-Last-Metadata/);
+  assert.match(api, /expected_project_updated_at/);
+  assert.match(types, /expected_project_updated_at\??:\s*string/);
+
+  assert.match(reportPanel, /previewReport\(project\.id,\s*\{/);
+  assert.match(reportPanel, /formats,/);
+  assert.match(reportPanel, /sections,/);
+  assert.match(reportPanel, /expected_project_updated_at:\s*project\.updated_at/);
+  assert.match(reportPanel, /applyLastReportMetadata/);
+  assert.match(reportPanel, /onReportMetadataApplied/);
+  assert.doesNotMatch(reportPanel, /getProject/);
+  assert.doesNotMatch(reportPanel, /onProjectRefreshed/);
+  assert.match(reportPanel, /setPreview\(\{[\s\S]*blockers:/);
+  assert.match(reportPanel, /can_generate:\s*false/);
+
+  assert.match(workspace, /onReportMetadataApplied/);
+  assert.doesNotMatch(workspace, /onProjectRefreshed=\{\(next\) => replaceProject\(next,\s*false\)\}/);
+  assert.match(workspace, /applyLastReportMetadata/);
+});
+
 test("Phase 6 CAP invalidation clears results for graph inputs but not presentation notes", () => {
   const base = { projected_crs: "EPSG:32617", defaults: { fixture_type: "LITE" }, source: { poles: [{ id: "p1", sequence_index: 0, longitude: -80, latitude: 25 }] }, pole_edits: {}, cap_planning_inputs: { profile: { product_mapping: { status: "known" }, node_policy: {} }, candidates: [{ id: "cap-1", notes: "note", priority: 1 }], excluded_node_ids: [], excluded_candidate_ids: [], locked_selected_candidate_ids: [], primary_assignment_locks: {}, parent_locks: {} }, cap_calculations: { status: "calculated", calculation_input_sha256: "x", calculated_at: "now", result: { result_sha256: "y" }, warnings: [] }, cap_recommendations: { selected_candidate_ids: ["cap-1"], result_sha256: "y" } };
   const note = structuredClone(base); note.cap_planning_inputs.candidates[0].notes = "new note";

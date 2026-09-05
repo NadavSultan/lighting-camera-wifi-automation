@@ -885,6 +885,7 @@ def test_p7_api_01_missing_project_404_and_success_returns_zip():
 
         project = bare_project(name="API Report")
         store.save(project)
+        saved = store.load(project.id)
         preview = client.get(f"/api/projects/{project.id}/reports/preview")
         assert preview.status_code == 200
         assert preview.json()["can_generate"] is True
@@ -894,11 +895,17 @@ def test_p7_api_01_missing_project_404_and_success_returns_zip():
             json={
                 "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
                 "persist_last_report_metadata": True,
+                "expected_project_updated_at": saved.updated_at.isoformat().replace("+00:00", "Z"),
             },
         )
         assert response.status_code == 200
         assert response.headers["content-type"].startswith("application/zip")
         assert response.content[:2] == b"PK"
+        assert response.headers["X-Report-Package-SHA256"] == hashlib.sha256(response.content).hexdigest()
+        assert response.headers["X-Report-Status"] in {"complete", "complete_with_warnings", "incomplete"}
+        assert response.headers["X-Report-Generated-At"]
+        assert response.headers["X-Project-Updated-At"]
+        assert response.headers["X-Report-Last-Metadata"]
         with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
             assert "report-manifest.json" in archive.namelist()
 
@@ -906,6 +913,7 @@ def test_p7_api_01_missing_project_404_and_success_returns_zip():
         assert reloaded.last_report is not None
         assert reloaded.last_report.package_sha256 == hashlib.sha256(response.content).hexdigest()
         assert reloaded.last_report.status in {"complete", "complete_with_warnings", "incomplete"}
+        assert response.headers["X-Project-Updated-At"] == reloaded.updated_at.isoformat().replace("+00:00", "Z")
 
 
 def test_p7_atomic_01_failure_leaves_project_unchanged(monkeypatch: pytest.MonkeyPatch):
@@ -913,6 +921,7 @@ def test_p7_atomic_01_failure_leaves_project_unchanged(monkeypatch: pytest.Monke
         store = ProjectStore(Path(root) / "projects")
         project = bare_project(name="Atomic")
         store.save(project)
+        saved = store.load(project.id)
         before = store.load(project.id).model_dump(mode="json")
         client = TestClient(create_app(store))
 
@@ -923,6 +932,7 @@ def test_p7_atomic_01_failure_leaves_project_unchanged(monkeypatch: pytest.Monke
             json={
                 "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
                 "persist_last_report_metadata": True,
+                "expected_project_updated_at": saved.updated_at.isoformat().replace("+00:00", "Z"),
             },
         )
         assert response.status_code == 422
@@ -936,16 +946,106 @@ def test_p7_api_01_persist_false_does_not_write_last_report():
         store = ProjectStore(Path(root) / "projects")
         project = bare_project(name="No Persist")
         store.save(project)
+        saved = store.load(project.id)
         client = TestClient(create_app(store))
         response = client.post(
             f"/api/projects/{project.id}/reports/package",
             json={
                 "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
                 "persist_last_report_metadata": False,
+                "expected_project_updated_at": saved.updated_at.isoformat().replace("+00:00", "Z"),
             },
         )
         assert response.status_code == 200
         assert store.load(project.id).last_report is None
+        assert response.headers["X-Report-Package-SHA256"] == hashlib.sha256(response.content).hexdigest()
+        assert "X-Report-Last-Metadata" not in response.headers
+        assert response.headers["X-Project-Updated-At"] == saved.updated_at.isoformat().replace("+00:00", "Z")
+
+
+def _preview_item(payload: dict, section: str) -> dict:
+    return next(item for item in payload["checklist"] if item["section"] == section)
+
+
+def _preview_format(payload: dict, format_name: str) -> dict:
+    return next(item for item in payload["formats"] if item["format"] == format_name)
+
+
+def test_p7_qa_04_stale_expected_timestamp_returns_409_without_output_or_write():
+    with _temp_project_store() as root:
+        store = ProjectStore(Path(root) / "projects")
+        project = bare_project(name="Conflict")
+        store.save(project)
+        saved = store.load(project.id)
+        before = saved.model_dump(mode="json")
+        client = TestClient(create_app(store))
+        stale_time = (saved.updated_at.replace(tzinfo=timezone.utc) if saved.updated_at.tzinfo is None else saved.updated_at)
+        stale_time = stale_time.replace(year=2000)
+        response = client.post(
+            f"/api/projects/{project.id}/reports/package",
+            json={
+                "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
+                "persist_last_report_metadata": True,
+                "expected_project_updated_at": stale_time.isoformat().replace("+00:00", "Z"),
+            },
+        )
+        assert response.status_code == 409
+        assert response.content == b"" or not response.content.startswith(b"PK")
+        assert store.load(project.id).model_dump(mode="json") == before
+
+
+def test_p7_qa_04_midflight_store_update_returns_409_without_persist(monkeypatch: pytest.MonkeyPatch):
+    with _temp_project_store() as root:
+        store = ProjectStore(Path(root) / "projects")
+        project = bare_project(name="Midflight")
+        store.save(project)
+        saved = store.load(project.id)
+        client = TestClient(create_app(store))
+        expected = saved.updated_at.isoformat().replace("+00:00", "Z")
+        import app.main as main_module
+
+        original_generate = main_module.generate_report_package
+
+        def _generate_and_mutate(project_arg, request=None, **kwargs):
+            package, manifest, metadata = original_generate(project_arg, request, **kwargs)
+            mutated = store.load(project_arg.id)
+            mutated.name = "Changed during generation"
+            store.save(mutated)
+            return package, manifest, metadata
+
+        monkeypatch.setattr(main_module, "generate_report_package", _generate_and_mutate)
+        response = client.post(
+            f"/api/projects/{project.id}/reports/package",
+            json={
+                "generation_time": FIXED_TIME.isoformat().replace("+00:00", "Z"),
+                "persist_last_report_metadata": True,
+                "expected_project_updated_at": expected,
+            },
+        )
+        assert response.status_code == 409
+        after = store.load(project.id)
+        assert after.last_report is None
+        assert after.name == "Changed during generation"
+        assert response.content == b"" or not response.content.startswith(b"PK")
+
+
+def test_p7_qa_06_preview_uses_requested_sections_and_formats():
+    with _temp_project_store() as root:
+        store = ProjectStore(Path(root) / "projects")
+        project = bare_project(name="Preview Options")
+        store.save(project)
+        client = TestClient(create_app(store))
+        response = client.post(
+            f"/api/projects/{project.id}/reports/preview",
+            json={
+                "formats": {"pdf_summary": False},
+                "sections": {"cap": False},
+            },
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert _preview_item(payload, "cap")["enabled"] is False
+        assert _preview_format(payload, "pdf_summary")["enabled"] is False
 
 
 # ---------------------------------------------------------------------------

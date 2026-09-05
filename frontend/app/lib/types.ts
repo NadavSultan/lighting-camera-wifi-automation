@@ -162,6 +162,15 @@ export interface ReportPackageRequest {
   kmz_layers?: ReportKmzLayerSelection | null;
   persist_last_report_metadata?: boolean;
   generation_time?: string | null;
+  expected_project_updated_at?: string | null;
+}
+
+export interface ReportPackageDownloadResult {
+  package_sha256: string;
+  status: string;
+  generated_at: string;
+  project_updated_at: string;
+  last_report: LastReportMetadata | null;
 }
 
 export type CapKnowledge = "unknown" | "known";

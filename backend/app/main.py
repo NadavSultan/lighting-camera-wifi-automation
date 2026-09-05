@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
+import hashlib
+import json
 from copy import deepcopy
+from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import Body, FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +38,32 @@ from app.services.kml import KmlImportError, MAX_UPLOAD_BYTES, export_updated_km
 from app.services.reporting import ReportGenerationError, generate_report_package, preview_report
 from app.services.store import ProjectNotFoundError, ProjectStore
 
+REPORT_RESPONSE_HEADERS = (
+    "X-Report-Package-SHA256",
+    "X-Report-Status",
+    "X-Report-Generated-At",
+    "X-Project-Updated-At",
+    "X-Report-Last-Metadata",
+    "Content-Disposition",
+)
+
+
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _timestamps_match(expected: datetime, actual: datetime) -> bool:
+    return _as_utc(expected) == _as_utc(actual)
+
+
+def _iso_z(value: datetime | str) -> str:
+    if isinstance(value, str):
+        normalized = value.replace("Z", "+00:00")
+        return _as_utc(datetime.fromisoformat(normalized)).isoformat().replace("+00:00", "Z")
+    return _as_utc(value).isoformat().replace("+00:00", "Z")
+
 
 def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | None = None) -> FastAPI:
     project_store = store or ProjectStore()
@@ -53,6 +82,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=list(REPORT_RESPONSE_HEADERS),
     )
 
     def pin_revisions(project: Project) -> Project:
@@ -577,12 +607,45 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         except (ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    @app.post("/api/projects/{project_id}/reports/preview")
+    def report_preview_with_selections(
+        project_id: str,
+        body: ReportPackageRequest | None = Body(default=None),
+    ) -> dict:
+        try:
+            project = pin_revisions(project_store.load(project_id))
+            return preview_report(project, body)
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     @app.post("/api/projects/{project_id}/reports/package")
     def report_package(project_id: str, body: ReportPackageRequest | None = Body(default=None)) -> Response:
         try:
             stored = pin_revisions(project_store.load(project_id))
-            zip_bytes, _manifest, metadata = generate_report_package(stored, body)
-            if metadata is not None and (body is None or body.persist_last_report_metadata):
+            persist = True if body is None else body.persist_last_report_metadata
+            expected = None if body is None else body.expected_project_updated_at
+            if persist and expected is None:
+                raise HTTPException(
+                    status_code=422,
+                    detail="expected_project_updated_at is required when persisting last_report metadata",
+                )
+            if expected is not None and not _timestamps_match(expected, stored.updated_at):
+                raise HTTPException(
+                    status_code=409,
+                    detail="Project was modified; refresh and retry report generation",
+                )
+
+            zip_bytes, manifest, metadata = generate_report_package(stored, body)
+            saved_project = stored
+            if metadata is not None and persist:
+                current = project_store.load(project_id)
+                if expected is None or not _timestamps_match(expected, current.updated_at):
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Project was modified; refresh and retry report generation",
+                    )
                 updated = deepcopy(stored)
                 if body is not None:
                     if body.formats is not None:
@@ -592,15 +655,33 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
                     if body.kmz_layers is not None:
                         updated.report_preferences.kmz_layers = body.kmz_layers
                 updated.last_report = metadata
-                # Preserve engineering timestamps; only touch updated_at for metadata persistence.
-                from app.models import utc_now
-                updated.updated_at = utc_now()
-                project_store.save(updated)
+                # Preserve engineering fields; store.save bumps updated_at for metadata persistence only.
+                saved_project = project_store.save(updated)
+
+            package_sha = (
+                metadata.package_sha256
+                if metadata is not None
+                else hashlib.sha256(zip_bytes).hexdigest()
+            )
             filename = f"{Path(stored.source.file.filename).stem if stored.source.file else stored.name}-report-package.zip"
+            headers = {
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "X-Report-Package-SHA256": package_sha,
+                "X-Report-Status": str(manifest["status"]),
+                "X-Report-Generated-At": _iso_z(manifest["generation_time"]),
+                "X-Project-Updated-At": _iso_z(saved_project.updated_at),
+            }
+            if metadata is not None:
+                headers["X-Report-Last-Metadata"] = json.dumps(
+                    metadata.model_dump(mode="json"),
+                    separators=(",", ":"),
+                    ensure_ascii=True,
+                    allow_nan=False,
+                )
             return Response(
                 content=zip_bytes,
                 media_type="application/zip",
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+                headers=headers,
             )
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None

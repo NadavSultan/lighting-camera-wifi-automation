@@ -13,6 +13,7 @@ import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzi
 import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";
 import { CAP_DISCLAIMER, capBlockers, capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";
+import { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -529,7 +530,13 @@ export function EngineeringWorkspace() {
                   onBusy={setBusy}
                   onStatus={setStatus}
                   onError={setError}
-                  onProjectRefreshed={(next) => replaceProject(next, false)}
+                  onReportMetadataApplied={(next) => {
+                    setProject((current) =>
+                      current
+                        ? applyLastReportMetadata(current, next.last_report, next.updated_at) ?? current
+                        : next,
+                    );
+                  }}
                 />
               )}
               <section className="section">
