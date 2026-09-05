@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-04. Documentation consistency reviewed: 2026-09-04. Phases 1-6 retain their prior accepted closure. Phase 7 reporting/export implementation is complete through M0-M9 and awaits independent QA / master gate / seal.
+Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-6 retain their prior accepted closure. Phase 7 original implementation failed independent QA at `fd8a43d`; bounded remediation under amended `P7-D08` is authorized and product remediation through Task 6 is committed. Full deterministic regression (Task 7) is the current control/schema checkpoint. Production M9, readiness, and a new independent-QA handoff remain Task 8. No Phase 7 gate PASS or seal exists.
 
 ## Completed
 
@@ -16,7 +16,7 @@ Phase state last changed: 2026-09-04. Documentation consistency reviewed: 2026-0
 - Failed IES uploads are retained as inactive invalid/unsupported records with errors; valid records may carry operational warnings.
 - Referenced equipment deactivation is conflict-safe, camera/lens compatibility is reciprocal with the lens relation authoritative, and per-slot overrides have an explicit restore-to-template action.
 - Catalog-management and model-dependent pole-configuration UI is available through the **Catalogs** toolbar action and properties inspector.
-- Phase 7 report packages produce a deterministic ZIP (manifest, project JSON archive without embedded source upload bytes, derived engineering KMZ, CSV schedules, XLSX, PDF summary, presentation-model JSON) via synchronous preview/package APIs and a Report Package UI panel.
+- Phase 7 report packages produce a deterministic ZIP (manifest, project JSON archive without embedded source upload bytes, derived engineering KMZ, CSV schedules, XLSX, PDF summary, presentation-model JSON) via synchronous preview/package APIs and a Report Package UI panel. Remediation commits address `P7-QA-01`–`P7-QA-09` product findings (fingerprint, conflict safety, preference retention, summary rendering, limits/security/provenance).
 
 ## Known limitations
 
@@ -31,13 +31,15 @@ Phase state last changed: 2026-09-04. Documentation consistency reviewed: 2026-0
 - Accepted implementation commit: `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-only history through independent-QA commit `f9dcea2fcc9bd8fc4a5118793a383736e5d72695`.
 - `docs/phase-6-master-gate-decision-2026-09-03.md` records the master **PASS**. `harness/seals/phase-06.md` is the controlling valid acceptance seal.
 
-## Phase 7 implementation
+## Phase 7 implementation and remediation
 
-- Planning decisions `P7-D01`–`P7-D15` approved 2026-09-03 (DL-018); implementation authorized 2026-09-04.
+- Planning decisions `P7-D01`–`P7-D15` approved 2026-09-03 (DL-018); original implementation authorized 2026-09-04.
+- Independent QA **FAIL** at `fd8a43d34177ab558e2da898b989b067a0677cd6` for `P7-QA-01`–`P7-QA-09`.
+- Remediation authorized 2026-09-05 under amended `P7-D08`. Design: `docs/superpowers/specs/2026-09-05-phase-7-remediation-design.md`. Plan: `docs/superpowers/plans/2026-09-05-phase-7-remediation.md`.
 - Controlling contract: `harness/phases/phase-07.md`. Work record: `harness/phases/2026-09-04-phase-7-implementation.md`.
-- Completion report: `docs/phase-7-implementation-completion-2026-09-04.md`. Handoff: `docs/phase-7-independent-qa-handoff-2026-09-04.md`.
-- Verification summary: `harness/verify/2026-09-04-phase-7-verification-summary.md`.
+- Historical original completion/handoff records remain evidence of the pre-QA attempt only and do not authorize a seal after the FAIL.
+- Remediation product HEAD before Task 7 contracts commit: `f7f776e` (Tasks 1–6). Task 7 regenerates schemas, reconciles control docs, and records full deterministic regression. Task 8 owns production M9, readiness, and the new independent-QA handoff.
 
 ## Current gate
 
-Phases 1-6 remain formally closed. Phase 7 implementation is complete and awaiting independent QA PASS, master gate PASS, and a valid seal. Report packages are transient derived artifacts and do not mutate source or engineering results.
+Phases 1-6 remain formally closed. Phase 7 has no gate PASS and no seal. Remediation product work is committed; readiness verifier PASS and a fresh independent-QA handoff are still required before any master gate or seal. Report packages are transient derived artifacts and do not mutate source or engineering results.

@@ -1,12 +1,13 @@
 # Phase work record — 2026-09-04 — Phase 7
 
-Status: independent QA failed on 2026-09-05; bounded remediation active
+Status: independent QA failed on 2026-09-05; bounded remediation active through Task 7 contracts/regression; Task 8 (M9/readiness/handoff) still pending
 
 Original durable goal: Cursor durable goal ACHIEVED / complete on 2026-09-04 after readiness verifier PASS; that readiness evidence was superseded by the independent QA FAIL.
 Remediation durable goal: active. Resolve `P7-QA-01`–`P7-QA-09`, pass readiness on a clean remediation implementation commit, and record a new independent-QA handoff.
 Implementation commit: `044c013b2fa23a29bee6fc2b8779896084daae44`
 Readiness evidence commit: `094fc49c34ab1a350f433effc881634a9ffb1e71`
 Independent QA FAIL baseline: `fd8a43d34177ab558e2da898b989b067a0677cd6`
+Remediation product HEAD before Task 7: `f7f776e66e0be77e0f0b985cb452e082f9e52b28`
 Readiness manifest: `harness/verify/phase-07-readiness.json` — historical **PASS**, invalidated for current gate purposes by the later QA FAIL
 
 
@@ -33,7 +34,7 @@ Do not copy requirements from the controlling contract. Link them and record onl
 | Runtime discovery | 2026-09-05 Task 1: Python 3.12.7 (`C:\Users\Nadav\Anaconda3\python.exe`), Node v24.19.0, corepack 0.35.0, pnpm 11.25.0 via corepack | pass | `.venv/` is ignored local state; Node satisfies `>=22.13.0` | yes |
 | Locked dependency materialization | Clean resolve from `.\backend[dev]`; repository lock reinstalled in `C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-lockcheck`; `pip check` returned no broken requirements | pass | `backend/pyproject.toml`, `backend/requirements.lock`; local `.venv/` | yes |
 | Build/test/lint/typecheck commands | `corepack pnpm install --frozen-lockfile --offline`; build; 16/16 rendered tests; typecheck; lint | pass | existing lock/workspace policy; ignored build/dependency outputs only | yes |
-| Generated-artifact/validator commands | `backend/scripts/export_schema.py` and `scripts/validate_engineering_data.py` present; current remediation execution remains scheduled for Task 7 | entry points confirmed; not executed in Task 1 | `schemas/`, validator inputs | yes under remediation plan |
+| Generated-artifact/validator commands | Task 7: `python -m scripts.export_schema` exit 0; `scripts/validate_engineering_data.py` exit 0; post-export pytest 281 passed | pass | `schemas/`, validator inputs | yes under remediation plan |
 | Browser/rendered-QA runtime and ports | Microsoft Edge 152.0.4191.62 available; ports 3000 and 8000 occupied during discovery | runtime pass; use alternate recorded ports for later M9 | browser and temporary ports | yes; recoverable environment condition |
 
 Product changes must not begin until every required supporting path is either inside the authorized boundary or covered by an explicit recorded amendment.
@@ -42,22 +43,22 @@ Product changes must not begin until every required supporting path is either in
 
 | Milestone | Contract reference | Expected evidence | Status |
 |---|---|---|---|
-| M0 | `phase-07.md` M0 | work record + execution log preflight | original implementation completed; QA found dependency/evidence gaps; remediation Task 1 preflight complete |
-| M1 | M1; `P7-DM-01` | backend `-k "p7_dm or p7_mg"` | original implementation complete; QA partial, remediation pending |
-| M2 | M2; `P7-SN-01`, `P7-ST-01`, `P7-FP-01`, `P7-MF-01` | backend `-k "p7_snapshot or p7_manifest or p7_fp"` | original implementation complete; QA failed `P7-QA-01`–`P7-QA-03`, remediation pending |
-| M3 | M3; `P7-CSV-01`, `P7-XL-01`, `P7-SC-01` | backend `-k "p7_csv or p7_xlsx or p7_security"` | original implementation complete; QA found determinism/security-coverage gaps, remediation pending |
-| M4 | M4; `P7-KM-01`, `P7-KM-02` | backend `-k "p7_kml or p7_kmz or p7_source"` | original implementation complete; provenance evidence not proven, remediation pending |
-| M5 | M5; `P7-PDF-01`, `P7-PR-01` | backend `-k "p7_pdf or p7_presentation"` | original implementation complete; QA failed `P7-QA-05`, remediation pending |
-| M6 | M6; `P7-AP-01`, `P7-AT-01`, `P7-SC-01` limits | backend `-k "p7_api or p7_atomic or p7_limits"` | original implementation complete; QA failed conflict safety/coverage, remediation pending |
-| M7 | M7; `P7-UI-01`, `P7-UI-02` | frontend build/test/typecheck/lint | original implementation complete; QA failed `P7-QA-04`/`P7-QA-06`; Task 1 entry-point preflight passes |
-| M8 | M8; `P7-REG-01` | final verification block | original evidence superseded by QA FAIL; remediation full regression pending |
-| M9 | M9; `P7-PRD-01` | production 74-pole package QA + readiness | original evidence insufficient under `P7-QA-08`; reproducible remediation M9 pending |
+| M0 | `phase-07.md` M0 | work record + execution log preflight | original implementation completed; remediation Task 1 preflight complete |
+| M1 | M1; `P7-DM-01` | backend `-k "p7_dm or p7_mg"` | remediation product commits through Task 6; full suite re-verified in Task 7 |
+| M2 | M2; `P7-SN-01`, `P7-ST-01`, `P7-FP-01`, `P7-MF-01` | backend `-k "p7_snapshot or p7_manifest or p7_fp"` | remediation product complete for QA findings; Task 7 full suite PASS |
+| M3 | M3; `P7-CSV-01`, `P7-XL-01`, `P7-SC-01` | backend `-k "p7_csv or p7_xlsx or p7_security"` | remediation product complete; Task 7 full suite PASS |
+| M4 | M4; `P7-KM-01`, `P7-KM-02` | backend `-k "p7_kml or p7_kmz or p7_source"` | remediation product complete; Task 7 full suite PASS |
+| M5 | M5; `P7-PDF-01`, `P7-PR-01` | backend `-k "p7_pdf or p7_presentation"` | remediation product complete; Task 7 full suite PASS |
+| M6 | M6; `P7-AP-01`, `P7-AT-01`, `P7-SC-01` limits | backend `-k "p7_api or p7_atomic or p7_limits"` | remediation product complete; Task 7 full suite PASS |
+| M7 | M7; `P7-UI-01`, `P7-UI-02` | frontend build/test/typecheck/lint | remediation product complete; Task 7 frontend block PASS (20 rendered tests) |
+| M8 | M8; `P7-REG-01` | final verification block | Task 7 deterministic block executed and recorded; readiness/M9 still Task 8 |
+| M9 | M9; `P7-PRD-01` | production 74-pole package QA + readiness | pending Task 8; not claimed PASS |
 
 ## Acceptance criteria
 
 | Acceptance ID / criterion | Verification method | Evidence location | Status |
 |---|---|---|---|
-| `P7-DM-01`–`P7-PRD-01` | Contract milestone and final commands | `harness/logs/2026-09-04-phase-7-execution.md`, `harness/verify/` | original implementation executed; independent-QA dispositions now control and remediation reruns are pending |
+| `P7-DM-01`–`P7-PRD-01` | Contract milestone and final commands | `harness/logs/2026-09-04-phase-7-execution.md`, `harness/verify/` | product remediation Tasks 1–6 complete; Task 7 deterministic regression recorded; `P7-PRD-01`/M9 and readiness pending Task 8 |
 
 ## Changes and evidence
 
@@ -65,6 +66,7 @@ Product changes must not begin until every required supporting path is either in
 - Decisions applied: P7-D01..D15 approved 2026-09-03 / DL-018; implementation authorized 2026-09-04 in this session.
 - Remediation decision: amended P7-D08 and `P7-QA-01`–`P7-QA-09` remediation authorized 2026-09-05.
 - Commands and durable evidence: `harness/logs/2026-09-04-phase-7-execution.md`.
+- Task 7: regenerated OpenAPI (`schemas/openapi.json` adds preview POST and `expected_project_updated_at`); reconciled AGENTS/status/context/goals/plans/ops/implementation-plan; full deterministic verification block recorded.
 
 ## Verification requirements
 
@@ -113,9 +115,9 @@ Failing/missing tests, incomplete coverage/milestones, compiler/build/lint/typec
 ## Gate state
 
 - Original implementation: complete at `044c013b`; independent QA later failed.
-- Remediation: authorized and active (2026-09-05).
-- Durable goal: active for bounded remediation.
-- Implementation-readiness verifier: historical PASS superseded; fresh remediation run pending.
-- Independent QA: FAIL recorded at `fd8a43d`; fresh review pending after remediation.
-- Master decision: pending.
+- Remediation: authorized and active (2026-09-05); product Tasks 1–6 through `f7f776e`; Task 7 contracts/control/regression in this checkpoint.
+- Durable goal: active for bounded remediation until readiness PASS + new independent-QA handoff (Task 8).
+- Implementation-readiness verifier: historical PASS superseded; fresh remediation run pending Task 8.
+- Independent QA: FAIL recorded at `fd8a43d`; fresh review pending after Task 8 handoff.
+- Master decision: pending / ineligible until fresh QA PASS.
 - Seal status: absent and ineligible until later gates.

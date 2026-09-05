@@ -59,7 +59,7 @@ Status: complete and formally closed on 2026-09-03 after implementation readines
 
 ## Phase 7 - reporting
 
-Status: all planning decisions approved on 2026-09-03; implementation is not authorized.
+Status: planning decisions approved on 2026-09-03; original implementation authorized 2026-09-04 and failed independent QA at `fd8a43d`; bounded remediation authorized 2026-09-05 under amended `P7-D08`. Remediation product work is committed; readiness, new independent QA, master gate, and seal remain outstanding. No Phase 7 seal.
 
 - KML/KMZ layers, CSV/XLSX schedules, calculations, assumptions, validations, JSON archive, PDF summary, and future presentation model.
 
@@ -67,4 +67,4 @@ Status: all planning decisions approved on 2026-09-03; implementation is not aut
 
 Each phase requires passing calculation/service tests, schema migration review, representative source validation, and interactive workflow validation before the next phase begins.
 
-The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 is closed after the independent QA PASS in `harness/verify/2026-09-02-phase-6-independent-qa-review.md` and the master decision in `docs/phase-6-master-gate-decision-2026-09-03.md`. Phase 7 remains unauthorized.
+The Phase 2 gate is closed with an independent unconditional pass. The Phase 3 gate is closed with an independent final focused pass under the approved zero XYZ origin offsets, explicit per-slot lens requirement, and flat local ground plane. The Phase 4 gate is closed with independent passing evidence for P4-IR-01 through P4-IR-07 and the master decision recorded in `docs/phase-4-master-gate-decision-2026-08-26.md`. Phase 5 is closed after the final focused independent PASS recorded in `docs/phase-5-final-focused-retest-2026-08-27.md` and the master decision in `docs/phase-5-master-gate-decision-2026-08-27.md`. Phase 6 is closed after the independent QA PASS in `harness/verify/2026-09-02-phase-6-independent-qa-review.md` and the master decision in `docs/phase-6-master-gate-decision-2026-09-03.md`. Phase 7 original implementation failed independent QA at `fd8a43d`; remediation is authorized and in progress toward readiness and a new independent QA. No Phase 7 seal.

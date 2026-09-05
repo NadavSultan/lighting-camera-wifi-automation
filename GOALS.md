@@ -4,11 +4,11 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-Complete Phase 7 reporting/export implementation readiness and independent-QA handoff per `harness/phases/phase-07.md`.
+Complete Phase 7 remediation under amended `P7-D08`: resolve `P7-QA-01`–`P7-QA-09`, pass implementation readiness on a clean remediation commit, and record a new independent-QA handoff per `harness/phases/phase-07.md` and `docs/superpowers/plans/2026-09-05-phase-7-remediation.md`.
 
 Controlling planning/implementation record: `harness/phases/phase-07.md` and `harness/phases/2026-09-04-phase-7-implementation.md`.
 
-Status: implementation authorized 2026-09-04 and executed through M0–M9; awaiting implementation-readiness verifier PASS confirmation and independent QA.
+Status: original implementation authorized 2026-09-04 and failed independent QA at `fd8a43d`; remediation authorized 2026-09-05; remediation product Tasks 1–6 committed through `f7f776e`; Task 7 covers contracts/control/regression; Task 8 owns M9/readiness/handoff. No Phase 7 seal.
 
 Phase 6 remains closed by its master decision and valid seal.
 
@@ -22,7 +22,7 @@ Phase 6 remains closed by its master decision and valid seal.
 | 4 | closed | `docs/phase-4-master-gate-decision-2026-08-26.md` |
 | 5 | closed | `docs/phase-5-master-gate-decision-2026-08-27.md` |
 | 6 | closed | `docs/phase-6-master-gate-decision-2026-09-03.md`; `harness/seals/phase-06.md` |
-| 7 | implementation complete awaiting QA | `harness/phases/phase-07.md`; `docs/phase-7-independent-qa-handoff-2026-09-04.md`; DL-018 |
+| 7 | remediation in progress; QA FAIL at `fd8a43d`; no seal | `harness/phases/phase-07.md`; remediation design/plan 2026-09-05; DL-018 |
 
 ## Explicit unknowns
 

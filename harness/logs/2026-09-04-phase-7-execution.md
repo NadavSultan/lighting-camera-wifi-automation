@@ -1,12 +1,12 @@
-# Execution log — 2026-09-04 — Phase 7
+# Execution log ג€” 2026-09-04 ג€” Phase 7
 
-> **Chronology note:** The opening sections through **Close state** record the original 2026-09-04 pre-implementation state only. They are historical and do not describe the current remediation checkpoint. The controlling current state is under **Remediation checkpoint — 2026-09-05 — Task 1**.
+> **Chronology note:** The opening sections through **Close state** record the original 2026-09-04 pre-implementation state only. They are historical and do not describe the current remediation checkpoint. Task 1 remediation state follows; the controlling current state for contracts/regression is under **Remediation checkpoint ג€” 2026-09-05 ג€” Task 7**.
 
 ## Historical opening scope and non-goals
 
 - Phase work record: `harness/phases/2026-09-04-phase-7-implementation.md`
-- Controlling contract and acceptance IDs: `harness/phases/phase-07.md`; `P7-DM-01`–`P7-PRD-01`
-- Authorized work/milestone: M0 preflight, then M1–M9
+- Controlling contract and acceptance IDs: `harness/phases/phase-07.md`; `P7-DM-01`ג€“`P7-PRD-01`
+- Authorized work/milestone: M0 preflight, then M1ג€“M9
 - Non-goals and excluded phases: linked from `phase-07.md`; no seal in this task
 - Exact starting commit/worktree: `7c843fcb2a3a8fe9d0a98b84e5bd73e71d2734b9`, clean `main`
 - Durable goal identifier/state: Cursor durable goal active (2026-09-04)
@@ -57,11 +57,11 @@
 - Implementation-readiness verifier result at log creation: not run
 - Historical next action: create `.venv`, install backend deps, enable pnpm, materialize frontend, smoke-check commands
 
-## Remediation checkpoint — 2026-09-05 — Task 1
+## Remediation checkpoint ג€” 2026-09-05 ג€” Task 1
 
 ### Authority, baseline, and current goal
 
-- Independent QA recorded **FAIL** for `P7-QA-01`–`P7-QA-09` at `fd8a43d34177ab558e2da898b989b067a0677cd6`.
+- Independent QA recorded **FAIL** for `P7-QA-01`ג€“`P7-QA-09` at `fd8a43d34177ab558e2da898b989b067a0677cd6`.
 - On 2026-09-05 the user approved the non-circular `P7-D08` amendment and bounded remediation of all nine findings.
 - Controlling design: `docs/superpowers/specs/2026-09-05-phase-7-remediation-design.md`.
 - Controlling plan: `docs/superpowers/plans/2026-09-05-phase-7-remediation.md`.
@@ -223,7 +223,7 @@ C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scrip
 C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scripts\python.exe -m pip_audit --requirement .\backend\requirements.lock --disable-pip --no-deps --desc on
 ```
 
-Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0`; audit exit `1`. Exact audit result: `Found 1 known vulnerability in 1 package` — `pytest 8.4.2`, `PYSEC-2026-1845`, fixed in `9.0.3`; pytest through 9.0.2 on UNIX uses the predictable `/tmp/pytest-of-{user}` pattern. The audit also warned that `--no-deps` users should fully hash pinned dependencies and recommended `pip-compile`. This Windows preflight and the recorded explicit Windows `--basetemp` baseline mitigation remain unchanged; pytest-major and hash-lock policy changes are outside Task 1.
+Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0`; audit exit `1`. Exact audit result: `Found 1 known vulnerability in 1 package` ג€” `pytest 8.4.2`, `PYSEC-2026-1845`, fixed in `9.0.3`; pytest through 9.0.2 on UNIX uses the predictable `/tmp/pytest-of-{user}` pattern. The audit also warned that `--no-deps` users should fully hash pinned dependencies and recommended `pip-compile`. This Windows preflight and the recorded explicit Windows `--basetemp` baseline mitigation remain unchanged; pytest-major and hash-lock policy changes are outside Task 1.
 
 ### Exact locked versions and declared licenses
 
@@ -236,7 +236,47 @@ Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0
 ### Task 1 checkpoint state
 
 - M0 remediation dependency/control preflight: complete.
-- M1–M9 original chronology: retained in Git and reconciled in the phase work record; all affected remediation verification remains pending.
+- M1ג€“M9 original chronology: retained in Git and reconciled in the phase work record; all affected remediation verification remains pending.
 - Open blocker: none.
 - Concern: the UNIX-only pytest advisory remains visible and requires a separately authorized pytest 9 compatibility decision if the project must run tests on a shared untrusted UNIX host. The lock is exact-version pinned but does not include artifact hashes; `pip-audit` emitted the corresponding hardening recommendation.
 - Next action: commit this final Task 1 exact-command evidence correction; Task 2 remains separate and the known fixed-clock failure is unchanged.
+
+## Remediation checkpoint ג€” 2026-09-05 ג€” Task 7
+
+### Authority and scope
+
+- Task 7 owns generated contracts, control-document consistency, and the full deterministic regression block from `harness/phases/phase-07.md`.
+- Does **not** create a Phase 7 seal, claim Phase 7 accepted, or execute Task 8 production M9 / readiness / handoff.
+- Starting HEAD: `f7f776e66e0be77e0f0b985cb452e082f9e52b28` (Tasks 1ג€“6 product complete).
+- Python: `C:\Users\Nadav\Desktop\Nadav\lighting-camera-wifi-automation\.venv\Scripts\python.exe`
+
+### Exact command evidence
+
+| Order | Exact command/action | Exit/result | Notes |
+|---|---|---|---|
+| 1 | `backend`: pytest `-q -p no:cacheprovider --basetemp=%TEMP%\lcwa-pytest-task7-pre` | 1 | 280 passed, 1 failed: `test_project_schema_and_openapi_are_exactly_fresh_in_memory` (stale OpenAPI before export). Two Starlette/httpx deprecation warnings. |
+| 2 | `backend`: `python -m scripts.export_schema` | 0 | Wrote `schemas/openapi.json` (+68 lines: preview POST + `expected_project_updated_at`). Other schema files unchanged on disk. |
+| 3 | `backend`: pytest `-q -p no:cacheprovider --basetemp=%TEMP%\lcwa-pytest-task7-post` | 0 | **281 passed**, 0 failed. Same two deprecation warnings. |
+| 4 | repo root: `python .\scripts\validate_engineering_data.py` | 0 | Engineering data validation PASSED (7 catalogs). |
+| 5 | `frontend`: `corepack pnpm run build` | 0 | vinext/Vite production build complete; chunk-size advisory only. |
+| 6 | `frontend`: `corepack pnpm run test` | 0 | **20/20** rendered tests passed. |
+| 7 | `frontend`: `corepack pnpm run typecheck` | 0 | `tsc --noEmit` clean. |
+| 8 | `frontend`: `corepack pnpm run lint` | 0 | ESLint clean. |
+| 9 | `git diff --check` (worktree) | 0 | clean |
+| 10 | `git diff --check 8a177b73..HEAD` | 0 | clean |
+| 11 | `git diff --exit-code 8a177b73..HEAD -- Input data schemas/cap-constraints.schema.json` | 0 | protected paths unchanged |
+| 12 | Control-document reconciliation | n/a | Updated AGENTS, PROJECT_CONTEXT, current-status, implementation-plan, OPERATIONS, GOALS, PLANS, work record, this log |
+
+### Schema / contract notes
+
+- OpenAPI now includes `ReportPackageRequest.expected_project_updated_at` and the POST `/api/projects/{project_id}/reports/preview` operation.
+- `PresentationModel` remains a strict in-package model validated by reporting tests; it is not currently an OpenAPI response component (package JSON member, not a typed FastAPI response schema).
+- Camera `result_fingerprint` provenance is emitted in derived KMZ feature text by the reporting service; it is not a separate OpenAPI/project-schema property name.
+
+### Controlling current remediation state after Task 7
+
+- Product remediation Tasks 1ג€“6: committed through `f7f776e`.
+- Task 7: contracts + control docs + deterministic M8 block recorded on this commit.
+- M9 production 74-pole workflow, readiness verifier, and new independent-QA handoff: **pending Task 8**.
+- Independent QA FAIL at `fd8a43d` remains the last QA disposition; no seal.
+- Next action: Task 8 M9 / readiness / handoff only.
