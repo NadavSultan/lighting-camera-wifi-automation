@@ -828,6 +828,44 @@ class ReportPackageRequest(StrictModel):
     expected_project_updated_at: datetime | None = None
 
 
+class PresentationInventory(StrictModel):
+    pole_count: Annotated[int, Field(ge=0)]
+    priority_area_count: Annotated[int, Field(ge=0)]
+    calculation_area_count: Annotated[int, Field(ge=0)]
+    wifi_analysis_area_count: Annotated[int, Field(ge=0)]
+    cap_candidate_count: Annotated[int, Field(ge=0)]
+
+
+class PresentationSubsystems(StrictModel):
+    lighting_included_area_ids: list[str]
+    wifi_included: bool
+    cap_included: bool
+    camera_included: bool
+
+
+class PresentationModel(StrictModel):
+    """Strict future presentation input — never a generated PPTX artifact."""
+
+    kind: Literal["presentation-model"]
+    label: str
+    presentation_generated: Literal[False]
+    pptx_supported: Literal[False]
+    report_model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
+    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
+    software_version: Literal["0.7.0"] = SOFTWARE_VERSION
+    project_id: str
+    project_name: str
+    generation_time: str
+    status: ReportStatus
+    report_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    section_dispositions: dict[str, ReportSectionDisposition]
+    warnings: list[str]
+    findings: list[str]
+    inventory: PresentationInventory
+    subsystems: PresentationSubsystems
+    disclaimer: str
+
+
 class Project(StrictModel):
     schema_version: Literal["2.7.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION

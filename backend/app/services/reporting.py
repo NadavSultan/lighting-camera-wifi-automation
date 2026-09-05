@@ -21,6 +21,7 @@ from xml.etree import ElementTree as ET
 from xml.sax.saxutils import escape as xml_escape
 
 from defusedxml import ElementTree as DET
+from reportlab.graphics.shapes import Circle, Drawing, Line, Rect, String
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -29,6 +30,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 import xlsxwriter
 
+from app.crs import project_transformers, validate_projected_metre_crs
 from app.models import (
     MAX_REPORT_CELL_CHARS,
     MAX_REPORT_KML_FEATURES,
@@ -42,6 +44,7 @@ from app.models import (
     SCHEMA_VERSION,
     SOFTWARE_VERSION,
     LastReportMetadata,
+    PresentationModel,
     Project,
     ReportFormatSelection,
     ReportKmzLayerSelection,
@@ -1129,6 +1132,91 @@ def _pdf_escape(text: str) -> str:
     )
 
 
+def _projected_pole_points(project: Project) -> list[tuple[str, float, float]]:
+    """Project poles into the project metre CRS; order by (x, y, id) for determinism."""
+    if not project.projected_crs:
+        raise ReportGenerationError("PDF vector overview requires a selected projected metre CRS")
+    crs = validate_projected_metre_crs(project.projected_crs)
+    to_proj, _ = project_transformers(crs)
+    points: list[tuple[str, float, float]] = []
+    for pole in project.source.poles:
+        fields = _effective_pole_fields(project, pole)
+        lon = float(fields["longitude"])
+        lat = float(fields["latitude"])
+        if not math.isfinite(lon) or not math.isfinite(lat):
+            raise ReportGenerationError(f"Pole {fields['pole_id']} has non-finite coordinates")
+        x, y = to_proj.transform(lon, lat)
+        if not math.isfinite(x) or not math.isfinite(y):
+            raise ReportGenerationError(f"Pole {fields['pole_id']} projected to a non-finite coordinate")
+        points.append((str(fields["pole_id"]), float(x), float(y)))
+    points.sort(key=lambda item: (item[1], item[2], item[0]))
+    return points
+
+
+def _build_vector_overview_drawing(project: Project) -> Drawing:
+    """Deterministic local projected vector overview — no network basemap."""
+    width, height = 420.0, 260.0
+    margin = 24.0
+    drawing = Drawing(width, height)
+    drawing.add(Rect(0, 0, width, height, strokeColor=colors.HexColor("#1F2A37"), strokeWidth=1.0, fillColor=colors.HexColor("#F7F9FC")))
+    drawing.add(Rect(margin, margin, width - 2 * margin, height - 2 * margin, strokeColor=colors.HexColor("#94A3B8"), strokeWidth=0.75, fillColor=colors.white))
+
+    nx = width - margin - 18
+    ny = height - margin - 10
+    drawing.add(Line(nx, ny - 18, nx, ny + 10, strokeColor=colors.HexColor("#111827"), strokeWidth=1.25))
+    drawing.add(Line(nx, ny + 10, nx - 5, ny + 2, strokeColor=colors.HexColor("#111827"), strokeWidth=1.25))
+    drawing.add(Line(nx, ny + 10, nx + 5, ny + 2, strokeColor=colors.HexColor("#111827"), strokeWidth=1.25))
+    drawing.add(String(nx, ny + 14, "N", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor("#111827"), textAnchor="middle"))
+
+    points = _projected_pole_points(project)
+    plot_left, plot_bottom = margin + 8, margin + 8
+    plot_w, plot_h = width - 2 * margin - 16, height - 2 * margin - 16
+
+    if not points:
+        cx, cy = plot_left + plot_w / 2, plot_bottom + plot_h / 2
+        drawing.add(Line(cx - 12, cy, cx, cy + 12, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.0))
+        drawing.add(Line(cx, cy + 12, cx + 12, cy, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.0))
+        drawing.add(Line(cx + 12, cy, cx, cy - 12, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.0))
+        drawing.add(Line(cx, cy - 12, cx - 12, cy, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.0))
+        drawing.add(String(cx, cy - 28, "no poles", fontName="Helvetica", fontSize=8, fillColor=colors.HexColor("#475569"), textAnchor="middle"))
+        return drawing
+
+    xs = [p[1] for p in points]
+    ys = [p[2] for p in points]
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    span_x = max_x - min_x
+    span_y = max_y - min_y
+    if span_x <= 1e-9:
+        min_x -= 10.0
+        max_x += 10.0
+        span_x = max_x - min_x
+    if span_y <= 1e-9:
+        min_y -= 10.0
+        max_y += 10.0
+        span_y = max_y - min_y
+    pad_x = span_x * 0.08
+    pad_y = span_y * 0.08
+    min_x -= pad_x
+    max_x += pad_x
+    min_y -= pad_y
+    max_y += pad_y
+    span_x = max_x - min_x
+    span_y = max_y - min_y
+
+    drawing.add(Rect(plot_left, plot_bottom, plot_w, plot_h, strokeColor=colors.HexColor("#CBD5E1"), strokeWidth=0.5, fillColor=None))
+
+    marker = colors.HexColor("#0F766E")
+    for _pole_id, x_m, y_m in points:
+        px = plot_left + ((x_m - min_x) / span_x) * plot_w
+        py = plot_bottom + ((y_m - min_y) / span_y) * plot_h
+        drawing.add(Circle(px, py, 3.2, strokeColor=marker, fillColor=marker, strokeWidth=0.5))
+
+    crs_label = project.projected_crs or "projected CRS"
+    drawing.add(String(margin + 4, 6, f"Projected overview · {crs_label}", fontName="Helvetica", fontSize=7, fillColor=colors.HexColor("#334155")))
+    return drawing
+
+
 def _build_pdf(project: Project, snapshot: dict[str, Any], schedules: dict[str, tuple[list[str], list[list[Any]]]]) -> bytes:
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -1196,33 +1284,9 @@ def _build_pdf(project: Project, snapshot: dict[str, Any], schedules: dict[str, 
 
     story.append(Paragraph(_pdf_escape("Local vector overview"), heading))
     story.append(Paragraph(_pdf_escape(
-        "Deterministic local vector overview of pole longitudes/latitudes (no online basemap)."
+        "Deterministic local projected vector overview of pole positions (no online basemap)."
     ), body))
-    overview_rows = [["pole_id", "longitude", "latitude"]]
-    for pole in project.source.poles[:MAX_REPORT_PDF_TABLE_ROWS]:
-        fields = _effective_pole_fields(project, pole)
-        overview_rows.append([
-            _pdf_escape(str(fields["pole_id"])),
-            _pdf_escape(str(fields["longitude"])),
-            _pdf_escape(str(fields["latitude"])),
-        ])
-    if len(project.source.poles) > MAX_REPORT_PDF_TABLE_ROWS:
-        overview_rows.append([
-            _pdf_escape("…"),
-            _pdf_escape(f"{len(project.source.poles) - MAX_REPORT_PDF_TABLE_ROWS} more poles"),
-            "",
-        ])
-    if len(overview_rows) == 1:
-        overview_rows.append([_pdf_escape("(no poles)"), "", ""])
-    table = Table(overview_rows, colWidths=[55 * mm, 45 * mm, 45 * mm])
-    table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E8EEF5")),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-    ]))
-    story.append(table)
+    story.append(_build_vector_overview_drawing(project))
     story.append(Spacer(1, 8))
 
     if "project_inventory" in schedules:
@@ -1300,7 +1364,10 @@ def _build_presentation_model(project: Project, snapshot: dict[str, Any]) -> byt
         },
         "disclaimer": DISCLAIMER_REPORT,
     }
-    data = (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+    model = PresentationModel.model_validate(payload)
+    data = (
+        json.dumps(model.model_dump(mode="json"), indent=2, sort_keys=True, allow_nan=False) + "\n"
+    ).encode("utf-8")
     if len(data) > MAX_REPORT_MEMBER_BYTES:
         raise ReportGenerationError(
             f"presentation-model.json exceeds the {MAX_REPORT_MEMBER_BYTES:,}-byte member limit"

@@ -11,6 +11,7 @@ import json
 import tempfile
 import time
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -823,25 +824,108 @@ def test_p7_source_01_updated_kml_remains_cap_free():
 # ---------------------------------------------------------------------------
 
 
+def _pdf_request(**format_overrides) -> ReportPackageRequest:
+    formats = ReportFormatSelection(
+        project_json=False,
+        engineering_kmz=False,
+        csv_schedules=False,
+        xlsx_workbook=False,
+        pdf_summary=True,
+        presentation_model=False,
+    )
+    for key, value in format_overrides.items():
+        setattr(formats, key, value)
+    return fixed_request(formats=formats)
+
+
+def _pdf_decoded_content(pdf: bytes) -> bytes:
+    """Decode ReportLab page streams (ASCII85 + Flate) for structural assertions."""
+    from reportlab.pdfbase.pdfutils import asciiBase85Decode
+
+    chunks: list[bytes] = []
+    idx = 0
+    while True:
+        start = pdf.find(b"stream", idx)
+        if start < 0:
+            break
+        end = pdf.find(b"endstream", start)
+        raw = pdf[start + 6 : end]
+        if raw.startswith(b"\r\n"):
+            raw = raw[2:]
+        elif raw.startswith(b"\n"):
+            raw = raw[1:]
+        if raw.endswith(b"\r"):
+            raw = raw[:-1]
+        data = raw if raw.endswith(b"~>") else raw + b"~>"
+        try:
+            chunks.append(zlib.decompress(asciiBase85Decode(data)))
+        except Exception:
+            try:
+                chunks.append(zlib.decompress(raw))
+            except Exception:
+                chunks.append(raw)
+        idx = end + 9
+    return b"\n".join(chunks)
+
+
+def _assert_pdf_has_vector_path_operators(pdf: bytes) -> None:
+    assert pdf.startswith(b"%PDF")
+    content = _pdf_decoded_content(pdf)
+    assert content, "expected decodable PDF content streams"
+    assert content.count(b" m") >= 2
+    assert content.count(b" l") >= 2 or content.count(b" c") >= 1 or content.count(b" re") >= 1
+    assert b" S" in content or b" s" in content or b" f" in content or b" B" in content or b"B*" in content
+    assert b" re" in content
+    assert b"Projected overview" in content or b"vector overview" in content.lower()
+    # Overview must not be a longitude/latitude coordinate table (legacy failure mode).
+    assert b"(pole_id)" not in content.lower()
+    assert b"pole_id) Tj" not in content  # table header text objects for the old overview
+    assert b"longitude) Tj" not in content
+
+
 def test_p7_pdf_01_summary_starts_with_pdf_header():
     project = bare_project(name="PDF Project")
-    package, _, _ = generate_report_package(
-        project,
-        fixed_request(
-            formats=ReportFormatSelection(
-                project_json=False,
-                engineering_kmz=False,
-                csv_schedules=False,
-                xlsx_workbook=False,
-                presentation_model=False,
-            )
-        ),
-    )
+    package, _, _ = generate_report_package(project, _pdf_request())
     pdf = _zip_members(package)["summary.pdf"]
     assert pdf.startswith(b"%PDF")
 
 
+def test_p7_qa_05_pdf_vector_overview_contains_path_operators():
+    project = bare_project(name="Vector Overview")
+    package, _, _ = generate_report_package(project, _pdf_request())
+    pdf = _zip_members(package)["summary.pdf"]
+    _assert_pdf_has_vector_path_operators(pdf)
+    content = _pdf_decoded_content(pdf)
+    assert b"Local vector overview" in content
+    assert b"no online basemap" in content.lower()
+
+
+def test_p7_qa_05_pdf_vector_empty_and_single_pole_extents():
+    from reportlab.graphics.shapes import Circle, Line
+
+    from app.services.reporting import _build_vector_overview_drawing
+
+    empty = bare_project(name="Empty poles")
+    empty.source.poles = []
+    empty_drawing = _build_vector_overview_drawing(empty)
+    assert any(isinstance(item, Line) for item in empty_drawing.contents)
+    empty_pkg, _, _ = generate_report_package(empty, _pdf_request())
+    empty_pdf = _zip_members(empty_pkg)["summary.pdf"]
+    _assert_pdf_has_vector_path_operators(empty_pdf)
+    assert b"no poles" in _pdf_decoded_content(empty_pdf)
+
+    single = bare_project(name="Single pole")
+    assert len(single.source.poles) == 1
+    single_drawing = _build_vector_overview_drawing(single)
+    assert sum(1 for item in single_drawing.contents if isinstance(item, Circle)) == 1
+    single_pkg, _, _ = generate_report_package(single, _pdf_request())
+    single_pdf = _zip_members(single_pkg)["summary.pdf"]
+    _assert_pdf_has_vector_path_operators(single_pdf)
+
+
 def test_p7_presentation_01_model_validates_and_is_not_a_presentation():
+    from app.models import PresentationModel
+
     project = bare_project(name="Presentation")
     package, _, _ = generate_report_package(
         project,
@@ -862,6 +946,51 @@ def test_p7_presentation_01_model_validates_and_is_not_a_presentation():
     assert "NOT a presentation" in payload["label"]
     assert payload["project_id"] == project.id
     assert payload["status"] in {"complete", "complete_with_warnings", "incomplete"}
+    PresentationModel.model_validate(payload)
+
+
+def test_p7_presentation_02_strict_model_rejects_extra_key():
+    from app.models import PresentationModel
+
+    project = bare_project(name="Strict presentation")
+    package, _, _ = generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+            )
+        ),
+    )
+    payload = json.loads(_zip_members(package)["presentation-model.json"].decode("utf-8"))
+    PresentationModel.model_validate(payload)
+    with pytest.raises(ValidationError):
+        PresentationModel.model_validate({**payload, "unexpected_extra": True})
+
+
+def test_p7_presentation_03_inventory_matches_project_counts():
+    project = bare_project(name="Inventory cross-check")
+    package, _, _ = generate_report_package(
+        project,
+        fixed_request(
+            formats=ReportFormatSelection(
+                project_json=False,
+                engineering_kmz=False,
+                csv_schedules=False,
+                xlsx_workbook=False,
+                pdf_summary=False,
+            )
+        ),
+    )
+    payload = json.loads(_zip_members(package)["presentation-model.json"].decode("utf-8"))
+    assert payload["inventory"]["pole_count"] == len(project.source.poles)
+    assert payload["inventory"]["priority_area_count"] == len(project.priority_areas)
+    assert payload["inventory"]["calculation_area_count"] == len(project.calculation_areas)
+    assert payload["inventory"]["wifi_analysis_area_count"] == len(project.wifi_analysis_areas)
+    assert payload["inventory"]["cap_candidate_count"] == len(project.cap_planning_inputs.candidates)
 
 
 # ---------------------------------------------------------------------------
