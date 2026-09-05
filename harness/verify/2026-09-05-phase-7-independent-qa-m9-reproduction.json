@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-09-05T18:13:34.849699Z",
+  "implementation_commit": "e24b6a16add314393574257a08e539a27673a505",
+  "health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "project_id": "8bab02a4-5a7a-497a-ba6d-8df7c0f3ac50",
+  "poles": 74,
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "package_bytes": 109923,
+  "package_sha256": "86896d76255f1fb28ed2b71f0f0587bb8904ff8ba1db8d51a12cf647697a8574",
+  "package_response_sha256_header": "86896d76255f1fb28ed2b71f0f0587bb8904ff8ba1db8d51a12cf647697a8574",
+  "manifest_status": "complete_with_warnings",
+  "member_count": 15,
+  "members": {
+    "engineering/Miracle_Mile_M9_Remediation-8bab02a4-engineering.kmz": {
+      "size": 2194,
+      "sha256": "184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2"
+    },
+    "presentation-model.json": {
+      "size": 2060,
+      "sha256": "dd6deb7636f022f860d74c956f65b3b9b6fbf5ca25e45a08f8cde1b4df57d0e4"
+    },
+    "project/Miracle_Mile_M9_Remediation-8bab02a4.json": {
+      "size": 61911,
+      "sha256": "6d9aa72109664ca9d22d17bdca9e1ce0f88ccc0457c6f5d914686264a0bbe988"
+    },
+    "report-manifest.json": {
+      "size": 4766,
+      "sha256": "bf5f93d6f0af3874f51e177d335c8d8711e155c4e12d6600e81f979da3318d11"
+    },
+    "schedules/01-project-inventory.csv": {
+      "size": 351,
+      "sha256": "43fba92eb60b29a83afefc0d924354cf51473c0d41a6a31d858d4e4931ee17c2"
+    },
+    "schedules/02-poles-fixtures.csv": {
+      "size": 5892,
+      "sha256": "db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e"
+    },
+    "schedules/03-cameras.csv": {
+      "size": 311,
+      "sha256": "aae645b2a4182be203dc338eea38707dfc07f010ddbf468c42e535c0561ce896"
+    },
+    "schedules/04-lighting.csv": {
+      "size": 305,
+      "sha256": "5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282"
+    },
+    "schedules/05-wifi.csv": {
+      "size": 225,
+      "sha256": "0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5"
+    },
+    "schedules/06-cap.csv": {
+      "size": 334,
+      "sha256": "73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45"
+    },
+    "schedules/07-warnings-assumptions.csv": {
+      "size": 913,
+      "sha256": "f39a906821e03bf05194c5dcd863a81edcbc8d184ec9d665457a645cf85c1433"
+    },
+    "schedules/08-validation-findings.csv": {
+      "size": 153,
+      "sha256": "095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156"
+    },
+    "schedules/09-provenance.csv": {
+      "size": 433,
+      "sha256": "8b94ce0dc48b17eb878bf18722cb27a9fecbb450422b0ab0b77a9d5ede926858"
+    },
+    "summary.pdf": {
+      "size": 11467,
+      "sha256": "e614e324ef72fca1747ef7fd648e43e5277d9655cac6da15bc0b398f20f5709d"
+    },
+    "workbook.xlsx": {
+      "size": 16576,
+      "sha256": "60c15667130eadfddac7ac06dc393606f2635134d0841bc467f250e544abaa5a"
+    }
+  },
+  "errors": [],
+  "ok": true,
+  "pdf_page_count": 2,
+  "checks": [
+    {
+      "id": "health",
+      "ok": true,
+      "body": {
+        "status": "ok",
+        "phase": 7,
+        "version": "0.7.0"
+      }
+    },
+    {
+      "id": "import",
+      "ok": true,
+      "poles": 74,
+      "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328"
+    },
+    {
+      "id": "preview",
+      "ok": true
+    },
+    {
+      "id": "package_download",
+      "ok": true,
+      "package_bytes": 109923,
+      "package_sha256": "86896d76255f1fb28ed2b71f0f0587bb8904ff8ba1db8d51a12cf647697a8574",
+      "header_sha256": "86896d76255f1fb28ed2b71f0f0587bb8904ff8ba1db8d51a12cf647697a8574",
+      "status": "complete_with_warnings"
+    },
+    {
+      "id": "csv_parse",
+      "ok": true,
+      "files": {
+        "schedules/01-project-inventory.csv": {
+          "row_count": 2
+        },
+        "schedules/02-poles-fixtures.csv": {
+          "row_count": 75
+        },
+        "schedules/03-cameras.csv": {
+          "row_count": 2
+        },
+        "schedules/04-lighting.csv": {
+          "row_count": 2
+        },
+        "schedules/05-wifi.csv": {
+          "row_count": 2
+        },
+        "schedules/06-cap.csv": {
+          "row_count": 2
+        },
+        "schedules/07-warnings-assumptions.csv": {
+          "row_count": 7
+        },
+        "schedules/08-validation-findings.csv": {
+          "row_count": 2
+        },
+        "schedules/09-provenance.csv": {
+          "row_count": 8
+        }
+      }
+    },
+    {
+      "id": "xlsx_active_content",
+      "ok": true,
+      "forbidden_hits": [],
+      "member_count": 18
+    },
+    {
+      "id": "kmz_labels",
+      "ok": true,
+      "kmz_member": "engineering/Miracle_Mile_M9_Remediation-8bab02a4-engineering.kmz"
+    },
+    {
+      "id": "pdf_vector",
+      "ok": true,
+      "page_count": 2,
+      "pdf_bytes": 11467
+    },
+    {
+      "id": "presentation_strict",
+      "ok": true,
+      "inventory_poles": 74
+    },
+    {
+      "id": "cross_format",
+      "ok": true,
+      "manifest_status": "complete_with_warnings"
+    },
+    {
+      "id": "updated_kml",
+      "ok": true,
+      "placemarks": 74
+    }
+  ],
+  "browser_workflow": {
+    "ok": true,
+    "frontend": "http://127.0.0.1:13100/",
+    "download_path": "harness/tmp/m9-qa/browser-download.zip",
+    "download_sha256": "71c1c9f81e7704e61b6ad9e02c1b024f41adfeebd922197456000f7973873d4c",
+    "download_bytes": 109936,
+    "console_error_count": 0,
+    "console": [
+      {
+        "type": "debug",
+        "text": "[vite] connecting..."
+      },
+      {
+        "type": "debug",
+        "text": "[vite] connected."
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "warning",
+        "text": "[GroupMarkerNotSet(crbug.com/242999)!:A0C09000BC360000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content."
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-000001A400118D00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-000001A400118D00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-000001A400118D00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-000001A400118D00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      }
+    ],
+    "suggested_filename": "Miracle_Mile_Lighting_Poles-report-package.zip"
+  },
+  "artifacts_dir": "harness/tmp/m9"
+}

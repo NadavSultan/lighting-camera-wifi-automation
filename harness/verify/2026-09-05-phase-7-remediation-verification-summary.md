@@ -2,7 +2,7 @@
 
 Status: remediation implementation verification complete; independent QA pending fresh review
 
-Implementation commit: `e24b6a16add314393574257a08e539a27673a505`  
+Implementation commit: `e24b6a16add314393574257a08e539a27673a505`
 Product remediation lineage: Tasks 1–6 through `f7f776e`; Task 7 contracts/regression at `63e6b31`; UTF-8 execution-log fix at `e24b6a1` (docs/log only; no product delta vs `63e6b31`).
 
 ## Deterministic commands (Task 7 on `63e6b31`, still valid for product tree at `e24b6a1`)
@@ -41,8 +41,8 @@ Recorded temporary ports for the reconciled complete pass: backend `127.0.0.1:18
 | Updated KML CAP/report-free with 74 placemarks | PASS |
 | Browser: import → refresh checklist → download | PASS via Playwright Chromium against `http://127.0.0.1:13000/` + API `18080`; download SHA-256 `4babb0990f45e0ab38370f8409b1d06709c353028d95121b6bf9651e180a787a`; **zero console errors** |
 
-Machine-readable evidence: `harness/verify/2026-09-05-phase-7-remediation-m9-summary.json`  
-Reproducible runner: `harness/verify/run_phase7_remediation_m9_complete.py`  
+Machine-readable evidence: `harness/verify/2026-09-05-phase-7-remediation-m9-summary.json`
+Reproducible runner: `harness/verify/run_phase7_remediation_m9_complete.py`
 Runtime (gitignored): `harness/tmp/m9/`
 
 Historical `harness/verify/2026-09-04-phase-7-m9-*.json` retained labelled as pre-remediation evidence and is not the current M9 record.

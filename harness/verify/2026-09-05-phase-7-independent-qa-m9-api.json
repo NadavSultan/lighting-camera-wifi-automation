@@ -1,0 +1,192 @@
+{
+  "health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "project_id": "c3d2d3db-ec38-41a0-9917-a3c56911c222",
+  "poles": 74,
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "package_bytes": 109921,
+  "package_sha256": "5f3f4bc5b6fda2e90d997110cd1ff561b2f302172e49765666e82669446659a5",
+  "package_response_sha256_header": "5f3f4bc5b6fda2e90d997110cd1ff561b2f302172e49765666e82669446659a5",
+  "manifest_status": "complete_with_warnings",
+  "member_count": 15,
+  "members": {
+    "engineering/Miracle_Mile_M9_Remediation-c3d2d3db-engineering.kmz": {
+      "size": 2194,
+      "sha256": "184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2"
+    },
+    "presentation-model.json": {
+      "size": 2060,
+      "sha256": "12353e637af276559e886c37a871188a1d66a097b80c1fa3dd1df03cedfd06b9"
+    },
+    "project/Miracle_Mile_M9_Remediation-c3d2d3db.json": {
+      "size": 61911,
+      "sha256": "9c62157ba1bdc0860ac7d81effd7c171353323b5797faf8cd69e6a1bcf192764"
+    },
+    "report-manifest.json": {
+      "size": 4766,
+      "sha256": "85b92ef16ce5de2cb401d51bddff0305f271c964d5978fbbf2372c43d32101b2"
+    },
+    "schedules/01-project-inventory.csv": {
+      "size": 351,
+      "sha256": "72bce9a88e2ad0d3345a85ee86a227c14772ac622a24c39494c62575c8620f9b"
+    },
+    "schedules/02-poles-fixtures.csv": {
+      "size": 5892,
+      "sha256": "db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e"
+    },
+    "schedules/03-cameras.csv": {
+      "size": 311,
+      "sha256": "aae645b2a4182be203dc338eea38707dfc07f010ddbf468c42e535c0561ce896"
+    },
+    "schedules/04-lighting.csv": {
+      "size": 305,
+      "sha256": "5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282"
+    },
+    "schedules/05-wifi.csv": {
+      "size": 225,
+      "sha256": "0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5"
+    },
+    "schedules/06-cap.csv": {
+      "size": 334,
+      "sha256": "73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45"
+    },
+    "schedules/07-warnings-assumptions.csv": {
+      "size": 913,
+      "sha256": "f39a906821e03bf05194c5dcd863a81edcbc8d184ec9d665457a645cf85c1433"
+    },
+    "schedules/08-validation-findings.csv": {
+      "size": 153,
+      "sha256": "095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156"
+    },
+    "schedules/09-provenance.csv": {
+      "size": 433,
+      "sha256": "b6aef3f45121cfd7bd0f5db32cff94ac6b3fb8f42a95d046163bddd444c15edc"
+    },
+    "summary.pdf": {
+      "size": 11466,
+      "sha256": "e6ecd35aec416827c20a64b5d289fb251337efe99af6948728b2d50ab6fb5ba7"
+    },
+    "workbook.xlsx": {
+      "size": 16575,
+      "sha256": "d997eb2610de743a730e838c3ab643f212aad21a9b74d2a89da257ddfc8198a7"
+    }
+  },
+  "checks": [
+    {
+      "id": "health",
+      "ok": true,
+      "body": {
+        "status": "ok",
+        "phase": 7,
+        "version": "0.7.0"
+      }
+    },
+    {
+      "id": "import",
+      "ok": true,
+      "poles": 74,
+      "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328"
+    },
+    {
+      "id": "preview",
+      "ok": true
+    },
+    {
+      "id": "package_download",
+      "ok": true,
+      "package_bytes": 109921,
+      "package_sha256": "5f3f4bc5b6fda2e90d997110cd1ff561b2f302172e49765666e82669446659a5",
+      "header_sha256": "5f3f4bc5b6fda2e90d997110cd1ff561b2f302172e49765666e82669446659a5",
+      "status": "complete_with_warnings"
+    },
+    {
+      "id": "csv_parse",
+      "ok": true,
+      "files": {
+        "schedules/01-project-inventory.csv": {
+          "row_count": 2
+        },
+        "schedules/02-poles-fixtures.csv": {
+          "row_count": 75
+        },
+        "schedules/03-cameras.csv": {
+          "row_count": 2
+        },
+        "schedules/04-lighting.csv": {
+          "row_count": 2
+        },
+        "schedules/05-wifi.csv": {
+          "row_count": 2
+        },
+        "schedules/06-cap.csv": {
+          "row_count": 2
+        },
+        "schedules/07-warnings-assumptions.csv": {
+          "row_count": 7
+        },
+        "schedules/08-validation-findings.csv": {
+          "row_count": 2
+        },
+        "schedules/09-provenance.csv": {
+          "row_count": 8
+        }
+      }
+    },
+    {
+      "id": "xlsx_active_content",
+      "ok": true,
+      "forbidden_hits": [],
+      "member_count": 18
+    },
+    {
+      "id": "kmz_labels",
+      "ok": true,
+      "kmz_member": "engineering/Miracle_Mile_M9_Remediation-c3d2d3db-engineering.kmz"
+    },
+    {
+      "id": "pdf_vector",
+      "ok": true,
+      "page_count": 2,
+      "pdf_bytes": 11466
+    },
+    {
+      "id": "presentation_strict",
+      "ok": true,
+      "inventory_poles": 74
+    },
+    {
+      "id": "cross_format",
+      "ok": true,
+      "manifest_status": "complete_with_warnings"
+    },
+    {
+      "id": "updated_kml",
+      "ok": true,
+      "placemarks": 74
+    }
+  ],
+  "errors": [],
+  "ok": true,
+  "conceptual_in_kmz": true,
+  "derived_in_kmz": true,
+  "manifest_has_self_entry": false,
+  "member_paths": [
+    "engineering/Miracle_Mile_M9_Remediation-c3d2d3db-engineering.kmz",
+    "presentation-model.json",
+    "project/Miracle_Mile_M9_Remediation-c3d2d3db.json",
+    "schedules/01-project-inventory.csv",
+    "schedules/02-poles-fixtures.csv",
+    "schedules/03-cameras.csv",
+    "schedules/04-lighting.csv",
+    "schedules/05-wifi.csv",
+    "schedules/06-cap.csv",
+    "schedules/07-warnings-assumptions.csv",
+    "schedules/08-validation-findings.csv",
+    "schedules/09-provenance.csv",
+    "summary.pdf",
+    "workbook.xlsx"
+  ]
+}
