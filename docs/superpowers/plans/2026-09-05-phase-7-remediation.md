@@ -62,10 +62,10 @@ Run:
 .\.venv\Scripts\python.exe -m pip freeze --all
 Set-Location .\frontend
 pnpm install --frozen-lockfile --offline
+pnpm run build
 pnpm run test
 pnpm run typecheck
 pnpm run lint
-pnpm run build
 ```
 
 Expected: dependency checks and all frontend entry points pass; known chunk advisory is recorded but not represented as a failure.
