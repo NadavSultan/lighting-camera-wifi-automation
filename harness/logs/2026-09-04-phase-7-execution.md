@@ -78,7 +78,7 @@
 
 | Order | Exact command/action | Exit/result | Evidence / warning |
 |---|---|---|---|
-| 1 | `git status --short --branch; git rev-parse HEAD; git diff --stat; git diff -- ...` | 0 | Clean `phase-7-remediation` at `e65b4c15...`; no starting diff |
+| 1 | Historical exact command text is unrecoverable; the interrupted worker report retained only an abbreviated Git-inspection summary, which is not treated as reproducible command evidence. | Reported exit 0 | Reported clean `phase-7-remediation` at `e65b4c15dcef794cb72c69cd3c447ab41cbbd5c2`; current exact equivalent recorded below |
 | 2 | `py -3.12 --version; py -3.12 -m venv .venv` | 1 | Python Launcher had no registered 3.12 runtime; environment-only discovery failure |
 | 3 | `C:\Users\Nadav\Anaconda3\python.exe --version` | 0 | Python 3.12.7 discovered |
 | 4 | `C:\Users\Nadav\Anaconda3\python.exe -m venv .venv` | 0 | Created ignored local environment |
@@ -97,7 +97,7 @@
 | 17 | `corepack pnpm run test` | 0 | 16 passed, 0 failed, 0 skipped |
 | 18 | `corepack pnpm run typecheck` | 0 | No TypeScript errors |
 | 19 | `corepack pnpm run lint` | 0 | No ESLint errors or warnings |
-| 20 | Browser/port discovery | 0 | Edge 152.0.4191.62 available; ports 3000 and 8000 occupied, so later M9 must use recorded alternate ports |
+| 20 | Historical exact browser/version and port-discovery command text is unrecoverable from the interrupted worker report. | Reported exit 0 | Reported Edge 152.0.4191.62 and occupied ports 3000/8000; current exact discovery recorded below |
 
 ### Controlling current remediation state
 
@@ -107,6 +107,39 @@
 - This evidence correction reran the lock installation/check, locked-package license inventory, and vulnerability audit because the exact original license/audit setup commands could not be recovered from the prior worker's report. No dependency or product file changed.
 
 ### Exact evidence-correction commands and results
+
+Current exact Git inspection equivalent:
+
+```powershell
+git status --short --branch
+git rev-parse HEAD
+git diff --stat
+git diff -- harness/phases/phase-07.md harness/phases/2026-09-04-phase-7-implementation.md harness/logs/2026-09-04-phase-7-execution.md backend/pyproject.toml backend/requirements.lock
+```
+
+Result at `c02ee14b34fa566a947b3ac7ce2be082c4dfebba`: all four commands exited `0`; status printed only `## phase-7-remediation`; both diff commands produced no output. This proves the current checkpoint is clean. It does not fabricate the unrecoverable historical command text or retroactively prove the historical starting state.
+
+Current exact browser/version and port discovery:
+
+```powershell
+& 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --version
+```
+
+Result: exit `0`, output `Opening in existing browser session.` This invocation did not return a version and is not accepted as version evidence.
+
+```powershell
+(Get-Item 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe').VersionInfo | Select-Object ProductVersion,FileVersion
+```
+
+Result: exit `0`; `ProductVersion=152.0.4191.62`, `FileVersion=152.0.4191.62`.
+
+```powershell
+$listeners = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 3000,8000 } | Sort-Object LocalPort | Select-Object LocalAddress,LocalPort,OwningProcess)
+Write-Output "LISTENER_COUNT=$($listeners.Count)"
+if ($listeners.Count -gt 0) { $listeners | ConvertTo-Json -Compress }
+```
+
+Result: exit `0`; `LISTENER_COUNT=2`; listeners were `127.0.0.1:3000` owned by PID `19312` and `127.0.0.1:8000` owned by PID `39768`. Occupancy is current environment evidence only; later M9 must discover and use safe ports at execution time.
 
 Clean lock environment and materialization:
 
@@ -119,7 +152,36 @@ C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\S
 
 Results: all four commands exited `0`. Installation resolved all 42 exact locked distributions. `pip check` returned `No broken requirements found.` Freeze matched the 42 lock entries, with only environment-owned `pip==24.2` additional.
 
-The first evidence-correction wrapper then exited `1` before audit setup because PowerShell mangled quoting in an inline `python -c` license command. The lock results above completed before that failure and remain valid; the malformed license command produced no accepted license evidence. License collection was rerun successfully using the following exact stdin script:
+The first evidence-correction wrapper then exited `1` before audit setup because PowerShell mangled quoting in an inline `python -c` license command. Its verbatim PowerShell command body is recoverable from this session and recorded below. The lock results completed before the failure and remain valid; execution stopped at the malformed license command, so the audit commands in this wrapper did not run and provide no audit evidence.
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$lockEnv = 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck'
+$auditEnv = 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit'
+if ((Test-Path $lockEnv) -or (Test-Path $auditEnv)) { throw 'Evidence environment path already exists; refusing to overwrite.' }
+& 'C:\Users\Nadav\Anaconda3\python.exe' -m venv 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck'
+if ($LASTEXITCODE -ne 0) { throw "lock venv creation failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe' -m pip install --disable-pip-version-check --no-input --requirement '.\backend\requirements.lock'
+if ($LASTEXITCODE -ne 0) { throw "lock install failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe' -m pip check
+if ($LASTEXITCODE -ne 0) { throw "lock pip check failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe' -m pip freeze --all
+if ($LASTEXITCODE -ne 0) { throw "lock freeze failed: $LASTEXITCODE" }
+& '.\.venv\Scripts\python.exe' -c "import importlib.metadata as m; ds=sorted(m.distributions(), key=lambda d: (d.metadata['Name'] or '').lower()); [print(f'{d.metadata[\"Name\"]}=={d.version}`t{d.metadata.get(\"License-Expression\") or d.metadata.get(\"License\") or \"; \".join(x for x in (d.metadata.get_all(\"Classifier\") or []) if x.startswith(\"License ::\")) or \"UNKNOWN\"}') for d in ds]"
+if ($LASTEXITCODE -ne 0) { throw "license inventory failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\Anaconda3\python.exe' -m venv 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit'
+if ($LASTEXITCODE -ne 0) { throw "audit venv creation failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scripts\python.exe' -m pip install --disable-pip-version-check --no-input 'pip-audit==2.10.1'
+if ($LASTEXITCODE -ne 0) { throw "pip-audit install failed: $LASTEXITCODE" }
+& 'C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scripts\python.exe' -m pip_audit --requirement '.\backend\requirements.lock' --disable-pip --no-deps --desc on
+$auditExit = $LASTEXITCODE
+Write-Output "AUDIT_EXIT=$auditExit"
+if ($auditExit -ne 1) { throw "unexpected audit exit: $auditExit" }
+```
+
+Exact result: wrapper exit `1`. Lock environment creation, installation, `pip check`, and freeze exited `0`; the inline Python command failed with `SyntaxError: unterminated string literal`, followed by a PowerShell command-not-found error caused by the mangled quoting. Audit setup was not reached.
+
+License collection was rerun successfully using the following corrected exact stdin script:
 
 ```powershell
 @'
@@ -177,4 +239,4 @@ Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0
 - M1–M9 original chronology: retained in Git and reconciled in the phase work record; all affected remediation verification remains pending.
 - Open blocker: none.
 - Concern: the UNIX-only pytest advisory remains visible and requires a separately authorized pytest 9 compatibility decision if the project must run tests on a shared untrusted UNIX host. The lock is exact-version pinned but does not include artifact hashes; `pip-audit` emitted the corresponding hardening recommendation.
-- Next action: commit this Task 1 evidence correction; Task 2 remains separate and the known fixed-clock failure is unchanged.
+- Next action: commit this final Task 1 exact-command evidence correction; Task 2 remains separate and the known fixed-clock failure is unchanged.
