@@ -83,7 +83,7 @@ Product changes must not begin until every required supporting path is either in
 - [x] Every required deterministic command passed on the recorded commit/worktree.
 - [x] Source, prior-phase behavior, and file-boundary invariants are verified.
 - [x] Completion and rendered evidence reports are present if required.
-- [ ] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree. (pending evidence commit + verifier run)
+- [x] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree.
 - [x] A fresh remediation independent-QA handoff is recorded; QA itself remains pending.
 - [x] No later phase has begun.
 
@@ -117,7 +117,7 @@ Failing/missing tests, incomplete coverage/milestones, compiler/build/lint/typec
 - Original implementation: complete at `044c013b`; independent QA later failed.
 - Remediation: product Tasks 1–6 through `f7f776e`; Task 7 at `63e6b31`; implementation commit `e24b6a1`; Task 8 M9/readiness/handoff recorded.
 - Durable goal: ACHIEVED for readiness+handoff stopping condition once verifier PASS on clean evidence commit.
-- Implementation-readiness verifier: refreshed manifest for `e24b6a1`; run after evidence commit.
+- Implementation-readiness verifier: **PASS** on clean evidence commit `b687b3b58a3ac09a479f59dc1d7209fe9890582e` against implementation commit `e24b6a1`.
 - Independent QA: FAIL recorded at `fd8a43d`; fresh review pending on the clean evidence commit.
 - Master decision: pending / ineligible until fresh QA PASS.
 - Seal status: absent and ineligible until later gates.

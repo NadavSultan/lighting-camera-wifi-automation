@@ -22,7 +22,7 @@ Next action: fresh independent QA on the exact clean evidence commit
 ## Identity to review
 
 - Remediation implementation commit: `e24b6a16add314393574257a08e539a27673a505`
-- Evidence/readiness commit: the clean commit that contains this handoff and the updated `harness/verify/phase-07-readiness.json` (record exact SHA after evidence commit)
+- Evidence/readiness commit: `b687b3b58a3ac09a479f59dc1d7209fe9890582e`
 - Do not seal Phase 7 in independent QA; master gate follows QA PASS only
 
 ## Notes for QA
