@@ -22,7 +22,7 @@ Next action: fresh independent QA on the exact clean evidence commit
 ## Identity to review
 
 - Remediation implementation commit: `e24b6a16add314393574257a08e539a27673a505`
-- Evidence/readiness commit: `b687b3b58a3ac09a479f59dc1d7209fe9890582e`
+- Evidence/readiness commit: `b687b3b58a3ac09a479f59dc1d7209fe9890582e` (M9/readiness/handoff artifacts); tip with PASS SHA note `7ed4fd8cad92b3dd506311fbb1c3c3e77b35cf96`
 - Do not seal Phase 7 in independent QA; master gate follows QA PASS only
 
 ## Notes for QA
