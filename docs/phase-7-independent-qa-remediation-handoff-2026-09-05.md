@@ -22,7 +22,7 @@ Next action: fresh independent QA on the exact clean evidence commit
 ## Identity to review
 
 - Remediation implementation commit: `e24b6a16add314393574257a08e539a27673a505`
-- Evidence/readiness commit: (this handoff tip after readiness PASS; verify with `git rev-parse HEAD` on the clean evidence tree)
+- Evidence/readiness tip commit: `9ec2d9ee74fe6247c3f8128fbeefb050c5906da4` (reconciled M9 API+browser evidence; readiness PASS recorded against clean tree at this tip)
 - Do not seal Phase 7 in independent QA; master gate follows QA PASS only
 
 ## Notes for QA
