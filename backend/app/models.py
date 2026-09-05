@@ -507,6 +507,7 @@ class CameraGeometryLayer(StrictModel):
     geometry_model_version: Literal["flat-ground-pinhole-1.0.0"] = "flat-ground-pinhole-1.0.0"
     calculated_at: datetime | None = None
     projected_crs: str | None = None
+    calculation_input_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")] = None
     footprints: list[CameraFootprintResult] = Field(default_factory=list)
     overlaps: list[CameraOverlapResult] = Field(default_factory=list)
     priority_area_summaries: list[PriorityAreaCoverageSummary] = Field(default_factory=list)

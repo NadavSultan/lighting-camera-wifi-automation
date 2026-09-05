@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from itertools import combinations
 
@@ -29,6 +31,59 @@ ASSUMPTIONS = [
     "No terrain, slope, buildings, trees, poles, occlusion, refraction, or site obstacles.",
     "Geometric footprint only; no facial recognition, LPR, people-counting, analytics, or compliance claim.",
 ]
+
+
+def camera_calculation_input_sha256(project: Project) -> str:
+    """Fingerprint geometry-significant project inputs for camera freshness checks."""
+    poles: list[dict[str, object]] = []
+    for source in sorted(project.source.poles, key=lambda item: (item.sequence_index, item.id)):
+        edit = project.pole_edits.get(source.id)
+        config = edit.fixture_configuration if edit else None
+        poles.append(
+            {
+                "id": source.id,
+                "sequence_index": source.sequence_index,
+                "longitude": source.longitude,
+                "latitude": source.latitude,
+                "active": edit.active if edit and edit.active is not None else True,
+                "fixture_type": (
+                    edit.fixture_type if edit and edit.fixture_type is not None else project.defaults.fixture_type
+                ).value,
+                "height_m": edit.height_m if edit and edit.height_m is not None else project.defaults.pole_height_m,
+                "fixture_configuration": None
+                if config is None
+                else {
+                    "fixture_model_id": config.fixture_model_id,
+                    "fixture_model_revision": config.fixture_model_revision,
+                    "mounting_template_revision": config.mounting_template_revision,
+                    "fixture_azimuth_deg": config.fixture_azimuth_deg,
+                    "camera_overrides": {
+                        key: override.model_dump(mode="json")
+                        for key, override in sorted(config.camera_overrides.items())
+                    },
+                },
+            }
+        )
+    payload = {
+        "geometry_model_version": GEOMETRY_MODEL_VERSION,
+        "fixed_mount_contract": FIXED_MOUNT_CONTRACT,
+        "projected_crs": project.projected_crs,
+        "default_pole_height_m": project.defaults.pole_height_m,
+        "poles": poles,
+        "priority_areas": [
+            {
+                "id": area.id,
+                "name": area.name,
+                "wgs84_coordinates": [[lon, lat] for lon, lat in area.wgs84_coordinates],
+            }
+            for area in project.priority_areas
+        ],
+    }
+    try:
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Camera calculation inputs are not finite JSON-compatible values") from exc
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _signed_area(vertices: list[tuple[float, float]]) -> float:
@@ -93,7 +148,11 @@ def _polygon_rings_wgs84(geometry, to_wgs84: Transformer) -> list[list[tuple[flo
 
 
 def calculate_camera_geometry(project: Project, fixtures: FixtureModelCatalog, cameras: CameraEquipmentCatalog) -> CameraGeometryLayer:
-    layer = CameraGeometryLayer(calculated_at=utc_now(), projected_crs=project.projected_crs)
+    layer = CameraGeometryLayer(
+        calculated_at=utc_now(),
+        projected_crs=project.projected_crs,
+        calculation_input_sha256=camera_calculation_input_sha256(project),
+    )
     fixture_revisions = {(item.id, item.revision): item for item in [*fixtures.fixture_models, *fixtures.fixture_model_history]}
     fixture_current = {item.id: item for item in fixtures.fixture_models}
     camera_revisions = {(item.id, item.revision): item for item in [*cameras.camera_models, *cameras.camera_model_history]}

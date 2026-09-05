@@ -9,7 +9,7 @@ from pyproj import Transformer
 from app.main import create_app
 from app.models import CapCandidateSite, CapConstraintValue, CapKnowledge, CapNodeDisposition, CapPlanningInputs, FixtureType, PoleEdit, Project, SourceFile, SourceLayer, SourcePole, migrate_project_payload, utc_now
 from app.services import cap_planning
-from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, cap_input_sha256, invalidate_stale_cap_results
+from app.services.cap_planning import _adjacency, apply_cap_result, calculate_cap_plan, cap_input_sha256, cap_result_sha256, invalidate_stale_cap_results
 from app.services.store import ProjectStore
 
 
@@ -513,6 +513,13 @@ def test_p6_fp_01_input_fingerprint_invalidates_results_without_mutating_inputs(
     assert invalidate_stale_cap_results(applied) is True
     assert applied.cap_planning_inputs.model_dump(mode="json")["candidates"][0]["preferred"] is True
     assert before["candidates"][0]["id"] == "cap-a"
+
+
+def test_p6_result_digest_matches_canonical_payload_and_detects_tampering():
+    result = calculate_cap_plan(project_with_test_only_inputs())
+    assert cap_result_sha256(result) == result.result_sha256
+    result.assignments[0].hop += 1
+    assert cap_result_sha256(result) != result.result_sha256
 
 
 @pytest.mark.parametrize("mutate", [

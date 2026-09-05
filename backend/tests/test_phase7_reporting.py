@@ -26,6 +26,8 @@ from app.models import (
     SCHEMA_VERSION,
     SOFTWARE_VERSION,
     CalculationArea,
+    CameraFootprintResult,
+    CameraGeometryLayer,
     CapCandidateSite,
     CapConstraintValue,
     CapKnowledge,
@@ -50,8 +52,10 @@ from app.models import (
     migrate_project_payload,
 )
 from app.services import reporting
+from app.services.camera_geometry import calculate_camera_geometry
 from app.services.cap_planning import apply_cap_result, calculate_cap_plan, cap_input_sha256
 from app.services.catalogs import CatalogStore
+from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
 from app.services.kml import export_updated_kml, import_project
 from app.services.lighting_calculation import lighting_calculation_input_sha256
 from app.services.reporting import (
@@ -67,6 +71,7 @@ from app.services.store import ProjectStore
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, wifi_calculation_input_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
+PHASE2_SEEDS = ROOT / "data" / "phase2"
 FIXED_TIME = datetime(2026, 9, 4, 12, 0, 0, tzinfo=timezone.utc)
 
 SIMPLE_KML = b"""<?xml version="1.0" encoding="UTF-8"?>
@@ -104,6 +109,82 @@ def bare_project(**kwargs):
 
 def fixed_request(**kwargs) -> ReportPackageRequest:
     return ReportPackageRequest(generation_time=FIXED_TIME, **kwargs)
+
+
+def build_report_snapshot(project: Project) -> dict:
+    return build_snapshot(
+        project,
+        formats=ReportFormatSelection(),
+        sections=ReportSectionSelection(),
+        kmz_layers=project.report_preferences.kmz_layers,
+        generation_time=FIXED_TIME,
+    )
+
+
+def camera_project_with_geometry() -> Project:
+    project = bare_project()
+    project.camera_geometry = CameraGeometryLayer(
+        calculated_at=FIXED_TIME,
+        projected_crs="EPSG:32617",
+        footprints=[
+            CameraFootprintResult(
+                pole_id="p1",
+                fixture_model_id="phoenix-1-smart",
+                fixture_model_revision=1,
+                mounting_template_revision=1,
+                camera_slot_id="camera-1",
+                camera_model_id="camera-model",
+                camera_model_revision=1,
+                lens_id="lens-jl-ln037",
+                lens_revision=1,
+                fixture_height_m=10.0,
+                fixture_azimuth_deg=0.0,
+                template_relative_azimuth_deg=-70.0,
+                fixed_downward_tilt_deg=35.0,
+                camera_absolute_azimuth_deg=290.0,
+                projected_crs="EPSG:32617",
+                enabled=True,
+                valid=True,
+                projected_coordinates_m=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0), (0.0, 0.0)],
+                wgs84_coordinates=[
+                    (-80.1, 25.7),
+                    (-80.09, 25.7),
+                    (-80.09, 25.71),
+                    (-80.1, 25.71),
+                    (-80.1, 25.7),
+                ],
+                footprint_area_m2=1.0,
+            )
+        ],
+    )
+    return project
+
+
+def calculated_camera_project(tmp_path: Path):
+    store = CatalogStore(tmp_path / "catalogs", PHASE2_SEEDS)
+    source = ROOT / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+    project = import_project(source.name, source.read_bytes(), "Phase 7 camera freshness")
+    pole_id = project.source.poles[0].id
+    project = apply_bulk_configuration(
+        project,
+        BulkPoleConfigurationRequest(
+            pole_ids=[pole_id],
+            patch=BulkPoleConfigurationPatch(
+                fixture_model_id="phoenix-1-smart",
+                pole_height_m=10.0,
+                fixture_azimuth_deg=0.0,
+                lens_by_slot={"camera-1": "lens-jl-ln037", "camera-2": "lens-jl-ln037"},
+            ),
+        ),
+        store.fixtures(),
+        store.cameras(),
+    )
+    project.camera_geometry = calculate_camera_geometry(project, store.fixtures(), store.cameras())
+    return project, store.fixtures(), store.cameras()
+
+
+def project_with_current_cap_result() -> Project:
+    return apply_cap_result(project_with_cap_inputs(), calculate_cap_plan(project_with_cap_inputs()))
 
 
 def _zip_members(package: bytes) -> dict[str, bytes]:
@@ -390,6 +471,31 @@ def test_p7_st_01_stale_lighting_wifi_cap_omitted_without_recalculation():
     assert cap_snapshot["status"] == "incomplete"
     assert cap_project.model_dump(mode="json") == cap_before
     assert cap_project.cap_calculations.result is not None
+
+
+def test_p7_qa_03_legacy_camera_geometry_is_omitted_until_recalculated():
+    project = camera_project_with_geometry()
+    project.camera_geometry.calculation_input_sha256 = None
+    snapshot = build_report_snapshot(project)
+    assert snapshot["included_calculated"]["camera_geometry"] is None
+    assert snapshot["dispositions"]["cameras"] == "stale_omitted"
+
+
+def test_p7_qa_03_camera_input_change_invalidates_report_inclusion(tmp_path: Path):
+    project, fixtures, cameras = calculated_camera_project(tmp_path)
+    project.pole_edits[next(iter(project.pole_edits))].fixture_configuration.fixture_azimuth_deg += 1
+    snapshot = build_report_snapshot(project)
+    assert snapshot["included_calculated"]["camera_geometry"] is None
+
+
+def test_p7_qa_03_tampered_cap_result_blocks_generation():
+    project = project_with_current_cap_result()
+    project.cap_calculations.result.assignments[0].hop += 1
+    with pytest.raises(ReportGenerationError, match="CAP result.*hash"):
+        generate_report_package(
+            project,
+            fixed_request(formats=ReportFormatSelection(engineering_kmz=False)),
+        )
 
 
 # ---------------------------------------------------------------------------

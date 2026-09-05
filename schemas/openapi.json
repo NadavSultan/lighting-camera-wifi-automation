@@ -2485,6 +2485,18 @@
             ],
             "title": "Projected Crs"
           },
+          "calculation_input_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Input Sha256"
+          },
           "footprints": {
             "items": {
               "$ref": "#/components/schemas/CameraFootprintResult"

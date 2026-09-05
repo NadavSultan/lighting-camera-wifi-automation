@@ -15,7 +15,7 @@ from app.catalog_models import camera_absolute_azimuth, normalize_azimuth
 from app.crs import project_transformers, validate_projected_metre_crs
 from app.models import CalculationArea, PriorityArea, Project, migrate_project_payload
 from app.main import create_app
-from app.services.camera_geometry import calculate_camera_geometry, canonical_ring, project_ground_footprint
+from app.services.camera_geometry import calculate_camera_geometry, camera_calculation_input_sha256, canonical_ring, project_ground_footprint
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
 from app.services.kml import import_project
@@ -88,6 +88,22 @@ def test_rotation_moves_both_cameras_together_preserving_template_separation_and
     assert [item.camera_absolute_azimuth_deg for item in second.footprints] == [30, 170]
     assert (second.footprints[1].camera_absolute_azimuth_deg - second.footprints[0].camera_absolute_azimuth_deg) % 360 == 140
     assert (pole.id, pole.raw_coordinates, pole.longitude, pole.latitude) == original
+
+
+def test_camera_calculation_persists_input_fingerprint_without_migration_invention(tmp_path: Path) -> None:
+    store = catalogs(tmp_path)
+    project = configure(miracle_project(), store, [miracle_project().source.poles[0].id])
+    layer = calculate_camera_geometry(project, store.fixtures(), store.cameras())
+    assert layer.calculation_input_sha256 == camera_calculation_input_sha256(project)
+    assert len(layer.calculation_input_sha256) == 64
+    migrated = migrate_project_payload({
+        **project.model_dump(mode="json"),
+        "schema_version": "2.2.0",
+        "camera_geometry": {"calculated_at": layer.calculated_at.isoformat(), "footprints": []},
+    })
+    assert "calculation_input_sha256" not in migrated["camera_geometry"] or migrated["camera_geometry"].get("calculation_input_sha256") is None
+    validated = Project.model_validate({**migrated, "camera_geometry": {"calculated_at": layer.calculated_at.isoformat(), "footprints": []}})
+    assert validated.camera_geometry.calculation_input_sha256 is None
 
 
 def test_camera_geometry_crs_boundary_preserves_approved_behavior(tmp_path: Path) -> None:

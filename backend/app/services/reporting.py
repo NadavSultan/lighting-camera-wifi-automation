@@ -51,7 +51,8 @@ from app.models import (
     utc_now,
     validate_report_member_path,
 )
-from app.services.cap_planning import cap_input_sha256
+from app.services.cap_planning import cap_input_sha256, cap_result_sha256
+from app.services.camera_geometry import camera_calculation_input_sha256
 from app.services.kml import KmlImportError, validate_embedded_source
 from app.services.lighting_calculation import lighting_calculation_input_sha256
 from app.services.wifi_coverage import wifi_calculation_input_sha256
@@ -64,8 +65,8 @@ DISCLAIMER_REPORT = (
     "optimal layouts, or installation-ready deliverables."
 )
 CAMERA_DISCLAIMER = (
-    "Camera geometry included when calculated_at is present; no separate fingerprint field "
-    "exists. Footprints are treated as current with this disclaimer."
+    "Camera geometry is included only when calculation_input_sha256 matches current "
+    "geometry-significant inputs. Legacy results without a fingerprint are omitted until recalculated."
 )
 
 SectionDisposition = Literal["included", "omitted", "not_configured", "not_calculated", "stale_omitted", "disabled"]
@@ -305,6 +306,10 @@ def _cap_current_result(project: Project) -> tuple[dict[str, Any] | None, list[s
         return None, findings, warnings
     if not result.result_sha256 or len(result.result_sha256) != 64:
         raise ReportGenerationError("CAP result is corrupt: result_sha256 is missing or malformed")
+    if cap_result_sha256(result) != result.result_sha256:
+        raise ReportGenerationError(
+            "CAP result payload hash mismatch: recomputed digest does not match result_sha256"
+        )
     recommendations = project.cap_recommendations
     if recommendations.result_sha256 is not None and recommendations.result_sha256 != result.result_sha256:
         raise ReportGenerationError(
@@ -323,6 +328,18 @@ def _camera_current(project: Project) -> tuple[dict[str, Any] | None, list[str],
         return None, findings, warnings
     if not layer.footprints:
         findings.append("Camera geometry has calculated_at but no footprints; treated as not calculated.")
+        return None, findings, warnings
+    if layer.calculation_input_sha256 is None:
+        findings.append(
+            "Camera geometry omitted: calculation_input_sha256 is missing; legacy result requires recalculation."
+        )
+        return None, findings, warnings
+    try:
+        current_hash = camera_calculation_input_sha256(project)
+    except Exception as exc:  # noqa: BLE001
+        raise ReportGenerationError(f"Camera fingerprint failure: {exc}") from exc
+    if layer.calculation_input_sha256 != current_hash:
+        findings.append("Camera geometry omitted: calculation_input_sha256 does not match current inputs.")
         return None, findings, warnings
     payload = layer.model_dump(mode="json")
     _assert_finite(payload, "camera_geometry")
@@ -414,12 +431,13 @@ def build_snapshot(
         stale_omitted=cap_stale and sections.cap,
     )
 
+    camera_stale = any("omitted" in item.lower() for item in camera_findings)
     dispositions["cameras"] = _section_disposition(
         sections.cameras,
         configured=True,
         calculated=project.camera_geometry.calculated_at is not None,
         included=camera_included is not None,
-        stale_omitted=False,
+        stale_omitted=camera_stale and sections.cameras,
     )
     dispositions["project_inventory"] = "included" if sections.project_inventory else "disabled"
     dispositions["poles_fixtures"] = "included" if sections.poles_fixtures else "disabled"

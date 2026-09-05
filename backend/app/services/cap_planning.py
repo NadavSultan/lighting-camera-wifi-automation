@@ -61,6 +61,14 @@ def cap_input_sha256(project: Project) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
 
 
+def cap_result_sha256(result: CapPlanningResult) -> str:
+    """Recompute the Phase 6 canonical CAP result payload digest."""
+    payload = result.model_dump(mode="json", exclude={"result_sha256"})
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    ).hexdigest()
+
+
 def invalidate_stale_cap_results(project: Project) -> bool:
     layer = project.cap_calculations
     if layer.result is None or layer.calculation_input_sha256 == cap_input_sha256(project):
