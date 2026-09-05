@@ -49,6 +49,7 @@ from app.models import (
     ReportPackageRequest,
     ReportSectionSelection,
     utc_now,
+    validate_report_member_path,
 )
 from app.services.cap_planning import cap_input_sha256
 from app.services.kml import KmlImportError, validate_embedded_source
@@ -1326,6 +1327,63 @@ def _assemble_zip(members: dict[str, bytes], generation_time: datetime) -> bytes
     return package
 
 
+def validate_report_package_integrity(package: bytes, manifest: ReportManifest) -> None:
+    """Reopen a completed package and verify its non-circular manifest contract."""
+    manifest_path = "report-manifest.json"
+    try:
+        with zipfile.ZipFile(io.BytesIO(package)) as archive:
+            names = [info.filename for info in archive.infolist()]
+            if len(names) != len(set(names)):
+                raise ReportGenerationError(
+                    "Final report ZIP integrity validation found duplicate member names"
+                )
+
+            for path in names:
+                if path == manifest_path:
+                    continue
+                try:
+                    validate_report_member_path(path)
+                except ValueError as exc:
+                    raise ReportGenerationError(
+                        f"Final report ZIP integrity validation found unsafe path: {path!r}"
+                    ) from exc
+
+            if manifest_path not in names:
+                raise ReportGenerationError(
+                    "Final report ZIP integrity validation found missing report-manifest.json"
+                )
+
+            payload_paths = set(names) - {manifest_path}
+            declared_paths = set(manifest.members)
+            missing_paths = sorted(declared_paths - payload_paths)
+            if missing_paths:
+                raise ReportGenerationError(
+                    "Final report ZIP integrity validation found missing payload members: "
+                    + ", ".join(missing_paths)
+                )
+            extra_paths = sorted(payload_paths - declared_paths)
+            if extra_paths:
+                raise ReportGenerationError(
+                    "Final report ZIP integrity validation found extra payload members: "
+                    + ", ".join(extra_paths)
+                )
+
+            for path, integrity in manifest.members.items():
+                data = archive.read(path)
+                if len(data) != integrity.size_bytes:
+                    raise ReportGenerationError(
+                        f"Final report ZIP integrity validation found size mismatch for {path}"
+                    )
+                if _sha256_bytes(data) != integrity.sha256:
+                    raise ReportGenerationError(
+                        f"Final report ZIP integrity validation found SHA-256 mismatch for {path}"
+                    )
+    except zipfile.BadZipFile as exc:
+        raise ReportGenerationError(
+            "Final report ZIP integrity validation could not reopen the completed package"
+        ) from exc
+
+
 def preview_report(project: Project, request: ReportPackageRequest | None = None) -> dict:
     """Return checklist/status/blockers/section dispositions without mutating project or writing files."""
     formats, sections, kmz_layers, _persist = _resolve_options(project, request)
@@ -1502,6 +1560,7 @@ def generate_report_package(
                 target_path.write_bytes(data)
 
             package = _assemble_zip(members, generation_time)
+            validate_report_package_integrity(package, manifest)
             package_sha = _sha256_bytes(package)
             metadata: LastReportMetadata | None = None
             if persist:

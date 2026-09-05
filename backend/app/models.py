@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 from shapely.geometry import Polygon
 from shapely.validation import explain_validity
 
@@ -742,7 +742,29 @@ ReportSectionDisposition = Literal[
     "stale_omitted",
     "disabled",
 ]
-ReportMemberPath = Annotated[str, Field(min_length=1, pattern=r"^[^\\\x00-\x1f]+$")]
+
+
+def validate_report_member_path(path: str) -> str:
+    if path == "report-manifest.json":
+        raise ValueError("report payload member path must not be the manifest self path")
+    if "\\" in path:
+        raise ValueError("report payload member path must use forward slashes")
+    if any(ord(character) < 32 for character in path):
+        raise ValueError("report payload member path must not contain control characters")
+    if path.startswith("/") or (
+        len(path) >= 3 and path[0].isalpha() and path[1] == ":" and path[2] == "/"
+    ):
+        raise ValueError("report payload member path must be relative")
+    if any(segment in {"", ".", ".."} for segment in path.split("/")):
+        raise ValueError("report payload member path contains an empty or dot segment")
+    return path
+
+
+ReportMemberPath = Annotated[
+    str,
+    Field(min_length=1),
+    AfterValidator(validate_report_member_path),
+]
 
 
 class ReportMemberIntegrity(StrictModel):

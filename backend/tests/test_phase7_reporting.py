@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 from pyproj import Transformer
 
 from app.main import create_app
@@ -40,6 +40,8 @@ from app.models import (
     PriorityArea,
     Project,
     ReportFormatSelection,
+    ReportManifest,
+    ReportMemberPath,
     ReportPackageRequest,
     ReportPreferences,
     ReportSectionSelection,
@@ -111,6 +113,26 @@ def _zip_members(package: bytes) -> dict[str, bytes]:
 
 def _manifest_from_package(package: bytes) -> dict:
     return json.loads(_zip_members(package)["report-manifest.json"].decode("utf-8"))
+
+
+def _rewrite_zip(
+    package: bytes,
+    *,
+    remove: str | None = None,
+    extra: tuple[str, bytes] | None = None,
+    duplicate: str | None = None,
+) -> bytes:
+    source = _zip_members(package)
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path, data in source.items():
+            if path != remove:
+                archive.writestr(path, data)
+        if extra is not None:
+            archive.writestr(*extra)
+        if duplicate is not None:
+            archive.writestr(duplicate, source[duplicate])
+    return buffer.getvalue()
 
 
 def _closed_ring_near_pole() -> list[tuple[float, float]]:
@@ -442,6 +464,99 @@ def test_p7_qa_02_manifest_hashes_every_payload_member_without_self_entry():
     for path, integrity in manifest["members"].items():
         assert integrity["size_bytes"] == len(members[path])
         assert integrity["sha256"] == hashlib.sha256(members[path]).hexdigest()
+
+
+def test_p7_qa_03_final_zip_integrity_accepts_generated_package():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    reporting.validate_report_package_integrity(package, ReportManifest.model_validate(manifest))
+
+
+def test_p7_qa_04_final_zip_integrity_rejects_duplicate_names():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    target = next(iter(manifest["members"]))
+    with pytest.warns(UserWarning, match="Duplicate name"):
+        duplicate_package = _rewrite_zip(package, duplicate=target)
+    with pytest.raises(ReportGenerationError, match="duplicate"):
+        reporting.validate_report_package_integrity(
+            duplicate_package,
+            ReportManifest.model_validate(manifest),
+        )
+
+
+def test_p7_qa_05_final_zip_integrity_rejects_missing_payload():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    target = next(iter(manifest["members"]))
+    missing_package = _rewrite_zip(package, remove=target)
+    with pytest.raises(ReportGenerationError, match="missing"):
+        reporting.validate_report_package_integrity(
+            missing_package,
+            ReportManifest.model_validate(manifest),
+        )
+
+
+def test_p7_qa_06_final_zip_integrity_rejects_extra_payload():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    extra_package = _rewrite_zip(package, extra=("extra.txt", b"unexpected"))
+    with pytest.raises(ReportGenerationError, match="extra"):
+        reporting.validate_report_package_integrity(
+            extra_package,
+            ReportManifest.model_validate(manifest),
+        )
+
+
+def test_p7_qa_07_final_zip_integrity_rejects_unsafe_path():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    unsafe_package = _rewrite_zip(package, extra=("../escape.txt", b"unsafe"))
+    with pytest.raises(ReportGenerationError, match="unsafe"):
+        reporting.validate_report_package_integrity(
+            unsafe_package,
+            ReportManifest.model_validate(manifest),
+        )
+
+
+def test_p7_qa_08_final_zip_integrity_rejects_declared_size_mismatch():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    target = next(iter(manifest["members"]))
+    bad_manifest = copy.deepcopy(manifest)
+    bad_manifest["members"][target]["size_bytes"] += 1
+    with pytest.raises(ReportGenerationError, match="size"):
+        reporting.validate_report_package_integrity(
+            package,
+            ReportManifest.model_validate(bad_manifest),
+        )
+
+
+def test_p7_qa_09_final_zip_integrity_rejects_declared_sha256_mismatch():
+    package, manifest, _ = generate_report_package(bare_project(), fixed_request())
+    target = next(iter(manifest["members"]))
+    bad_manifest = copy.deepcopy(manifest)
+    bad_manifest["members"][target]["sha256"] = "0" * 64
+    with pytest.raises(ReportGenerationError, match="SHA-256"):
+        reporting.validate_report_package_integrity(
+            package,
+            ReportManifest.model_validate(bad_manifest),
+        )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "",
+        "../payload.txt",
+        "/absolute.txt",
+        "C:/absolute.txt",
+        "folder//payload.txt",
+        "./payload.txt",
+        "folder/./payload.txt",
+        "folder/../payload.txt",
+        "folder\\payload.txt",
+        "folder/\x01payload.txt",
+        "report-manifest.json",
+    ],
+)
+def test_p7_qa_10_report_member_path_rejects_unsafe_values(path: str):
+    with pytest.raises(ValidationError):
+        TypeAdapter(ReportMemberPath).validate_python(path)
 
 
 def test_p7_mf_01_preview_exposes_checklist_without_mutation():
