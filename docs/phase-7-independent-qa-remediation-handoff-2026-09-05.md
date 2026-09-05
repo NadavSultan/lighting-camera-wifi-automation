@@ -22,14 +22,14 @@ Next action: fresh independent QA on the exact clean evidence commit
 ## Identity to review
 
 - Remediation implementation commit: `e24b6a16add314393574257a08e539a27673a505`
-- Evidence/readiness commit: `b687b3b58a3ac09a479f59dc1d7209fe9890582e` (M9/readiness/handoff artifacts); tip with PASS SHA note `7ed4fd8cad92b3dd506311fbb1c3c3e77b35cf96`
+- Evidence/readiness commit: (this handoff tip after readiness PASS; verify with `git rev-parse HEAD` on the clean evidence tree)
 - Do not seal Phase 7 in independent QA; master gate follows QA PASS only
 
 ## Notes for QA
 
 - Prefer pytest `--basetemp` under an isolated temp path on this Windows host.
-- Ports 3000/8000 are often occupied; M9 used temporary ports `53780`/`53781` with CORS `allow_origin_regex` for localhost/127.0.0.1 any port.
-- Runtime package bytes under `harness/tmp/m9/` are gitignored; regenerate from the recorded commands if cleaned.
+- Ports 3000/8000 are often occupied; reconciled M9 used temporary ports `18080` (backend) and `13000` (frontend) with `NEXT_PUBLIC_API_URL=http://127.0.0.1:18080`.
+- Runtime package bytes under `harness/tmp/m9/` are gitignored; regenerate via `harness/verify/run_phase7_remediation_m9_complete.py` if cleaned.
 - Historical 2026-09-04 M9/readiness/completion records remain labelled historical and do not prove current remediation.
 
 ## Explicit non-claims

@@ -298,6 +298,7 @@ Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0
 | 7 | Browser recovery 3: Chrome headless `--dump-dom` | 0 | Confirmed Import KML/KMZ + Report Package controls in DOM |
 | 8 | `python harness/tmp/m9/run_m9_browser_pass.py` | 0 | Playwright: import Miracle Mile KML, refresh checklist, toggle PDF option, download package; **zero console errors**; download SHA-256 `9ecfd89b53ac0479e294abd7d1d8577afa71fe0ab2a4ee6dcdf45901d81bde8a` |
 | 9 | Evidence records written under `harness/verify/` + handoff doc | n/a | Dated M9 summary + verification summary + readiness refresh + QA handoff |
+| 10 | Evidence reconciliation: `python harness/verify/run_phase7_remediation_m9_complete.py` with backend `18080` + frontend `13000` | 0 | API package SHA-256 `08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced`; browser download SHA-256 `4babb0990f45e0ab38370f8409b1d06709c353028d95121b6bf9651e180a787a`; **zero console errors**; M9 JSON rewritten to match |
 
 ### Controlling state after Task 8
 

@@ -24,24 +24,25 @@ Exact chronology: `harness/logs/2026-09-04-phase-7-execution.md` Task 7 section.
 
 ## M9 production 74-pole reporting (Task 8 on `e24b6a1`)
 
-Recorded temporary ports: backend `127.0.0.1:53780`, frontend `localhost:53781` (3000/8000 occupied).
+Recorded temporary ports for the reconciled complete pass: backend `127.0.0.1:18080`, frontend `127.0.0.1:13000` (3000/8000 occupied; prior Task 8 attempt also used 53780/53781).
 
 | Check | Result |
 |---|---|
 | API health | phase 7 / version 0.7.0 |
 | Import `Input/Miracle_Mile_Lighting_Poles.kml` | 74 poles; source SHA-256 `2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328` |
-| Report preview + package (API) | status `complete_with_warnings`; package SHA-256 `7d2f17891add98bf4032f0302712949e38a9870838fd667fc23aec4996561d5c` |
+| Report preview + package (API TestClient) | status `complete_with_warnings`; package SHA-256 `08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced` |
 | ZIP safe paths / uniqueness / member hashes / response hash | PASS (15 members; amended P7-D08 payload hashes without circular self-entry) |
 | CSV parse (all schedules) | PASS |
-| XLSX vs CSV pole count + no active content | PASS (74 data rows; no VBA/media/external/hyperlink active relationships) |
+| XLSX vs CSV pole count + no active content | PASS (no VBA/external/hyperlink active relationships) |
 | KMZ/KML DERIVED/CONCEPTUAL provenance markers | PASS |
-| PDF structural page parse + vector overview inspection | PASS (`Local vector overview`, no online basemap, not coordinate table) |
-| Presentation-model strict schema (`PresentationModel`) | PASS; inventory pole_count 74 |
+| PDF structural page parse + vector overview inspection | PASS (`Projected overview`; not longitude/latitude coordinate table) |
+| Presentation-model strict schema (`PresentationModel`) | PASS; inventory pole_count 74; extras rejected |
 | Cross-format source hash / counts / statuses / fingerprints | PASS |
 | Updated KML CAP/report-free with 74 placemarks | PASS |
-| Browser: import → refresh checklist → option toggle → download | PASS via Playwright Chromium; download SHA-256 `9ecfd89b53ac0479e294abd7d1d8577afa71fe0ab2a4ee6dcdf45901d81bde8a`; **zero console errors** |
+| Browser: import → refresh checklist → download | PASS via Playwright Chromium against `http://127.0.0.1:13000/` + API `18080`; download SHA-256 `4babb0990f45e0ab38370f8409b1d06709c353028d95121b6bf9651e180a787a`; **zero console errors** |
 
 Machine-readable evidence: `harness/verify/2026-09-05-phase-7-remediation-m9-summary.json`  
+Reproducible runner: `harness/verify/run_phase7_remediation_m9_complete.py`  
 Runtime (gitignored): `harness/tmp/m9/`
 
 Historical `harness/verify/2026-09-04-phase-7-m9-*.json` retained labelled as pre-remediation evidence and is not the current M9 record.

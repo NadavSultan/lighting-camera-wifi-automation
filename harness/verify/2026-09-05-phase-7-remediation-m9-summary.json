@@ -1,39 +1,39 @@
 {
-  "generated_at": "2026-09-05T17:54:45.853997Z",
-  "implementation_commit_hint": "e24b6a1",
+  "generated_at": "2026-09-05T18:00:11.339652Z",
+  "implementation_commit": "e24b6a16add314393574257a08e539a27673a505",
   "health": {
     "status": "ok",
     "phase": 7,
     "version": "0.7.0"
   },
-  "project_id": "b3307438-154d-44a8-b2ec-766688dadaa7",
+  "project_id": "f9e67957-8ee3-4bbc-b4ab-934e5afe1093",
   "poles": 74,
   "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
   "package_bytes": 109921,
-  "package_sha256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
-  "package_response_sha256_header": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
+  "package_sha256": "08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced",
+  "package_response_sha256_header": "08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced",
   "manifest_status": "complete_with_warnings",
   "member_count": 15,
   "members": {
-    "engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz": {
+    "engineering/Miracle_Mile_M9_Remediation-f9e67957-engineering.kmz": {
       "size": 2194,
       "sha256": "184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2"
     },
     "presentation-model.json": {
       "size": 2060,
-      "sha256": "af84ba7b84d1a7a0b64065f615d81e049a98666f7e397581d1d1efb02bfb9a4f"
+      "sha256": "28d10f46990677196752eb736e34074f7f76dd5fd76479726bf5935cc0d99ce4"
     },
-    "project/Miracle_Mile_M9_Remediation-b3307438.json": {
+    "project/Miracle_Mile_M9_Remediation-f9e67957.json": {
       "size": 61911,
-      "sha256": "323eb3081cb4192e8384efcdd85053ce13c38cc78b0e392544308fbf36abd876"
+      "sha256": "b2c09789dcbb7813d5d5306a6d5bd6bf05b4f04acae9906a7390382807b78151"
     },
     "report-manifest.json": {
       "size": 4766,
-      "sha256": "7173f396b7e413c58b09fca249f5127f592b2501d649345d8e3f53c382fafcdb"
+      "sha256": "bb5e9bca0bc6ecf6367df6426cbf554f0ddce084b77df84ffe42e6180d9d6824"
     },
     "schedules/01-project-inventory.csv": {
       "size": 351,
-      "sha256": "49de678901f0198fff5eb5958b45e514b285aab1faec6a7466c113b3135038f2"
+      "sha256": "4c19155cc76169d4f6aabae888f67a10c652aaaaa51b3131b05bd6633750ebc1"
     },
     "schedules/02-poles-fixtures.csv": {
       "size": 5892,
@@ -65,17 +65,19 @@
     },
     "schedules/09-provenance.csv": {
       "size": 433,
-      "sha256": "f018670850448772a058bcd8997c363b29c5ecafef31a84bc5726e9d5ceebc1f"
+      "sha256": "94db79d940b2699369e709064b8e129ed1f19d9b448e43a1175cc7365a6216e0"
     },
     "summary.pdf": {
-      "size": 11467,
-      "sha256": "268e08cb24c1d6f67cfd4da09606a0fee9418ff4493c06bbab25bd4ebd7b441c"
+      "size": 11468,
+      "sha256": "779bd4b8e5406a22a158ae752d250bbea262c4b2a7b5576848557753e71c2ded"
     },
     "workbook.xlsx": {
-      "size": 16574,
-      "sha256": "952d41e87788c85119513ca17495a8e912c968232e502cee3fd674fa5acf5549"
+      "size": 16573,
+      "sha256": "12381c189b11a1dc432dd4dc561a51001d916bdd3e3d7cbcbfd0e78f08761ea1"
     }
   },
+  "errors": [],
+  "ok": true,
   "pdf_page_count": 2,
   "checks": [
     {
@@ -95,124 +97,124 @@
     },
     {
       "id": "preview",
-      "ok": true,
-      "status_code": 200,
-      "can_generate": true,
-      "blockers": []
+      "ok": true
     },
     {
       "id": "package_download",
       "ok": true,
-      "status_code": 200,
       "package_bytes": 109921,
-      "package_sha256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
-      "headers": {
-        "X-Report-Package-SHA256": "e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b",
-        "X-Report-Status": "complete_with_warnings",
-        "X-Report-Generated-At": "2026-09-05T17:00:00Z",
-        "X-Project-Updated-At": "2026-09-05T17:54:45.815477Z",
-        "X-Report-Last-Metadata": "{\"model_version\":\"report-package-1.0.0\",\"generated_at\":\"2026-09-05T17:00:00Z\",\"status\":\"complete_with_warnings\",\"report_input_sha256\":\"037c8d54b5db26e85209fe25a29acd792d9fbc3ac6ee4ec66454c50a6d446768\",\"package_sha256\":\"e80e87d9aefed8db699c2f5e0b56408cc9f16cfb9847ef05986a071050b0381b\",\"package_size_bytes\":109921,\"member_count\":15,\"member_sha256\":{\"project/Miracle_Mile_M9_Remediation-b3307438.json\":\"323eb3081cb4192e8384efcdd85053ce13c38cc78b0e392544308fbf36abd876\",\"engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz\":\"184604bf7e0fe314c4f3123fa9a046bed0702728ee8dfff0d1ac7838ff84a8c2\",\"schedules/01-project-inventory.csv\":\"49de678901f0198fff5eb5958b45e514b285aab1faec6a7466c113b3135038f2\",\"schedules/02-poles-fixtures.csv\":\"db070a4d06029430bc0984c1112b1a7cfd9b202794a8bc7e766e9d90221d7c2e\",\"schedules/03-cameras.csv\":\"aae645b2a4182be203dc338eea38707dfc07f010ddbf468c42e535c0561ce896\",\"schedules/04-lighting.csv\":\"5ab26d257c61291ea9b515dbfbfcb6afdd1901349243735542359b8de1ab8282\",\"schedules/05-wifi.csv\":\"0aa93c1061532ffe0cf4a1e0eda84a580027cb7269e8b9e0004671032efca3d5\",\"schedules/06-cap.csv\":\"73d031dbab3166edb1d51ccba72d23af63b75cfd8a0508238eaa83896a960e45\",\"schedules/07-warnings-assumptions.csv\":\"f39a906821e03bf05194c5dcd863a81edcbc8d184ec9d665457a645cf85c1433\",\"schedules/08-validation-findings.csv\":\"095ff07c0d2c59aa04f01a0c0561f14846602a3db5aa2441e126f7cedd178156\",\"schedules/09-provenance.csv\":\"f018670850448772a058bcd8997c363b29c5ecafef31a84bc5726e9d5ceebc1f\",\"workbook.xlsx\":\"952d41e87788c85119513ca17495a8e912c968232e502cee3fd674fa5acf5549\",\"summary.pdf\":\"268e08cb24c1d6f67cfd4da09606a0fee9418ff4493c06bbab25bd4ebd7b441c\",\"presentation-model.json\":\"af84ba7b84d1a7a0b64065f615d81e049a98666f7e397581d1d1efb02bfb9a4f\",\"report-manifest.json\":\"7173f396b7e413c58b09fca249f5127f592b2501d649345d8e3f53c382fafcdb\"},\"included_sections\":[\"project_inventory\",\"poles_fixtures\",\"warnings_assumptions\",\"validation_findings\",\"provenance\"],\"omitted_sections\":[\"lighting\",\"wifi\",\"cap\",\"cameras\"],\"warnings\":[\"Report package for engineering review only. Conceptual Phase 4-6 outputs are not professionally validated photometry, verified RF design, compliance determinations, optimal layouts, or installation-ready deliverables.\",\"Camera geometry is included only when calculation_input_sha256 matches current geometry-significant inputs. Legacy results without a fingerprint are omitted until recalculated.\",\"Imported 74 point placemarks without geometry or coordinate errors.\"],\"validation_finding_count\":1}"
-      }
+      "package_sha256": "08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced",
+      "header_sha256": "08d5ce65775858aca39e88a543fa4b0902e970f3f0c0d921b5e2a49529610ced",
+      "status": "complete_with_warnings"
     },
     {
       "id": "csv_parse",
       "ok": true,
       "files": {
         "schedules/01-project-inventory.csv": {
-          "row_count": 2,
-          "col_count": 10,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/02-poles-fixtures.csv": {
-          "row_count": 75,
-          "col_count": 10,
-          "crlf": true
+          "row_count": 75
         },
         "schedules/03-cameras.csv": {
-          "row_count": 2,
-          "col_count": 10,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/04-lighting.csv": {
-          "row_count": 2,
-          "col_count": 10,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/05-wifi.csv": {
-          "row_count": 2,
-          "col_count": 6,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/06-cap.csv": {
-          "row_count": 2,
-          "col_count": 8,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/07-warnings-assumptions.csv": {
-          "row_count": 7,
-          "col_count": 5,
-          "crlf": true
+          "row_count": 7
         },
         "schedules/08-validation-findings.csv": {
-          "row_count": 2,
-          "col_count": 4,
-          "crlf": true
+          "row_count": 2
         },
         "schedules/09-provenance.csv": {
-          "row_count": 8,
-          "col_count": 3,
-          "crlf": true
+          "row_count": 8
         }
       }
     },
     {
       "id": "xlsx_active_content",
       "ok": true,
-      "member_count": 18,
-      "has_shared_strings": true,
-      "forbidden_hits": []
+      "forbidden_hits": [],
+      "member_count": 18
     },
     {
       "id": "kmz_labels",
       "ok": true,
-      "kmz_member": "engineering/Miracle_Mile_M9_Remediation-b3307438-engineering.kmz",
-      "kml_bytes": 2082
+      "kmz_member": "engineering/Miracle_Mile_M9_Remediation-f9e67957-engineering.kmz"
     },
     {
       "id": "pdf_vector",
       "ok": true,
-      "pdf_bytes": 11467,
       "page_count": 2,
-      "has_projected_overview": true
+      "pdf_bytes": 11468
     },
     {
       "id": "presentation_strict",
       "ok": true,
-      "extra_rejected": true,
       "inventory_poles": 74
     },
     {
       "id": "cross_format",
       "ok": true,
-      "manifest_status": "complete_with_warnings",
-      "presentation_status": "complete_with_warnings",
-      "report_input_sha256": "037c8d54b5db26e85209fe25a29acd792d9fbc3ac6ee4ec66454c50a6d446768"
+      "manifest_status": "complete_with_warnings"
     },
     {
       "id": "updated_kml",
       "ok": true,
       "placemarks": 74
-    },
-    {
-      "id": "frontend_report_controls",
-      "ok": true
     }
   ],
-  "errors": [],
-  "ok": true,
   "browser_workflow": {
-    "status": "deferred_to_http_recovery",
-    "note": "API TestClient package + static ReportPanel evidence recorded; live browser attempts follow in execution log."
+    "ok": true,
+    "frontend": "http://127.0.0.1:13000/",
+    "download_path": "harness/tmp/m9/browser-download.zip",
+    "download_sha256": "4babb0990f45e0ab38370f8409b1d06709c353028d95121b6bf9651e180a787a",
+    "download_bytes": 109934,
+    "console_error_count": 0,
+    "console": [
+      {
+        "type": "debug",
+        "text": "[vite] connecting..."
+      },
+      {
+        "type": "debug",
+        "text": "[vite] connected."
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "warning",
+        "text": "[GroupMarkerNotSet(crbug.com/242999)!:A0009100E4500000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content."
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0000339400E7FF00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0000339400E7FF00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0000339400E7FF00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0000339400E7FF00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      }
+    ],
+    "suggested_filename": "Miracle_Mile_Lighting_Poles-report-package.zip"
   },
-  "artifacts_dir": "harness/tmp/m9-remediation"
+  "artifacts_dir": "harness/tmp/m9"
 }
