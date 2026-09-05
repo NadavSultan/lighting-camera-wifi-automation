@@ -1,4 +1,4 @@
-# Phase 7 independent QA remediation handoff — 2026-09-05
+# Phase 7 independent QA remediation handoff - 2026-09-05
 
 ```
 Implementation: remediation complete
