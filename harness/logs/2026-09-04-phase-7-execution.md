@@ -1,6 +1,8 @@
 # Execution log — 2026-09-04 — Phase 7
 
-## Scope and non-goals
+> **Chronology note:** The opening sections through **Close state** record the original 2026-09-04 pre-implementation state only. They are historical and do not describe the current remediation checkpoint. The controlling current state is under **Remediation checkpoint — 2026-09-05 — Task 1**.
+
+## Historical opening scope and non-goals
 
 - Phase work record: `harness/phases/2026-09-04-phase-7-implementation.md`
 - Controlling contract and acceptance IDs: `harness/phases/phase-07.md`; `P7-DM-01`–`P7-PRD-01`
@@ -8,9 +10,9 @@
 - Non-goals and excluded phases: linked from `phase-07.md`; no seal in this task
 - Exact starting commit/worktree: `7c843fcb2a3a8fe9d0a98b84e5bd73e71d2734b9`, clean `main`
 - Durable goal identifier/state: Cursor durable goal active (2026-09-04)
-- Implementation-readiness manifest: pending under `harness/verify/`
+- Implementation-readiness manifest: pending under `harness/verify/` (historical opening state)
 
-## Environment and file-boundary preflight
+## Historical opening environment and file-boundary preflight
 
 | Check | Exact command/inspection | Result | Repository paths affected or required | Boundary disposition |
 |---|---|---|---|---|
@@ -20,34 +22,34 @@
 | Generated-artifact/validator entry points | pending | not run | `scripts/`, `schemas/` | unresolved |
 | Browser/local-server/port requirements | pending | not run | ports 8000/3000 | unresolved |
 
-## Milestone and acceptance criteria
+## Historical opening milestone and acceptance criteria
 
 - Milestone being executed: M0
 - Objective completion condition: authority, decisions, preflight, boundary recorded
 - Evidence required: this log + work record preflight table
 
-## Execution entries
+## Historical opening execution entries
 
 | UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
 |---|---|---|---|---|---|
 | 2026-09-04 local | Create Cursor durable goal; set active; create work record | `7c843fcb` clean | success | work record + this log | harness evidence only |
 | 2026-09-04 local | Runtime discovery: Python 3.12.7, Node v24.19.0, corepack present, no `.venv`, pnpm not on PATH | `7c843fcb` | partial | this log | recoverable materialization |
 
-## Verification requirements
+## Historical opening verification requirements
 
 - Deterministic checks required for this milestone: Git identity + preflight rows
 - Source/hash/generated-artifact checks: deferred until after dependency materialization smoke
 - Rendered/manual checks: deferred to M9
 - Checks not run and reason: product commands await venv/pnpm setup
 
-## Definition of Done
+## Historical opening Definition of Done
 
 - [ ] The milestone's acceptance criteria have objective evidence.
 - [ ] Required checks passed on the recorded commit/worktree.
 - [ ] Changed files remain within the authorized boundary.
 - [ ] No source, prior-phase, dependency, migration, or later-phase violation occurred.
 
-## Close state
+## Historical opening close state
 
 - Last verified milestone/state at log creation: none yet; M0 in progress
 - Open blockers: none
@@ -83,21 +85,83 @@
 | 5 | `.\.venv\Scripts\python.exe -m pip install --disable-pip-version-check --no-input ".\backend[dev]"` | 0 | Clean resolution installed the local backend and all production/test dependencies; ReportLab 4.5.1 and XlsxWriter 3.2.9 came from resolver output |
 | 6 | `.\.venv\Scripts\python.exe -m pip freeze --all` | 0 | Exact resolution captured; local backend URL and environment-owned pip excluded from `backend/requirements.lock` |
 | 7 | `C:\Users\Nadav\Anaconda3\python.exe -m venv C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-lockcheck` | 0 | New clean lock-check environment |
-| 8 | `...\task1-lockcheck\Scripts\python.exe -m pip install --disable-pip-version-check --no-input --requirement .\backend\requirements.lock` | 0 | Exact production/test lock installed successfully |
-| 9 | `...\task1-lockcheck\Scripts\python.exe -m pip check` | 0 | `No broken requirements found.` |
-| 10 | `...\task1-lockcheck\Scripts\python.exe -m pip freeze --all` | 0 | Matched all 42 locked distributions; only environment-owned `pip==24.2` was additional |
-| 11 | Metadata inventory using `importlib.metadata.distributions()` and `License-Expression`/`License`/license classifiers | 0 | Versions/licenses recorded below |
-| 12 | Create isolated audit environment; install `pip-audit==2.10.1`; `python -m pip_audit --requirement .\backend\requirements.lock --disable-pip --no-deps --desc on` | 1 | One advisory: `pytest==8.4.2`, `PYSEC-2026-1845`, fixed in 9.0.3; advisory applies to predictable `/tmp/pytest-of-{user}` on UNIX, while this preflight is Windows. Warning also recommends hash-pinned lock generation. |
-| 13 | `.\.venv\Scripts\python.exe -m pip check` | 0 | Required current-environment dependency check passed |
-| 14 | `.\.venv\Scripts\python.exe -m pip freeze --all` | 0 | Required current-environment inventory captured; exact list equals the lock plus local backend and pip |
-| 15 | `corepack enable pnpm; pnpm --version` | 1 | Global shim creation denied at `C:\Program Files\nodejs\pnpx`; environment-only EPERM |
-| 16 | `corepack pnpm --version` | 0 | pnpm 11.25.0 available without global mutation |
-| 17 | `corepack pnpm install --frozen-lockfile --offline` | 0 | Supply-chain policy passed; lockfile current; no repository lock/config change |
-| 18 | `corepack pnpm run build` | 0 | Production build passed; known non-failing `>500 kB` chunk advisory and Vinext route-classification advisory recorded |
-| 19 | `corepack pnpm run test` | 0 | 16 passed, 0 failed, 0 skipped |
-| 20 | `corepack pnpm run typecheck` | 0 | No TypeScript errors |
-| 21 | `corepack pnpm run lint` | 0 | No ESLint errors or warnings |
-| 22 | Browser/port discovery | 0 | Edge 152.0.4191.62 available; ports 3000 and 8000 occupied, so later M9 must use recorded alternate ports |
+| 8 | `C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-lockcheck\Scripts\python.exe -m pip install --disable-pip-version-check --no-input --requirement .\backend\requirements.lock` | 0 | Exact production/test lock installed successfully |
+| 9 | `C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-lockcheck\Scripts\python.exe -m pip check` | 0 | `No broken requirements found.` |
+| 10 | `C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-lockcheck\Scripts\python.exe -m pip freeze --all` | 0 | Matched all 42 locked distributions; only environment-owned `pip==24.2` was additional |
+| 11 | `.\.venv\Scripts\python.exe -m pip check` | 0 | Required current-environment dependency check passed |
+| 12 | `.\.venv\Scripts\python.exe -m pip freeze --all` | 0 | Required current-environment inventory captured; exact list equals the lock plus local backend and pip |
+| 13 | `corepack enable pnpm; pnpm --version` | 1 | Global shim creation denied at `C:\Program Files\nodejs\pnpx`; environment-only EPERM |
+| 14 | `corepack pnpm --version` | 0 | pnpm 11.25.0 available without global mutation |
+| 15 | `corepack pnpm install --frozen-lockfile --offline` | 0 | Supply-chain policy passed; lockfile current; no repository lock/config change |
+| 16 | `corepack pnpm run build` | 0 | Production build passed; known non-failing `>500 kB` chunk advisory and Vinext route-classification advisory recorded |
+| 17 | `corepack pnpm run test` | 0 | 16 passed, 0 failed, 0 skipped |
+| 18 | `corepack pnpm run typecheck` | 0 | No TypeScript errors |
+| 19 | `corepack pnpm run lint` | 0 | No ESLint errors or warnings |
+| 20 | Browser/port discovery | 0 | Edge 152.0.4191.62 available; ports 3000 and 8000 occupied, so later M9 must use recorded alternate ports |
+
+### Controlling current remediation state
+
+- This state supersedes the historical opening `pending`, `not run`, and `unresolved` labels above without rewriting their chronology.
+- Phase-wide readiness remains pending until all remediation tasks pass on the final clean implementation commit; the original readiness PASS remains superseded by independent QA FAIL.
+- Task 1 M0 dependency/control preflight is complete at checkpoint `dddf4d2bd5ab886cf03843778aa411ac67537cb2`.
+- This evidence correction reran the lock installation/check, locked-package license inventory, and vulnerability audit because the exact original license/audit setup commands could not be recovered from the prior worker's report. No dependency or product file changed.
+
+### Exact evidence-correction commands and results
+
+Clean lock environment and materialization:
+
+```powershell
+C:\Users\Nadav\Anaconda3\python.exe -m venv C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck
+C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe -m pip install --disable-pip-version-check --no-input --requirement .\backend\requirements.lock
+C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe -m pip check
+C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-lockcheck\Scripts\python.exe -m pip freeze --all
+```
+
+Results: all four commands exited `0`. Installation resolved all 42 exact locked distributions. `pip check` returned `No broken requirements found.` Freeze matched the 42 lock entries, with only environment-owned `pip==24.2` additional.
+
+The first evidence-correction wrapper then exited `1` before audit setup because PowerShell mangled quoting in an inline `python -c` license command. The lock results above completed before that failure and remain valid; the malformed license command produced no accepted license evidence. License collection was rerun successfully using the following exact stdin script:
+
+```powershell
+@'
+from pathlib import Path
+import importlib.metadata as metadata
+
+entries = []
+for line in Path('backend/requirements.lock').read_text(encoding='utf-8').splitlines():
+    if line and not line.startswith('#'):
+        name, expected_version = line.split('==', 1)
+        dist = metadata.distribution(name)
+        if dist.version != expected_version:
+            raise SystemExit(f'version mismatch for {name}: {dist.version} != {expected_version}')
+        classifiers = '; '.join(
+            value
+            for value in (dist.metadata.get_all('Classifier') or [])
+            if value.startswith('License ::')
+        )
+        license_value = (
+            dist.metadata.get('License-Expression')
+            or dist.metadata.get('License')
+            or classifiers
+            or 'UNKNOWN'
+        )
+        entries.append((dist.metadata['Name'], dist.version, license_value))
+for name, version, license_value in entries:
+    print(f'{name}=={version}\t{license_value}')
+print(f'LOCK_LICENSE_ENTRIES={len(entries)}')
+'@ | .\.venv\Scripts\python.exe -
+```
+
+Result: exit `0`; `LOCK_LICENSE_ENTRIES=42`. The exact version/license output is summarized in the next section. No locked distribution had unknown license metadata and no incompatible license was identified.
+
+Audit environment creation, tool installation, and audit:
+
+```powershell
+C:\Users\Nadav\Anaconda3\python.exe -m venv C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit
+C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scripts\python.exe -m pip install --disable-pip-version-check --no-input pip-audit==2.10.1
+C:\Users\Nadav\AppData\Local\Temp\lcwa-p7-remediation-task1-evidence-audit\Scripts\python.exe -m pip_audit --requirement .\backend\requirements.lock --disable-pip --no-deps --desc on
+```
+
+Results: environment creation exit `0`; `pip-audit==2.10.1` installation exit `0`; audit exit `1`. Exact audit result: `Found 1 known vulnerability in 1 package` — `pytest 8.4.2`, `PYSEC-2026-1845`, fixed in `9.0.3`; pytest through 9.0.2 on UNIX uses the predictable `/tmp/pytest-of-{user}` pattern. The audit also warned that `--no-deps` users should fully hash pinned dependencies and recommended `pip-compile`. This Windows preflight and the recorded explicit Windows `--basetemp` baseline mitigation remain unchanged; pytest-major and hash-lock policy changes are outside Task 1.
 
 ### Exact locked versions and declared licenses
 
@@ -113,4 +177,4 @@
 - M1–M9 original chronology: retained in Git and reconciled in the phase work record; all affected remediation verification remains pending.
 - Open blocker: none.
 - Concern: the UNIX-only pytest advisory remains visible and requires a separately authorized pytest 9 compatibility decision if the project must run tests on a shared untrusted UNIX host. The lock is exact-version pinned but does not include artifact hashes; `pip-audit` emitted the corresponding hardening recommendation.
-- Next action: commit this bounded Task 1 checkpoint, then proceed to Task 2 without changing the known fixed-clock failure here.
+- Next action: commit this Task 1 evidence correction; Task 2 remains separate and the known fixed-clock failure is unchanged.
