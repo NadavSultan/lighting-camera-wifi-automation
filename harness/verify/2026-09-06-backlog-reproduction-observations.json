@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-06",
+  "commit": "8751714003bf09f39c217a5f26b9fd6056d2927b",
+  "scope": "Diagnostic only; development frontend browser walkthrough, not phase acceptance or full regression",
+  "frontend": "http://localhost:3048/",
+  "backend": "http://127.0.0.1:8048",
+  "project_id": "dd3d8dfb-3405-4a43-aa50-132a3105b36c",
+  "source_poles": 74,
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "archived_source_byte_equal": true,
+  "source_collection_equal_to_pre_CAP_snapshot": true,
+  "ies_associations": [
+    {
+      "ies_file_id": "ies-4a897fb04b6d8f6c",
+      "fixture_model_id": "phoenix-1-lite",
+      "active": true
+    },
+    {
+      "ies_file_id": "ies-4a897fb04b6d8f6c",
+      "fixture_model_id": "phoenix-1-wifi",
+      "active": true
+    },
+    {
+      "ies_file_id": "ies-4a897fb04b6d8f6c",
+      "fixture_model_id": "phoenix-1-smart",
+      "active": true
+    }
+  ],
+  "ies_sha256": "4a897fb04b6d8f6c75c94a3ceba473391021aee6d506f05357f48bc01d26d363",
+  "wifi_circle_count": 1,
+  "wifi_radius_m": 30.0,
+  "cap_status": "calculated",
+  "cap_selected_candidate_ids": [
+    "repro-cap-one"
+  ],
+  "cap_candidate_pole_id": "pole-443127e3a723e1b3",
+  "cap_test_only": true,
+  "limitations": [
+    "One eligible WIFI fixture and one CAP candidate; not a capacity or optimality test.",
+    "IES reproduction used one supplied Phoenix 100 W file and three compatible Phoenix variants.",
+    "Lighting drawing observed at 0,1,2,3 vertices; other polygon tools were not exercised live.",
+    "No production build or full regression suite run."
+  ]
+}
