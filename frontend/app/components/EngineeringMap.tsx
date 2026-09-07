@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type StyleSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";
 import type { EffectivePole, FixtureType, Project } from "../lib/types";
 import { effectivePole } from "../lib/types";
 import { fixtureAzimuthFromHandle } from "../lib/phase3-workflows.mjs";
+import { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";
+import LightingPointLabels, { type LightingLabelPoint } from "./LightingPointLabels";
+import { formatLux } from "../lib/lighting-labels.mjs";
+import { screenArrow } from "../lib/fixture-direction-view.mjs";
+import type { FixtureDirectionPreview } from "../lib/api";
 
+const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
 const BASE_STYLE: StyleSpecification = {
   version: 8,
   sources: {
@@ -95,14 +101,59 @@ function capTreeFeatures(project: Project | null): FeatureCollection<LineString>
   return { type: "FeatureCollection", features: result.assignments.flatMap((assignment) => { const a = coordinate(assignment.node_id), b = coordinate(assignment.parent_id); return a && b ? [{ type: "Feature" as const, id: `${assignment.node_id}/${assignment.parent_id}`, properties: { hop: assignment.hop, distance_m: assignment.distance_m, disclaimer: "distance-qualified conceptual link; not RF-predicted" }, geometry: { type: "LineString" as const, coordinates: [a, b] } }] : []; }) };
 }
 
-function draftFeature(points: Array<[number, number]>): FeatureCollection<LineString | Polygon> {
-  if (points.length < 2) return { type: "FeatureCollection", features: [] };
-  return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: points.length >= 3 ? { type: "Polygon", coordinates: [[...points, points[0]]] } : { type: "LineString", coordinates: points } }] };
+function lightingLabelPoints(project: Project | null): LightingLabelPoint[] {
+  if (!project) return [];
+  return Object.values(project.lighting_calculations.results).flatMap((result) =>
+    result.points.map((point) => ({
+      id: `${result.calculation_area_id}/${point.id}`,
+      longitude: point.wgs84_coordinate[0],
+      latitude: point.wgs84_coordinate[1],
+      label: formatLux(point.maintained_horizontal_illuminance_lux),
+    })),
+  );
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string }) {
+type DraftTool = "priority" | "calculation" | "wifi";
+
+const DRAFT_COLORS: Record<DraftTool, { fill: string; edge: string; casing: string; preview: string; vertex: string }> = {
+  priority: { fill: "#fb923c", edge: "#fdba74", casing: "#431407", preview: "#fed7aa", vertex: "#fb923c" },
+  calculation: { fill: "#14b8a6", edge: "#5eead4", casing: "#042f2e", preview: "#99f6e4", vertex: "#2dd4bf" },
+  wifi: { fill: "#06b6d4", edge: "#67e8f9", casing: "#083344", preview: "#a5f3fc", vertex: "#22d3ee" },
+};
+
+function addDraftSourcesAndLayers(map: MapLibreMap, tool: DraftTool) {
+  const colors = DRAFT_COLORS[tool];
+  const prefix = `${tool}-draft`;
+  map.addSource(`${prefix}-fill`, { type: "geojson", data: EMPTY_GEOMETRY });
+  map.addSource(`${prefix}-edges`, { type: "geojson", data: EMPTY_GEOMETRY });
+  map.addSource(`${prefix}-preview`, { type: "geojson", data: EMPTY_GEOMETRY });
+  map.addSource(`${prefix}-vertices`, { type: "geojson", data: EMPTY });
+  map.addLayer({ id: `${prefix}-fill`, type: "fill", source: `${prefix}-fill`, paint: { "fill-color": colors.fill, "fill-opacity": .2 } });
+  map.addLayer({ id: `${prefix}-edge-casing`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.casing, "line-width": 6, "line-opacity": .9 } });
+  map.addLayer({ id: `${prefix}-edge`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.edge, "line-width": 4, "line-opacity": .95 } });
+  map.addLayer({ id: `${prefix}-preview`, type: "line", source: `${prefix}-preview`, paint: { "line-color": colors.preview, "line-width": 2, "line-dasharray": [2, 2], "line-opacity": .95 } });
+  map.addLayer({ id: `${prefix}-vertices`, type: "circle", source: `${prefix}-vertices`, paint: { "circle-radius": ["case", ["boolean", ["get", "last"], false], 7, 5], "circle-color": colors.vertex, "circle-stroke-width": 2, "circle-stroke-color": colors.casing } });
+}
+
+function setDraftSources(map: MapLibreMap, tool: DraftTool, points: LngLat[], cursor: LngLat | null) {
+  const draft = buildPolygonDraft(points, cursor);
+  const prefix = `${tool}-draft`;
+  (map.getSource(`${prefix}-fill`) as GeoJSONSource | undefined)?.setData(draft.fill);
+  (map.getSource(`${prefix}-edges`) as GeoJSONSource | undefined)?.setData(draft.edges);
+  (map.getSource(`${prefix}-preview`) as GeoJSONSource | undefined)?.setData(draft.preview);
+  (map.getSource(`${prefix}-vertices`) as GeoJSONSource | undefined)?.setData(draft.vertices);
+}
+
+function clearDraftSources(map: MapLibreMap, tool: DraftTool) {
+  setDraftSources(map, tool, [], null);
+}
+
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const directionCanvasRef = useRef<HTMLCanvasElement>(null);
+  const directionFrameRef = useRef<number | null>(null);
+  const [mapInstance, setMapInstance] = useState<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
   const fittedProjectRef = useRef<string | null>(null);
   const azimuthMarkerRef = useRef<Marker | null>(null);
@@ -115,9 +166,29 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const drawingWifiRef = useRef(drawingWifiArea);
   const onWifiDraftPointRef = useRef(onWifiDraftPoint);
   const onWifiAreaSelectRef = useRef(onSelectWifiArea);
+  const draftCursorRef = useRef<LngLat | null>(null);
+  const priorityDraftRef = useRef(priorityDraft);
+  const calculationDraftRef = useRef(calculationDraft);
+  const wifiDraftRef = useRef(wifiDraft);
+  const onMapReadyRef = useRef(onMapReady);
 
+  useEffect(() => { onMapReadyRef.current = onMapReady; }, [onMapReady]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
-  useEffect(() => { drawingRef.current = drawingPriorityArea; onDraftPointRef.current = onPriorityDraftPoint; onPrioritySelectRef.current = onSelectPriorityArea; drawingCalculationRef.current = drawingCalculationArea; onCalculationDraftPointRef.current = onCalculationDraftPoint; onCalculationSelectRef.current = onSelectCalculationArea; drawingWifiRef.current = drawingWifiArea; onWifiDraftPointRef.current = onWifiDraftPoint; onWifiAreaSelectRef.current = onSelectWifiArea; }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, onWifiDraftPoint, onSelectWifiArea]);
+  useEffect(() => {
+    drawingRef.current = drawingPriorityArea;
+    onDraftPointRef.current = onPriorityDraftPoint;
+    onPrioritySelectRef.current = onSelectPriorityArea;
+    drawingCalculationRef.current = drawingCalculationArea;
+    onCalculationDraftPointRef.current = onCalculationDraftPoint;
+    onCalculationSelectRef.current = onSelectCalculationArea;
+    drawingWifiRef.current = drawingWifiArea;
+    onWifiDraftPointRef.current = onWifiDraftPoint;
+    onWifiAreaSelectRef.current = onSelectWifiArea;
+    priorityDraftRef.current = priorityDraft;
+    calculationDraftRef.current = calculationDraft;
+    wifiDraftRef.current = wifiDraft;
+    if (!drawingPriorityArea && !drawingCalculationArea && !drawingWifiArea) draftCursorRef.current = null;
+  }, [drawingPriorityArea, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, onWifiDraftPoint, onSelectWifiArea, priorityDraft, calculationDraft, wifiDraft]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -130,12 +201,9 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("camera-fov", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-overlap", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-areas", { type: "geojson", data: EMPTY_GEOMETRY });
-      map.addSource("priority-draft", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("calculation-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("wifi-coverage", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("wifi-analysis-areas", { type: "geojson", data: EMPTY_GEOMETRY });
-      map.addSource("calculation-draft", { type: "geojson", data: EMPTY_GEOMETRY });
-      map.addSource("wifi-draft", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("lighting-points", { type: "geojson", data: EMPTY });
       map.addSource("camera-warnings", { type: "geojson", data: EMPTY });
       map.addSource("cap-candidates", { type: "geojson", data: EMPTY });
@@ -144,15 +212,14 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addLayer({ id: "priority-area-line", type: "line", source: "priority-areas", paint: { "line-color": "#fbbf24", "line-width": 2, "line-dasharray": [2, 1] } });
       map.addLayer({ id: "calculation-area-fill", type: "fill", source: "calculation-areas", paint: { "fill-color": "#14b8a6", "fill-opacity": .13 } });
       map.addLayer({ id: "calculation-area-line", type: "line", source: "calculation-areas", paint: { "line-color": ["case", ["boolean", ["get", "warning"], false], "#ff7a59", "#2dd4bf"], "line-width": 2.5 } });
-      map.addLayer({ id: "wifi-coverage-fill", type: "fill", source: "wifi-coverage", paint: { "fill-color": "#06b6d4", "fill-opacity": .16, "fill-outline-color": "#67e8f9" } });
+      map.addLayer({ id: "wifi-coverage-fill", type: "fill", source: "wifi-coverage", paint: { "fill-color": "#06b6d4", "fill-opacity": .12, "fill-outline-color": "#67e8f9" } });
+      map.addLayer({ id: "wifi-coverage-casing", type: "line", source: "wifi-coverage", paint: { "line-color": "#0f172a", "line-width": 5, "line-opacity": .88 } });
+      map.addLayer({ id: "wifi-coverage-outline", type: "line", source: "wifi-coverage", paint: { "line-color": "#22d3ee", "line-width": 2.5, "line-opacity": .95 } });
       map.addLayer({ id: "wifi-analysis-area-line", type: "line", source: "wifi-analysis-areas", paint: { "line-color": "#a3e635", "line-width": 2, "line-dasharray": [3, 2] } });
       map.addLayer({ id: "wifi-analysis-area-fill", type: "fill", source: "wifi-analysis-areas", paint: { "fill-color": "#a3e635", "fill-opacity": .04 } });
       map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
       map.addLayer({ id: "camera-2-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-2"], paint: { "fill-color": "#22d3ee", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "camera-overlap-fill", type: "fill", source: "camera-overlap", paint: { "fill-color": "#ec4899", "fill-opacity": .48, "fill-outline-color": "#f9a8d4" } });
-      map.addLayer({ id: "priority-draft-fill", type: "fill", source: "priority-draft", paint: { "fill-color": "#fb923c", "fill-opacity": .2, "fill-outline-color": "#fdba74" } });
-      map.addLayer({ id: "calculation-draft-fill", type: "fill", source: "calculation-draft", paint: { "fill-color": "#14b8a6", "fill-opacity": .24, "fill-outline-color": "#5eead4" } });
-      map.addLayer({ id: "wifi-draft-fill", type: "fill", source: "wifi-draft", paint: { "fill-color": "#06b6d4", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "lighting-heat-points", type: "circle", source: "lighting-points", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2, 19, 7], "circle-color": ["interpolate", ["linear"], ["get", "lux"], 0, "#172554", 1, "#2563eb", 5, "#22d3ee", 15, "#facc15", 30, "#f97316", 60, "#ef4444"], "circle-opacity": .76, "circle-stroke-width": .4, "circle-stroke-color": "#ffffff" } });
       map.addLayer({ id: "lighting-calculation-points", type: "circle", source: "lighting-points", paint: { "circle-radius": 1.4, "circle-color": "#f8fafc", "circle-opacity": .9 } });
       map.addLayer({ id: "poles-original", type: "circle", source: "poles", paint: { "circle-radius": 7, "circle-color": "#7f8d9b", "circle-opacity": .34, "circle-stroke-width": 1, "circle-stroke-color": "#d8e1e9", "circle-stroke-opacity": .42 } });
@@ -173,16 +240,22 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       // has no glyph source. The double ring remains visually distinct from a pole site.
       map.addLayer({ id: "cap-manual-candidate-sites", type: "circle", source: "cap-candidates", filter: ["==", ["get", "kind"], "manual_non_pole"], paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 3, "circle-stroke-color": "#ecfdf5" } });
       map.addLayer({ id: "selected-pole", type: "circle", source: "selection", paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 2, "circle-stroke-color": "#5de2c2", "circle-blur": .1 } });
+      addDraftSourcesAndLayers(map, "priority");
+      addDraftSourcesAndLayers(map, "calculation");
+      addDraftSourcesAndLayers(map, "wifi");
+      const isDrawing = () => drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current;
       for (const layer of CLICKABLE_LAYERS) {
         map.on("click", layer, (event) => {
+          if (isDrawing()) return;
           const id = event.features?.[0]?.properties?.id as string | undefined;
           if (id) onSelectRef.current(id);
         });
-        map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
-        map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
+        map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = isDrawing() ? "crosshair" : "pointer"; });
+        map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = isDrawing() ? "crosshair" : ""; });
       }
-      map.on("click", "camera-warning-indicator", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
+      map.on("click", "camera-warning-indicator", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onSelectRef.current(id); });
       map.on("click", "cap-candidate-sites", (event) => {
+        if (isDrawing()) return;
         const feature = event.features?.[0];
         if (!feature) return;
         const props = feature.properties ?? {};
@@ -190,16 +263,40 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         // eslint-disable-next-line react/prop-types
         new maplibregl.Popup({ closeButton: true, closeOnClick: true }).setLngLat(event.lngLat).setHTML(`<strong>${props.kind === "manual_non_pole" ? "Manual non-pole CAP site" : "Existing-pole CAP candidate"}</strong><br/>Priority: ${props.priority ?? "—"} · survey: ${props.survey_status ?? "unknown"}<br/><small>${props.disclaimer ?? "Distance-qualified conceptual link; not RF-predicted."}</small>`).addTo(map);
       });
-      map.on("mouseenter", "cap-candidate-sites", () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "cap-candidate-sites", () => { map.getCanvas().style.cursor = ""; });
-      map.on("click", "priority-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
-      map.on("click", "calculation-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
-      map.on("click", "wifi-analysis-area-fill", (event) => { const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onWifiAreaSelectRef.current(id); });
-      map.on("click", (event) => { if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); else if (drawingWifiRef.current) onWifiDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]); });
+      map.on("mouseenter", "cap-candidate-sites", () => { map.getCanvas().style.cursor = isDrawing() ? "crosshair" : "pointer"; });
+      map.on("mouseleave", "cap-candidate-sites", () => { map.getCanvas().style.cursor = isDrawing() ? "crosshair" : ""; });
+      map.on("click", "priority-area-fill", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onPrioritySelectRef.current(id); });
+      map.on("click", "calculation-area-fill", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
+      map.on("click", "wifi-analysis-area-fill", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onWifiAreaSelectRef.current(id); });
+      map.on("click", (event) => {
+        if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
+        else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
+        else if (drawingWifiRef.current) onWifiDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
+      });
+      map.on("mousemove", (event) => {
+        if (!(drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current)) return;
+        draftCursorRef.current = [event.lngLat.lng, event.lngLat.lat];
+        map.getCanvas().style.cursor = "crosshair";
+        if (drawingRef.current) setDraftSources(map, "priority", priorityDraftRef.current, draftCursorRef.current);
+        else if (drawingCalculationRef.current) setDraftSources(map, "calculation", calculationDraftRef.current, draftCursorRef.current);
+        else if (drawingWifiRef.current) setDraftSources(map, "wifi", wifiDraftRef.current, draftCursorRef.current);
+      });
+      map.on("mouseleave", () => {
+        if (!(drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current)) return;
+        draftCursorRef.current = null;
+        if (drawingRef.current) setDraftSources(map, "priority", priorityDraftRef.current, null);
+        else if (drawingCalculationRef.current) setDraftSources(map, "calculation", calculationDraftRef.current, null);
+        else if (drawingWifiRef.current) setDraftSources(map, "wifi", wifiDraftRef.current, null);
+      });
     });
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
+    setMapInstance(map);
+    onMapReadyRef.current?.(map);
+    return () => { map.remove(); mapRef.current = null; setMapInstance(null); onMapReadyRef.current?.(null); };
   }, []);
+
+  const labelPoints = useMemo(() => lightingLabelPoints(project), [project]);
+  const labelsVisible = Boolean(project?.layer_state.calculation_points);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -210,16 +307,19 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("camera-fov") as GeoJSONSource | undefined)?.setData(cameraFeatures(project));
       (map.getSource("camera-overlap") as GeoJSONSource | undefined)?.setData(overlapFeatures(project));
       (map.getSource("priority-areas") as GeoJSONSource | undefined)?.setData(priorityFeatures(project));
-      (map.getSource("priority-draft") as GeoJSONSource | undefined)?.setData(draftFeature(priorityDraft));
       (map.getSource("calculation-areas") as GeoJSONSource | undefined)?.setData(calculationAreaFeatures(project));
       (map.getSource("wifi-coverage") as GeoJSONSource | undefined)?.setData(wifiFeatures(project));
       (map.getSource("wifi-analysis-areas") as GeoJSONSource | undefined)?.setData(wifiAreaFeatures(project));
-      (map.getSource("calculation-draft") as GeoJSONSource | undefined)?.setData(draftFeature(calculationDraft));
-      (map.getSource("wifi-draft") as GeoJSONSource | undefined)?.setData(draftFeature(wifiDraft));
       (map.getSource("lighting-points") as GeoJSONSource | undefined)?.setData(calculationPointFeatures(project));
       (map.getSource("camera-warnings") as GeoJSONSource | undefined)?.setData(cameraWarningFeatures(project));
       (map.getSource("cap-candidates") as GeoJSONSource | undefined)?.setData(capCandidateFeatures(project));
       (map.getSource("cap-tree") as GeoJSONSource | undefined)?.setData(capTreeFeatures(project));
+      if (drawingPriorityArea) setDraftSources(map, "priority", priorityDraft, draftCursorRef.current);
+      else clearDraftSources(map, "priority");
+      if (drawingCalculationArea) setDraftSources(map, "calculation", calculationDraft, draftCursorRef.current);
+      else clearDraftSources(map, "calculation");
+      if (drawingWifiArea) setDraftSources(map, "wifi", wifiDraft, draftCursorRef.current);
+      else clearDraftSources(map, "wifi");
       const states: Array<[string, boolean]> = [
         ["poles-original", project?.layer_state.original_customer_poles ?? true],
         ["poles-lite", project?.layer_state.lite_fixtures ?? true],
@@ -235,6 +335,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["lighting-calculation-points", project?.layer_state.calculation_points ?? true],
         ["lighting-heat-points", project?.layer_state.lighting_heat_map ?? true],
         ["wifi-coverage-fill", Boolean(project?.layer_state.wifi_coverage && project?.wifi_coverage.result)],
+        ["wifi-coverage-casing", Boolean(project?.layer_state.wifi_coverage && project?.wifi_coverage.result)],
+        ["wifi-coverage-outline", Boolean(project?.layer_state.wifi_coverage && project?.wifi_coverage.result)],
         ["wifi-analysis-area-line", project?.layer_state.wifi_coverage ?? false],
         ["wifi-analysis-area-fill", project?.layer_state.wifi_coverage ?? false],
         ["camera-warning-indicator", project?.layer_state.warnings ?? true],
@@ -250,7 +352,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       }
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
-  }, [project, selected, priorityDraft, calculationDraft, wifiDraft]);
+  }, [project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea]);
 
   useEffect(() => {
     azimuthMarkerRef.current?.remove();
@@ -277,5 +379,182 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     return () => window.clearTimeout(timer);
   }, [resizeSignal]);
 
-  return <div ref={containerRef} className="map-container" aria-label="Interactive pole map" />;
+  useEffect(() => {
+    const map = mapRef.current;
+    const canvas = directionCanvasRef.current;
+    if (!map || !canvas) return;
+
+    const layerVisible = (fixtureType: FixtureType) => {
+      if (!project) return false;
+      if (fixtureType === "LITE") return project.layer_state.lite_fixtures;
+      if (fixtureType === "WIFI") return project.layer_state.wifi_fixtures;
+      if (fixtureType === "SMART") return project.layer_state.smart_fixtures;
+      return true;
+    };
+
+    const drawArrow = (
+      ctx: CanvasRenderingContext2D,
+      origin: { x: number; y: number },
+      vector: { dx: number; dy: number },
+      color: string,
+      muted: boolean,
+    ) => {
+      const tipX = origin.x + vector.dx;
+      const tipY = origin.y + vector.dy;
+      const mag = Math.hypot(vector.dx, vector.dy) || 1;
+      const ux = vector.dx / mag;
+      const uy = vector.dy / mag;
+      const head = 7;
+      const wingX = tipX - ux * head;
+      const wingY = tipY - uy * head;
+      const px = -uy * (head * 0.55);
+      const py = ux * (head * 0.55);
+      ctx.globalAlpha = muted ? 0.38 : 0.96;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#071018";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(wingX + px, wingY + py);
+      ctx.lineTo(wingX - px, wingY - py);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(wingX + px, wingY + py);
+      ctx.lineTo(wingX - px, wingY - py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    };
+
+    const draw = () => {
+      directionFrameRef.current = null;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const width = map.getCanvas().clientWidth;
+      const height = map.getCanvas().clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      if (!project || !fixtureDirectionPreview) return;
+
+      for (const direction of fixtureDirectionPreview.directions) {
+        const source = project.source.poles.find((pole) => pole.id === direction.pole_id);
+        if (!source) continue;
+        const pole = effectivePole(project, source);
+        if (!layerVisible(pole.fixtureType)) continue;
+        const originScreen = map.project([direction.origin_wgs84[0], direction.origin_wgs84[1]]);
+        const endScreen = map.project([direction.endpoint_wgs84[0], direction.endpoint_wgs84[1]]);
+        const vector = screenArrow(
+          { x: originScreen.x, y: originScreen.y },
+          { x: endScreen.x, y: endScreen.y },
+          24,
+        );
+        if (!vector) continue;
+        if (originScreen.x < -40 || originScreen.y < -40 || originScreen.x > width + 40 || originScreen.y > height + 40) continue;
+        const color = pole.fixtureType ? FIXTURE_ARROW_COLORS[pole.fixtureType] : "#94a3b8";
+        drawArrow(ctx, originScreen, vector, color, !direction.active);
+      }
+
+      for (const item of fixtureDirectionPreview.unavailable) {
+        const source = project.source.poles.find((pole) => pole.id === item.pole_id);
+        if (!source) continue;
+        const pole = effectivePole(project, source);
+        if (!layerVisible(pole.fixtureType)) continue;
+        const screen = map.project([source.longitude, source.latitude]);
+        if (screen.x < -40 || screen.y < -40 || screen.x > width + 40 || screen.y > height + 40) continue;
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = "#071018";
+        ctx.fillStyle = "#94a3b8";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(screen.x + 10, screen.y - 10, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fill();
+        ctx.fillStyle = "#071018";
+        ctx.font = "9px ui-sans-serif, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("?", screen.x + 10, screen.y - 10);
+        ctx.globalAlpha = 1;
+      }
+    };
+
+    const schedule = () => {
+      if (directionFrameRef.current != null) return;
+      directionFrameRef.current = window.requestAnimationFrame(draw);
+    };
+
+    schedule();
+    map.on("move", schedule);
+    map.on("resize", schedule);
+    map.on("zoom", schedule);
+    map.on("rotate", schedule);
+    map.on("pitch", schedule);
+    window.addEventListener("resize", schedule);
+    return () => {
+      if (directionFrameRef.current != null) window.cancelAnimationFrame(directionFrameRef.current);
+      map.off("move", schedule);
+      map.off("resize", schedule);
+      map.off("zoom", schedule);
+      map.off("rotate", schedule);
+      map.off("pitch", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [project, fixtureDirectionPreview, mapInstance]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusRequest || focusRequestKey <= 0) return;
+    if (focusRequest.kind === "point") {
+      map.easeTo({ center: focusRequest.coordinate, zoom: Math.max(map.getZoom(), 17), duration: 600 });
+      if (focusRequest.highlightId && map.getLayer("cap-candidate-sites")) {
+        map.setPaintProperty("cap-candidate-sites", "circle-stroke-color", [
+          "case",
+          ["==", ["get", "id"], focusRequest.highlightId],
+          "#fde68a",
+          "#062b25",
+        ]);
+      }
+      return;
+    }
+    if (focusRequest.coordinates.length === 1) {
+      map.easeTo({ center: focusRequest.coordinates[0], zoom: Math.max(map.getZoom(), 17), duration: 600 });
+      return;
+    }
+    if (focusRequest.coordinates.length > 1) {
+      const bounds = focusRequest.coordinates.reduce(
+        (result, coordinate) => result.extend(coordinate),
+        new maplibregl.LngLatBounds(focusRequest.coordinates[0], focusRequest.coordinates[0]),
+      );
+      map.fitBounds(bounds, { padding: 70, maxZoom: 18, duration: 700 });
+    }
+  }, [focusRequest, focusRequestKey]);
+
+  return (
+    <div className="map-container-shell">
+      <div ref={containerRef} className="map-container" aria-label="Interactive pole map" />
+      <canvas ref={directionCanvasRef} className="fixture-direction-arrows" aria-hidden="true" />
+      <LightingPointLabels map={mapInstance} points={labelPoints} visible={labelsVisible} />
+    </div>
+  );
 }

@@ -1,19 +1,30 @@
 "use client";
-/* eslint-disable jsx-a11y/label-has-associated-control -- Phase 6 field labels are visually adjacent to their controls; existing workspace markup uses this compact grid pattern. */
 
 import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { EngineeringMap } from "./EngineeringMap";
 import { CatalogManager } from "./CatalogManager";
 import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";
 import { ReportPanel } from "./ReportPanel";
-import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan } from "../lib/api";
+import WifiMapSummary from "./WifiMapSummary";
+import CapPlanningPanel from "./CapPlanningPanel";
+import LightingResultCard from "./LightingResultCard";
+import type { Map as MapLibreMap } from "maplibre-gl";
+import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, previewFixtureDirections, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan, type FixtureDirectionPreview } from "../lib/api";
 import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";
-import { CAP_DISCLAIMER, capBlockers, capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";
+import { capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";
 import { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";
+import { polygonDraftGuidance } from "../lib/polygon-draft.mjs";
+import { capResultSummary } from "../lib/cap-workflow-view.mjs";
+import { ringAnchorLngLat } from "../lib/lighting-card-position.mjs";
+import { directionSignificantKey } from "../lib/fixture-direction-view.mjs";
+
+type MapFocusRequest =
+  | { kind: "point"; coordinate: [number, number]; highlightId?: string }
+  | { kind: "bounds"; coordinates: Array<[number, number]> };
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
@@ -93,9 +104,69 @@ export function EngineeringWorkspace() {
   const [renamingWifiArea, setRenamingWifiArea] = useState(false);
   const [manualCapLongitude, setManualCapLongitude] = useState("");
   const [manualCapLatitude, setManualCapLatitude] = useState("");
+  const [capPanelFocusNonce, setCapPanelFocusNonce] = useState(0);
+  const [mapFocusRequest, setMapFocusRequest] = useState<MapFocusRequest | null>(null);
+  const [mapFocusKey, setMapFocusKey] = useState(0);
+  const [mapInstance, setMapInstance] = useState<MapLibreMap | null>(null);
+  const [lightingCardAreaId, setLightingCardAreaId] = useState<string | null>(null);
+  const [lightingCardSessions, setLightingCardSessions] = useState<Record<string, { anchorLngLat: [number, number] | null; draggedPosition: { x: number; y: number } | null }>>({});
+  const [fixtureDirectionPreview, setFixtureDirectionPreview] = useState<FixtureDirectionPreview | null>(null);
   const geometrySignatureRef = useRef("");
+  const directionPreviewSeqRef = useRef(0);
   const importRef = useRef<HTMLInputElement>(null);
   const openRef = useRef<HTMLInputElement>(null);
+
+  function openCapPlanningPanel() {
+    setLeftCollapsed(false);
+    setCapPanelFocusNonce((value) => value + 1);
+  }
+
+  function resolveCapCandidateCoordinate(candidateId: string): [number, number] | null {
+    if (!project) return null;
+    const candidate = project.cap_planning_inputs.candidates.find((item) => item.id === candidateId);
+    if (!candidate) return null;
+    if (candidate.kind === "manual_non_pole") return candidate.wgs84_coordinate;
+    const pole = project.source.poles.find((item) => item.id === candidate.pole_id);
+    return pole ? [pole.longitude, pole.latitude] : null;
+  }
+
+  function focusCapCandidate(candidateId: string) {
+    const coordinate = resolveCapCandidateCoordinate(candidateId);
+    if (!coordinate) {
+      setError(`CAP candidate ${candidateId} has no stored map location`);
+      return;
+    }
+    setMapFocusRequest({ kind: "point", coordinate, highlightId: candidateId });
+    setMapFocusKey((value) => value + 1);
+  }
+
+  function showSelectedCapSitesOnMap() {
+    if (!project) return;
+    const summary = capResultSummary(project);
+    const coordinates = summary.selectedIds
+      .map((id) => resolveCapCandidateCoordinate(id))
+      .filter((point): point is [number, number] => Array.isArray(point));
+    mutateProject((draft) => {
+      draft.layer_state.cap_locations = true;
+      draft.layer_state.cap_connections = true;
+    });
+    if (coordinates.length) {
+      setMapFocusRequest({ kind: "bounds", coordinates });
+      setMapFocusKey((value) => value + 1);
+    }
+    setStatus(`Showing ${summary.selectedIds.length} selected CAP site${summary.selectedIds.length === 1 ? "" : "s"} on map`);
+  }
+
+  function reviewCapInput(elementId: string) {
+    openCapPlanningPanel();
+    window.setTimeout(() => {
+      const element = document.getElementById(elementId);
+      if (element instanceof HTMLElement) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.focus();
+      }
+    }, 80);
+  }
 
   useEffect(() => {
     void refreshCatalogs().catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load Phase 2 catalogs"));
@@ -114,6 +185,35 @@ export function EngineeringWorkspace() {
     }, 180);
     return () => window.clearTimeout(timer);
   }, [project, fixtureCatalog, cameraCatalog]);
+
+  const fixtureDirectionKey = useMemo(() => directionSignificantKey(project), [project]);
+
+  useEffect(() => {
+    const seq = ++directionPreviewSeqRef.current;
+    if (!project) {
+      const clearTimer = window.setTimeout(() => {
+        if (seq === directionPreviewSeqRef.current) setFixtureDirectionPreview(null);
+      }, 0);
+      return () => window.clearTimeout(clearTimer);
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void previewFixtureDirections(project, { signal: controller.signal })
+        .then((preview) => {
+          if (seq !== directionPreviewSeqRef.current) return;
+          setFixtureDirectionPreview(preview);
+        })
+        .catch((caught) => {
+          if (controller.signal.aborted || seq !== directionPreviewSeqRef.current) return;
+          setFixtureDirectionPreview({ directions: [], unavailable: [] });
+          setError(caught instanceof Error ? caught.message : "Fixture direction preview failed");
+        });
+    }, 120);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [fixtureDirectionKey, project]);
 
   async function refreshCatalogs() {
     const [fixtures, cameras, ies] = await Promise.all([getFixtureCatalog(), getCameraCatalog(), getIesLibrary()]);
@@ -426,21 +526,29 @@ export function EngineeringWorkspace() {
     if (!project) return;
     const existing = project.calculation_areas.find((item) => item.id === selectedCalculationAreaId);
     const points = drawingCalculationArea ? calculationDraft : existing?.wgs84_coordinates.slice(0, -1) ?? [];
+    const draftAnchor = drawingCalculationArea && calculationDraft.length ? calculationDraft[calculationDraft.length - 1] : null;
     try {
       const validated = validateCalculationAreaDraft(points, { name: calculationAreaName, classification: calculationClassification, calculation_plane_elevation_m: calculationPlane, grid_spacing_m: calculationSpacing, maintenance_factor: calculationMaintenance });
       const now = new Date().toISOString();
+      let savedAreaId = selectedCalculationAreaId;
       mutateProject((draft) => {
         const index = selectedCalculationAreaId ? draft.calculation_areas.findIndex((item) => item.id === selectedCalculationAreaId) : -1;
         if (index >= 0) {
           const prior = draft.calculation_areas[index];
           draft.calculation_areas[index] = { ...prior, ...validated, modified_at: now, calculation_state: staleCalculationState(prior.calculation_state, drawingCalculationArea) as CalculationArea["calculation_state"] };
           delete draft.lighting_calculations.results[prior.id];
+          savedAreaId = prior.id;
         } else {
           const id = crypto.randomUUID();
           draft.calculation_areas.push({ id, ...validated, created_at: now, modified_at: now, calculation_state: { status: "not-calculated", polygon_revision: 1, last_calculated_at: null, warnings: [], assumptions: [], provenance: {} } });
           setSelectedCalculationAreaId(id);
+          savedAreaId = id;
         }
       });
+      if (savedAreaId && draftAnchor) {
+        const areaId = savedAreaId;
+        setLightingCardSessions((sessions) => ({ ...sessions, [areaId]: { anchorLngLat: draftAnchor, draggedPosition: null } }));
+      }
       setCalculationDraft([]); setDrawingCalculationArea(false); setEditingCalculationArea(false);
       setStatus(existing ? "Calculation area updated and prior derived result marked stale" : "Lighting calculation area created separately from camera priority areas");
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Calculation area is invalid"); }
@@ -449,14 +557,23 @@ export function EngineeringWorkspace() {
   function deleteCalculationArea(areaId: string) {
     mutateProject((draft) => { draft.calculation_areas = draft.calculation_areas.filter((item) => item.id !== areaId); delete draft.lighting_calculations.results[areaId]; });
     if (selectedCalculationAreaId === areaId) setSelectedCalculationAreaId(null);
+    if (lightingCardAreaId === areaId) setLightingCardAreaId(null);
+    setLightingCardSessions((sessions) => { const next = { ...sessions }; delete next[areaId]; return next; });
     setStatus("Calculation area and its derived result deleted; source poles and camera priority areas unchanged");
   }
 
   async function calculateSelectedArea() {
     if (!project || !selectedCalculationAreaId) { setError("Select a lighting calculation area first"); return; }
+    const areaId = selectedCalculationAreaId;
     await runAction(async () => {
-      const calculated = await calculateLighting(project, selectedCalculationAreaId);
-      setProject(calculated); setStatus(`Calculated ${calculated.lighting_calculations.results[selectedCalculationAreaId]?.statistics.point_count ?? 0} deterministic lighting points`);
+      const calculated = await calculateLighting(project, areaId);
+      setProject(calculated);
+      const area = calculated.calculation_areas.find((item) => item.id === areaId);
+      const session = lightingCardSessions[areaId];
+      const anchor = session?.anchorLngLat ?? ringAnchorLngLat(area?.wgs84_coordinates ?? null);
+      setLightingCardSessions((sessions) => ({ ...sessions, [areaId]: { anchorLngLat: anchor, draggedPosition: sessions[areaId]?.draggedPosition ?? null } }));
+      setLightingCardAreaId(areaId);
+      setStatus(`Calculated ${calculated.lighting_calculations.results[areaId]?.statistics.point_count ?? 0} deterministic lighting points`);
     });
   }
 
@@ -492,6 +609,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button primary" onClick={calculateConceptualWifi} disabled={!project || busy}>Calculate conceptual Wi-Fi</button>
           <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !selectedCalculationAreaId || busy}>Calculate Lighting</button>
           <button className="tool-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend CAP</button>
+          <button className="tool-button" onClick={openCapPlanningPanel} disabled={!project}>CAP Planning</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>
           <button className="tool-button primary" onClick={() => setLeftCollapsed(false)} disabled={!project || busy}>Report Package</button>
         </nav>
@@ -505,23 +623,26 @@ export function EngineeringWorkspace() {
           {leftCollapsed ? <CollapsedRail label="Layers" symbol="›" onClick={() => setLeftCollapsed(false)} /> : (
             <div className="panel-scroll">
               <div className="panel-titlebar"><h2>Project & layers</h2><button className="icon-button" onClick={() => setLeftCollapsed(true)} aria-label="Collapse layer panel">‹</button></div>
-              <section className="section">
-                <div className="section-heading"><h3>Phase 6 — CAP / JNET1 graph planning</h3><span className="helper">Blocker-first</span></div>
-                <p className="lighting-disclaimer">{CAP_DISCLAIMER}</p>
-                {project ? <>
-                  <p className="helper">Product, variant, band/jurisdiction, explicit LITE/WIFI/SMART node dispositions, design limits, counting, redundancy, and surveyed candidates remain separate user inputs.</p>
-                  {capBlockers(project.cap_planning_inputs).length ? <div className="warning-card"><strong>CAP preflight blockers</strong><p>{capBlockers(project.cap_planning_inputs).join(", ")}</p></div> : <div className="warning-card info">Preflight complete for the selected test/project inputs.</div>}
-                  <div className="form-grid"><div className="field"><label>Operation mode</label><select value={project.cap_planning_inputs.profile.operation_mode} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.operation_mode = event.target.value as "validate" | "recommend"; })}><option value="validate">Validate explicit CAP selection</option><option value="recommend">Recommend from approved pool</option></select></div><div className="field"><label>Mode permission</label><select value={project.cap_planning_inputs.profile.mode_permission} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.mode_permission = event.target.value as "validate_only" | "recommend_from_approved_pool" | "unknown"; })}><option value="unknown">Unknown — blocks planning</option><option value="validate_only">Validate only</option><option value="recommend_from_approved_pool">Recommend from approved pool</option></select></div><div className="field"><label>Gateway appliance counting</label><select value={String(project.cap_planning_inputs.profile.gateway_appliance_counting.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.gateway_appliance_counting; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="included">Included in per-CAP node count</option><option value="excluded">Excluded from per-CAP node count</option></select></div><div className="field"><label>Co-located fixture counting</label><select value={String(project.cap_planning_inputs.profile.colocated_fixture_counting.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.colocated_fixture_counting; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="distinct_managed_node_once">Distinct managed fixture node once</option><option value="merged_not_separate">Merged, not a separate fixture node</option></select></div><div className="field"><label>Redundancy policy</label><select value={String(project.cap_planning_inputs.profile.redundancy.value ?? "")} onChange={(event) => mutateProject((draft) => { const field = draft.cap_planning_inputs.profile.redundancy; field.value = event.target.value || null; field.status = event.target.value ? "known" : "unknown"; field.source = event.target.value ? "TEST-ONLY user-entered project input" : null; field.applicability = event.target.value ? "test-only" : null; field.classification = event.target.value ? "user_approved_assumption" : "unknown"; })}><option value="">Unknown — blocks planning</option><option value="single_allowed_with_warning">Single allowed with warning</option><option value="n_plus_one_validation">N+1 graph validation</option><option value="user_supplied_only">User supplied only</option></select></div></div>
-                  <div className="form-grid">{(["LITE", "WIFI", "SMART"] as FixtureType[]).map((type) => <div className="field" key={type}><label>{type} node disposition</label><select value={project.cap_planning_inputs.profile.node_policy[type]} onChange={(event) => mutateProject((draft) => { draft.cap_planning_inputs.profile.node_policy[type] = event.target.value as "node" | "non_node" | "unknown"; })}><option value="unknown">Unknown — blocks planning</option><option value="node">Node</option><option value="non_node">Non-node</option></select></div>)}</div>
-                  <div className="form-grid">{(["product_mapping", "variant", "band_and_jurisdiction", "link_distance_m", "node_limit", "child_limit", "hop_limit"] as const).map((field) => <div className="field" key={field}><label>{field.replaceAll("_", " ")} · provenance-bearing</label><input value={String(project.cap_planning_inputs.profile[field].value ?? "")} onChange={(event) => mutateProject((draft) => { const value = event.target.value; const target = draft.cap_planning_inputs.profile[field]; target.value = field.endsWith("limit") || field === "link_distance_m" ? (value === "" ? null : Number(value)) : value || null; target.status = value ? "known" : "unknown"; target.source = value ? "user-entered project input" : null; target.applicability = value ? "project planning" : null; target.classification = value ? "user_approved_assumption" : "unknown"; })} /></div>)}</div>
-                  <div className="button-row"><button className="quiet-button" onClick={addSelectedPoleCapCandidate} disabled={!selected || busy}>Add selected pole as CAP site</button><button className="quiet-button" disabled={!selected || busy} onClick={() => selected && mutateProject((draft) => { const nodeId = `fixture/${selected.id}`; const ids = draft.cap_planning_inputs.excluded_node_ids; draft.cap_planning_inputs.excluded_node_ids = ids.includes(nodeId) ? ids.filter((id) => id !== nodeId) : [...ids, nodeId]; })}>{selected && project.cap_planning_inputs.excluded_node_ids.includes(`fixture/${selected.id}`) ? "Include current CAP node" : "Exclude current CAP node"}</button></div>
-                  <div className="form-grid"><div className="field"><label htmlFor="manual-cap-longitude">Manual non-pole longitude</label><input id="manual-cap-longitude" type="number" min="-180" max="180" step="any" value={manualCapLongitude} onChange={(event) => setManualCapLongitude(event.target.value)} /></div><div className="field"><label htmlFor="manual-cap-latitude">Manual non-pole latitude</label><input id="manual-cap-latitude" type="number" min="-90" max="90" step="any" value={manualCapLatitude} onChange={(event) => setManualCapLatitude(event.target.value)} /></div></div><div className="button-row"><button className="quiet-button" onClick={addManualCapCandidate} disabled={busy}>Add distinct manual non-pole CAP site</button></div>
-                  {project.cap_planning_inputs.candidates.map((candidate) => <div className="priority-row" key={candidate.id}><strong>{candidate.kind === "existing_pole" ? `Pole ${candidate.pole_id}` : "Manual non-pole site"}</strong><span>mounting {String(candidate.mounting_confirmed)} · power {String(candidate.power_confirmed)} · backhaul {String(candidate.backhaul_confirmed)} · survey {candidate.survey_status} · priority {candidate.priority}</span><div><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { mounting_confirmed: true, power_confirmed: true, backhaul_confirmed: true, enclosure_confirmed: true, indoor_outdoor: "outdoor", survey_status: "confirmed", notes: "TEST-ONLY feasibility values; not approved site engineering." })}>Mark test-only feasible</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { preferred: !candidate.preferred })}>{candidate.preferred ? "Remove preference" : "Prefer"}</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { prohibited: !candidate.prohibited })}>{candidate.prohibited ? "Allow" : "Prohibit"}</button><button className="quiet-button" onClick={() => updateCapCandidate(candidate, { locked_selected: !candidate.locked_selected })}>{candidate.locked_selected ? "Unlock selected" : "Lock selected"}</button><button className="quiet-button" disabled={!selected} onClick={() => selected && mutateProject((draft) => { const nodeId = `fixture/${selected.id}`; const gatewayId = `gateway/${candidate.id}`; const locks = draft.cap_planning_inputs.primary_assignment_locks; if (locks[nodeId] === gatewayId) delete locks[nodeId]; else locks[nodeId] = gatewayId; })}>{selected && project.cap_planning_inputs.primary_assignment_locks[`fixture/${selected.id}`] === `gateway/${candidate.id}` ? "Unlock current node assignment" : "Lock current node to this CAP"}</button><button className="quiet-button" disabled={!selected} onClick={() => selected && mutateProject((draft) => { const nodeId = `fixture/${selected.id}`; const gatewayId = `gateway/${candidate.id}`; const locks = draft.cap_planning_inputs.parent_locks; if (locks[nodeId] === gatewayId) delete locks[nodeId]; else locks[nodeId] = gatewayId; })}>{selected && project.cap_planning_inputs.parent_locks[`fixture/${selected.id}`] === `gateway/${candidate.id}` ? "Unlock current parent" : "Lock current parent to this CAP"}</button><button className="quiet-button" onClick={() => mutateProject((draft) => { const ids = draft.cap_planning_inputs.excluded_candidate_ids; draft.cap_planning_inputs.excluded_candidate_ids = ids.includes(candidate.id) ? ids.filter((id) => id !== candidate.id) : [...ids, candidate.id]; })}>{project.cap_planning_inputs.excluded_candidate_ids.includes(candidate.id) ? "Include candidate" : "Exclude candidate"}</button><button className="quiet-button" onClick={() => removeCapCandidate(candidate.id)}>Delete site</button></div></div>)}
-                  <div className="button-row"><button className="quiet-button" onClick={() => runCap("calculate")} disabled={!capOperationEnabled(project, "calculate") || busy}>Calculate / rank</button><button className="quiet-button" onClick={() => runCap("validate")} disabled={!capOperationEnabled(project, "validate") || busy}>Validate</button><button className="quiet-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend</button></div>
-                  <p>{project.cap_planning_inputs.candidates.length} explicit CAP candidate sites · {project.cap_recommendations.selected_candidate_ids.length} selected.</p>
-                  {project.cap_calculations.result && <details className="lighting-provenance"><summary>CAP topology, score trace, and provenance</summary><p>Fingerprint {project.cap_calculations.calculation_input_sha256} · CRS {project.cap_calculations.result.projected_crs}</p>{project.cap_calculations.result.assignments.map((item) => <p key={item.node_id}>{item.node_id} → {item.parent_id} · hop {item.hop} · {item.distance_m.toFixed(6)} m · distance-qualified conceptual link; not RF-predicted</p>)}{project.cap_calculations.result.warnings.map((warning) => <p key={warning}>{warning}</p>)}</details>}
-                </> : <p className="helper">Import or create a project to preserve unknown CAP inputs and inspect blockers.</p>}
-              </section>
+              <CapPlanningPanel
+                project={project}
+                selected={selected}
+                busy={busy}
+                focused={capPanelFocusNonce > 0}
+                focusNonce={capPanelFocusNonce}
+                manualCapLongitude={manualCapLongitude}
+                manualCapLatitude={manualCapLatitude}
+                onManualCapLongitude={setManualCapLongitude}
+                onManualCapLatitude={setManualCapLatitude}
+                mutateProject={mutateProject}
+                runCap={runCap}
+                addSelectedPoleCapCandidate={addSelectedPoleCapCandidate}
+                addManualCapCandidate={addManualCapCandidate}
+                updateCapCandidate={updateCapCandidate}
+                removeCapCandidate={removeCapCandidate}
+                onShowSelectedSites={showSelectedCapSitesOnMap}
+                onFocusCandidate={focusCapCandidate}
+                onReviewInput={reviewCapInput}
+              />
               {project && (
                 <ReportPanel
                   key={project.id}
@@ -606,8 +727,64 @@ export function EngineeringWorkspace() {
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} />
+          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} focusRequest={mapFocusRequest} focusRequestKey={mapFocusKey} onMapReady={setMapInstance} fixtureDirectionPreview={fixtureDirectionPreview} />
           <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 4 lighting rotates distributions around unchanged existing-pole origins. No customer location is generated or moved.</span></div>
+          {project?.wifi_coverage.result != null && (
+            <WifiMapSummary
+              result={project.wifi_coverage.result}
+              layerVisible={Boolean(project.layer_state.wifi_coverage)}
+              onShowCoverage={() => toggleLayer("wifi_coverage", true)}
+            />
+          )}
+          {lightingCardAreaId && project && (() => {
+            const area = project.calculation_areas.find((item) => item.id === lightingCardAreaId);
+            if (!area) return null;
+            const session = lightingCardSessions[lightingCardAreaId];
+            const result = project.lighting_calculations.results[lightingCardAreaId] ?? null;
+            return (
+              <LightingResultCard
+                map={mapInstance}
+                areaName={area.name}
+                result={result}
+                unavailableReason={result ? null : "Lighting result unavailable or invalidated for this area."}
+                anchorLngLat={session?.anchorLngLat ?? ringAnchorLngLat(area.wgs84_coordinates)}
+                draggedPosition={session?.draggedPosition ?? null}
+                onDraggedPosition={(position) => setLightingCardSessions((sessions) => ({
+                  ...sessions,
+                  [lightingCardAreaId]: {
+                    anchorLngLat: sessions[lightingCardAreaId]?.anchorLngLat ?? ringAnchorLngLat(area.wgs84_coordinates),
+                    draggedPosition: position,
+                  },
+                }))}
+                onClose={() => setLightingCardAreaId(null)}
+              />
+            );
+          })()}
+          {(drawingPriorityArea || drawingCalculationArea || drawingWifiArea) && (() => {
+            const draftPoints = drawingPriorityArea ? priorityDraft : drawingCalculationArea ? calculationDraft : wifiDraft;
+            const finish = drawingPriorityArea ? finishPriorityArea : drawingCalculationArea ? finishCalculationArea : finishWifiArea;
+            const cancel = drawingPriorityArea
+              ? () => { setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null); }
+              : drawingCalculationArea
+                ? cancelCalculationArea
+                : () => { setDrawingWifiArea(false); setWifiDraft([]); };
+            const toolLabel = drawingPriorityArea ? "Priority area" : drawingCalculationArea ? "Calculation area" : "Wi-Fi analysis area";
+            return (
+              <aside
+                className="map-overlay polygon-draft-guide"
+                aria-label={`${toolLabel} drawing guidance`}
+                onPointerDown={(event) => event.stopPropagation()}
+              >
+                <strong>{toolLabel}</strong>
+                <span>{polygonDraftGuidance(draftPoints.length)}</span>
+                <span>{draftPoints.length} vertices</span>
+                <div className="polygon-draft-actions">
+                  <button type="button" className="quiet-button" disabled={draftPoints.length < 3} onClick={finish}>Finish</button>
+                  <button type="button" className="quiet-button" onClick={cancel}>Cancel</button>
+                </div>
+              </aside>
+            );
+          })()}
           {!project?.source.poles.length && <div className="map-overlay map-empty"><span className="eyebrow">Phase 1 · Existing-pole foundation</span><h1>Start with the customer’s pole layout</h1><p>Import a KML or KMZ to validate and display authoritative pole coordinates. Your changes remain separate and reversible.</p><button className="primary-button" onClick={() => importRef.current?.click()} disabled={busy}>Import KML/KMZ</button></div>}
         </section>
 

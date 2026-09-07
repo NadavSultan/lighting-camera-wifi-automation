@@ -1,9 +1,10 @@
 "use client";
 
 import { type ChangeEvent, useRef, useState } from "react";
-import { addFixtureTemplateRevision, associateIes, removeIesAssociation, saveCameraModel, saveFixtureModel, saveLens, setDefaultIes, setIesActive, uploadIes } from "../lib/api";
+import { addFixtureTemplateRevision, saveCameraModel, saveFixtureModel, saveLens, setIesActive, uploadIes } from "../lib/api";
 import type { CameraEquipmentCatalog, CameraModel, FixtureModel, FixtureModelCatalog, FixtureType, IesLibrary, LensConfiguration } from "../lib/types";
 import { uploadIesAndRefresh } from "../lib/phase2-workflows.mjs";
+import { IesAssociations } from "./IesAssociations";
 
 interface Props {
   fixtures: FixtureModelCatalog;
@@ -16,8 +17,8 @@ interface Props {
 
 export function CatalogManager({ fixtures, cameras, ies, onClose, onRefresh, onError }: Props) {
   const iesRef = useRef<HTMLInputElement>(null);
-  const [fixtureId, setFixtureId] = useState(fixtures.fixture_models[0]?.id ?? "");
-  const [iesId, setIesId] = useState(ies.files.find((item) => item.active && item.validation_status === "valid")?.id ?? "");
+  // Retained so rejected uploads clear any prior association-target selection (NIR-01).
+  const [, setIesId] = useState(ies.files.find((item) => item.active && item.validation_status === "valid")?.id ?? "");
 
   async function action(callback: () => Promise<unknown>) {
     try {
@@ -75,7 +76,6 @@ export function CatalogManager({ fixtures, cameras, ies, onClose, onRefresh, onE
     await onRefresh();
   }
 
-  const usableIes = ies.files.filter((item) => item.active && item.validation_status === "valid");
   return <div className="catalog-backdrop">
     <section className="catalog-dialog" role="dialog" aria-modal="true" aria-label="Phase 2 catalog manager">
       <div className="catalog-header"><div><h2>Phase 2 catalogs</h2><p>Operational records · immutable catalog and mounting-template revisions</p></div><button className="icon-button" onClick={onClose} aria-label="Close catalog manager">×</button></div>
@@ -100,15 +100,9 @@ export function CatalogManager({ fixtures, cameras, ies, onClose, onRefresh, onE
           {ies.files.map((file) => <div className="catalog-row" key={file.id}>
             <div><strong>{file.original_filename}</strong><span>{file.ies_format_version} · {file.validation_status} · r{file.revision} · {file.sha256.slice(0, 12)}</span>{file.validation_errors.map((message) => <span key={`error-${message}`}>Error: {message}</span>)}{file.validation_warnings.map((message) => <span key={`warning-${message}`}>Warning: {message}</span>)}</div>
             <button className="quiet-button" disabled={!file.active && file.validation_status !== "valid"} onClick={() => void action(() => setIesActive(file.id, !file.active))}>{file.active ? "Deactivate" : "Activate"}</button>
+            <IesAssociations file={file} fixtureModels={fixtures.fixture_models} ies={ies} onRefresh={onRefresh} onError={onError} />
           </div>)}
           {!ies.files.length && <p className="empty-copy">No operational IES files uploaded.</p>}
-          <div className="association-grid">
-            <select aria-label="IES file association" value={iesId} onChange={(event) => setIesId(event.target.value)}><option value="">Active valid IES file</option>{usableIes.map((item) => <option value={item.id} key={item.id}>{item.original_filename}</option>)}</select>
-            <select aria-label="Fixture association" value={fixtureId} onChange={(event) => setFixtureId(event.target.value)}>{fixtures.fixture_models.map((item) => <option value={item.id} key={item.id}>{item.display_name}</option>)}</select>
-            <button className="quiet-button" disabled={!iesId || !fixtureId} onClick={() => void action(() => associateIes(iesId, fixtureId))}>Associate</button>
-            <button className="quiet-button" disabled={!iesId || !fixtureId} onClick={() => void action(() => setDefaultIes(fixtureId, iesId))}>Set default</button>
-            <button className="quiet-button" disabled={!iesId || !fixtureId || !ies.fixture_associations.some((item) => item.ies_file_id === iesId && item.fixture_model_id === fixtureId)} onClick={() => void action(() => removeIesAssociation(iesId, fixtureId))}>Remove association</button>
-          </div>
         </section>
 
         <section className="catalog-column">

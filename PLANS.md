@@ -4,7 +4,9 @@ This is the execution plan index. Phase 7 requirements, decisions, milestones, v
 
 ## Active plan
 
-No active gated phase plan. Phase 7 is formally closed by `docs/phase-7-master-gate-decision-2026-09-05.md` and `harness/seals/phase-07.md` (implementation `e24b6a1`; Independent QA PASS). Decisions `P7-D01` through `P7-D15` remain binding with amended `P7-D08`. Post-roadmap work requires separate authorization.
+Post-roadmap item plan (not a numbered phase): `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`, executed as Plan-mode stages 1–7 (BL-003…BL-005). Scoped master CONDITIONAL PASS: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md`. Stage 8 / BL-001 gated. Stage 0 prep recorded in `harness/phases/2026-09-07-stage-0-prep.md`.
+
+Phase 7 remains formally closed by `docs/phase-7-master-gate-decision-2026-09-05.md` and `harness/seals/phase-07.md` (implementation `e24b6a1`; Independent QA PASS). Decisions `P7-D01` through `P7-D15` remain binding with amended `P7-D08`.
 
 ## Guardrails
 

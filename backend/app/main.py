@@ -31,6 +31,7 @@ from app.services.configuration import (
     validate_project_configuration,
 )
 from app.services.camera_geometry import calculate_camera_geometry
+from app.services.fixture_direction_preview import FixtureDirectionPreviewResponse, preview_fixture_directions
 from app.services.lighting_calculation import calculate_lighting_area, invalidate_stale_lighting_results
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results, validate_wifi_analysis_areas
 from app.services.ies import IesValidationError, parse_ies_upload
@@ -210,6 +211,14 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             return project_store.save(recalculate(updated))
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/fixture-directions/preview", response_model=FixtureDirectionPreviewResponse)
+    def fixture_directions_preview(project: Project) -> FixtureDirectionPreviewResponse:
+        """Read-only display preview of fixture azimuth segments. Does not save or mutate catalogs."""
+        try:
+            return preview_fixture_directions(project, catalogs.fixtures())
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 

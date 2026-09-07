@@ -52,6 +52,27 @@ export function recalculateCameraGeometry(project: Project) {
   });
 }
 
+export type FixtureDirectionPreview = {
+  directions: Array<{
+    pole_id: string;
+    origin_wgs84: [number, number];
+    endpoint_wgs84: [number, number];
+    fixture_azimuth_deg: number;
+    active: boolean;
+  }>;
+  unavailable: Array<{ pole_id: string; reason: string }>;
+};
+
+/** Read-only display preview; does not save the project. */
+export function previewFixtureDirections(project: Project, init?: RequestInit) {
+  return api<FixtureDirectionPreview>("/api/fixture-directions/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(project),
+    ...init,
+  });
+}
+
 export function calculateLighting(project: Project, areaId: string) {
   return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/lighting/calculate/${encodeURIComponent(areaId)}`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),

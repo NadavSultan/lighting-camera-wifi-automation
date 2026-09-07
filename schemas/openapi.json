@@ -324,6 +324,45 @@
         }
       }
     },
+    "/api/fixture-directions/preview": {
+      "post": {
+        "summary": "Fixture Directions Preview",
+        "description": "Read-only display preview of fixture azimuth segments. Does not save or mutate catalogs.",
+        "operationId": "fixture_directions_preview_api_fixture_directions_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Project"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixtureDirectionPreviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/projects/{project_id}/camera-geometry/recalculate": {
       "post": {
         "summary": "Recalculate Project Camera Geometry",
@@ -3797,6 +3836,100 @@
           "cameras"
         ],
         "title": "FixtureCapabilities"
+      },
+      "FixtureDirection": {
+        "properties": {
+          "pole_id": {
+            "type": "string",
+            "title": "Pole Id"
+          },
+          "origin_wgs84": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Origin Wgs84"
+          },
+          "endpoint_wgs84": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Endpoint Wgs84"
+          },
+          "fixture_azimuth_deg": {
+            "type": "number",
+            "title": "Fixture Azimuth Deg"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pole_id",
+          "origin_wgs84",
+          "endpoint_wgs84",
+          "fixture_azimuth_deg",
+          "active"
+        ],
+        "title": "FixtureDirection"
+      },
+      "FixtureDirectionPreviewResponse": {
+        "properties": {
+          "directions": {
+            "items": {
+              "$ref": "#/components/schemas/FixtureDirection"
+            },
+            "type": "array",
+            "title": "Directions"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/components/schemas/FixtureDirectionUnavailable"
+            },
+            "type": "array",
+            "title": "Unavailable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "FixtureDirectionPreviewResponse"
+      },
+      "FixtureDirectionUnavailable": {
+        "properties": {
+          "pole_id": {
+            "type": "string",
+            "title": "Pole Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pole_id",
+          "reason"
+        ],
+        "title": "FixtureDirectionUnavailable"
       },
       "FixtureModel": {
         "properties": {

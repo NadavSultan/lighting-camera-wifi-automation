@@ -32,6 +32,7 @@ test("server-renders the Phase 5 engineering workspace", async () => {
 
 test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => {
   const workspace = await readFile(new URL("../app/components/EngineeringWorkspace.tsx", import.meta.url), "utf8");
+  const capPanel = await readFile(new URL("../app/components/CapPlanningPanel.tsx", import.meta.url), "utf8");
   const inspector = await readFile(new URL("../app/components/PoleInspector.tsx", import.meta.url), "utf8");
   const catalogs = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
   const types = await readFile(new URL("../app/lib/types.ts", import.meta.url), "utf8");
@@ -49,22 +50,27 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(workspace, /Calculate conceptual Wi-Fi/);
   assert.match(workspace, /Clear radius to project default/);
   assert.match(workspace, /wifiBoundaryGapMessage/);
-  assert.match(workspace, /Phase 6 — CAP \/ JNET1 graph planning/);
-  assert.match(workspace, /CAP_DISCLAIMER/);
+  assert.match(workspace, /CAP Planning/);
   assert.match(workspace, /Recommend CAP/);
   assert.match(workspace, /CAP candidate \/ selected sites/);
-  assert.match(workspace, /Add distinct manual non-pole CAP site/);
   assert.match(workspace, /Manual non-pole site; never a customer lighting pole/);
-  assert.match(workspace, /Mark test-only feasible/);
-  assert.match(workspace, /Lock selected/);
-  assert.match(workspace, /Exclude candidate/);
-  assert.match(workspace, /Exclude current CAP node/);
-  assert.match(workspace, /Lock current node to this CAP/);
-  assert.match(workspace, /primary_assignment_locks/);
-  assert.match(workspace, /Lock current parent to this CAP/);
-  assert.match(workspace, /parent_locks/);
-  assert.match(workspace, /CAP topology, score trace, and provenance/);
-  assert.match(workspace, /distance-qualified conceptual link; not RF-predicted/);
+  assert.match(capPanel, /CAP Planning/);
+  assert.match(capPanel, /CAP_DISCLAIMER/);
+  assert.match(capPanel, /Phase 6/);
+  assert.match(capPanel, /Add distinct manual non-pole CAP site/);
+  assert.match(capPanel, /Mark test-only feasible/);
+  assert.match(capPanel, /Lock selected/);
+  assert.match(capPanel, /Show selected sites on map/);
+  assert.match(capPanel, /Recommended CAP units/);
+  assert.match(capPanel, /Review input/);
+  assert.match(capPanel, /Exclude candidate/);
+  assert.match(capPanel, /Exclude current CAP node/);
+  assert.match(capPanel, /Lock current node to this CAP/);
+  assert.match(capPanel, /primary_assignment_locks/);
+  assert.match(capPanel, /Lock current parent to this CAP/);
+  assert.match(capPanel, /parent_locks/);
+  assert.match(capPanel, /Advanced topology, score trace, and provenance/);
+  assert.match(capPanel, /distance-qualified conceptual link; not RF-predicted/);
   assert.match(workspace, /Report Package/);
   assert.match(workspace, /ReportPanel/);
   const reportPanel = await readFile(new URL("../app/components/ReportPanel.tsx", import.meta.url), "utf8");
@@ -437,7 +443,7 @@ test("NIR-01 refreshes and reports a rejected retained IES record without raw JS
   const catalog = await readFile(new URL("../app/components/CatalogManager.tsx", import.meta.url), "utf8");
   assert.match(catalog, /setIesId\(""\)/);
   assert.match(catalog, /disabled=\{!file\.active && file\.validation_status !== "valid"\}/);
-  assert.match(catalog, /usableIes/);
+  assert.match(catalog, /IesAssociations/);
 });
 
 test("manual bulk targets and slot reset implement the Phase 2 corrective workflows", () => {

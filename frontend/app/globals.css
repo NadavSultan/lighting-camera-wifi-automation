@@ -71,7 +71,62 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .bulk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 
 .map-stage { position: relative; min-width: 0; background: #0b1118; }
+.map-container-shell { position: absolute; inset: 0; }
 .map-container { position: absolute; inset: 0; }
+.lighting-point-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+.fixture-direction-arrows {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+.lighting-result-card {
+  z-index: 3;
+  width: min(280px, calc(100% - 24px));
+  max-height: min(220px, calc(100% - 24px));
+  overflow: auto;
+  padding: 0;
+  border: 1px solid rgb(72 92 111 / 70%);
+  border-radius: 8px;
+  background: rgb(12 18 25 / 94%);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+  pointer-events: auto;
+  display: grid;
+}
+.lighting-result-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: grab;
+  border-bottom: 1px solid var(--line);
+}
+.lighting-result-card-header:active { cursor: grabbing; }
+.lighting-result-card-body { padding: 8px 10px; font-size: 10px; line-height: 1.45; display: grid; gap: 4px; }
+.lighting-result-card-actions { display: flex; gap: 6px; padding: 0 10px 10px; }
+.lighting-lux-legend {
+  right: 14px;
+  top: 14px;
+  max-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid rgb(72 92 111 / 70%);
+  border-radius: 8px;
+  background: rgb(12 18 25 / 88%);
+  pointer-events: none;
+  display: grid;
+  gap: 3px;
+}
+.lighting-lux-legend strong { font-size: 10px; }
+.lighting-lux-legend span { color: var(--muted); font-size: 9px; }
 .maplibregl-map { font-family: Arial, Helvetica, sans-serif; }
 .maplibregl-ctrl-group { border: 1px solid var(--line) !important; background: var(--panel) !important; }
 .maplibregl-ctrl-group button { filter: invert(1); }
@@ -81,6 +136,51 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .map-caption { left: 14px; top: 14px; max-width: 330px; padding: 9px 11px; border: 1px solid rgb(72 92 111 / 70%); border-radius: 8px; background: rgb(12 18 25 / 88%); box-shadow: 0 8px 26px rgb(0 0 0 / 22%); backdrop-filter: blur(8px); }
 .map-caption strong { display: block; font-size: 11px; }
 .map-caption span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+.polygon-draft-guide {
+  right: 14px;
+  bottom: 54px;
+  max-width: 280px;
+  padding: 10px 12px;
+  border: 1px solid rgb(72 92 111 / 70%);
+  border-radius: 8px;
+  background: rgb(12 18 25 / 92%);
+  box-shadow: 0 8px 26px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  display: grid;
+  gap: 4px;
+}
+.polygon-draft-guide strong { font-size: 11px; }
+.polygon-draft-guide span { color: var(--muted); font-size: 10px; line-height: 1.4; }
+.polygon-draft-actions { display: flex; gap: 6px; margin-top: 6px; }
+.polygon-draft-actions .quiet-button { pointer-events: auto; }
+.wifi-map-summary {
+  left: 14px;
+  bottom: 54px;
+  max-width: 320px;
+  padding: 10px 12px;
+  border: 1px solid rgb(34 211 238 / 45%);
+  border-radius: 8px;
+  background: rgb(12 18 25 / 92%);
+  box-shadow: 0 8px 26px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  display: grid;
+  gap: 6px;
+}
+.wifi-map-summary strong { font-size: 11px; color: #67e8f9; }
+.wifi-map-summary span, .wifi-map-summary p { color: var(--muted); font-size: 10px; line-height: 1.4; margin: 0; }
+.wifi-map-summary .wifi-show-coverage { justify-self: start; pointer-events: auto; }
+.wifi-map-stats { margin-top: 2px; }
+.wifi-map-stats summary { cursor: pointer; color: var(--ink); font-size: 10px; }
+.wifi-map-stats p { margin-top: 4px; }
+.cap-planning-panel h4 { margin: 10px 0 6px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #86efac; }
+.cap-planning-panel-focused { outline: 1px solid rgb(52 211 153 / 45%); outline-offset: 2px; }
+.cap-result-summary { display: grid; gap: 8px; margin-bottom: 12px; padding: 10px; border: 1px solid rgb(52 211 153 / 35%); border-radius: 8px; background: rgb(6 43 37 / 35%); }
+.cap-selected-list, .cap-blocker-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cap-selected-list li, .cap-blocker-list li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-size: 11px; }
+.cap-panel-block { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.cap-result-warnings { display: grid; gap: 6px; }
 .map-empty { left: 50%; top: 50%; width: min(360px, calc(100% - 40px)); padding: 22px; transform: translate(-50%, -50%); text-align: center; border: 1px solid #334456; border-radius: 12px; background: rgb(13 21 29 / 93%); box-shadow: 0 20px 60px rgb(0 0 0 / 35%); }
 .map-empty .eyebrow { color: var(--accent); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
 .map-empty h1 { margin: 8px 0 7px; font-size: 19px; line-height: 1.2; }
@@ -146,6 +246,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .catalog-row .quiet-button { min-height: 28px; padding-inline: 8px; }
 .association-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 12px; }
 .association-grid select { min-width: 0; min-height: 34px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: #0d151e; }
+.ies-associations { flex: 1 1 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: #0b131b; }
+.ies-associations-title { display: block; margin-bottom: 6px; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.ies-association-family { margin-top: 8px; }
+.ies-association-family-name { display: block; margin-bottom: 4px; font-size: 10px; color: var(--accent); }
+.ies-association-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0; font-size: 10px; }
+.ies-association-row span { margin-top: 0; color: var(--ink); }
+.ies-association-row .quiet-button { margin-left: auto; }
 .warning-list { display: grid; gap: 7px; }
 .warning-card { border-left: 3px solid var(--warning); font-size: 10px; line-height: 1.4; }
 .warning-card.info { border-left-color: var(--accent-deep); }

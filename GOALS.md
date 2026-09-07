@@ -4,11 +4,11 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-No active gated phase. Phases 1–7 are formally closed. Post-roadmap work requires a separate explicit authorization and contract.
+Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 8 / BL-001 remains gated pending imagery-provider authorization. OBS-01 not authorized.
 
-Controlling Phase 7 closure: `docs/phase-7-master-gate-decision-2026-09-05.md`; `harness/seals/phase-07.md`.
+Controlling execution plan: `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Scoped master: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8 gate: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 
-Status: Phase 7 remediation under amended `P7-D08` accepted on 2026-09-05 (implementation `e24b6a1`; Independent QA PASS; master PASS; seal present).
+Phases 1–7 remain formally closed. Controlling Phase 7 closure: `docs/phase-7-master-gate-decision-2026-09-05.md`; `harness/seals/phase-07.md`.
 
 ## Phase ledger
 
