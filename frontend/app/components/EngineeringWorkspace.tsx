@@ -21,6 +21,7 @@ import { polygonDraftGuidance } from "../lib/polygon-draft.mjs";
 import { capResultSummary } from "../lib/cap-workflow-view.mjs";
 import { ringAnchorLngLat } from "../lib/lighting-card-position.mjs";
 import { directionSignificantKey } from "../lib/fixture-direction-view.mjs";
+import { USE_STANDARD_MAP_LABEL, backgroundAvailability, readSatelliteConfigFromEnv, requestBackground, sessionBackground, type BackgroundChoice } from "../lib/map-background.mjs";
 
 type MapFocusRequest =
   | { kind: "point"; coordinate: [number, number]; highlightId?: string }
@@ -111,6 +112,17 @@ export function EngineeringWorkspace() {
   const [lightingCardAreaId, setLightingCardAreaId] = useState<string | null>(null);
   const [lightingCardSessions, setLightingCardSessions] = useState<Record<string, { anchorLngLat: [number, number] | null; draggedPosition: { x: number; y: number } | null }>>({});
   const [fixtureDirectionPreview, setFixtureDirectionPreview] = useState<FixtureDirectionPreview | null>(null);
+  const [backgroundChoice, setBackgroundChoice] = useState<BackgroundChoice>("standard");
+  const [satelliteTileFailed, setSatelliteTileFailed] = useState(false);
+  const [backgroundNotice, setBackgroundNotice] = useState<string | null>(null);
+  const satelliteConfig = useMemo(() => readSatelliteConfigFromEnv(process.env), []);
+  const satelliteAvailability = useMemo(() => backgroundAvailability(satelliteConfig), [satelliteConfig]);
+  const backgroundSession = sessionBackground({
+    choice: backgroundChoice,
+    availability: satelliteAvailability,
+    tileFailed: satelliteTileFailed,
+  });
+  const backgroundBanner = backgroundSession.error ?? backgroundNotice;
   const geometrySignatureRef = useRef("");
   const directionPreviewSeqRef = useRef(0);
   const importRef = useRef<HTMLInputElement>(null);
@@ -588,6 +600,19 @@ export function EngineeringWorkspace() {
     });
   }
 
+  function selectMapBackground(next: BackgroundChoice) {
+    const result = requestBackground(next, satelliteAvailability);
+    setBackgroundChoice(result.choice);
+    setSatelliteTileFailed(false);
+    setBackgroundNotice(result.error);
+  }
+
+  function useStandardMap() {
+    setBackgroundChoice("standard");
+    setSatelliteTileFailed(false);
+    setBackgroundNotice(null);
+  }
+
   const workspaceClass = ["workspace", leftCollapsed && "left-collapsed", rightCollapsed && "right-collapsed"].filter(Boolean).join(" ");
   return (
     <main className="app-shell">
@@ -727,8 +752,20 @@ export function EngineeringWorkspace() {
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} focusRequest={mapFocusRequest} focusRequestKey={mapFocusKey} onMapReady={setMapInstance} fixtureDirectionPreview={fixtureDirectionPreview} />
+          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} focusRequest={mapFocusRequest} focusRequestKey={mapFocusKey} onMapReady={setMapInstance} fixtureDirectionPreview={fixtureDirectionPreview} backgroundVisible={backgroundSession.visible} satelliteConfig={satelliteAvailability.available ? satelliteConfig : null} onSatelliteTileError={() => setSatelliteTileFailed(true)} />
           <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 4 lighting rotates distributions around unchanged existing-pole origins. No customer location is generated or moved.</span></div>
+          <div className="map-overlay map-background-control" role="group" aria-label="Map background">
+            <button type="button" aria-pressed={backgroundChoice === "standard"} onClick={() => selectMapBackground("standard")}>Standard</button>
+            <button type="button" aria-pressed={backgroundChoice === "satellite"} onClick={() => selectMapBackground("satellite")}>Satellite</button>
+          </div>
+          {backgroundBanner && (
+            <div className="map-overlay map-background-error" role="alert">
+              <span>{backgroundBanner}</span>
+              {(backgroundSession.offerUseStandard || backgroundNotice) && (
+                <button type="button" className="quiet-button" onClick={useStandardMap}>{USE_STANDARD_MAP_LABEL}</button>
+              )}
+            </div>
+          )}
           {project?.wifi_coverage.result != null && (
             <WifiMapSummary
               result={project.wifi_coverage.result}

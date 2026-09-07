@@ -24,7 +24,7 @@ Eight user requests received on 2026-09-06. Initial triage used user reports, so
 
 | ID | Title | Type | Severity | Priority | Status | Recommended route | Implementation authorization |
 |---|---|---|---|---|---|---|---|
-| BL-001 | Satellite background option | feature | N/A | P2 | Provider authorized 2026-09-07 (free EOX public WMTS; replaceable; not yet implemented) | Dedicated implementation contract | Authorized 2026-09-07 — see [provider authorization](post-roadmap-bl-001-provider-authorization-2026-09-07.md) |
+| BL-001 | Satellite background option | feature | N/A | P2 | Implemented 2026-09-07 (awaiting independent QA; not accepted) | Dedicated implementation contract | Authorized 2026-09-07 — see [provider authorization](post-roadmap-bl-001-provider-authorization-2026-09-07.md); verification `../harness/verify/2026-09-07-bl-001-verification.md` |
 | BL-002 | Make conceptual Wi-Fi visible and discoverable | improvement | Medium | P1 | Live usability issue confirmed | Small corrective task; contract decision if auto-enabled | Not authorized |
 | BL-003 | Visible polygon drawing progress | bug | Medium | P1 | Early-vertex feedback defect reproduced | Small corrective task | Not authorized |
 | BL-004 | Movable lighting results window | feature | N/A | P2 | Triaged | Dedicated implementation contract | Not authorized |
@@ -47,7 +47,7 @@ Eight user requests received on 2026-09-06. Initial triage used user reports, so
 - **Acceptance criteria:** Both backgrounds are selectable; switching retains viewport, selection, drawings, results, and layer state; required attribution remains visible; unavailable imagery produces a readable state and allows return to Standard; source bytes and coordinates remain unchanged.
 - **Verification:** Browser checks for repeated switching with all engineering overlays and an active draft, failed tile requests, attribution, and supported zoom ranges; frontend tests/typecheck/lint/build; persistence/migration tests only if persistence is added.
 - **Contract impact:** Additive change to Phase 1 map/architecture behavior; no calculation change. Storage changes would require an explicit compatibility decision. Existing accepted records are not amended here.
-- **Route/open decisions:** Dedicated implementation contract. **Closed 2026-09-07:** session-only; Standard = current OSM; Satellite = environment-configured tiles, first backend = free EOX public WMTS; may replace the satellite provider later without a project-schema change. Exact XYZ/attribution still verified at implementation time. Implementation of product files has not started.
+- **Route/open decisions:** Dedicated implementation contract. **Closed 2026-09-07:** session-only; Standard = current OSM; Satellite = environment-configured tiles, first backend = free EOX public WMTS; may replace the satellite provider later without a project-schema change. XYZ/attribution verified at implementation 2026-09-07. Product implemented; independent QA and scoped master decision still required (`../harness/verify/2026-09-07-bl-001-verification.md`).
 
 ## BL-002 — Make conceptual Wi-Fi visible and discoverable
 

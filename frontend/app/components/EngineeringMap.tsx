@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type StyleSpecification } from "maplibre-gl";
+import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type StyleSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";
 import type { EffectivePole, FixtureType, Project } from "../lib/types";
 import { effectivePole } from "../lib/types";
@@ -11,6 +11,7 @@ import LightingPointLabels, { type LightingLabelPoint } from "./LightingPointLab
 import { formatLux } from "../lib/lighting-labels.mjs";
 import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import type { FixtureDirectionPreview } from "../lib/api";
+import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
 
 const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
 const BASE_STYLE: StyleSpecification = {
@@ -148,7 +149,7 @@ function clearDraftSources(map: MapLibreMap, tool: DraftTool) {
   setDraftSources(map, tool, [], null);
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null }) {
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null, backgroundVisible = "standard", satelliteConfig = null, onSatelliteTileError }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null; backgroundVisible?: BackgroundChoice; satelliteConfig?: SatelliteRasterConfig | null; onSatelliteTileError?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const directionCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -171,8 +172,12 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const calculationDraftRef = useRef(calculationDraft);
   const wifiDraftRef = useRef(wifiDraft);
   const onMapReadyRef = useRef(onMapReady);
+  const satelliteConfigRef = useRef(satelliteConfig);
+  const onSatelliteTileErrorRef = useRef(onSatelliteTileError);
 
   useEffect(() => { onMapReadyRef.current = onMapReady; }, [onMapReady]);
+  useEffect(() => { satelliteConfigRef.current = satelliteConfig; }, [satelliteConfig]);
+  useEffect(() => { onSatelliteTileErrorRef.current = onSatelliteTileError; }, [onSatelliteTileError]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
   useEffect(() => {
     drawingRef.current = drawingPriorityArea;
@@ -196,6 +201,18 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
     map.on("load", () => {
+      const satellite = satelliteConfigRef.current;
+      if (satellite && backgroundAvailability(satellite).available && !map.getSource("satellite")) {
+        map.addSource("satellite", rasterSourceSpec(satellite) as RasterSourceSpecification);
+        map.addLayer({ id: "satellite", type: "raster", source: "satellite", layout: { visibility: "none" } });
+        const source = map.getSource("satellite");
+        if (source && "on" in source && typeof source.on === "function") {
+          source.on("error", () => onSatelliteTileErrorRef.current?.());
+        }
+      }
+      map.on("error", (event) => {
+        if (isSatelliteTileError(event)) onSatelliteTileErrorRef.current?.();
+      });
       map.addSource("poles", { type: "geojson", data: EMPTY });
       map.addSource("selection", { type: "geojson", data: EMPTY });
       map.addSource("camera-fov", { type: "geojson", data: EMPTY_GEOMETRY });
@@ -345,6 +362,9 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["cap-tree-links", project?.layer_state.cap_connections ?? false],
       ];
       for (const [layer, visible] of states) if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
+      const background = backgroundLayerVisibility(backgroundVisible);
+      if (map.getLayer("osm")) map.setLayoutProperty("osm", "visibility", background.osm);
+      if (map.getLayer("satellite")) map.setLayoutProperty("satellite", "visibility", background.satellite);
       if (project && project.source.poles.length && fittedProjectRef.current !== project.id) {
         const bounds = project.source.poles.reduce((result, pole) => result.extend([pole.longitude, pole.latitude]), new maplibregl.LngLatBounds());
         map.fitBounds(bounds, { padding: 70, maxZoom: 18, duration: 700 });
@@ -352,7 +372,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       }
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
-  }, [project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea]);
+  }, [project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea, backgroundVisible]);
 
   useEffect(() => {
     azimuthMarkerRef.current?.remove();
