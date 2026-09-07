@@ -316,7 +316,9 @@ This item requires approval of its read-only API boundary. If execution proposes
 
 ## 13. Task 8 — BL-001: satellite background, after provider approval
 
-**External decision required:** No imagery provider/account is authorized in this plan. Before this task begins, record the provider's official documented endpoint and attribution, allowed usage, relevant zoom range, credential handling, costs/quota, and the user's authorization to use it. Verify current provider documentation at execution time. Do not use an unverified public tile URL or accept terms/purchase service on the user's behalf without authority.
+**External decision (recorded 2026-09-07):** User authorized the **free non-commercial EOX public WMTS** (no purchase). Standard = current OSM. Satellite = environment-configured public tiles with required attribution. Session-only. The satellite provider **may be replaced later**; do not bake EOX or any provider into saved projects. Controlling record: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`.
+
+Still verify the current official EOX Maps/s2maps endpoint, 3857 XYZ template, tile size, zoom range, and attribution **at execution time**. Do not copy an unverified tile URL. Do not accept paid terms or purchase a mosaic in this task.
 
 Earlier tasks do not wait for this decision. This is a real external dependency, not an invitation to invent a provider.
 

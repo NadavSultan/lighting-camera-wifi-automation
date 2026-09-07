@@ -4,9 +4,9 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 8 / BL-001 remains gated pending imagery-provider authorization. OBS-01 not authorized.
+Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit `02c027ef`). BL-001 provider authorized 2026-09-07 (free EOX public WMTS; replaceable satellite backend; product not started). OBS-01 not authorized. Merge not authorized.
 
-Controlling execution plan: `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Scoped master: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8 gate: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
+Controlling execution plan: `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Scoped master: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md`. BL-001 provider: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 
 Phases 1–7 remain formally closed. Controlling Phase 7 closure: `docs/phase-7-master-gate-decision-2026-09-05.md`; `harness/seals/phase-07.md`.
 

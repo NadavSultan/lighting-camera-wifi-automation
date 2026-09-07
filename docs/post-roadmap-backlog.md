@@ -24,7 +24,7 @@ Eight user requests received on 2026-09-06. Initial triage used user reports, so
 
 | ID | Title | Type | Severity | Priority | Status | Recommended route | Implementation authorization |
 |---|---|---|---|---|---|---|---|
-| BL-001 | Satellite background option | feature | N/A | P2 | Triaged | Dedicated implementation contract | Not authorized |
+| BL-001 | Satellite background option | feature | N/A | P2 | Provider authorized 2026-09-07 (free EOX public WMTS; replaceable; not yet implemented) | Dedicated implementation contract | Authorized 2026-09-07 — see [provider authorization](post-roadmap-bl-001-provider-authorization-2026-09-07.md) |
 | BL-002 | Make conceptual Wi-Fi visible and discoverable | improvement | Medium | P1 | Live usability issue confirmed | Small corrective task; contract decision if auto-enabled | Not authorized |
 | BL-003 | Visible polygon drawing progress | bug | Medium | P1 | Early-vertex feedback defect reproduced | Small corrective task | Not authorized |
 | BL-004 | Movable lighting results window | feature | N/A | P2 | Triaged | Dedicated implementation contract | Not authorized |
@@ -42,12 +42,12 @@ Eight user requests received on 2026-09-06. Initial triage used user reports, so
 - **Expected behavior:** An explicit Standard/Satellite choice changes the background while keeping the engineering workspace usable.
 - **Subsystem:** Map background, attribution, provider configuration, optional UI preference storage.
 - **Severity/priority:** N/A (new capability); P2, improves site interpretation without evidence that current workflows are blocked.
-- **Dependencies:** Select an authorized imagery provider and clarify credentials, availability, attribution, usage terms/cost, and preference persistence before implementation. No provider or purchase is selected by this entry. BL-002/003/005/007 must remain legible over imagery but can be implemented independently.
+- **Dependencies:** Imagery provider, terms, attribution, and persistence were open at intake. **Resolved 2026-09-07:** free EOX public WMTS with attribution; session-only choice; environment config; provider must remain replaceable (not saved in project JSON). See [provider authorization](post-roadmap-bl-001-provider-authorization-2026-09-07.md). BL-002/003/005/007 must remain legible over imagery.
 - **Risks:** Tile availability, credential exposure, imagery age/alignment, extra network use, and accidentally resetting overlays on background change.
 - **Acceptance criteria:** Both backgrounds are selectable; switching retains viewport, selection, drawings, results, and layer state; required attribution remains visible; unavailable imagery produces a readable state and allows return to Standard; source bytes and coordinates remain unchanged.
 - **Verification:** Browser checks for repeated switching with all engineering overlays and an active draft, failed tile requests, attribution, and supported zoom ranges; frontend tests/typecheck/lint/build; persistence/migration tests only if persistence is added.
 - **Contract impact:** Additive change to Phase 1 map/architecture behavior; no calculation change. Storage changes would require an explicit compatibility decision. Existing accepted records are not amended here.
-- **Route/open decisions:** Dedicated implementation contract covering provider and interaction choices. Decide whether the choice is session-only or persisted.
+- **Route/open decisions:** Dedicated implementation contract. **Closed 2026-09-07:** session-only; Standard = current OSM; Satellite = environment-configured tiles, first backend = free EOX public WMTS; may replace the satellite provider later without a project-schema change. Exact XYZ/attribution still verified at implementation time. Implementation of product files has not started.
 
 ## BL-002 — Make conceptual Wi-Fi visible and discoverable
 
@@ -199,3 +199,5 @@ Severity describes impact (critical / high / medium / low / not applicable); pri
 2026-09-06 live reproduction: user authorized the walkthrough and asked to continue. Updated BL-002/003/006/008 from observed browser/API behavior. Evidence: `harness/verify/2026-09-06-backlog-live-reproduction.md` and companion observations JSON. Test setup affected only isolated ignored runtime state; all product implementation remains unauthorized.
 
 2026-09-06 planning handoff: user requested an implementation plan for Cursor on another computer. Proposed execution order and item designs are in [the implementation plan](superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md). Planning is authorized; implementation status remains unchanged until the user authorizes specific work items.
+
+2026-09-07 BL-001 provider authorization: user selected the total-free EOX public WMTS option, required attribution, session-only choice, environment config (not project JSON), and explicit replaceability of the satellite provider later. Record: [provider authorization](post-roadmap-bl-001-provider-authorization-2026-09-07.md). Product implementation of BL-001 has not started.
