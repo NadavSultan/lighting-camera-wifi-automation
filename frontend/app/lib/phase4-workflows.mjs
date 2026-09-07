@@ -45,6 +45,25 @@ export function invalidateLightingResults(project) {
   for (const area of project.calculation_areas) area.calculation_state = staleCalculationState(area.calculation_state, false);
 }
 
+/**
+ * Calculate every lighting area in sequence so each persisted result is kept.
+ * @template T
+ * @param {{ calculation_areas?: Array<{ id: string }> } | null | undefined} project
+ * @param {(project: T, areaId: string) => Promise<T>} calculateOne
+ * @returns {Promise<T>}
+ */
+export async function calculateAllLightingAreas(project, calculateOne) {
+  const areas = project?.calculation_areas ?? [];
+  if (!project || !areas.length) {
+    throw new Error("Draw a lighting calculation area first");
+  }
+  let current = project;
+  for (const area of areas) {
+    current = await calculateOne(current, area.id);
+  }
+  return current;
+}
+
 export function validateCalculationAreaDraft(points, settings) {
   const name = String(settings.name ?? "").trim();
   if (!name) throw new Error("Calculation-area name is required");

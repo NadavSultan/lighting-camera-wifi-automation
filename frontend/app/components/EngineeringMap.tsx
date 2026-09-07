@@ -7,8 +7,8 @@ import type { EffectivePole, FixtureType, Project } from "../lib/types";
 import { effectivePole } from "../lib/types";
 import { fixtureAzimuthFromHandle } from "../lib/phase3-workflows.mjs";
 import { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";
-import LightingPointLabels, { type LightingLabelPoint } from "./LightingPointLabels";
-import { formatLux } from "../lib/lighting-labels.mjs";
+import LightingPointLabels from "./LightingPointLabels";
+import { lightingLabelPoints } from "../lib/lighting-labels.mjs";
 import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import type { FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
@@ -100,18 +100,6 @@ function capTreeFeatures(project: Project | null): FeatureCollection<LineString>
     return null;
   };
   return { type: "FeatureCollection", features: result.assignments.flatMap((assignment) => { const a = coordinate(assignment.node_id), b = coordinate(assignment.parent_id); return a && b ? [{ type: "Feature" as const, id: `${assignment.node_id}/${assignment.parent_id}`, properties: { hop: assignment.hop, distance_m: assignment.distance_m, disclaimer: "distance-qualified conceptual link; not RF-predicted" }, geometry: { type: "LineString" as const, coordinates: [a, b] } }] : []; }) };
-}
-
-function lightingLabelPoints(project: Project | null): LightingLabelPoint[] {
-  if (!project) return [];
-  return Object.values(project.lighting_calculations.results).flatMap((result) =>
-    result.points.map((point) => ({
-      id: `${result.calculation_area_id}/${point.id}`,
-      longitude: point.wgs84_coordinate[0],
-      latitude: point.wgs84_coordinate[1],
-      label: formatLux(point.maintained_horizontal_illuminance_lux),
-    })),
-  );
 }
 
 type DraftTool = "priority" | "calculation" | "wifi";
@@ -312,8 +300,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     return () => { map.remove(); mapRef.current = null; setMapInstance(null); onMapReadyRef.current?.(null); };
   }, []);
 
-  const labelPoints = useMemo(() => lightingLabelPoints(project), [project]);
-  const labelsVisible = Boolean(project?.layer_state.calculation_points);
+  const labelPoints = useMemo(() => lightingLabelPoints(project?.lighting_calculations.results), [project]);
+  const labelsVisible = project?.layer_state.calculation_points ?? true;
 
   useEffect(() => {
     const map = mapRef.current;

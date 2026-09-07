@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { formatLux, lightingLabelPoints } from "../app/lib/lighting-labels.mjs";
 
 test("formatLux matches required numeric cases", () => {
@@ -20,4 +21,19 @@ test("lightingLabelPoints composites area and point ids", () => {
   assert.equal(points.length, 1);
   assert.equal(points[0].id, "a1:p1");
   assert.equal(points[0].label, "10.00");
+  assert.equal(points[0].longitude, -80.26);
+  assert.equal(points[0].latitude, 25.75);
+});
+
+test("map lux labels sit in a compositor layer above the MapLibre canvas", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /\.lighting-point-labels\s*\{[^}]*z-index:\s*2/);
+  assert.match(css, /\.lighting-point-labels\s*\{[^}]*translateZ\(0\)/);
+});
+
+test("EngineeringMap draws helper label points for current lighting results", async () => {
+  const source = await readFile(new URL("../app/components/EngineeringMap.tsx", import.meta.url), "utf8");
+  assert.match(source, /lightingLabelPoints\(project\?\.lighting_calculations\.results\)/);
+  assert.match(source, /layer_state\.calculation_points \?\? true/);
+  assert.doesNotMatch(source, /function lightingLabelPoints\(project/);
 });

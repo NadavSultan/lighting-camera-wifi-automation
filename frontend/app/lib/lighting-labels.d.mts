@@ -3,6 +3,8 @@ export function formatLux(value: unknown): string;
 export type LightingLabelPoint = {
   id: string;
   coordinate: [number, number];
+  longitude: number;
+  latitude: number;
   lux: number;
   label: string;
 };

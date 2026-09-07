@@ -13,7 +13,7 @@ import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCove
 import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
-import { invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
+import { calculateAllLightingAreas, invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
 import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";
 import { capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";
 import { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";
@@ -521,6 +521,7 @@ export function EngineeringWorkspace() {
   }
 
   function startCalculationArea() {
+    setSelectedCalculationAreaId(null);
     loadCalculationForm(null); setCalculationDraft([]); setDrawingCalculationArea(true); setEditingCalculationArea(true);
     setDrawingPriorityArea(false); setStatus("Drawing a new lighting calculation area from an empty draft");
   }
@@ -575,17 +576,26 @@ export function EngineeringWorkspace() {
   }
 
   async function calculateSelectedArea() {
-    if (!project || !selectedCalculationAreaId) { setError("Select a lighting calculation area first"); return; }
-    const areaId = selectedCalculationAreaId;
+    if (!project || !project.calculation_areas.length) { setError("Draw a lighting calculation area first"); return; }
+    const selectedAreaId = selectedCalculationAreaId;
     await runAction(async () => {
-      const calculated = await calculateLighting(project, areaId);
+      const calculated = await calculateAllLightingAreas(project, calculateLighting);
       setProject(calculated);
-      const area = calculated.calculation_areas.find((item) => item.id === areaId);
-      const session = lightingCardSessions[areaId];
-      const anchor = session?.anchorLngLat ?? ringAnchorLngLat(area?.wgs84_coordinates ?? null);
-      setLightingCardSessions((sessions) => ({ ...sessions, [areaId]: { anchorLngLat: anchor, draggedPosition: sessions[areaId]?.draggedPosition ?? null } }));
-      setLightingCardAreaId(areaId);
-      setStatus(`Calculated ${calculated.lighting_calculations.results[areaId]?.statistics.point_count ?? 0} deterministic lighting points`);
+      const focusId = (selectedAreaId && calculated.lighting_calculations.results[selectedAreaId] ? selectedAreaId : null)
+        ?? calculated.calculation_areas.find((area) => calculated.lighting_calculations.results[area.id])?.id
+        ?? calculated.calculation_areas.at(-1)?.id
+        ?? null;
+      if (focusId) {
+        const area = calculated.calculation_areas.find((item) => item.id === focusId);
+        const session = lightingCardSessions[focusId];
+        const anchor = session?.anchorLngLat ?? ringAnchorLngLat(area?.wgs84_coordinates ?? null);
+        setLightingCardSessions((sessions) => ({ ...sessions, [focusId]: { anchorLngLat: anchor, draggedPosition: sessions[focusId]?.draggedPosition ?? null } }));
+        setLightingCardAreaId(focusId);
+        setSelectedCalculationAreaId(focusId);
+      }
+      const areaCount = calculated.calculation_areas.length;
+      const pointCount = Object.values(calculated.lighting_calculations.results).reduce((sum, result) => sum + (result.statistics.point_count ?? 0), 0);
+      setStatus(`Calculated ${pointCount} deterministic lighting points across ${areaCount} area${areaCount === 1 ? "" : "s"}`);
     });
   }
 
@@ -632,7 +642,7 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={startCalculationArea} disabled={!project || drawingCalculationArea || drawingPriorityArea || drawingWifiArea}>Draw Calculation Area</button>
           <button className="tool-button" onClick={() => { setDrawingWifiArea(true); setWifiDraft([]); setDrawingPriorityArea(false); setDrawingCalculationArea(false); }} disabled={!project || drawingPriorityArea || drawingCalculationArea}>Draw Wi-Fi analysis area</button>
           <button className="tool-button primary" onClick={calculateConceptualWifi} disabled={!project || busy}>Calculate conceptual Wi-Fi</button>
-          <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !selectedCalculationAreaId || busy}>Calculate Lighting</button>
+          <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !project.calculation_areas.length || busy}>Calculate Lighting</button>
           <button className="tool-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend CAP</button>
           <button className="tool-button" onClick={openCapPlanningPanel} disabled={!project}>CAP Planning</button>
           <button className="tool-button" onClick={exportBoth} disabled={!project || busy}>Export Project</button>

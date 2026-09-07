@@ -68,8 +68,16 @@ export default function LightingResultCard({
     ));
   }, [draggedPosition, map]);
 
+  function stageBounds() {
+    const stage = cardRef.current?.closest(".map-stage");
+    if (stage) return stage.getBoundingClientRect();
+    if (map) return map.getContainer().getBoundingClientRect();
+    return null;
+  }
+
   function onPointerDown(event: React.PointerEvent<HTMLElement>) {
     if (!cardRef.current) return;
+    if ((event.target as HTMLElement).closest("button")) return;
     event.preventDefault();
     event.stopPropagation();
     const rect = cardRef.current.getBoundingClientRect();
@@ -78,9 +86,10 @@ export default function LightingResultCard({
   }
 
   function onPointerMove(event: React.PointerEvent<HTMLElement>) {
-    if (!dragOffsetRef.current || !map || !cardRef.current) return;
+    if (!dragOffsetRef.current || !cardRef.current) return;
+    const container = stageBounds();
+    if (!container) return;
     event.stopPropagation();
-    const container = map.getContainer().getBoundingClientRect();
     const rect = cardRef.current.getBoundingClientRect();
     const next = clampCard(
       {

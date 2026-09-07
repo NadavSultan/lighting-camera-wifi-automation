@@ -5,8 +5,9 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 
 export type LightingLabelPoint = {
   id: string;
-  longitude: number;
-  latitude: number;
+  longitude?: number;
+  latitude?: number;
+  coordinate?: [number, number];
   label: string;
 };
 
@@ -44,7 +45,10 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       for (const point of points) {
-        const screen = map.project([point.longitude, point.latitude]);
+        const longitude = point.longitude ?? point.coordinate?.[0];
+        const latitude = point.latitude ?? point.coordinate?.[1];
+        if (longitude == null || latitude == null) continue;
+        const screen = map.project([longitude, latitude]);
         if (screen.x < -40 || screen.y < -20 || screen.x > width + 40 || screen.y > height + 20) continue;
         const x = screen.x + 6;
         const y = screen.y - 6;
@@ -67,6 +71,7 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
     map.on("zoom", schedule);
     map.on("rotate", schedule);
     map.on("pitch", schedule);
+    map.on("idle", schedule);
     window.addEventListener("resize", schedule);
     return () => {
       if (frameRef.current != null) window.cancelAnimationFrame(frameRef.current);
@@ -75,6 +80,7 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
       map.off("zoom", schedule);
       map.off("rotate", schedule);
       map.off("pitch", schedule);
+      map.off("idle", schedule);
       window.removeEventListener("resize", schedule);
     };
   }, [map, points, visible]);

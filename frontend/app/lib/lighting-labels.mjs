@@ -23,9 +23,13 @@ export function lightingLabelPoints(results) {
     if (!result || !Array.isArray(result.points)) continue;
     for (const point of result.points) {
       if (!point || !Array.isArray(point.wgs84_coordinate) || point.wgs84_coordinate.length < 2) continue;
+      const longitude = point.wgs84_coordinate[0];
+      const latitude = point.wgs84_coordinate[1];
       points.push({
         id: `${result.calculation_area_id ?? "area"}:${point.id}`,
-        coordinate: [point.wgs84_coordinate[0], point.wgs84_coordinate[1]],
+        coordinate: [longitude, latitude],
+        longitude,
+        latitude,
         lux: point.maintained_horizontal_illuminance_lux,
         label: formatLux(point.maintained_horizontal_illuminance_lux),
       });
