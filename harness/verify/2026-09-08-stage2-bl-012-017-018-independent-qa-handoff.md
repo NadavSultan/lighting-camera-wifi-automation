@@ -1,10 +1,20 @@
 # Independent QA handoff — 2026-09-08 — Stage 2 BL-012 / BL-017 / BL-018
 
+**Next action:** Independent QA of Stage 2. Product implementation is committed. Merge, Stage 3, and any seal remain unauthorized.
+
 ## Requested review
 
 Independently review post-roadmap Stage 2 items **BL-012**, **BL-017**, and **BL-018** on branch `codex/bl-006-ies-associations`.
 
-Implementation identity: the commit that contains this handoff. Parent/base is `2f0f4a9c42a3a7bdbb51971591aaced5c57a8d38`. At session start record `git rev-parse HEAD`, `git status --short --branch`, and `git merge-base --is-ancestor 2f0f4a9c42a3a7bdbb51971591aaced5c57a8d38 HEAD` (must exit 0). Prefer a **clean** worktree. Do not reset, clean, stash, revert, merge, or push.
+| Field | Value |
+|---|---|
+| Product implementation commit | `eb3a606253d794bf8ef685eb69d6c885368823ea` |
+| Parent/base | `2f0f4a9c42a3a7bdbb51971591aaced5c57a8d38` |
+| Branch | `codex/bl-006-ies-associations` |
+| Pasteable QA prompt | `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md` section **Independent QA launch prompt** |
+| Review output | `harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-review.md` |
+
+At session start record `git rev-parse HEAD`, `git status --short --branch`, and `git merge-base --is-ancestor eb3a606253d794bf8ef685eb69d6c885368823ea HEAD` (must exit 0). Review the Stage 2 product diff of `2f0f4a9..eb3a606`. HEAD may include later docs-only commits that save the QA prompt and execution-index notes; that is not a product change. Prefer a **clean** worktree. Do not reset, clean, stash, revert, merge, or push.
 
 Use `harness/templates/qa-review-template.md`. Record the review at `harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-review.md`. Treat implementer verification as a **claim set**, not proof.
 
@@ -12,7 +22,7 @@ Use `harness/templates/qa-review-template.md`. Record the review at `harness/ver
 
 Authorized: BL-012 / WA-05, BL-017 / WA-10, and BL-018 / WA-11 only, per `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`.
 
-Still unauthorized: Stage 3+ (BL-013, BL-014, BL-016, BL-019, BL-020, OBS-01), Phase 8 / any harness seal, merge to `main`, push, backend engines, schemas, `Input/`, catalogs, lockfiles, invented CAP operational values, BL-018 as a three-column shell rewrite.
+Still unauthorized: Stage 3+ (BL-013, BL-014, BL-016, BL-019, BL-020, OBS-01), Phase 8 / any harness seal, merge to `main`, backend engines, schemas, `Input/`, catalogs, lockfiles, invented CAP operational values, BL-018 as a three-column shell rewrite.
 
 Do not use `verify_phase_readiness.py` as the item gate. QA never authorizes the next stage.
 

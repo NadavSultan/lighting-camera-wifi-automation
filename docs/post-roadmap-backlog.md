@@ -41,7 +41,7 @@ User authorized Stage 0 + Stage 1 only (BL-009, BL-005 follow-up, BL-010, BL-011
 
 ## Stage 2 implementation — 2026-09-08
 
-User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Work record: `harness/phases/2026-09-08-stage2-bl-012-017-018.md`. Implementer verification: `../harness/verify/2026-09-08-stage2-bl-012-017-018-verification.md`. Independent QA and merge remain unauthorized. Stage 3+ remain gated.
+User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Work record: `harness/phases/2026-09-08-stage2-bl-012-017-018.md`. Implementer verification: `../harness/verify/2026-09-08-stage2-bl-012-017-018-verification.md`. **Next action: Independent QA** (prompt in that plan file; handoff `../harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-handoff.md`). Implementation commit `eb3a606`. Merge and Stage 3+ remain gated.
 
 | ID | Implementation status |
 |---|---|

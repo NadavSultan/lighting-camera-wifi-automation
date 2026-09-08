@@ -4,7 +4,9 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit `02c027ef`). BL-001 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 1 P1 display (BL-009, BL-005 follow-up, BL-010, BL-011) received scoped master CONDITIONAL PASS on 2026-09-08 (dirty HEAD `bc45b63`; commit authorized; merge and Stage 2+ not authorized). OBS-01 not authorized. No Phase 8 seal.
+**Next action:** Independent QA of Stage 2 (BL-012, BL-017, BL-018). Product implementation commit `eb3a606253d794bf8ef685eb69d6c885368823ea` on `codex/bl-006-ies-associations`. QA launch prompt: `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Handoff: `harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-handoff.md`. Merge, Stage 3, and any seal remain unauthorized.
+
+Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit `02c027ef`). BL-001 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 1 P1 display (BL-009, BL-005 follow-up, BL-010, BL-011) received scoped master CONDITIONAL PASS on 2026-09-08 (implementation identity later minted; merge not authorized). Stage 2 implementation is committed and awaits Independent QA. OBS-01 not authorized. No Phase 8 seal.
 
 Controlling execution plan: `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Stages 1–7 master: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md`. BL-001 provider: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`. BL-001 master: `docs/post-roadmap-bl-001-scoped-master-decision-2026-09-07.md`. Stage 1 P1 master: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 
