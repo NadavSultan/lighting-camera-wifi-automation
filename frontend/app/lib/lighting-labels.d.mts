@@ -1,4 +1,5 @@
 export function formatLux(value: unknown): string;
+export function formatLuxWithUnit(value: unknown): string;
 
 export type LightingLabelPoint = {
   id: string;

@@ -7,3 +7,8 @@ export function clampCard(
 export function ringAnchorLngLat(
   ring: Array<[number, number]> | null | undefined,
 ): [number, number] | null;
+
+export function cardOffsetFromProjected(
+  projected: { x?: number; y?: number } | null | undefined,
+  offsetPx?: number,
+): { x: number; y: number };

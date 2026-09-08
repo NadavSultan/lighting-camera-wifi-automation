@@ -167,7 +167,7 @@ export function ReportPanel({ project, busy, onBusy, onStatus, onError, onReport
   const canGenerate = reportCanGenerate(preview) && Object.values(formats).some(Boolean);
 
   return (
-    <section className="section">
+    <section className="section" id="report-package-panel">
       <div className="section-heading">
         <h3>Phase 7 — Report package</h3>
         <span className="helper">Export only</span>

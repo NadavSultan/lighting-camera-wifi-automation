@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { LightingCalculationResult } from "../lib/types";
-import { clampCard } from "../lib/lighting-card-position.mjs";
+import { clampCard, cardOffsetFromProjected } from "../lib/lighting-card-position.mjs";
+import { formatLuxWithUnit } from "../lib/lighting-labels.mjs";
 
 type LightingResultCardProps = {
   map: MapLibreMap | null;
@@ -16,7 +17,7 @@ type LightingResultCardProps = {
   onClose: () => void;
 };
 
-function formatStat(value: number | null | undefined, digits = 2) {
+function formatRatio(value: number | null | undefined, digits = 3) {
   if (value == null || !Number.isFinite(value)) return "—";
   return value.toFixed(digits);
 }
@@ -42,8 +43,9 @@ export default function LightingResultCard({
       const projected = map.project(anchorLngLat);
       const rect = cardRef.current.getBoundingClientRect();
       const container = map.getContainer().getBoundingClientRect();
+      const offset = cardOffsetFromProjected(projected, 12);
       const next = clampCard(
-        { x: projected.x - container.left + 12, y: projected.y - container.top + 12, width: rect.width || 280, height: rect.height || 180 },
+        { x: offset.x, y: offset.y, width: rect.width || 280, height: rect.height || 180 },
         { width: container.width, height: container.height },
       );
       setPosition(next);
@@ -147,11 +149,11 @@ export default function LightingResultCard({
         <div className="lighting-result-card-body">
           <p className="helper">{current ? "Current calculated result" : "Result state unknown"}</p>
           <dl className="lighting-result-stats">
-            <div><dt>Eavg</dt><dd>{formatStat(stats?.average_illuminance_lux)} lx</dd></div>
-            <div><dt>Emin</dt><dd>{formatStat(stats?.minimum_illuminance_lux)} lx</dd></div>
-            <div><dt>Emax</dt><dd>{formatStat(stats?.maximum_illuminance_lux)} lx</dd></div>
-            <div><dt>Emin/Eavg</dt><dd>{formatStat(stats?.emin_over_eavg, 3)}</dd></div>
-            <div><dt>Emin/Emax</dt><dd>{formatStat(stats?.emin_over_emax, 3)}</dd></div>
+            <div><dt>Eavg</dt><dd title={stats?.average_illuminance_lux != null ? String(stats.average_illuminance_lux) : undefined}>{formatLuxWithUnit(stats?.average_illuminance_lux)}</dd></div>
+            <div><dt>Emin</dt><dd title={stats?.minimum_illuminance_lux != null ? String(stats.minimum_illuminance_lux) : undefined}>{formatLuxWithUnit(stats?.minimum_illuminance_lux)}</dd></div>
+            <div><dt>Emax</dt><dd title={stats?.maximum_illuminance_lux != null ? String(stats.maximum_illuminance_lux) : undefined}>{formatLuxWithUnit(stats?.maximum_illuminance_lux)}</dd></div>
+            <div><dt>Emin/Eavg</dt><dd>{formatRatio(stats?.emin_over_eavg)}</dd></div>
+            <div><dt>Emin/Emax</dt><dd>{formatRatio(stats?.emin_over_emax)}</dd></div>
             <div><dt>Points</dt><dd>{stats?.point_count ?? "—"}</dd></div>
           </dl>
           <details className="lighting-result-assumptions">

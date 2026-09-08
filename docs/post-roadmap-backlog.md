@@ -39,6 +39,16 @@ User authorized Stage 0 + Stage 1 only (BL-009, BL-005 follow-up, BL-010, BL-011
 | BL-010 | CONDITIONAL PASS; labels stayed attached through pan/zoom/rotate/resize; grid not thinned |
 | BL-011 | CONDITIONAL PASS; core stats unclipped; assumptions collapsed; card max-height no longer 220px |
 
+## Stage 2 implementation — 2026-09-08
+
+User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Work record: `harness/phases/2026-09-08-stage2-bl-012-017-018.md`. Implementer verification: `../harness/verify/2026-09-08-stage2-bl-012-017-018-verification.md`. Independent QA and merge remain unauthorized. Stage 3+ remain gated.
+
+| ID | Implementation status |
+|---|---|
+| BL-012 | Implementer PASS; live card ~12 px from finish vertex with map origin not at (0,0) |
+| BL-017 | Implementer PASS; exact 0 → `0.00 lx`, null → `—`, tiny positive → `<0.01 lx` |
+| BL-018 | Implementer PASS; Lighting/Camera/Wi-Fi/CAP switcher; overflowX false at 1920/1024 |
+
 ## Baseline and accepted gates
 
 Startup review used clean `main` at `8751714003bf09f39c217a5f26b9fd6056d2927b`, equal to freshly fetched `origin/main`. Working checkout: `C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/lighting-camera-wifi-automation`. The parent checkout contains unrelated uncommitted work and was preserved unchanged.

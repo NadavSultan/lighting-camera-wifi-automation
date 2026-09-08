@@ -43,3 +43,27 @@ export function ringAnchorLngLat(ring) {
     ? /** @type {[number, number]} */ ([anchor[0], anchor[1]])
     : null;
 }
+
+/**
+ * Convert a MapLibre `map.project()` point into CSS left/top for a card that is
+ * `position:absolute` inside `.map-stage`.
+ *
+ * MapLibre documents `project()` as pixels relative to the map container.
+ * `.map-container` fills `.map-stage` (`inset: 0`), so those coordinates are
+ * already the card's containing-block coordinates. Subtracting the container's
+ * viewport `left`/`top` double-offsets the card whenever the map is not at page
+ * origin (0, 0).
+ *
+ * @param {{x?: number, y?: number} | null | undefined} projected
+ * @param {number} [offsetPx=12] small placement offset from the finish vertex
+ * @returns {{x: number, y: number}}
+ */
+export function cardOffsetFromProjected(projected, offsetPx = 12) {
+  const x = Number(projected?.x);
+  const y = Number(projected?.y);
+  const offset = Number.isFinite(offsetPx) ? offsetPx : 12;
+  return {
+    x: (Number.isFinite(x) ? x : 0) + offset,
+    y: (Number.isFinite(y) ? y : 0) + offset,
+  };
+}

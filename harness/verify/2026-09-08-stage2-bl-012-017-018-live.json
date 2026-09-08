@@ -1,0 +1,260 @@
+{
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "errors": [],
+  "viewports": [
+    {
+      "width": 1920,
+      "height": 855,
+      "innerWidth": 1920,
+      "panelClientWidth": 277,
+      "panelScrollWidth": 277,
+      "panelOverflowX": false,
+      "scrollOverflowXStyle": "hidden",
+      "scrollClientWidth": 277,
+      "scrollScrollWidth": 371,
+      "contentFits": false,
+      "switcher": [
+        {
+          "label": "Lighting",
+          "selected": true
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "lightingVisible": true,
+      "capVisible": false,
+      "mapStage": {
+        "left": 278,
+        "top": 58,
+        "width": 1324,
+        "height": 767
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "innerWidth": 1024,
+      "panelClientWidth": 239,
+      "panelScrollWidth": 239,
+      "panelOverflowX": false,
+      "scrollOverflowXStyle": "hidden",
+      "scrollClientWidth": 239,
+      "scrollScrollWidth": 371,
+      "contentFits": false,
+      "switcher": [
+        {
+          "label": "Lighting",
+          "selected": true
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "lightingVisible": true,
+      "capVisible": false,
+      "mapStage": {
+        "left": 240,
+        "top": 58,
+        "width": 498,
+        "height": 680
+      }
+    }
+  ],
+  "frontend_mode": "reused-3012",
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "pole_count": 74,
+  "after_open": {
+    "innerWidth": 1920,
+    "panelClientWidth": 277,
+    "panelScrollWidth": 277,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "scrollClientWidth": 277,
+    "scrollScrollWidth": 371,
+    "contentFits": false,
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "lightingVisible": true,
+    "capVisible": false,
+    "mapStage": {
+      "left": 278,
+      "top": 58,
+      "width": 1324,
+      "height": 767
+    }
+  },
+  "cap_pane": {
+    "innerWidth": 1920,
+    "panelClientWidth": 277,
+    "panelScrollWidth": 277,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "scrollClientWidth": 277,
+    "scrollScrollWidth": 371,
+    "contentFits": false,
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": false
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": true
+      }
+    ],
+    "lightingVisible": false,
+    "capVisible": true,
+    "mapStage": {
+      "left": 278,
+      "top": 58,
+      "width": 1324,
+      "height": 767
+    }
+  },
+  "lighting_pane": {
+    "innerWidth": 1920,
+    "panelClientWidth": 277,
+    "panelScrollWidth": 277,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "scrollClientWidth": 277,
+    "scrollScrollWidth": 371,
+    "contentFits": false,
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "lightingVisible": true,
+    "capVisible": false,
+    "mapStage": {
+      "left": 278,
+      "top": 58,
+      "width": 1324,
+      "height": 767
+    }
+  },
+  "card": {
+    "lastVertex": {
+      "x": 873.8000000000001,
+      "y": 487.52000000000004
+    },
+    "card": {
+      "left": 885,
+      "top": 499,
+      "width": 320,
+      "height": 165.5
+    },
+    "stage": {
+      "left": 278,
+      "top": 58,
+      "width": 1324,
+      "height": 767
+    },
+    "offsetFromVertex": {
+      "x": 11.199999999999932,
+      "y": 11.479999999999961
+    },
+    "cssLeft": 607,
+    "cssTop": 441,
+    "textSample": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1115\nAssumptions and limitations",
+    "hasLt001": false,
+    "hasZeroLx": true,
+    "hasEmDash": true
+  },
+  "card_after_reset": {
+    "left": 885,
+    "top": 499,
+    "cssLeft": 607,
+    "cssTop": 441
+  },
+  "collapsed": {
+    "innerWidth": 1920,
+    "panelClientWidth": 41,
+    "panelScrollWidth": 41,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": null,
+    "scrollClientWidth": null,
+    "scrollScrollWidth": null,
+    "contentFits": null,
+    "switcher": [],
+    "lightingVisible": false,
+    "capVisible": false,
+    "mapStage": {
+      "left": 42,
+      "top": 58,
+      "width": 1560,
+      "height": 767
+    }
+  },
+  "hash_ok": true,
+  "switcher_default_lighting": true,
+  "overflow_ok": true,
+  "card_not_clamped_to_left_margin": true,
+  "stage_not_page_origin": true,
+  "card_offset": {
+    "x": 11.199999999999932,
+    "y": 11.479999999999961
+  }
+}

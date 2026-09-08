@@ -139,6 +139,8 @@ export default function CapPlanningPanel({
               <div className="warning-card info">Preflight complete for the selected test/project inputs.</div>
             )}
 
+            <details className="cap-required-inputs" open>
+              <summary>Required CAP inputs and candidates</summary>
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="cap-field-operation_mode">Operation mode</label>
@@ -215,6 +217,7 @@ export default function CapPlanningPanel({
                 </div>
               ))}
             </div>
+            </details>
           </div>
 
           <div className="cap-panel-block" id="cap-section-candidates">
