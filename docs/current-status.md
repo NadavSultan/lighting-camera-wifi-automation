@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-09-05. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8 or post-roadmap work is authorized.
+Phase state last changed: 2026-09-08. Documentation consistency reviewed: 2026-09-08. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Item-based post-roadmap Stage 1 P1 (BL-009, BL-005 follow-up, BL-010, BL-011) received scoped master CONDITIONAL PASS on 2026-09-08; merge and Stage 2+ remain unauthorized.
 
 ## Completed
 
@@ -48,4 +48,4 @@ Phase state last changed: 2026-09-05. Documentation consistency reviewed: 2026-0
 
 ## Current gate
 
-Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Post-roadmap work requires separate explicit authorization.
+Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`. Stage 2+ and merge to `main` remain unauthorized.

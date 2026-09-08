@@ -136,11 +136,15 @@ export default function LightingResultCard({
         </div>
       </header>
       {unavailableReason ? (
-        <p className="helper">{unavailableReason}</p>
+        <div className="lighting-result-card-body">
+          <p className="helper">{unavailableReason}</p>
+        </div>
       ) : !result ? (
-        <p className="helper">No lighting result for this area.</p>
+        <div className="lighting-result-card-body">
+          <p className="helper">No lighting result for this area.</p>
+        </div>
       ) : (
-        <>
+        <div className="lighting-result-card-body">
           <p className="helper">{current ? "Current calculated result" : "Result state unknown"}</p>
           <dl className="lighting-result-stats">
             <div><dt>Eavg</dt><dd>{formatStat(stats?.average_illuminance_lux)} lx</dd></div>
@@ -150,9 +154,12 @@ export default function LightingResultCard({
             <div><dt>Emin/Emax</dt><dd>{formatStat(stats?.emin_over_emax, 3)}</dd></div>
             <div><dt>Points</dt><dd>{stats?.point_count ?? "—"}</dd></div>
           </dl>
-          <p className="helper">{result.disclaimer}</p>
-          <p className="helper">Approved simplified direct-light model; not a standards-compliance determination.</p>
-        </>
+          <details className="lighting-result-assumptions">
+            <summary>Assumptions and limitations</summary>
+            <p className="helper">{result.disclaimer}</p>
+            <p className="helper">Approved simplified direct-light model; not a standards-compliance determination.</p>
+          </details>
+        </div>
       )}
     </aside>
   );

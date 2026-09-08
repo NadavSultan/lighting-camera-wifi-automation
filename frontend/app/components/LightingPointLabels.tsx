@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 
 export type LightingLabelPoint = {
   id: string;
@@ -26,7 +27,6 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
     if (!canvas || !map) return;
 
     const draw = () => {
-      frameRef.current = null;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const width = map.getCanvas().clientWidth;
@@ -60,10 +60,7 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
       }
     };
 
-    const schedule = () => {
-      if (frameRef.current != null) return;
-      frameRef.current = window.requestAnimationFrame(draw);
-    };
+    const schedule = createMapFrameScheduler(frameRef, draw);
 
     schedule();
     map.on("move", schedule);
@@ -74,7 +71,7 @@ export default function LightingPointLabels({ map, points, visible }: Props) {
     map.on("idle", schedule);
     window.addEventListener("resize", schedule);
     return () => {
-      if (frameRef.current != null) window.cancelAnimationFrame(frameRef.current);
+      cancelMapFrame(frameRef);
       map.off("move", schedule);
       map.off("resize", schedule);
       map.off("zoom", schedule);

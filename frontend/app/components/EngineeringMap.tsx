@@ -10,6 +10,7 @@ import { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";
 import LightingPointLabels from "./LightingPointLabels";
 import { lightingLabelPoints } from "../lib/lighting-labels.mjs";
 import { screenArrow } from "../lib/fixture-direction-view.mjs";
+import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 import type { FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
 
@@ -449,7 +450,6 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     };
 
     const draw = () => {
-      directionFrameRef.current = null;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const width = map.getCanvas().clientWidth;
@@ -507,10 +507,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       }
     };
 
-    const schedule = () => {
-      if (directionFrameRef.current != null) return;
-      directionFrameRef.current = window.requestAnimationFrame(draw);
-    };
+    const schedule = createMapFrameScheduler(directionFrameRef, draw);
 
     schedule();
     map.on("move", schedule);
@@ -518,14 +515,16 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     map.on("zoom", schedule);
     map.on("rotate", schedule);
     map.on("pitch", schedule);
+    map.on("idle", schedule);
     window.addEventListener("resize", schedule);
     return () => {
-      if (directionFrameRef.current != null) window.cancelAnimationFrame(directionFrameRef.current);
+      cancelMapFrame(directionFrameRef);
       map.off("move", schedule);
       map.off("resize", schedule);
       map.off("zoom", schedule);
       map.off("rotate", schedule);
       map.off("pitch", schedule);
+      map.off("idle", schedule);
       window.removeEventListener("resize", schedule);
     };
   }, [project, fixtureDirectionPreview, mapInstance]);

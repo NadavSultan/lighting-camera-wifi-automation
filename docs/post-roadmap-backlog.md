@@ -2,6 +2,43 @@
 
 Established: 2026-09-06. Authority: user's post-roadmap master-session instruction, limited to intake, clarification, classification, and backlog maintenance. Implementation requires separate authorization for a specific item. No Phase 8 is created or authorized.
 
+## Current live-review intake — 2026-09-08
+
+The latest exploratory review is [the English web-app review](web-app-review-2026-09-08.md), supported by [measured observations](../harness/verify/2026-09-08-web-audit-observations.json). It reviewed clean branch `codex/bl-006-ies-associations` at `bc45b63da41092175f7fbda97bc4c24f1f39bfe9`, not the historical main baseline below. No product changes or acceptance decisions were made. The review sections are the controlling intake details for the following independently scoped follow-ups, including reproduction, expected behavior, subsystem, severity/priority, risks/dependencies, acceptance, verification and contract impact.
+
+| Backlog ID | Review section | Type / state | Recommended route |
+|---|---|---|---|
+| BL-009 | WA-01: right inspector / workspace clipping | Bug, reproduced; P1 | Small corrective task |
+| BL-005 follow-up | WA-02: missing direction arrows / unavailable badges | Bug, reproduced; P1; original improvement now needs diagnosis | Diagnose canvas lifecycle, then correction |
+| BL-010 | WA-03: lux labels detached from map points | Bug, reproduced; P1; follow-up to BL-007 | Diagnosis then correction |
+| BL-011 | WA-04: lighting card hides core statistics | Usability bug, reproduced; P1; follow-up to BL-004 | Small corrective task |
+| BL-012 | WA-05: lighting card anchor offset | Bug, observed with supporting code evidence; P2 | Small corrective task after layout |
+| BL-013 | WA-06: revisit results across multiple areas | Improvement; P2; disappearance on polygon creation not conclusively reproduced | Scoped UI task; diagnose exact disappearance separately |
+| BL-014 | WA-07: result-first CAP workflow | Improvement; P2; follow-up to BL-008 | Dedicated UI contract preserving Phase 6 prerequisites |
+| BL-015 | WA-08: explain camera projection boundary | Improvement; P2 | Small explanatory UI task |
+| BL-016 | WA-09: camera pixel-density heatmap | Feature; P3 | Dedicated engineering contract, separate authorization |
+| BL-017 | WA-10: distinguish tiny lux from exact zero | Improvement; P2 | Small numeric-presentation task |
+| BL-018 | WA-11: organize left workflow panel | Improvement; P2 | Scoped UI design/task |
+| BL-019 | WA-12: stale phase/gating UI messages | Content bug; P3 | Small corrective task |
+| BL-020 | WA-13: duplicate React warning keys | Technical bug observed in dev-server log; P3 | Small corrective task preserving warnings |
+
+All items remain **recorded, not authorized for implementation by this review**. No Phase 8 is created. Existing BL-001–008 intake and subsequent scoped decisions remain historical context; the live observations above do not rewrite accepted Phase 1–7 contracts.
+
+## Cursor handoff readiness
+
+This backlog and the linked English review are ready for intake and diagnosis, not blanket implementation. See the review's **Cursor handoff readiness** section for the required item-specific authorization, reproduction, execution plan, file boundary and verification. The older 2026-09-06 plan does not automatically cover this new review round. UI redesign items need a settled scope; BL-016 needs a dedicated engineering contract.
+
+## Stage 1 P1 implementation — 2026-09-08
+
+User authorized Stage 0 + Stage 1 only (BL-009, BL-005 follow-up, BL-010, BL-011) via the Codex-staged plan. Work record: `harness/phases/2026-09-08-stage1-p1-display.md`. Independent QA PASS: `../harness/verify/2026-09-08-stage1-p1-independent-qa-review.md`. Scoped master CONDITIONAL PASS: `post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md` (dirty HEAD `bc45b63`; commit authorized; merge and Stage 2+ not authorized).
+
+| ID | Implementation status |
+|---|---|
+| BL-009 | CONDITIONAL PASS; live viewport fit at 1920/1440/1366/1024 |
+| BL-005 follow-up | CONDITIONAL PASS; rAF leak proven; live SMART arrow and unconfigured `?` |
+| BL-010 | CONDITIONAL PASS; labels stayed attached through pan/zoom/rotate/resize; grid not thinned |
+| BL-011 | CONDITIONAL PASS; core stats unclipped; assumptions collapsed; card max-height no longer 220px |
+
 ## Baseline and accepted gates
 
 Startup review used clean `main` at `8751714003bf09f39c217a5f26b9fd6056d2927b`, equal to freshly fetched `origin/main`. Working checkout: `C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/lighting-camera-wifi-automation`. The parent checkout contains unrelated uncommitted work and was preserved unchanged.

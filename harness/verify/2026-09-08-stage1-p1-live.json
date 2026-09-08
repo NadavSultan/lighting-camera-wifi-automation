@@ -1,0 +1,117 @@
+{
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "viewports": [
+    {
+      "width": 1920,
+      "height": 855,
+      "innerWidth": 1920,
+      "workspaceWidth": 1920,
+      "workspaceRight": 1920,
+      "inspectorRight": 1920,
+      "shellWidth": 1920,
+      "overflowX": false,
+      "arrowCanvas": {
+        "width": 1324,
+        "height": 767,
+        "clientWidth": 1324
+      },
+      "labelCanvas": {
+        "width": 1324,
+        "height": 767,
+        "clientWidth": 1324
+      },
+      "cardMaxHeight": "min(420px, 100% - 24px)"
+    },
+    {
+      "width": 1440,
+      "height": 855,
+      "innerWidth": 1440,
+      "workspaceWidth": 1440,
+      "workspaceRight": 1440,
+      "inspectorRight": 1440,
+      "shellWidth": 1440,
+      "overflowX": false,
+      "arrowCanvas": {
+        "width": 844,
+        "height": 767,
+        "clientWidth": 844
+      },
+      "labelCanvas": {
+        "width": 844,
+        "height": 767,
+        "clientWidth": 844
+      },
+      "cardMaxHeight": "min(420px, 100% - 24px)"
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "innerWidth": 1366,
+      "workspaceWidth": 1366,
+      "workspaceRight": 1366,
+      "inspectorRight": 1366,
+      "shellWidth": 1366,
+      "overflowX": false,
+      "arrowCanvas": {
+        "width": 770,
+        "height": 680,
+        "clientWidth": 770
+      },
+      "labelCanvas": {
+        "width": 770,
+        "height": 680,
+        "clientWidth": 770
+      },
+      "cardMaxHeight": "min(420px, 100% - 24px)"
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "innerWidth": 1024,
+      "workspaceWidth": 1024,
+      "workspaceRight": 1024,
+      "inspectorRight": 1024,
+      "shellWidth": 1024,
+      "overflowX": false,
+      "arrowCanvas": {
+        "width": 498,
+        "height": 680,
+        "clientWidth": 498
+      },
+      "labelCanvas": {
+        "width": 498,
+        "height": 680,
+        "clientWidth": 498
+      },
+      "cardMaxHeight": "min(420px, 100% - 24px)"
+    }
+  ],
+  "preview": {
+    "direction_count": 1,
+    "unavailable_count": 73
+  },
+  "errors": [],
+  "source_archive_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "pole_count": 74,
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "arrow_pixels_1920": {
+    "painted": false,
+    "sample": 0,
+    "width": 1324,
+    "height": 767
+  },
+  "arrow_pixels": {
+    "painted": false,
+    "sample": 0,
+    "width": 1324,
+    "height": 767
+  },
+  "hash_ok": true,
+  "layout_ok": true,
+  "card_ok": true
+}

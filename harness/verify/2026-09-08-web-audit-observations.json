@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-08",
+  "kind": "exploratory-browser-review-not-gate-acceptance",
+  "implementation_commit": "bc45b63da41092175f7fbda97bc4c24f1f39bfe9",
+  "branch": "codex/bl-006-ies-associations",
+  "environment": {"browser": "Chrome", "viewport_css_px": [1920, 855], "frontend": "isolated vinext dev localhost:3058", "api": "isolated uvicorn 127.0.0.1:8058", "production_tested": false},
+  "fixture": {"source_pole_count": 74, "selected_pole": "pole-443127e3a723e1b3", "name": "Cobra Head 7", "fixture": "Phoenix 1 SMART", "height_m": 8, "azimuth_deg": 0, "camera_lens_both_slots": "JL-LN039 6 mm", "ies": "JLED-SL-100W-PHOENIX1-40-D01.ies", "cap_inputs": "synthetic test-only profile and one explicit candidate, not approved site design"},
+  "layout_dom_measurements": {"main_width": 1920, "main_scroll_width": 2046, "workspace_width": 2045.78125, "inspector_left": 1727.78125, "inspector_right": 2045.78125, "left_panel_client_width": 262, "left_panel_scroll_width": 370},
+  "lighting_card_dom_measurements": {"width": 280, "height": 220, "client_height": 218, "scroll_height": 436, "first_area_left": 286, "first_area_top": 459, "first_area_final_vertex_screen_approx": [390, 505]},
+  "lighting_results": [
+    {"name": "Calculation area 1", "points": 192, "average_lux": 13.062903701859971, "minimum_lux": 0.047417338014968245, "maximum_lux": 70.01812894927782, "emin_over_eavg": 0.0036299232618714544, "emin_over_emax": 0.0006772151545111706},
+    {"name": "Calculation area 2", "points": 68, "average_lux": 0.000035932938568215193, "minimum_lux": 0.000022703481403898017, "maximum_lux": 0.00006823243704465751, "emin_over_eavg": 0.6318292438231197, "emin_over_emax": 0.33273736637955337, "displayed_lux_all": "0.00 lx"}
+  ],
+  "observations": {
+    "directions": "No fixture arrows or unavailable badges visible; direct read-only preview of saved test project returned 1 valid direction at azimuth 0 and 73 missing-configuration entries. Root cause not proven.",
+    "lighting_labels": "After zoom and CAP Show selected sites on map, a label cluster remained around screen x400/y480 while corresponding map geometry moved. Observed again after movement settled. Overlap also reduced legibility.",
+    "lighting_card_lifecycle": "Area 1 card remained while drawing and saving area 2. Calculate Lighting replaced it with area 2. Both stored results retained. Exact disappearance during polygon creation not conclusively reproduced.",
+    "camera": "Two footprints of 154.7 m2 displayed in inspector, H52/V40, tilt35, absolute azimuth290/70. No pixel-density layer.",
+    "cap": "Recommend CAP returned 0 with no eligible nodes; after explicit synthetic SMART Node disposition returned 1 at repro-cap-one / Cobra Head 7. Locate and Show selected sites available.",
+    "wifi": "Calculated one conceptual circle, initially hidden; Show coverage on map displayed it.",
+    "satellite": "Without configured provider env, Satellite returned Satellite imagery is not configured. Expected fallback path, not provider test.",
+    "ies": "Uploaded valid IES and associated Phoenix 1 SMART through catalog checkbox. Async acknowledgement reached checked state; no failure inferred from immediate automation timing.",
+    "console_sample": "No warn/error entries returned in a limited early browser sample. On stopping the isolated dev server, its log showed repeated React duplicate-key errors for Single-CAP conceptual plan; single point of failure is not mitigated by this graph result. User-visible warning loss not established."
+  },
+  "preservation": {"source_object_equal_before_after": true, "source_and_archived_kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328", "product_files_modified": false},
+  "verification_limits": ["No automated product test suite run", "No production build tested", "No satellite tile provider test", "No comprehensive exports/undo/responsive/touch test", "No professional photometric, RF, camera quality or real-site CAP validation", "Canvas lifecycle causes are hypotheses requiring independent diagnosis"],
+  "report": "docs/web-app-review-2026-09-08.md"
+}

@@ -1,0 +1,276 @@
+{
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "api": "http://127.0.0.1:8078",
+  "ui": "http://127.0.0.1:3078/",
+  "errors": [
+    "Page.goto: Timeout 90000ms exceeded.\nCall log:\nnavigating to \"http://127.0.0.1:3078/\", waiting until \"networkidle\"\n"
+  ],
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "prod_import": {
+    "id": "6c91ca85-6833-4acb-99d3-ff1e544feb9d",
+    "pole_count": 74,
+    "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328"
+  },
+  "prod_arrows_unconfigured": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 3554,
+    "blueish": 2223,
+    "grayish": 1909,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 91902
+  },
+  "prod_pole_selected": true,
+  "prod_arrows_configured": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 3537,
+    "blueish": 2215,
+    "grayish": 1887,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 91994
+  },
+  "prod_azimuth_handle_count": 1,
+  "prod_viewports": [
+    {
+      "width": 1920,
+      "height": 855,
+      "innerWidth": 1920,
+      "innerHeight": 855,
+      "documentScrollWidth": 1920,
+      "overflowX": false,
+      "workspaceWidth": 1920,
+      "workspaceRight": 1920,
+      "inspectorRight": 1920,
+      "inspectorLeft": 1602,
+      "shellWidth": 1920,
+      "topbarRight": 1920,
+      "collapseInspectorVisible": true,
+      "collapseLayersVisible": true
+    },
+    {
+      "width": 1440,
+      "height": 855,
+      "innerWidth": 1440,
+      "innerHeight": 855,
+      "documentScrollWidth": 1440,
+      "overflowX": false,
+      "workspaceWidth": 1440,
+      "workspaceRight": 1440,
+      "inspectorRight": 1440,
+      "inspectorLeft": 1122,
+      "shellWidth": 1440,
+      "topbarRight": 1440,
+      "collapseInspectorVisible": true,
+      "collapseLayersVisible": true
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "innerWidth": 1366,
+      "innerHeight": 768,
+      "documentScrollWidth": 1366,
+      "overflowX": false,
+      "workspaceWidth": 1366,
+      "workspaceRight": 1366,
+      "inspectorRight": 1366,
+      "inspectorLeft": 1048,
+      "shellWidth": 1366,
+      "topbarRight": 1366,
+      "collapseInspectorVisible": true,
+      "collapseLayersVisible": true
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "documentScrollWidth": 1024,
+      "overflowX": false,
+      "workspaceWidth": 1024,
+      "workspaceRight": 1024,
+      "inspectorRight": 1024,
+      "inspectorLeft": 738,
+      "shellWidth": 1024,
+      "topbarRight": 1024,
+      "collapseInspectorVisible": true,
+      "collapseLayersVisible": true
+    }
+  ],
+  "prod_collapsed": {
+    "innerWidth": 1920,
+    "innerHeight": 855,
+    "documentScrollWidth": 1920,
+    "overflowX": false,
+    "workspaceWidth": 1920,
+    "workspaceRight": 1920,
+    "inspectorRight": 1920,
+    "inspectorLeft": 1878,
+    "shellWidth": 1920,
+    "topbarRight": 1920,
+    "collapseInspectorVisible": false,
+    "collapseLayersVisible": false
+  },
+  "prod_card": {
+    "present": true,
+    "areaName": "Calculation area 1",
+    "width": 320,
+    "height": 165.5,
+    "maxHeight": "min(420px, 100% - 24px)",
+    "labels": [
+      "Eavg",
+      "Emin",
+      "Emax",
+      "Emin/Eavg",
+      "Emin/Emax",
+      "Points"
+    ],
+    "values": {
+      "Eavg": "0.00 lx",
+      "Emin": "0.00 lx",
+      "Emax": "0.00 lx",
+      "Emin/Eavg": "\u2014",
+      "Emin/Emax": "\u2014",
+      "Points": "1638"
+    },
+    "statsFullyVisible": true,
+    "bodyClientHeight": 113,
+    "bodyScrollHeight": 113,
+    "assumptionsCollapsed": true
+  },
+  "prod_labels_before": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4556,
+    "blueish": 7,
+    "grayish": 1222,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 47258
+  },
+  "prod_labels_zoomed": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4906,
+    "blueish": 226,
+    "grayish": 2008,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 63922
+  },
+  "prod_labels_after_pan": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4915,
+    "blueish": 242,
+    "grayish": 2005,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 64730
+  },
+  "prod_labels_after_zoom": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4915,
+    "blueish": 242,
+    "grayish": 2005,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 64730
+  },
+  "prod_labels_after_rotate": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4450,
+    "blueish": 216,
+    "grayish": 1755,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 116630
+  },
+  "prod_labels_after_resize": {
+    "present": true,
+    "width": 844,
+    "height": 767,
+    "clientWidth": 844,
+    "clientHeight": 767,
+    "painted": 2830,
+    "blueish": 129,
+    "grayish": 1149,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 67986
+  },
+  "prod_card_drag": {
+    "arrows_painted_before": 0,
+    "arrows_painted_after": 0,
+    "arrow_size_before": [
+      1324,
+      767
+    ],
+    "arrow_size_after": [
+      1324,
+      767
+    ]
+  },
+  "prod_add_cap_site_enabled": true,
+  "prod_recommend_enabled": false,
+  "prod_labels_after_cap_show": {
+    "skipped": true,
+    "reason": "Mark test-only feasible was not available"
+  },
+  "prod_arrows_final": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 0,
+    "blueish": 0,
+    "grayish": 0,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 26326
+  },
+  "prod_labels_final": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4450,
+    "blueish": 216,
+    "grayish": 1755,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 116630
+  }
+}

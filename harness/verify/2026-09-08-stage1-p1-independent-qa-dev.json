@@ -1,0 +1,90 @@
+{
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "api": "http://127.0.0.1:8078",
+  "ui": "http://127.0.0.1:3078/",
+  "errors": [],
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "dev_import": {
+    "id": "9a9fd32a-19c6-495b-ae91-b92c1cc2171e",
+    "pole_count": 74,
+    "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328"
+  },
+  "dev_arrows_unconfigured": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 3554,
+    "blueish": 2223,
+    "grayish": 1909,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 91902
+  },
+  "dev_pole_selected": true,
+  "dev_arrows_configured": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 3537,
+    "blueish": 2215,
+    "grayish": 1887,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 91994
+  },
+  "dev_azimuth_handle_count": 1,
+  "dev_card": {
+    "present": true,
+    "areaName": "Calculation area 1",
+    "width": 320,
+    "height": 165.5,
+    "maxHeight": "min(420px, 100% - 24px)",
+    "labels": [
+      "Eavg",
+      "Emin",
+      "Emax",
+      "Emin/Eavg",
+      "Emin/Emax",
+      "Points"
+    ],
+    "values": {
+      "Eavg": "0.00 lx",
+      "Emin": "0.00 lx",
+      "Emax": "0.00 lx",
+      "Emin/Eavg": "\u2014",
+      "Emin/Emax": "\u2014",
+      "Points": "1638"
+    },
+    "statsFullyVisible": true,
+    "bodyClientHeight": 113,
+    "bodyScrollHeight": 113,
+    "assumptionsCollapsed": true
+  },
+  "dev_labels_before": {
+    "present": true,
+    "width": 1324,
+    "height": 767,
+    "clientWidth": 1324,
+    "clientHeight": 767,
+    "painted": 4556,
+    "blueish": 7,
+    "grayish": 1222,
+    "redish": 0,
+    "yellowish": 0,
+    "dataUrlBytes": 47258
+  },
+  "hash_ok": true,
+  "layout_ok": true,
+  "card_ok": true,
+  "arrows_painted": true,
+  "labels_painted": true
+}
