@@ -4,7 +4,7 @@ This is the execution plan index. Phase 7 requirements, decisions, milestones, v
 
 ## Active plan
 
-**Next action:** Independent QA of Stage 2. Contract and pasteable QA prompt: `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Implementation commit `eb3a606`. Do not start Stage 3. Do not merge.
+**Next action:** Commit the bounded Stage 2 QA/master evidence, then prepare a dedicated Stage 3 contract. Stage 2 contract: `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`; implementation `eb3a606`; Independent QA PASS and scoped master PASS: `docs/post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. Do not implement Stage 3 or merge before its separate gate.
 
 Post-roadmap item plan (not a numbered phase): `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Stages 1–7 CONDITIONAL PASS: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md` (commit `02c027ef`). BL-001 CONDITIONAL PASS: `docs/post-roadmap-bl-001-scoped-master-decision-2026-09-07.md`. Stage 1 P1 display CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`. Provider: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 

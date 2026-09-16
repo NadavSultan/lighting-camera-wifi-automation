@@ -117,3 +117,7 @@ Phase 6 implementation is `3a81f31682c333928879ecb5168183f1f950ac1d`; evidence-o
 ## Current Phase 7 closure evidence
 
 Phase 7 accepted implementation is `e24b6a16add314393574257a08e539a27673a505`. Evidence-only history reaches Independent QA packaging tip `dc9e1b57709ced30ba78799674331734af6cbc8c`. The readiness verifier passed all 10 milestones and 18 acceptance IDs against `e24b6a1`. Independent QA passed the full deterministic suite and production 74-pole M9 workflow. The 2026-09-05 master gate re-ran readiness, backend suites with isolated pytest basetemp before and after schema generation, engineering/source validation, frontend test/typecheck/lint/build, protected-path and whitespace checks (including `P7-QA-10` cleanup), and confirmed Independent QA PASS. `docs/phase-7-master-gate-decision-2026-09-05.md` and `harness/seals/phase-07.md` close Phase 7. Post-roadmap work remains unauthorized.
+
+## Current post-roadmap Stage 2 evidence
+
+Stage 2 items BL-012, BL-017, and BL-018 are implemented at `eb3a606253d794bf8ef685eb69d6c885368823ea`. Independent QA and the scoped master gate passed on 2026-09-16; controlling decision: `docs/post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. The next authorized work is a bounded evidence-only commit followed by preparation of a dedicated Stage 3 contract. Stage 3 implementation, merge, Phase 8, and any seal remain gated.

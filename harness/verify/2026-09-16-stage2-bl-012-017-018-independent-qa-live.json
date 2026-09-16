@@ -1,0 +1,557 @@
+{
+  "head": "a0cf9ceae6f5097a12a858592b2ec249d988587c",
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "errors": [],
+  "anchors": {
+    "top_left": {
+      "vertex": {
+        "x": 383.92,
+        "y": 184.55499999999998
+      },
+      "card": {
+        "left": 395,
+        "top": 196,
+        "right": 715,
+        "bottom": 361.5,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": 11.079999999999984,
+        "y": 11.445000000000022
+      },
+      "inside": true,
+      "css": {
+        "left": 117,
+        "top": 138
+      },
+      "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n365\nAssumptions and limitations"
+    },
+    "top_right": {
+      "vertex": {
+        "x": 1496.0800000000002,
+        "y": 184.55499999999998
+      },
+      "card": {
+        "left": 1274,
+        "top": 196,
+        "right": 1594,
+        "bottom": 361.5,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": -222.08000000000015,
+        "y": 11.445000000000022
+      },
+      "inside": true,
+      "css": {
+        "left": 996,
+        "top": 138
+      },
+      "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n363\nAssumptions and limitations"
+    },
+    "bottom_left": {
+      "vertex": {
+        "x": 383.92,
+        "y": 767.475
+      },
+      "card": {
+        "left": 395,
+        "top": 651.5,
+        "right": 715,
+        "bottom": 817,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": 11.079999999999984,
+        "y": -115.97500000000002
+      },
+      "inside": true,
+      "css": {
+        "left": 117,
+        "top": 593.5
+      },
+      "text": "Calculation area 3\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n372\nAssumptions and limitations"
+    },
+    "bottom_right": {
+      "vertex": {
+        "x": 1416.6399999999999,
+        "y": 706.115
+      },
+      "card": {
+        "left": 1274,
+        "top": 651.5,
+        "right": 1594,
+        "bottom": 817,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": -142.63999999999987,
+        "y": -54.61500000000001
+      },
+      "inside": true,
+      "css": {
+        "left": 996,
+        "top": 593.5
+      },
+      "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n357\nAssumptions and limitations"
+    },
+    "center": {
+      "vertex": {
+        "x": 940,
+        "y": 476.01500000000004
+      },
+      "card": {
+        "left": 952,
+        "top": 488,
+        "right": 1272,
+        "bottom": 653.5,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": 12,
+        "y": 11.984999999999957
+      },
+      "inside": true,
+      "css": {
+        "left": 674,
+        "top": 430
+      },
+      "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n364\nAssumptions and limitations"
+    }
+  },
+  "health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "isolated_store": "C:\\Users\\NADAVS~1\\AppData\\Local\\Temp\\lcwa-stage2-qa-k9sdhzyx",
+  "after_import": {
+    "innerWidth": 1920,
+    "panelClientWidth": 277,
+    "panelScrollWidth": 277,
+    "overflowX": false,
+    "scrollOverflowX": "hidden",
+    "tabs": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "stage": {
+      "left": 278,
+      "top": 58,
+      "width": 1324,
+      "height": 767
+    }
+  },
+  "viewports": [
+    {
+      "innerWidth": 1920,
+      "panelClientWidth": 277,
+      "panelScrollWidth": 277,
+      "overflowX": false,
+      "scrollOverflowX": "hidden",
+      "tabs": [
+        {
+          "label": "Lighting",
+          "selected": true
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "width": 1324,
+        "height": 767
+      }
+    },
+    {
+      "innerWidth": 1024,
+      "panelClientWidth": 239,
+      "panelScrollWidth": 239,
+      "overflowX": false,
+      "scrollOverflowX": "hidden",
+      "tabs": [
+        {
+          "label": "Lighting",
+          "selected": true
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "stage": {
+        "left": 240,
+        "top": 58,
+        "width": 498,
+        "height": 680
+      }
+    }
+  ],
+  "cap": {
+    "metrics": {
+      "innerWidth": 1920,
+      "panelClientWidth": 277,
+      "panelScrollWidth": 277,
+      "overflowX": false,
+      "scrollOverflowX": "hidden",
+      "tabs": [
+        {
+          "label": "Lighting",
+          "selected": false
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": true
+        }
+      ],
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "width": 1324,
+        "height": 767
+      }
+    },
+    "panelVisible": true,
+    "blockerText": "CAP PLANNING\nPhase 6 \u00b7 JNET1 graph\n\nDistance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance.\n\nNo current CAP result. Complete prerequisites, then Calculate / rank, Validate, or Recommend.\n\nPREREQUISITES\n\nProduct, variant, band/jurisdiction, explicit LITE/WIFI/SMART node dispositions, design limits, counting, redundancy, and surveyed candidates remain separate user inputs.\n\nCAP preflight blockers\nProduct mapping\nReview input\nVariant\nReview input\nBand / jurisdiction\nReview input\nLink distance\nReview input\nNode limit\nReview input\nChild limit\nReview input\nHop limit\nReview input\nGateway appliance counting\nReview input\nCo-located fixture counting\nReview input\nRedundancy policy\nReview input\nLITE node disposition\nReview input\nWIFI node disposition\nReview input\nSMART node disposition\nReview input\nMode permission\nReview input\nFeasible CAP candidate\nReview input\nREQUIRED CAP INPUTS AND CANDIDATES\nOPERATION MODE\nValidate explicit CAP selection\nRecommend from approved pool\nMODE PERMISSION\nUnknown \u2014 blocks planning\nValidate only\nRecommend from approved pool\nGATEWAY APPL"
+  },
+  "draft_preserved": {
+    "before": "Calculation area\nClick to add the next point\n2 vertices\nFinish\nCancel",
+    "after": "Calculation area\nClick to add the next point\n2 vertices\nFinish\nCancel"
+  },
+  "interaction_center_initial": {
+    "vertex": {
+      "x": 940,
+      "y": 476.01500000000004
+    },
+    "card": {
+      "left": 952,
+      "top": 488,
+      "right": 1272,
+      "bottom": 653.5,
+      "width": 320,
+      "height": 165.5
+    },
+    "stage": {
+      "left": 278,
+      "top": 58,
+      "right": 1602,
+      "bottom": 825,
+      "width": 1324,
+      "height": 767
+    },
+    "offset": {
+      "x": 12,
+      "y": 11.984999999999957
+    },
+    "inside": true,
+    "css": {
+      "left": 674,
+      "top": 430
+    },
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+  },
+  "dragged": {
+    "vertex": {
+      "x": 940,
+      "y": 476.01500000000004
+    },
+    "card": {
+      "left": 1082,
+      "top": 558,
+      "right": 1402,
+      "bottom": 723.5,
+      "width": 320,
+      "height": 165.5
+    },
+    "stage": {
+      "left": 278,
+      "top": 58,
+      "right": 1602,
+      "bottom": 825,
+      "width": 1324,
+      "height": 767
+    },
+    "offset": {
+      "x": 142,
+      "y": 81.98499999999996
+    },
+    "inside": true,
+    "css": {
+      "left": 804,
+      "top": 500
+    },
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+  },
+  "session_only_drag": {
+    "project_json_equal_before_after_drag": false,
+    "project_json_equal_excluding_async_camera_geometry": true,
+    "changed_top_level_keys": [
+      "camera_geometry"
+    ],
+    "forbidden_position_keys_present": false
+  },
+  "reset": {
+    "vertex": {
+      "x": 940,
+      "y": 476.01500000000004
+    },
+    "card": {
+      "left": 952,
+      "top": 488,
+      "right": 1272,
+      "bottom": 653.5,
+      "width": 320,
+      "height": 165.5
+    },
+    "stage": {
+      "left": 278,
+      "top": 58,
+      "right": 1602,
+      "bottom": 825,
+      "width": 1324,
+      "height": 767
+    },
+    "offset": {
+      "x": 12,
+      "y": 11.984999999999957
+    },
+    "inside": true,
+    "css": {
+      "left": 674,
+      "top": 430
+    },
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+  },
+  "after_pan_zoom": {
+    "before": {
+      "left": 952,
+      "top": 488,
+      "right": 1272,
+      "bottom": 653.5,
+      "width": 320,
+      "height": 165.5
+    },
+    "after": {
+      "left": 819.59375,
+      "top": 411.296875,
+      "right": 1139.59375,
+      "bottom": 576.796875,
+      "width": 320,
+      "height": 165.5
+    }
+  },
+  "collapsed": {
+    "metrics": {
+      "innerWidth": 1920,
+      "panelClientWidth": 41,
+      "panelScrollWidth": 41,
+      "overflowX": false,
+      "scrollOverflowX": null,
+      "tabs": [],
+      "stage": {
+        "left": 42,
+        "top": 58,
+        "width": 1560,
+        "height": 767
+      }
+    },
+    "card": {
+      "vertex": {
+        "x": 940,
+        "y": 476.01500000000004
+      },
+      "card": {
+        "left": 583.59375,
+        "top": 411.296875,
+        "right": 903.59375,
+        "bottom": 576.796875,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 42,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1560,
+        "height": 767
+      },
+      "offset": {
+        "x": -356.40625,
+        "y": -64.71812500000004
+      },
+      "inside": true,
+      "css": {
+        "left": 541.6,
+        "top": 353.3
+      },
+      "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+    }
+  },
+  "restored": {
+    "metrics": {
+      "innerWidth": 1920,
+      "panelClientWidth": 277,
+      "panelScrollWidth": 277,
+      "overflowX": false,
+      "scrollOverflowX": "hidden",
+      "tabs": [
+        {
+          "label": "Lighting",
+          "selected": true
+        },
+        {
+          "label": "Camera",
+          "selected": false
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "width": 1324,
+        "height": 767
+      }
+    },
+    "card": {
+      "vertex": {
+        "x": 940,
+        "y": 476.01500000000004
+      },
+      "card": {
+        "left": 819.59375,
+        "top": 411.296875,
+        "right": 1139.59375,
+        "bottom": 576.796875,
+        "width": 320,
+        "height": 165.5
+      },
+      "stage": {
+        "left": 278,
+        "top": 58,
+        "right": 1602,
+        "bottom": 825,
+        "width": 1324,
+        "height": 767
+      },
+      "offset": {
+        "x": -120.40625,
+        "y": -64.71812500000004
+      },
+      "inside": true,
+      "css": {
+        "left": 541.6,
+        "top": 353.3
+      },
+      "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+    }
+  },
+  "report_toolbar": true,
+  "project_json": 200,
+  "lux_dom": {
+    "card": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n359\nAssumptions and limitations"
+  },
+  "hash_ok": true,
+  "bl012_matrix_pass": {
+    "five_positions_inside": true,
+    "center_offset_about_12px": true,
+    "drag_moved_card": true,
+    "reset_returned_to_anchor": true,
+    "pan_zoom_moved_card": true,
+    "collapse_restore_worked": true,
+    "drag_session_only": true
+  }
+}

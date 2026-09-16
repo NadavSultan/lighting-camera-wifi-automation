@@ -41,13 +41,13 @@ User authorized Stage 0 + Stage 1 only (BL-009, BL-005 follow-up, BL-010, BL-011
 
 ## Stage 2 implementation — 2026-09-08
 
-User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Work record: `harness/phases/2026-09-08-stage2-bl-012-017-018.md`. Implementer verification: `../harness/verify/2026-09-08-stage2-bl-012-017-018-verification.md`. **Next action: Independent QA** (prompt in that plan file; handoff `../harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-handoff.md`). Implementation commit `eb3a606`. Merge and Stage 3+ remain gated.
+User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Work record: `harness/phases/2026-09-08-stage2-bl-012-017-018.md`. Implementation commit `eb3a606`. Independent QA PASS: `../harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-review.md`. Scoped master PASS: `post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. Merge and Stage 3 implementation remain gated.
 
 | ID | Implementation status |
 |---|---|
-| BL-012 | Implementer PASS; live card ~12 px from finish vertex with map origin not at (0,0) |
-| BL-017 | Implementer PASS; exact 0 → `0.00 lx`, null → `—`, tiny positive → `<0.01 lx` |
-| BL-018 | Implementer PASS; Lighting/Camera/Wi-Fi/CAP switcher; overflowX false at 1920/1024 |
+| BL-012 | Accepted; Independent QA and scoped master PASS |
+| BL-017 | Accepted; Independent QA and scoped master PASS |
+| BL-018 | Accepted; Independent QA and scoped master PASS |
 
 ## Baseline and accepted gates
 

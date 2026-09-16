@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-08. Documentation consistency reviewed: 2026-09-08. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 1 P1 received scoped master CONDITIONAL PASS. Stage 2 implementation (BL-012, BL-017, BL-018) is committed at `eb3a606` and **awaits Independent QA**. Merge and Stage 3 remain unauthorized.
+Phase state last changed: 2026-09-16. Documentation consistency reviewed: 2026-09-16. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 1 P1 received scoped master CONDITIONAL PASS. Stage 2 (BL-012, BL-017, BL-018) is implemented at `eb3a606` and received Independent QA PASS plus scoped master PASS on 2026-09-16. Merge and Stage 3 implementation remain unauthorized pending their separate gates.
 
 ## Completed
 
@@ -50,4 +50,4 @@ Phase state last changed: 2026-09-08. Documentation consistency reviewed: 2026-0
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Next action: Independent QA of Stage 2** (BL-012 / WA-05, BL-017 / WA-10, BL-018 / WA-11). Product implementation commit `eb3a606253d794bf8ef685eb69d6c885368823ea` on `codex/bl-006-ies-associations`. Paste the QA launch prompt from `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`. Handoff: `harness/verify/2026-09-08-stage2-bl-012-017-018-independent-qa-handoff.md`. Merge to `main` and Stage 3 remain unauthorized.
+**Next action: commit the bounded Stage 2 QA/master evidence, then prepare the Stage 3 contract.** Stage 2 implementation commit `eb3a606253d794bf8ef685eb69d6c885368823ea` passed Independent QA and the scoped master gate; decision: `docs/post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. Merge to `main` and Stage 3 implementation remain unauthorized.
