@@ -12,3 +12,9 @@ export function cardOffsetFromProjected(
   projected: { x?: number; y?: number } | null | undefined,
   offsetPx?: number,
 ): { x: number; y: number };
+
+export function resolveLightingCardSession(
+  sessions: Record<string, { anchorLngLat?: [number, number] | null; draggedPosition?: { x: number; y: number } | null }> | null | undefined,
+  areaId: string,
+  fallbackAnchor: [number, number] | null,
+): { anchorLngLat: [number, number] | null; draggedPosition: { x: number; y: number } | null };

@@ -1,0 +1,731 @@
+{
+  "identity": "independent-qa",
+  "head": "fa1cbcadda93a0fb2ac0b31fdf1023a3ff5688d6",
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "api": "http://127.0.0.1:8057",
+  "ui": "http://127.0.0.1:3057/",
+  "errors": [],
+  "lighting_calculate_requests": [
+    {
+      "url": "http://127.0.0.1:8057/api/projects/0d3cd00d-30c7-4efe-bf56-0ad1c7cc78a4/lighting/calculate/31f2ddb3-f519-448b-ad61-86eafe80befe",
+      "method": "POST"
+    },
+    {
+      "url": "http://127.0.0.1:8057/api/projects/0d3cd00d-30c7-4efe-bf56-0ad1c7cc78a4/lighting/calculate/31f2ddb3-f519-448b-ad61-86eafe80befe",
+      "method": "POST"
+    },
+    {
+      "url": "http://127.0.0.1:8057/api/projects/0d3cd00d-30c7-4efe-bf56-0ad1c7cc78a4/lighting/calculate/0f90331e-e033-4558-8474-6801d1e561d3",
+      "method": "POST"
+    }
+  ],
+  "viewports": [
+    {
+      "width": 1920,
+      "height": 855,
+      "innerWidth": 1920,
+      "panelOverflowX": false,
+      "scrollOverflowXStyle": "hidden",
+      "switcher": [
+        {
+          "label": "Lighting",
+          "selected": false
+        },
+        {
+          "label": "Camera",
+          "selected": true
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "showResultsCount": 1,
+      "showResultsEnabled": 1,
+      "lightingCardCount": 1,
+      "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+      "calculationRows": [
+        {
+          "text": "Calculation area 1 \u00b7 ROAD810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lxEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixturesSelectShow resultsEditRedrawDeleteNot independently validated against AGi32 or another professional photometric reference ",
+          "showDisabled": false
+        }
+      ],
+      "capPrimary": {
+        "disabled": true,
+        "visible": false,
+        "className": "tool-button primary"
+      },
+      "capNotCalculated": true,
+      "capCurrentBanner": false,
+      "capError": false,
+      "capZeroSelected": false,
+      "capUnresolved": false,
+      "capRecommended": false,
+      "capInputsDetails": true,
+      "projectionBoundary": "Projection boundary\n\nThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+      "mapLayerIds": "present",
+      "extraCameraLayers": false,
+      "consoleErrors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "innerWidth": 1024,
+      "panelOverflowX": false,
+      "scrollOverflowXStyle": "hidden",
+      "switcher": [
+        {
+          "label": "Lighting",
+          "selected": false
+        },
+        {
+          "label": "Camera",
+          "selected": true
+        },
+        {
+          "label": "Wi-Fi",
+          "selected": false
+        },
+        {
+          "label": "CAP",
+          "selected": false
+        }
+      ],
+      "showResultsCount": 1,
+      "showResultsEnabled": 1,
+      "lightingCardCount": 1,
+      "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+      "calculationRows": [
+        {
+          "text": "Calculation area 1 \u00b7 ROAD810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lxEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixturesSelectShow resultsEditRedrawDeleteNot independently validated against AGi32 or another professional photometric reference ",
+          "showDisabled": false
+        }
+      ],
+      "capPrimary": {
+        "disabled": true,
+        "visible": false,
+        "className": "tool-button primary"
+      },
+      "capNotCalculated": true,
+      "capCurrentBanner": false,
+      "capError": false,
+      "capZeroSelected": false,
+      "capUnresolved": false,
+      "capRecommended": false,
+      "capInputsDetails": true,
+      "projectionBoundary": "Projection boundary\n\nThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+      "mapLayerIds": "present",
+      "extraCameraLayers": false,
+      "consoleErrors": []
+    }
+  ],
+  "data_dir": "C:\\Users\\NADAVS~1\\AppData\\Local\\Temp\\lcwa-stage3-p2-qa-w48zeovu",
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "pole_count": 74,
+  "api_projects": [
+    {
+      "id": "0d3cd00d-30c7-4efe-bf56-0ad1c7cc78a4",
+      "name": "Miracle Mile Lighting Poles",
+      "mode": "existing-poles",
+      "pole_count": 74,
+      "warning_count": 0,
+      "updated_at": "2026-09-16T11:55:45.047976Z"
+    }
+  ],
+  "import_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "mode": "existing-poles",
+  "after_open": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 0,
+    "showResultsEnabled": 0,
+    "lightingCardCount": 0,
+    "lightingCardText": null,
+    "calculationRows": [],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "draft_preserved_all_disciplines": {
+    "before": "Calculation area\nClick to add the next point\n1 vertices\nFinish\nCancel",
+    "after": "Calculation area\nClick to add the next point\n1 vertices\nFinish\nCancel",
+    "guideVisible": true
+  },
+  "first_card": {
+    "count": 1,
+    "cssLeft": 779,
+    "cssTop": 456,
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations"
+  },
+  "after_first_calculate": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 1,
+    "showResultsEnabled": 1,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD\n810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refer",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "first_card_dragged": {
+    "count": 1,
+    "cssLeft": 869,
+    "cssTop": 538,
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations"
+  },
+  "second_card": {
+    "count": 1,
+    "cssLeft": 846,
+    "cssTop": 410,
+    "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1124\nAssumptions and limitations"
+  },
+  "second_card_dragged": {
+    "count": 1,
+    "cssLeft": 866,
+    "cssTop": 442,
+    "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1124\nAssumptions and limitations"
+  },
+  "show_results_count": 2,
+  "after_two_areas": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 2,
+    "showResultsEnabled": 2,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1124\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD\n810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refer",
+        "showDisabled": false
+      },
+      {
+        "text": "Calculation area 2 \u00b7 ROAD\n1124 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refe",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "opened_first": {
+    "count": 1,
+    "cssLeft": 869,
+    "cssTop": 538,
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations"
+  },
+  "opened_second": {
+    "count": 1,
+    "cssLeft": 866,
+    "cssTop": 442,
+    "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1124\nAssumptions and limitations"
+  },
+  "reopened_first": {
+    "count": 1,
+    "cssLeft": 869,
+    "cssTop": 538,
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations"
+  },
+  "show_results_did_not_calculate": true,
+  "calculate_request_count_after_first": 0,
+  "after_cancel_draft": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 2,
+    "showResultsEnabled": 2,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD\n810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refer",
+        "showDisabled": false
+      },
+      {
+        "text": "Calculation area 2 \u00b7 ROAD\n1124 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refe",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "area2_card_before_invalidate": {
+    "count": 1,
+    "cssLeft": 866,
+    "cssTop": 442,
+    "text": "Calculation area 2\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n1124\nAssumptions and limitations"
+  },
+  "after_invalidate_area_2": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": true
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 2,
+    "showResultsEnabled": 1,
+    "lightingCardCount": 1,
+    "lightingCardText": "Area 2 edited\nReset position\nClose\n\nLighting result unavailable or invalidated for this area.",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD\n810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lx\nEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixtures\nSelectShow resultsEditRedrawDelete\n\nNot independently validated against AGi32 or another professional photometric refer",
+        "showDisabled": false
+      },
+      {
+        "text": "Area 2 edited \u00b7 ROAD\nNot calculated\nSelectShow resultsEditRedrawDelete",
+        "showDisabled": true
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "after_invalidate_card": {
+    "count": 1,
+    "cssLeft": 866,
+    "cssTop": 442,
+    "text": "Area 2 edited\nReset position\nClose\n\nLighting result unavailable or invalidated for this area."
+  },
+  "after_delete_area_2": {
+    "rows": [
+      "Calculation area 1 \u00b7 ROAD"
+    ],
+    "showResultsEnabled": 1,
+    "cardText": null,
+    "cardCount": 0
+  },
+  "area1_after_delete_other": {
+    "count": 1,
+    "cssLeft": 869,
+    "cssTop": 538,
+    "text": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations"
+  },
+  "cap_pane_initial": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": false
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": true
+      }
+    ],
+    "showResultsCount": 1,
+    "showResultsEnabled": 1,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lxEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixturesSelectShow resultsEditRedrawDeleteNot independently validated against AGi32 or another professional photometric reference ",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": true,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "cap_pane_text_initial": "CAP PLANNING\nPhase 6 \u00b7 JNET1 graph\n\nDistance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance.\n\nNo current CAP result.\n\nCalculate CAP recommendation\n\nRecommendation is unavailable until existing Phase 6 preflight permits it. Review the blockers below. Do not invent inputs or candidate coordinates.\n\nCAP preflight blockers\nProduct mapping\nReview input\nVariant\nReview input\nBand / jurisdiction\nReview input\nLink distance\nReview input\nNode limit\nReview input\nChild limit\nReview input\nHop limit\nReview input\nGateway appliance counting\nReview input\nCo-located fixture counting\nReview input\nRedundancy policy\nReview input\nLITE node disposition\nReview input\nWIFI node disposition\nReview input\nSMART node disposition\nReview input\nMode permission\nReview input\nFeasible CAP candidate\nReview input\nREQUIRED CAP INPUTS\nCANDIDATES AND LOCKS\nADVANCED OPERATIONS\nAdvanced topology, score trace, and provenance",
+  "cap_review_count": 15,
+  "cap_review_focus_collapsed": {
+    "activeId": "cap-planning-panel",
+    "activeTag": "SECTION",
+    "productMappingDetailsOpen": false,
+    "productMappingVisible": true,
+    "blockers": [
+      "Product mapping\nReview input",
+      "Variant\nReview input",
+      "Band / jurisdiction\nReview input",
+      "Link distance\nReview input",
+      "Node limit\nReview input",
+      "Child limit\nReview input",
+      "Hop limit\nReview input",
+      "Gateway appliance counting\nReview input",
+      "Co-located fixture counting\nReview input",
+      "Redundancy policy\nReview input",
+      "LITE node disposition\nReview input",
+      "WIFI node disposition\nReview input",
+      "SMART node disposition\nReview input",
+      "Mode permission\nReview input",
+      "Feasible CAP candidate\nReview input"
+    ]
+  },
+  "cap_add_site_enabled": true,
+  "cap_candidate_error": "Locator.click: Timeout 30000ms exceeded.\nCall log:\nwaiting for get_by_role(\"button\", name=\"Add distinct manual non-pole CAP site\")\n  -   locator resolved to <button disabled class=\"quiet-button\">Add distinct manual non-pole CAP site</button>\n  - attempting click action\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #1\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #2\n  -   waiting 20ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #3\n  -   waiting 100ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #4\n  -   waiting 100ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #5\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #6\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #7\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #8\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #9\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #10\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #11\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #12\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #13\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #14\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #15\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #16\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #17\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #18\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #19\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #20\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #21\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #22\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #23\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #24\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #25\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #26\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #27\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #28\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #29\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #30\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #31\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #32\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #33\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #34\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #35\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #36\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #37\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #38\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #39\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #40\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #41\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #42\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #43\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #44\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #45\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #46\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #47\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #48\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #49\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #50\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #51\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #52\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #53\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #54\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #55\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #56\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #57\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #58\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #59\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #60\n  -   waiting 500ms\n  -   waiting for element to be visible, enabled and stable\n  -   element is not enabled\n  - retrying click action, attempt #61\n  -   waiting 500ms\n",
+  "cap_review_focus_open": {
+    "activeId": "cap-planning-panel",
+    "activeTag": "SECTION",
+    "productMappingDetailsOpen": true,
+    "productMappingVisible": true,
+    "blockers": [
+      "Feasible CAP candidate\nReview input"
+    ]
+  },
+  "cap_after_profile": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": false
+      },
+      {
+        "label": "Camera",
+        "selected": false
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": true
+      }
+    ],
+    "showResultsCount": 1,
+    "showResultsEnabled": 1,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lxEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixturesSelectShow resultsEditRedrawDeleteNot independently validated against AGi32 or another professional photometric reference ",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": true,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundaryThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "cap_after_profile_text": "CAP PLANNING\nPhase 6 \u00b7 JNET1 graph\n\nDistance-qualified conceptual link; not RF-predicted. Graph-and-constraint planning only; not coverage, capacity, performance, service quality, installation feasibility, or compliance.\n\nNo current CAP result.\n\nCalculate CAP recommendation\n\nRecommendation is unavailable until existing Phase 6 preflight permits it. Review the blockers below. Do not invent inputs or candidate coordinates.\n\nCAP preflight blockers\nFeasible CAP candidate\nReview input\nREQUIRED CAP INPUTS\nOPERATION MODE\nValidate explicit CAP selection\nRecommend from approved pool\nMODE PERMISSION\nUnknown \u2014 blocks planning\nValidate only\nRecommend from approved pool\nGATEWAY APPLIANCE COUNTING\nUnknown \u2014 blocks planning\nIncluded in per-CAP node count\nExcluded from per-CAP node count\nCO-LOCATED FIXTURE COUNTING\nUnknown \u2014 blocks planning\nDistinct managed fixture node once\nMerged, not a separate fixture node\nREDUNDANCY POLICY\nUnknown \u2014 blocks planning\nSingle allowed with warning\nN+1 graph validation\nUser supplied only\nLITE NODE DISPOSITION\nUnknown \u2014 blocks planning\nNode\nNon-node\nWIFI NODE DISPOSITION\nUnknown \u2014 blocks planning\nNode\nNon-node\nSMART NODE DISPOSITION\nUnknown \u2014 blocks planning\nNode\nNon-node\nPRODUCT MAPPING \u00b7 PROVENANCE-BEARING\nVARIANT \u00b7 PROVENANCE-BEARING\nBAND AND JURISDICTION \u00b7 PROVENANCE-BEARING\nLINK DISTANCE M \u00b7 PROVENANCE-BEARING\nNODE LIMIT \u00b7 PROVENANCE-BEARING\nCHILD LIMIT \u00b7 PROVENANCE-BEARING\nHOP LIMIT \u00b7 PROVENANCE-BEARING\nCANDIDATES AND LOCKS\nAdd selected pole as CAP site\nExclude current CAP node\nMANUAL NON-POLE LONGITUDE\nMANUAL NON-POLE LATITUDE\nAdd distinct manual non-pole CAP site\n\nNo CAP candidates yet. Add an existing-pole or distinct manual non-pole site.\n\nADVANCED OPERATIONS\nAdvanced topology, score trace, and provenance",
+  "cap_primary_enable_wait_error": "Page.wait_for_function: Timeout 20000ms exceeded.",
+  "cap_primary_after_profile": {
+    "count": 1,
+    "disabled": true
+  },
+  "cap_recommend_skipped": "primary remained disabled after filling existing UI test-only inputs",
+  "cap_advanced_visible": true,
+  "cap_inputs_open": [
+    {
+      "summary": "Required CAP inputs",
+      "open": true,
+      "hasOperationMode": true,
+      "hasCandidates": false
+    },
+    {
+      "summary": "Candidates and locks",
+      "open": true,
+      "hasOperationMode": false,
+      "hasCandidates": true
+    },
+    {
+      "summary": "Advanced operations",
+      "open": true,
+      "hasOperationMode": false,
+      "hasCandidates": false
+    }
+  ],
+  "camera_pane": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": "hidden",
+    "switcher": [
+      {
+        "label": "Lighting",
+        "selected": false
+      },
+      {
+        "label": "Camera",
+        "selected": true
+      },
+      {
+        "label": "Wi-Fi",
+        "selected": false
+      },
+      {
+        "label": "CAP",
+        "selected": false
+      }
+    ],
+    "showResultsCount": 1,
+    "showResultsEnabled": 1,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [
+      {
+        "text": "Calculation area 1 \u00b7 ROAD810 points \u00b7 Eavg 0.00 lx \u00b7 Emin 0.00 lx \u00b7 Emax 0.00 lxEmin/Eavg \u2014 \u00b7 Emin/Emax \u2014 \u00b7 0 fixturesSelectShow resultsEditRedrawDeleteNot independently validated against AGi32 or another professional photometric reference ",
+        "showDisabled": false
+      }
+    ],
+    "capPrimary": {
+      "disabled": true,
+      "visible": false,
+      "className": "tool-button primary"
+    },
+    "capNotCalculated": true,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": true,
+    "projectionBoundary": "Projection boundary\n\nThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "camera_legend_text": "Projection boundary\n\nThe displayed boundary is the intersection of the camera field-of-view corner rays with the application's flat local ground plane. It depends on the pinned camera/lens FOV, mounting height, fixture azimuth, fixed relative camera azimuth, and fixed downward tilt. Footprint area and overlap are geometric results only. The boundary is not detection range, recognition performance, pixel density, terrain/occlusion analysis, or proof of unobstructed visibility.",
+  "collapsed": {
+    "innerWidth": 1920,
+    "panelOverflowX": false,
+    "scrollOverflowXStyle": null,
+    "switcher": [],
+    "showResultsCount": 0,
+    "showResultsEnabled": 0,
+    "lightingCardCount": 1,
+    "lightingCardText": "Calculation area 1\nReset position\nClose\n\nCurrent calculated result\n\nEavg\n0.00 lx\nEmin\n0.00 lx\nEmax\n0.00 lx\nEmin/Eavg\n\u2014\nEmin/Emax\n\u2014\nPoints\n810\nAssumptions and limitations",
+    "calculationRows": [],
+    "capPrimary": null,
+    "capNotCalculated": false,
+    "capCurrentBanner": false,
+    "capError": false,
+    "capZeroSelected": false,
+    "capUnresolved": false,
+    "capRecommended": false,
+    "capInputsDetails": false,
+    "projectionBoundary": "",
+    "mapLayerIds": "present",
+    "extraCameraLayers": false,
+    "consoleErrors": []
+  },
+  "hash_ok": true,
+  "switcher_default_lighting": true,
+  "overflow_ok": true,
+  "one_card": true,
+  "show_results_present": true,
+  "reopened_first_is_area_1": true,
+  "opened_second_is_area_2": true,
+  "session_restore_delta": {
+    "left": 0,
+    "top": 0
+  },
+  "session_restore_ok": true,
+  "cap_primary_present": true,
+  "cap_primary_disabled_before_profile": true,
+  "projection_boundary_ok": true,
+  "draft_preserved_across_discipline": true,
+  "cancel_kept_results": true,
+  "delete_closed_active_card": true,
+  "delete_kept_other_area": true,
+  "delete_kept_other_session": true,
+  "no_page_errors": true,
+  "no_new_camera_layer": true
+}

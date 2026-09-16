@@ -4,7 +4,7 @@ This is the execution plan index. Phase 7 requirements, decisions, milestones, v
 
 ## Active plan
 
-**Next action:** Commit the bounded Stage 2 QA/master evidence, then prepare a dedicated Stage 3 contract. Stage 2 contract: `docs/superpowers/plans/2026-09-08-stage2-bl-012-017-018.md`; implementation `eb3a606`; Independent QA PASS and scoped master PASS: `docs/post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. Do not implement Stage 3 or merge before its separate gate.
+**Next action:** Create one bounded Stage 3 P2 implementation/evidence commit under the final PASS in `docs/post-roadmap-stage3-p2-scoped-master-decision-2026-09-16.md`. The original Independent QA review and focused `S3P2-QA-01` PASS addendum remain separate evidence. Do not merge, push, prepare or start BL-016/019/020, or seal.
 
 Post-roadmap item plan (not a numbered phase): `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Stages 1–7 CONDITIONAL PASS: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md` (commit `02c027ef`). BL-001 CONDITIONAL PASS: `docs/post-roadmap-bl-001-scoped-master-decision-2026-09-07.md`. Stage 1 P1 display CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`. Provider: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 

@@ -4,7 +4,7 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-**Next action:** Commit the bounded Stage 2 QA/master evidence, then prepare a dedicated Stage 3 contract. Stage 2 (BL-012, BL-017, BL-018) passed Independent QA and the scoped master gate on product commit `eb3a606253d794bf8ef685eb69d6c885368823ea`; decision: `docs/post-roadmap-stage2-scoped-master-decision-2026-09-16.md`. Merge, Stage 3 implementation, and any seal remain unauthorized.
+**Next action:** Create one bounded Stage 3 P2 implementation/evidence commit from the accepted dirty worktree at HEAD `fa1cbca`, excluding `.superpowers/`, `docs/bl-016-camera-pixel-density-architecture.md`, and unrelated/generated/runtime files. Stage 3 P2 passed the final scoped master gate on 2026-09-16 after focused Independent QA closed `S3P2-QA-01`. Do not merge, push, start later backlog work, or seal. Stage 2 remains accepted at `eb3a606`.
 
 Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit `02c027ef`). BL-001 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 1 P1 display (BL-009, BL-005 follow-up, BL-010, BL-011) received scoped master CONDITIONAL PASS on 2026-09-08 (implementation identity later minted; merge not authorized). Stage 2 passed Independent QA and scoped master review on 2026-09-16. OBS-01 is not authorized. No Phase 8 seal.
 

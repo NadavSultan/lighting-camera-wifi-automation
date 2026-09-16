@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { CapCandidateSite, EffectivePole, FixtureType, Project } from "../lib/types";
 import { CAP_DISCLAIMER, capBlockers, capOperationEnabled } from "../lib/phase6-cap-workflows.mjs";
 import { blockerFocusTarget, blockerLabel, candidateDisplayLabel, capResultSummary } from "../lib/cap-workflow-view.mjs";
+import { capPrimaryAction } from "../lib/cap-primary-action.mjs";
 
 type CapPlanningPanelProps = {
   project: Project | null;
@@ -49,6 +50,7 @@ export default function CapPlanningPanel({
   const panelRef = useRef<HTMLElement | null>(null);
   const summary = capResultSummary(project);
   const blockers = project ? capBlockers(project.cap_planning_inputs) : [];
+  const primary = capPrimaryAction(project);
 
   useEffect(() => {
     if (focusNonce > 0 && panelRef.current) {
@@ -77,47 +79,33 @@ export default function CapPlanningPanel({
         <>
           <div className="cap-result-summary" aria-live="polite">
             {summary.state === "not-calculated" && (
-              <p className="helper">No current CAP result. Complete prerequisites, then Calculate / rank, Validate, or Recommend.</p>
+              <p className="helper">No current CAP result.</p>
             )}
             {summary.state === "error" && (
               <div className="warning-card"><strong>CAP calculation error</strong><p>The last operation failed. Review inputs and try again. This is not an installation-ready answer.</p></div>
             )}
             {(summary.state === "current" || summary.state === "current-with-unresolved") && (
-              <>
-                <p><strong>Recommended CAP units: {summary.selectedIds.length}</strong></p>
-                {summary.state === "current-with-unresolved" && (
-                  <div className="warning-card"><strong>{summary.unresolvedIds.length} unresolved node{summary.unresolvedIds.length === 1 ? "" : "s"}</strong><p>Incomplete graph coverage — not an installation-ready answer.</p></div>
-                )}
-                {summary.selectedIds.length === 0 ? (
-                  <p className="helper">Current result has zero selected CAP sites.</p>
-                ) : (
-                  <ul className="cap-selected-list">
-                    {summary.selectedIds.map((id) => (
-                      <li key={id}>
-                        <span><code>{id}</code> · {candidateDisplayLabel(project, id)}</span>
-                        <button type="button" className="quiet-button" onClick={() => onFocusCandidate(id)}>Locate</button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <button type="button" className="quiet-button" onClick={onShowSelectedSites} disabled={!summary.selectedIds.length}>
-                  Show selected sites on map
-                </button>
-                {project.cap_calculations.result?.warnings?.length ? (
-                  <div className="cap-result-warnings">
-                    {project.cap_calculations.result.warnings.map((warning) => (
-                      <div className="warning-card" key={warning}>{warning}</div>
-                    ))}
-                  </div>
-                ) : null}
-                <p className="helper">{CAP_DISCLAIMER}</p>
-              </>
+              <p><strong>Current CAP result</strong></p>
             )}
           </div>
 
           <div className="cap-panel-block">
-            <h4>Prerequisites</h4>
-            <p className="helper">Product, variant, band/jurisdiction, explicit LITE/WIFI/SMART node dispositions, design limits, counting, redundancy, and surveyed candidates remain separate user inputs.</p>
+            <div className="button-row cap-primary-action">
+              <button
+                type="button"
+                className="tool-button primary"
+                onClick={() => runCap(primary.operation)}
+                disabled={!primary.enabled || busy}
+              >
+                Calculate CAP recommendation
+              </button>
+            </div>
+            {!primary.enabled && (
+              <p className="helper">Recommendation is unavailable until existing Phase 6 preflight permits it. Review the blockers below. Do not invent inputs or candidate coordinates.</p>
+            )}
+          </div>
+
+          <div className="cap-panel-block">
             {blockers.length ? (
               <div className="warning-card">
                 <strong>CAP preflight blockers</strong>
@@ -138,9 +126,42 @@ export default function CapPlanningPanel({
             ) : (
               <div className="warning-card info">Preflight complete for the selected test/project inputs.</div>
             )}
+            {summary.state === "current-with-unresolved" && (
+              <div className="warning-card"><strong>{summary.unresolvedIds.length} unresolved node{summary.unresolvedIds.length === 1 ? "" : "s"}</strong><p>Incomplete graph coverage — not an installation-ready answer.</p></div>
+            )}
+          </div>
 
-            <details className="cap-required-inputs" open>
-              <summary>Required CAP inputs and candidates</summary>
+          {(summary.state === "current" || summary.state === "current-with-unresolved") && (
+            <div className="cap-panel-block">
+              <p><strong>Recommended CAP units: {summary.selectedIds.length}</strong></p>
+              {summary.selectedIds.length === 0 ? (
+                <p className="helper">Current result has zero selected CAP sites.</p>
+              ) : (
+                <ul className="cap-selected-list">
+                  {summary.selectedIds.map((id) => (
+                    <li key={id}>
+                      <span><code>{id}</code> · {candidateDisplayLabel(project, id)}</span>
+                      <button type="button" className="quiet-button" onClick={() => onFocusCandidate(id)}>Locate</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <button type="button" className="quiet-button" onClick={onShowSelectedSites} disabled={!summary.selectedIds.length}>
+                Show selected sites on map
+              </button>
+              {project.cap_calculations.result?.warnings?.length ? (
+                <div className="cap-result-warnings">
+                  {project.cap_calculations.result.warnings.map((warning) => (
+                    <div className="warning-card" key={warning}>{warning}</div>
+                  ))}
+                </div>
+              ) : null}
+              <p className="helper">{CAP_DISCLAIMER}</p>
+            </div>
+          )}
+
+          <details className="cap-required-inputs">
+            <summary>Required CAP inputs</summary>
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="cap-field-operation_mode">Operation mode</label>
@@ -217,11 +238,10 @@ export default function CapPlanningPanel({
                 </div>
               ))}
             </div>
-            </details>
-          </div>
+          </details>
 
-          <div className="cap-panel-block" id="cap-section-candidates">
-            <h4>Candidates and locks</h4>
+          <details className="cap-required-inputs" id="cap-section-candidates">
+            <summary>Candidates and locks</summary>
             <div className="button-row">
               <button className="quiet-button" onClick={addSelectedPoleCapCandidate} disabled={!selected || busy}>Add selected pole as CAP site</button>
               <button className="quiet-button" disabled={!selected || busy} onClick={() => selected && mutateProject((draft) => {
@@ -276,18 +296,17 @@ export default function CapPlanningPanel({
               </div>
             ))}
             {!project.cap_planning_inputs.candidates.length && <p className="helper">No CAP candidates yet. Add an existing-pole or distinct manual non-pole site.</p>}
-          </div>
+          </details>
 
-          <div className="cap-panel-block">
-            <h4>Actions</h4>
+          <details className="cap-required-inputs">
+            <summary>Advanced operations</summary>
             <div className="button-row">
               <button className="quiet-button" onClick={() => runCap("calculate")} disabled={!capOperationEnabled(project, "calculate") || busy} title="Calculate / rank: inspect candidate ranking">Calculate / rank</button>
               <button className="quiet-button" onClick={() => runCap("validate")} disabled={!capOperationEnabled(project, "validate") || busy} title="Validate: check your explicit selection">Validate</button>
-              <button className="quiet-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy} title="Recommend: choose from the approved candidate pool">Recommend</button>
             </div>
             <p className="helper">Calculate / rank: inspect candidate ranking. Validate: check your explicit selection. Recommend: choose from the approved candidate pool.</p>
             <p>{project.cap_planning_inputs.candidates.length} explicit CAP candidate sites · {project.cap_recommendations.selected_candidate_ids.length} selected.</p>
-          </div>
+          </details>
 
           <details className="lighting-provenance">
             <summary>Advanced topology, score trace, and provenance</summary>

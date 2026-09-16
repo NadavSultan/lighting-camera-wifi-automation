@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { clampCard, ringAnchorLngLat, cardOffsetFromProjected } from "../app/lib/lighting-card-position.mjs";
+import { clampCard, ringAnchorLngLat, cardOffsetFromProjected, resolveLightingCardSession } from "../app/lib/lighting-card-position.mjs";
 
 test("clampCard keeps a 280x180 card inside an 800x600 viewport with 8px margin", () => {
   assert.deepEqual(
@@ -71,4 +71,36 @@ test("LightingResultCard does not subtract container viewport origin from map.pr
   assert.match(source, /cardOffsetFromProjected/);
   assert.doesNotMatch(source, /projected\.x\s*-\s*container\.left/);
   assert.doesNotMatch(source, /projected\.y\s*-\s*container\.top/);
+});
+
+test("resolveLightingCardSession restores independent dragged positions", () => {
+  const sessions = {
+    "area-a": { anchorLngLat: [-80.26, 25.75], draggedPosition: { x: 40, y: 80 } },
+    "area-b": { anchorLngLat: [-80.24, 25.76], draggedPosition: { x: 120, y: 200 } },
+  };
+  assert.deepEqual(resolveLightingCardSession(sessions, "area-a", [-80.0, 25.0]), {
+    anchorLngLat: [-80.26, 25.75],
+    draggedPosition: { x: 40, y: 80 },
+  });
+  assert.deepEqual(resolveLightingCardSession(sessions, "area-b", [-80.0, 25.0]), {
+    anchorLngLat: [-80.24, 25.76],
+    draggedPosition: { x: 120, y: 200 },
+  });
+});
+
+test("resolveLightingCardSession uses the polygon fallback when no session exists", () => {
+  assert.deepEqual(resolveLightingCardSession({}, "area-c", [-80.21, 25.74]), {
+    anchorLngLat: [-80.21, 25.74],
+    draggedPosition: null,
+  });
+});
+
+test("resolveLightingCardSession keeps a stored anchor when dragged position is null", () => {
+  const sessions = {
+    "area-a": { anchorLngLat: [-80.26, 25.75], draggedPosition: null },
+  };
+  assert.deepEqual(resolveLightingCardSession(sessions, "area-a", [-80.0, 25.0]), {
+    anchorLngLat: [-80.26, 25.75],
+    draggedPosition: null,
+  });
 });

@@ -29,8 +29,33 @@ test("left panel uses a four-discipline switcher defaulting to Lighting", async 
 test("CAP required inputs stay available and expandable rather than deleted", async () => {
   const capPanel = await readFile(new URL("../app/components/CapPlanningPanel.tsx", import.meta.url), "utf8");
   assert.match(capPanel, /CAP preflight blockers/);
-  assert.match(capPanel, /<details className="cap-required-inputs" open>/);
-  assert.match(capPanel, /Required CAP inputs and candidates/);
+  assert.match(capPanel, /<details className="cap-required-inputs">/);
+  assert.doesNotMatch(capPanel, /<details className="cap-required-inputs" open>/);
+  assert.match(capPanel, /Required CAP inputs/);
   assert.match(capPanel, /cap-field-operation_mode/);
-  assert.match(capPanel, /cap-section-candidates/);
+  assert.match(capPanel, /id="cap-section-candidates"/);
+  assert.match(capPanel, /Calculate \/ rank/);
+  assert.match(capPanel, /Validate/);
+});
+
+test("CAP pane is result-first with one recommend primary action", async () => {
+  const capPanel = await readFile(new URL("../app/components/CapPlanningPanel.tsx", import.meta.url), "utf8");
+  const resultIdx = capPanel.indexOf("cap-result-summary");
+  const primaryIdx = capPanel.indexOf("button-row cap-primary-action");
+  const blockerIdx = capPanel.indexOf("CAP preflight blockers");
+  const inputsIdx = capPanel.indexOf("Required CAP inputs");
+  const candidatesIdx = capPanel.indexOf("id=\"cap-section-candidates\"");
+  const secondaryIdx = capPanel.indexOf("Advanced operations");
+  assert.ok(resultIdx >= 0 && primaryIdx > resultIdx);
+  assert.ok(blockerIdx > primaryIdx);
+  assert.ok(inputsIdx > blockerIdx);
+  assert.ok(candidatesIdx > inputsIdx);
+  assert.ok(secondaryIdx > candidatesIdx);
+  assert.match(capPanel, /runCap\(primary.operation\)/);
+  assert.match(capPanel, /Calculate CAP recommendation/);
+  assert.doesNotMatch(capPanel, /onClick=\{\(\) => runCap\("recommend"\)\}/);
+  assert.match(capPanel, /runCap\("calculate"\)/);
+  assert.match(capPanel, /runCap\("validate"\)/);
+  assert.match(capPanel, /Current result has zero selected CAP sites/);
+  assert.match(capPanel, /unresolved node/);
 });

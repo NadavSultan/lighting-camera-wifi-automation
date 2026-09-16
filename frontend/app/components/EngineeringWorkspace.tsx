@@ -19,7 +19,10 @@ import { capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-c
 import { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";
 import { polygonDraftGuidance } from "../lib/polygon-draft.mjs";
 import { capResultSummary } from "../lib/cap-workflow-view.mjs";
-import { ringAnchorLngLat } from "../lib/lighting-card-position.mjs";
+import { lightingAreaResultState, lightingAreaShowResultsEnabled } from "../lib/lighting-area-result-state.mjs";
+import { resolveLightingCardSession, ringAnchorLngLat } from "../lib/lighting-card-position.mjs";
+import { CAMERA_PROJECTION_BOUNDARY_EXPLANATION } from "../lib/camera-projection-legend.mjs";
+import { openAndFocusCapReviewTarget } from "../lib/cap-review-input.mjs";
 import { formatLuxWithUnit } from "../lib/lighting-labels.mjs";
 import { directionSignificantKey } from "../lib/fixture-direction-view.mjs";
 import { USE_STANDARD_MAP_LABEL, backgroundAvailability, readSatelliteConfigFromEnv, requestBackground, sessionBackground, type BackgroundChoice } from "../lib/map-background.mjs";
@@ -195,11 +198,7 @@ export function EngineeringWorkspace() {
   function reviewCapInput(elementId: string) {
     openCapPlanningPanel();
     window.setTimeout(() => {
-      const element = document.getElementById(elementId);
-      if (element instanceof HTMLElement) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-        element.focus();
-      }
+      openAndFocusCapReviewTarget(document, elementId);
     }, 80);
   }
 
@@ -598,6 +597,18 @@ export function EngineeringWorkspace() {
     setStatus("Calculation area and its derived result deleted; source poles and camera priority areas unchanged");
   }
 
+  function showLightingResults(areaId: string) {
+    if (!project) return;
+    const area = project.calculation_areas.find((item) => item.id === areaId);
+    const result = project.lighting_calculations.results[areaId];
+    if (!area || lightingAreaResultState(area, result) !== "current") return;
+    const fallback = ringAnchorLngLat(area.wgs84_coordinates);
+    const resolved = resolveLightingCardSession(lightingCardSessions, areaId, fallback);
+    setSelectedCalculationAreaId(areaId);
+    setLightingCardSessions((sessions) => ({ ...sessions, [areaId]: resolved }));
+    setLightingCardAreaId(areaId);
+  }
+
   async function calculateSelectedArea() {
     if (!project || !project.calculation_areas.length) { setError("Draw a lighting calculation area first"); return; }
     const selectedAreaId = selectedCalculationAreaId;
@@ -747,7 +758,62 @@ export function EngineeringWorkspace() {
                   <div className="field"><label htmlFor="calculation-spacing">Grid spacing (m)</label><input id="calculation-spacing" type="number" min="0.01" max="1000" value={calculationSpacing} onChange={(event) => setCalculationSpacing(event.target.value)} /></div>
                   <div className="field"><label htmlFor="calculation-maintenance">Maintenance factor</label><input id="calculation-maintenance" type="number" min="0.01" max="1" step="0.01" value={calculationMaintenance} onChange={(event) => setCalculationMaintenance(event.target.value)} /></div>
                 </div>{drawingCalculationArea && <p>{selectedCalculationAreaId ? "Replacement begins empty; the stored polygon is preserved until this draft validates." : "New polygon"} · {calculationDraft.length} vertices.</p>}<button className="quiet-button" onClick={finishCalculationArea}>{drawingCalculationArea ? "Validate and save polygon" : "Save details"}</button><button className="quiet-button" onClick={cancelCalculationArea}>Cancel</button></div>}
-                {project?.calculation_areas.map((area) => { const result = project.lighting_calculations.results[area.id]; const stats = result?.statistics; return <div className={`calculation-row ${selectedCalculationAreaId === area.id ? "selected" : ""}`} key={area.id}><strong>{area.name} · {area.classification}</strong><span>{stats ? `${stats.point_count} points · Eavg ${formatLuxWithUnit(stats.average_illuminance_lux)} · Emin ${formatLuxWithUnit(stats.minimum_illuminance_lux)} · Emax ${formatLuxWithUnit(stats.maximum_illuminance_lux)}` : "Not calculated"}</span>{stats && <small>Emin/Eavg {stats.emin_over_eavg?.toFixed(3) ?? "—"} · Emin/Emax {stats.emin_over_emax?.toFixed(3) ?? "—"} · {result.contributing_fixture_count} fixtures</small>}<div><button className="quiet-button" onClick={() => setSelectedCalculationAreaId(area.id)}>Select</button><button className="quiet-button" onClick={() => editCalculationArea(area.id)}>Edit</button><button className="quiet-button" onClick={() => editCalculationArea(area.id, true)}>Redraw</button><button className="quiet-button" onClick={() => deleteCalculationArea(area.id)}>Delete</button></div>{result && <><p className="lighting-disclaimer">{result.disclaimer}</p><p className="helper">Approved simplified direct-light model; not a standards-compliance determination.</p><details className="lighting-provenance"><summary>Calculation and fixture provenance</summary><p>Model {result.calculation_model_version} · CRS {result.projected_crs} · polygon r{result.polygon_revision}<br />Grid {result.statistics.grid_spacing_m} m · origin {result.grid_origin_m.join(", ")} m · {result.grid_anchor_policy}<br />Boundary {result.boundary_policy} · plane {area.calculation_plane_elevation_m} m · maintenance factor {area.maintenance_factor}</p>{result.fixture_provenance.map((fixture) => <p key={fixture.pole_id}><strong>{fixture.pole_id}</strong><br />{fixture.fixture_model_id} r{fixture.fixture_model_revision} · {fixture.ies_original_filename} r{fixture.ies_file_revision}<br />SHA-256 {fixture.ies_sha256} · parsed Type {fixture.ies_parsed_metadata.photometric_type ?? "—"}, {fixture.ies_parsed_metadata.input_watts ?? "—"} W, {fixture.ies_parsed_metadata.vertical_angle_count ?? "—"}×{fixture.ies_parsed_metadata.horizontal_angle_count ?? "—"} angles<br />Height {fixture.mounting_height_m} m · azimuth {fixture.fixture_azimuth_deg}° · origin {fixture.origin_projected_m.join(", ")} m{fixture.warnings.length ? <><br />Warnings: {fixture.warnings.join(" ")}</> : null}</p>)}</details>{result.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}</>}</div>; })}
+                {project?.calculation_areas.map((area) => {
+                  const result = project.lighting_calculations.results[area.id];
+                  const resultState = lightingAreaResultState(area, result);
+                  const showResults = lightingAreaShowResultsEnabled(resultState);
+                  const stats = resultState === "current" ? result?.statistics : undefined;
+                  return (
+                    <div className={`calculation-row ${selectedCalculationAreaId === area.id ? "selected" : ""}`} key={area.id}>
+                      <strong>{area.name} · {area.classification}</strong>
+                      <span>
+                        {resultState === "current" && stats
+                          ? `${stats.point_count} points · Eavg ${formatLuxWithUnit(stats.average_illuminance_lux)} · Emin ${formatLuxWithUnit(stats.minimum_illuminance_lux)} · Emax ${formatLuxWithUnit(stats.maximum_illuminance_lux)}`
+                          : resultState === "stale"
+                            ? "Stale — recalculate"
+                            : "Not calculated"}
+                      </span>
+                      {resultState === "current" && stats && result && (
+                        <small>Emin/Eavg {stats.emin_over_eavg?.toFixed(3) ?? "—"} · Emin/Emax {stats.emin_over_emax?.toFixed(3) ?? "—"} · {result.contributing_fixture_count} fixtures</small>
+                      )}
+                      <div>
+                        <button className="quiet-button" onClick={() => setSelectedCalculationAreaId(area.id)}>Select</button>
+                        <button
+                          type="button"
+                          className="quiet-button"
+                          disabled={!showResults}
+                          title={resultState === "current" ? "Show stored results" : resultState === "stale" ? "Stored result is stale; recalculate" : "No stored result"}
+                          onClick={() => showLightingResults(area.id)}
+                        >
+                          Show results
+                        </button>
+                        <button className="quiet-button" onClick={() => editCalculationArea(area.id)}>Edit</button>
+                        <button className="quiet-button" onClick={() => editCalculationArea(area.id, true)}>Redraw</button>
+                        <button className="quiet-button" onClick={() => deleteCalculationArea(area.id)}>Delete</button>
+                      </div>
+                      {resultState === "current" && result && (
+                        <>
+                          <p className="lighting-disclaimer">{result.disclaimer}</p>
+                          <p className="helper">Approved simplified direct-light model; not a standards-compliance determination.</p>
+                          <details className="lighting-provenance">
+                            <summary>Calculation and fixture provenance</summary>
+                            <p>Model {result.calculation_model_version} · CRS {result.projected_crs} · polygon r{result.polygon_revision}<br />Grid {result.statistics.grid_spacing_m} m · origin {result.grid_origin_m.join(", ")} m · {result.grid_anchor_policy}<br />Boundary {result.boundary_policy} · plane {area.calculation_plane_elevation_m} m · maintenance factor {area.maintenance_factor}</p>
+                            {result.fixture_provenance.map((fixture) => (
+                              <p key={fixture.pole_id}>
+                                <strong>{fixture.pole_id}</strong><br />
+                                {fixture.fixture_model_id} r{fixture.fixture_model_revision} · {fixture.ies_original_filename} r{fixture.ies_file_revision}<br />
+                                SHA-256 {fixture.ies_sha256} · parsed Type {fixture.ies_parsed_metadata.photometric_type ?? "—"}, {fixture.ies_parsed_metadata.input_watts ?? "—"} W, {fixture.ies_parsed_metadata.vertical_angle_count ?? "—"}×{fixture.ies_parsed_metadata.horizontal_angle_count ?? "—"} angles<br />
+                                Height {fixture.mounting_height_m} m · azimuth {fixture.fixture_azimuth_deg}° · origin {fixture.origin_projected_m.join(", ")} m
+                                {fixture.warnings.length ? <><br />Warnings: {fixture.warnings.join(" ")}</> : null}
+                              </p>
+                            ))}
+                          </details>
+                          {result.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
                 {!project?.calculation_areas.length && <p className="helper">Draw a Road, Sidewalk, Parking, or Other polygon. Defaults: 0.0 m plane, 2.0 m grid, maintenance factor 1.0.</p>}
               </section>
               </div>
@@ -755,6 +821,10 @@ export function EngineeringWorkspace() {
               <section className="section">
                 <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
                 <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>
+                <div className="camera-projection-legend" role="note">
+                  <strong>Projection boundary</strong>
+                  <p className="helper">{CAMERA_PROJECTION_BOUNDARY_EXPLANATION}</p>
+                </div>
                 {drawingPriorityArea && <div className="warning-card info"><p>{selectedPriorityAreaId ? "Replacement geometry starts empty. The saved polygon remains unchanged unless this replacement validates." : "New priority area"}</p><p>{priorityDraft.length} vertices. Click the map to add at least three distinct points.</p><button className="quiet-button" onClick={finishPriorityArea}>Save polygon</button><button className="quiet-button" onClick={() => { setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
                 {renamingPriorityArea && <div className="warning-card info"><div className="field full"><label htmlFor="priority-name">Area name</label><input id="priority-name" value={priorityAreaName} onChange={(event) => setPriorityAreaName(event.target.value)} /></div><p>Renaming preserves every saved vertex.</p><button className="quiet-button" onClick={finishPriorityRename}>Save name</button><button className="quiet-button" onClick={() => { setRenamingPriorityArea(false); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
                 {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityRename(area.id)}>Rename</button><button className="quiet-button" onClick={() => startPriorityRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
@@ -832,16 +902,21 @@ export function EngineeringWorkspace() {
           {lightingCardAreaId && project && (() => {
             const area = project.calculation_areas.find((item) => item.id === lightingCardAreaId);
             if (!area) return null;
-            const session = lightingCardSessions[lightingCardAreaId];
+            const session = resolveLightingCardSession(
+              lightingCardSessions,
+              lightingCardAreaId,
+              ringAnchorLngLat(area.wgs84_coordinates),
+            );
             const result = project.lighting_calculations.results[lightingCardAreaId] ?? null;
+            const resultState = lightingAreaResultState(area, result);
             return (
               <LightingResultCard
                 map={mapInstance}
                 areaName={area.name}
-                result={result}
-                unavailableReason={result ? null : "Lighting result unavailable or invalidated for this area."}
-                anchorLngLat={session?.anchorLngLat ?? ringAnchorLngLat(area.wgs84_coordinates)}
-                draggedPosition={session?.draggedPosition ?? null}
+                result={resultState === "current" ? result : null}
+                unavailableReason={resultState === "current" ? null : "Lighting result unavailable or invalidated for this area."}
+                anchorLngLat={session.anchorLngLat}
+                draggedPosition={session.draggedPosition}
                 onDraggedPosition={(position) => setLightingCardSessions((sessions) => ({
                   ...sessions,
                   [lightingCardAreaId]: {

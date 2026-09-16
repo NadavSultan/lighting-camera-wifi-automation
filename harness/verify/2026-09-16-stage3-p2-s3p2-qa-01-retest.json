@@ -1,0 +1,47 @@
+{
+  "identity": "independent-qa-s3p2-qa-01-retest",
+  "head": "fa1cbcadda93a0fb2ac0b31fdf1023a3ff5688d6",
+  "kml_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "expected_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "api": "http://127.0.0.1:8063",
+  "ui": "http://127.0.0.1:3063/",
+  "errors": [],
+  "does_not_overwrite": "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\lighting-camera-wifi-automation\\harness\\verify\\2026-09-16-stage3-p2-usability-independent-qa-review.md",
+  "data_dir": "C:\\Users\\NADAVS~1\\AppData\\Local\\Temp\\lcwa-s3p2-qa01-qg0nftkh",
+  "live_health": {
+    "status": "ok",
+    "phase": 7,
+    "version": "0.7.0"
+  },
+  "import_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "pole_count": 74,
+  "mode": "existing-poles",
+  "before": {
+    "requiredOpen": false,
+    "requiredSummary": "Required CAP inputs",
+    "productMappingDetailsOpen": false,
+    "productMappingDetailsIsRequired": true,
+    "activeId": "",
+    "activeTag": "BUTTON",
+    "fieldVisible": true,
+    "fieldDisabled": false
+  },
+  "review_button_count": 1,
+  "after": {
+    "requiredOpen": true,
+    "requiredSummary": "Required CAP inputs",
+    "productMappingDetailsOpen": true,
+    "productMappingDetailsIsRequired": true,
+    "activeId": "cap-field-product_mapping",
+    "activeTag": "INPUT",
+    "fieldVisible": true,
+    "fieldDisabled": false
+  },
+  "hash_ok": true,
+  "started_collapsed": true,
+  "opened_required_details": true,
+  "focused_product_mapping": true,
+  "field_visible": true,
+  "no_page_errors": true,
+  "s3p2_qa_01": true
+}

@@ -41,6 +41,10 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(workspace, /Draw Priority Area/);
   assert.match(workspace, /Draw Calculation Area/);
   assert.match(workspace, /calculateSelectedArea/);
+  assert.match(workspace, /Show results/);
+  assert.match(workspace, /showLightingResults/);
+  assert.match(workspace, /CAMERA_PROJECTION_BOUNDARY_EXPLANATION/);
+  assert.match(workspace, /Projection boundary/);
   assert.match(workspace, /Approved simplified direct-light model/);
   assert.match(workspace, /Calculation and fixture provenance/);
   assert.match(workspace, /ies_sha256/);
@@ -62,6 +66,9 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(capPanel, /Lock selected/);
   assert.match(capPanel, /Show selected sites on map/);
   assert.match(capPanel, /Recommended CAP units/);
+  assert.match(capPanel, /Calculate CAP recommendation/);
+  assert.match(capPanel, /capPrimaryAction/);
+  assert.match(capPanel, /Advanced operations/);
   assert.match(capPanel, /Review input/);
   assert.match(capPanel, /Exclude candidate/);
   assert.match(capPanel, /Exclude current CAP node/);

@@ -67,3 +67,19 @@ export function cardOffsetFromProjected(projected, offsetPx = 12) {
     y: (Number.isFinite(y) ? y : 0) + offset,
   };
 }
+
+/**
+ * Restore one area's session-only card position without reading another area.
+ *
+ * @param {Record<string, { anchorLngLat?: [number, number] | null, draggedPosition?: { x: number, y: number } | null }> | null | undefined} sessions
+ * @param {string} areaId
+ * @param {[number, number] | null} fallbackAnchor
+ * @returns {{ anchorLngLat: [number, number] | null, draggedPosition: { x: number, y: number } | null }}
+ */
+export function resolveLightingCardSession(sessions, areaId, fallbackAnchor) {
+  const session = sessions?.[areaId];
+  return {
+    anchorLngLat: session?.anchorLngLat ?? fallbackAnchor ?? null,
+    draggedPosition: session?.draggedPosition ?? null,
+  };
+}
