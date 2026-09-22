@@ -131,3 +131,13 @@ Task 5 covers deterministic overlap and safety-limit portions of `BL016-07`, `BL
 | 2026-09-22 Asia/Jerusalem | schema export plus full backend pytest with Task 7 compatibility changes present | `6ee9fe73` + working tree | PASS: 100% | session output | generated contracts and version-only assertions remain unstaged for Task 7; dependency deprecations only |
 
 Task 6 covers atomic/current/stale lifecycle portions of `BL016-09`, `BL016-10`, `BL016-11`, `BL016-12`, and `BL016-13`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 7 — report and generated-contract compatibility
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Update prior-phase current-version assertions to schema `2.8.0`; add calculated BL-016 report archive/no-visual-output test | `6692ab3b` + working tree | GREEN without reporting service changes | session output | historical `2.7.0` migration fixture remains intact |
+| 2026-09-22 Asia/Jerusalem | report + engineering-data tests | `6692ab3b` + working tree | PASS: 79 tests | session output | Starlette/httpx and anyio deprecation warnings only |
+| 2026-09-22 Asia/Jerusalem | schema export; engineering validator; report + engineering tests; `git diff --check` | `6692ab3b` + working tree | PASS: five schema paths, 8 catalogs, 79 tests, clean diff | generated contract evidence | only `schemas/openapi.json` changed for the new route; no report service or density visual output change |
+
+Task 7 proves Phase 7 packages archive the BL-016 project result while existing KMZ/PDF/XLSX/presentation visualization contracts remain unchanged. BL-016 remains unaccepted pending the complete gate.

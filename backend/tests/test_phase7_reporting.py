@@ -35,6 +35,8 @@ from app.models import (
     CalculationArea,
     CameraFootprintResult,
     CameraGeometryLayer,
+    CameraPixelDensityProfileSnapshot,
+    CameraPixelDensityResult,
     CapCandidateSite,
     CapConstraintValue,
     CapKnowledge,
@@ -60,6 +62,7 @@ from app.models import (
 )
 from app.services import reporting
 from app.services.camera_geometry import calculate_camera_geometry
+from app.services.camera_pixel_density import apply_camera_pixel_density_result
 from app.services.cap_planning import apply_cap_result, calculate_cap_plan, cap_input_sha256
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
@@ -336,7 +339,7 @@ def test_p7_dm_01_report_models_reject_extras_nonfinite_and_project_validates_re
         )
 
     project = bare_project()
-    assert project.schema_version == SCHEMA_VERSION == "2.7.0"
+    assert project.schema_version == SCHEMA_VERSION == "2.8.0"
     assert isinstance(project.report_preferences, ReportPreferences)
     assert project.last_report is None
     restored = Project.model_validate(project.model_dump(mode="json"))
@@ -367,7 +370,7 @@ def test_p7_mg_01_migrate_prior_versions_add_empty_report_fields_losslessly(vers
 
     original_source = copy.deepcopy(payload["source"])
     migrated = migrate_project_payload(payload)
-    assert migrated["schema_version"] == SCHEMA_VERSION == "2.7.0"
+    assert migrated["schema_version"] == SCHEMA_VERSION == "2.8.0"
     assert migrated["software_version"] == SOFTWARE_VERSION
     assert migrated["source"] == original_source
     assert migrated["recommended_layers"] == {"future": {"preserve": True}}
@@ -383,7 +386,7 @@ def test_p7_mg_01_current_schema_migrate_is_identity():
     project = bare_project()
     payload = project.model_dump(mode="json")
     assert migrate_project_payload(payload) is payload
-    assert SCHEMA_VERSION == "2.7.0"
+    assert SCHEMA_VERSION == "2.8.0"
 
 
 # ---------------------------------------------------------------------------
@@ -582,6 +585,35 @@ def test_p7_qa_02_manifest_hashes_every_payload_member_without_self_entry():
     for path, integrity in manifest["members"].items():
         assert integrity["size_bytes"] == len(members[path])
         assert integrity["sha256"] == hashlib.sha256(members[path]).hexdigest()
+
+
+def test_bl016_report_archive_preserves_result_without_new_visual_output():
+    project = bare_project(name="BL-016 report compatibility")
+    result = CameraPixelDensityResult(
+        calculated_at=FIXED_TIME,
+        projected_crs=project.projected_crs,
+        calculation_input_sha256="a" * 64,
+        profile_snapshot=CameraPixelDensityProfileSnapshot(
+            lower_projection_height_m=0.5,
+            upper_projection_height_m=2.0,
+            measurement_height_m=1.25,
+            maximum_visible_distance_m=50.0,
+            legend_id="face-density-0.16m-v1",
+        ),
+    )
+    calculated = apply_camera_pixel_density_result(project, result)
+    package, _, _ = generate_report_package(calculated, fixed_request())
+    members = _zip_members(package)
+    project_path = next(path for path in members if path.startswith("project/") and path.endswith(".json"))
+    archive_project = json.loads(members[project_path])
+    assert archive_project["camera_pixel_density"]["result"]["model_version"] == "camera-face-density-vector-1.0.0"
+    kmz_path = next(path for path in members if path.startswith("engineering/") and path.endswith(".kmz"))
+    with zipfile.ZipFile(io.BytesIO(members[kmz_path])) as kmz:
+        kml_bytes = b"".join(kmz.read(name) for name in kmz.namelist() if name.endswith(".kml"))
+    assert b"face-density" not in kml_bytes
+    assert b"camera pixel density" not in _pdf_decoded_content(members["summary.pdf"]).lower()
+    presentation = json.loads(members["presentation-model.json"])
+    assert "camera_pixel_density" not in json.dumps(presentation).lower()
 
 
 def test_p7_qa_03_final_zip_integrity_accepts_generated_package():
