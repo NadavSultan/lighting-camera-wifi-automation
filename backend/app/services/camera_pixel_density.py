@@ -1,12 +1,40 @@
 from __future__ import annotations
 
 import math
+import hashlib
+import json
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Sequence
 
-from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+from pyproj import Transformer
+from shapely.geometry import MultiPolygon, Polygon
+from shapely.ops import unary_union
 
-from app.models import PixelDensityLegendDefinition, PixelDensityLegendThreshold
+from app.catalog_models import (
+    CameraEquipmentCatalog,
+    CameraModel,
+    CameraMountingSlot,
+    CameraMountingTemplateRevision,
+    FixtureModel,
+    FixtureModelCatalog,
+    LensConfiguration,
+    camera_absolute_azimuth,
+)
+from app.crs import project_transformers, validate_projected_metre_crs
+from app.models import (
+    CameraPixelDensityBand,
+    CameraPixelDensityCameraResult,
+    CameraPixelDensityProfile,
+    CameraPixelDensityProfileSnapshot,
+    CameraPixelDensityProjectionEnvelope,
+    CameraPixelDensityResult,
+    PixelDensityLegendDefinition,
+    PixelDensityLegendThreshold,
+    PoleCameraOverride,
+    Project,
+    utc_now,
+)
 
 
 PIXEL_DENSITY_MODEL_VERSION = "camera-face-density-vector-1.0.0"
@@ -18,6 +46,14 @@ PROJECTED_DIGITS = 9
 WGS84_DIGITS = 10
 AREA_DIGITS = 6
 GEOMETRY_AREA_TOLERANCE_M2 = 1e-8
+MAX_ENABLED_CAMERAS = 200
+FIXED_MOUNT_CONTRACT = "fixed-zero-origin-1.0.0"
+PIXEL_DENSITY_ASSUMPTIONS = [
+    "Project-selected local projected CRS in metres; WGS84 is display/interchange only.",
+    "Flat horizontal projection planes and an ideal rectilinear pinhole camera; no lens distortion.",
+    "Density is horizontal pixels across a front-facing 0.16 m reference face at the AUTO midpoint height.",
+    "No terrain, occlusion, recognition, identification, analytics, or compliance claim.",
+]
 
 Vector3 = tuple[float, float, float]
 
@@ -27,6 +63,34 @@ class BandGeometry:
     rank: int
     threshold: PixelDensityLegendThreshold
     geometry: Polygon | MultiPolygon
+
+
+@dataclass(frozen=True)
+class ResolvedCameraDensityInput:
+    footprint_id: str
+    pole_id: str
+    camera_slot_id: str
+    sequence_index: int
+    longitude: float
+    latitude: float
+    enabled: bool
+    fixture_model_id: str
+    fixture_model_revision: int
+    mounting_template_revision: int | None
+    fixture_height_m: float | None
+    fixture_azimuth_deg: float
+    absolute_azimuth_deg: float
+    slot: CameraMountingSlot
+    template: CameraMountingTemplateRevision | None
+    fixture_model: FixtureModel | None
+    camera_model_id: str | None
+    camera_model_revision: int | None
+    camera: CameraModel | None
+    lens_id: str | None
+    lens_revision: int | None
+    lens: LensConfiguration | None
+    override: PoleCameraOverride | None
+    resolution_warnings: tuple[str, ...]
 
 
 def _finite_vector(values: Sequence[float], name: str) -> tuple[float, ...]:
@@ -266,4 +330,307 @@ def clip_midpoint_density_bands(
         )
         if not geometry.is_empty:
             result.append(BandGeometry(rank=rank, threshold=threshold, geometry=canonical_polygonal(geometry)))
+    return result
+
+
+def profile_snapshot(profile: CameraPixelDensityProfile, legend: PixelDensityLegendDefinition) -> CameraPixelDensityProfileSnapshot:
+    return CameraPixelDensityProfileSnapshot(
+        lower_projection_height_m=profile.lower_projection_height_m,
+        upper_projection_height_m=profile.upper_projection_height_m,
+        measurement_height_m=profile.measurement_height_m,
+        maximum_visible_distance_m=profile.maximum_visible_distance_m,
+        legend_id=legend.id,
+        face_width_m=legend.object_width_m,
+    )
+
+
+def resolve_camera_pixel_density_inputs(
+    project: Project,
+    fixtures: FixtureModelCatalog,
+    cameras: CameraEquipmentCatalog,
+) -> list[ResolvedCameraDensityInput]:
+    fixture_revisions = {(item.id, item.revision): item for item in [*fixtures.fixture_models, *fixtures.fixture_model_history]}
+    fixture_current = {item.id: item for item in fixtures.fixture_models}
+    camera_revisions = {(item.id, item.revision): item for item in [*cameras.camera_models, *cameras.camera_model_history]}
+    lens_revisions = {(item.id, item.revision): item for item in [*cameras.lenses, *cameras.lens_history]}
+    result: list[ResolvedCameraDensityInput] = []
+    for source in sorted(project.source.poles, key=lambda item: (item.sequence_index, item.id)):
+        edit = project.pole_edits.get(source.id)
+        config = edit.fixture_configuration if edit else None
+        if config is None or edit is None or edit.fixture_type is None or edit.fixture_type.value != "SMART":
+            continue
+        pinned_model = fixture_revisions.get((config.fixture_model_id, config.fixture_model_revision))
+        reference_model = pinned_model or fixture_current.get(config.fixture_model_id)
+        if reference_model is None or not reference_model.capabilities.cameras:
+            continue
+        template = next(
+            (item for item in (pinned_model.mounting_template_revisions if pinned_model else []) if item.revision == config.mounting_template_revision),
+            None,
+        )
+        reference_template = template or reference_model.current_template()
+        if reference_template is None:
+            continue
+        longitude = edit.longitude if edit.longitude is not None else source.longitude
+        latitude = edit.latitude if edit.latitude is not None else source.latitude
+        for slot in sorted(reference_template.slots, key=lambda item: item.id):
+            override = config.camera_overrides.get(slot.id)
+            camera_id = override.camera_model_id if override and override.camera_model_id is not None else slot.camera_model_id
+            camera_revision = override.camera_model_revision if override and override.camera_model_id is not None else slot.camera_model_revision
+            lens_id = override.lens_id if override and override.lens_id is not None else slot.lens_id
+            lens_revision = override.lens_revision if override and override.lens_id is not None else slot.lens_revision
+            enabled = override.enabled if override and override.enabled is not None else slot.enabled
+            warnings: list[str] = []
+            if pinned_model is None:
+                warnings.append("Pinned fixture model revision does not exist.")
+            if template is None:
+                warnings.append("Pinned mounting template revision does not exist.")
+            result.append(ResolvedCameraDensityInput(
+                footprint_id=f"{source.id}/{slot.id}", pole_id=source.id, camera_slot_id=slot.id,
+                sequence_index=source.sequence_index, longitude=longitude, latitude=latitude, enabled=enabled,
+                fixture_model_id=config.fixture_model_id, fixture_model_revision=config.fixture_model_revision,
+                mounting_template_revision=config.mounting_template_revision,
+                fixture_height_m=edit.height_m if edit.height_m is not None else project.defaults.pole_height_m,
+                fixture_azimuth_deg=config.fixture_azimuth_deg,
+                absolute_azimuth_deg=camera_absolute_azimuth(config.fixture_azimuth_deg, slot.relative_azimuth_deg),
+                slot=slot, template=template, fixture_model=pinned_model,
+                camera_model_id=camera_id, camera_model_revision=camera_revision,
+                camera=camera_revisions.get((camera_id, camera_revision)) if camera_id is not None and camera_revision is not None else None,
+                lens_id=lens_id, lens_revision=lens_revision,
+                lens=lens_revisions.get((lens_id, lens_revision)) if lens_id is not None and lens_revision is not None else None,
+                override=override, resolution_warnings=tuple(warnings),
+            ))
+    return result
+
+
+def _resolved_payload(item: ResolvedCameraDensityInput) -> dict[str, object]:
+    return {
+        "footprint_id": item.footprint_id,
+        "sequence_index": item.sequence_index,
+        "longitude": item.longitude,
+        "latitude": item.latitude,
+        "enabled": item.enabled,
+        "fixture_model_id": item.fixture_model_id,
+        "fixture_model_revision": item.fixture_model_revision,
+        "mounting_template_revision": item.mounting_template_revision,
+        "geometry_contract_version": item.template.geometry_contract_version if item.template else None,
+        "fixture_height_m": item.fixture_height_m,
+        "fixture_azimuth_deg": item.fixture_azimuth_deg,
+        "slot": item.slot.model_dump(mode="json"),
+        "override": item.override.model_dump(mode="json") if item.override else None,
+        "camera": item.camera.model_dump(mode="json") if item.camera else {
+            "id": item.camera_model_id, "revision": item.camera_model_revision,
+        },
+        "lens": item.lens.model_dump(mode="json") if item.lens else {
+            "id": item.lens_id, "revision": item.lens_revision,
+        },
+    }
+
+
+def camera_pixel_density_input_sha256(
+    project: Project,
+    fixtures: FixtureModelCatalog,
+    cameras: CameraEquipmentCatalog,
+    legend: PixelDensityLegendDefinition,
+) -> str:
+    profile = project.camera_pixel_density_profile
+    if not all(math.isfinite(value) for value in (
+        profile.lower_projection_height_m,
+        profile.upper_projection_height_m,
+        profile.maximum_visible_distance_m,
+        profile.measurement_height_m,
+    )):
+        raise ValueError("Camera pixel-density calculation inputs are not finite JSON-compatible values.")
+    payload = {
+        "model_version": PIXEL_DENSITY_MODEL_VERSION,
+        "fixed_mount_contract": FIXED_MOUNT_CONTRACT,
+        "distance_cap_sides": DISTANCE_CAP_SIDES,
+        "projected_digits": PROJECTED_DIGITS,
+        "projected_crs": project.projected_crs,
+        "profile": profile_snapshot(profile, legend).model_dump(mode="json"),
+        "legend": legend.model_dump(mode="json"),
+        "cameras": [_resolved_payload(item) for item in resolve_camera_pixel_density_inputs(project, fixtures, cameras)],
+    }
+    try:
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Camera pixel-density calculation inputs are not finite JSON-compatible values.") from exc
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _polygonal_parts(geometry: Polygon | MultiPolygon) -> list[Polygon]:
+    if geometry.is_empty:
+        return []
+    if isinstance(geometry, Polygon):
+        return [geometry]
+    if isinstance(geometry, MultiPolygon):
+        return sorted(geometry.geoms, key=lambda polygon: tuple(polygon.exterior.coords))
+    raise ValueError("Camera-density overlay produced non-polygonal geometry.")
+
+
+def _rings(geometry: Polygon | MultiPolygon, *, digits: int) -> list[list[list[tuple[float, float]]]]:
+    result: list[list[list[tuple[float, float]]]] = []
+    for polygon in _polygonal_parts(geometry):
+        rings = [canonical_ring(list(polygon.exterior.coords), digits=digits)]
+        rings.extend(canonical_ring(list(interior.coords), digits=digits) for interior in polygon.interiors)
+        result.append(rings)
+    return result
+
+
+def _transform_polygonal(geometry: Polygon | MultiPolygon, transformer: Transformer) -> Polygon | MultiPolygon:
+    polygons: list[Polygon] = []
+    for polygon in _polygonal_parts(geometry):
+        exterior = [transformer.transform(x, y) for x, y in polygon.exterior.coords]
+        interiors = [[transformer.transform(x, y) for x, y in ring.coords] for ring in polygon.interiors]
+        polygons.append(Polygon(exterior, interiors))
+    return polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
+
+
+def calculate_one_camera_density(
+    project: Project,
+    item: ResolvedCameraDensityInput,
+    legend: PixelDensityLegendDefinition,
+    *,
+    to_projected: Transformer,
+    to_wgs84: Transformer,
+) -> CameraPixelDensityCameraResult:
+    camera = item.camera
+    lens = item.lens
+    result = CameraPixelDensityCameraResult(
+        footprint_id=item.footprint_id, pole_id=item.pole_id, camera_slot_id=item.camera_slot_id,
+        enabled=item.enabled, fixture_model_id=item.fixture_model_id, fixture_model_revision=item.fixture_model_revision,
+        mounting_template_revision=item.mounting_template_revision,
+        geometry_contract_version=item.template.geometry_contract_version if item.template else None,
+        camera_model_id=item.camera_model_id, camera_model_revision=item.camera_model_revision,
+        lens_id=item.lens_id, lens_revision=item.lens_revision,
+        resolution_width_px=camera.resolution_width_px if camera else None,
+        resolution_height_px=camera.resolution_height_px if camera else None,
+        horizontal_fov_deg=lens.horizontal_fov_deg if lens else None,
+        vertical_fov_deg=lens.vertical_fov_deg if lens else None,
+        fixture_height_m=item.fixture_height_m, camera_absolute_azimuth_deg=item.absolute_azimuth_deg,
+        fixed_downward_tilt_deg=item.slot.downward_tilt_deg, assumptions=PIXEL_DENSITY_ASSUMPTIONS,
+    )
+    if not item.enabled:
+        return result
+    warnings = list(item.resolution_warnings)
+    if item.fixture_height_m is None:
+        warnings.append("Fixture/pole height is required.")
+    if item.camera_model_id is None:
+        warnings.append("A pinned camera model is required.")
+    elif item.camera_model_revision is None:
+        warnings.append("A pinned camera model revision is required.")
+    elif camera is None:
+        warnings.append("Pinned camera model revision does not exist.")
+    elif camera.resolution_width_px is None or camera.resolution_height_px is None:
+        warnings.append("Pinned camera revision requires positive horizontal and vertical resolution.")
+    if item.lens_id is None:
+        warnings.append("An explicit pinned lens is required; no default lens is assigned.")
+    elif item.lens_revision is None:
+        warnings.append("A pinned lens revision is required.")
+    elif lens is None:
+        warnings.append("Pinned lens revision does not exist.")
+    elif lens.horizontal_fov_deg is None or lens.vertical_fov_deg is None:
+        warnings.append("Pinned lens revision lacks catalog horizontal/vertical FOV.")
+    if camera and lens and camera.id not in lens.compatible_camera_model_ids:
+        warnings.append("Selected camera and lens revisions are incompatible.")
+    if item.template is None or item.template.geometry_contract_version != FIXED_MOUNT_CONTRACT:
+        warnings.append("Pinned mounting template does not use the approved fixed-mount contract.")
+    if item.override and (item.override.relative_azimuth_deg is not None or item.override.downward_tilt_deg is not None):
+        warnings.append("Legacy per-pole camera orientation override is preserved but unsupported; explicitly reset this slot to the immutable template.")
+    if (item.slot.origin_offset_x_m, item.slot.origin_offset_y_m, item.slot.origin_offset_z_m) != (0, 0, 0):
+        warnings.append("Mounting template does not use the approved zero XYZ optical-center offsets.")
+    if warnings:
+        result.warnings = list(dict.fromkeys(warnings))
+        return result
+    assert camera and lens and item.fixture_height_m is not None
+    origin_x, origin_y = to_projected.transform(item.longitude, item.latitude)
+    origin = (origin_x, origin_y, item.fixture_height_m)
+    forward, right, image_up = camera_basis(item.absolute_azimuth_deg, item.slot.downward_tilt_deg)
+    profile = project.camera_pixel_density_profile
+    try:
+        planes = [
+            project_frustum_plane(origin, forward, right, image_up, lens.horizontal_fov_deg, lens.vertical_fov_deg, height)
+            for height in (profile.lower_projection_height_m, profile.measurement_height_m, profile.upper_projection_height_m)
+        ]
+        cap = distance_cap_polygon(origin_x, origin_y, profile.maximum_visible_distance_m)
+        envelope_raw = unary_union([planes[0], planes[2]]).convex_hull.intersection(cap)
+        if envelope_raw.is_empty or not isinstance(envelope_raw, (Polygon, MultiPolygon)):
+            raise ValueError("Projection envelope is empty or non-polygonal.")
+        envelope = canonical_polygonal(envelope_raw)
+        midpoint_raw = planes[1].intersection(envelope).intersection(cap)
+        if midpoint_raw.is_empty or not isinstance(midpoint_raw, Polygon):
+            raise ValueError("Midpoint projection is empty, fragmented, or non-polygonal.")
+        midpoint = canonical_polygonal(midpoint_raw)
+        if not isinstance(midpoint, Polygon):
+            raise ValueError("Midpoint projection is fragmented.")
+        focal_length_px = camera.resolution_width_px / (2 * math.tan(math.radians(lens.horizontal_fov_deg) / 2))
+        band_geometries = clip_midpoint_density_bands(
+            midpoint, origin_xyz_m=origin, forward=forward, measurement_height_m=profile.measurement_height_m,
+            focal_length_px=focal_length_px, legend=legend,
+        )
+    except ValueError as exc:
+        result.warnings = [str(exc)]
+        return result
+    envelope_wgs84 = _transform_polygonal(envelope, to_wgs84)
+    result.projection_envelope = CameraPixelDensityProjectionEnvelope(
+        projected_rings_m=_rings(envelope, digits=PROJECTED_DIGITS),
+        wgs84_rings=_rings(envelope_wgs84, digits=WGS84_DIGITS),
+    )
+    for band in band_geometries:
+        wgs84 = _transform_polygonal(band.geometry, to_wgs84)
+        result.bands.append(CameraPixelDensityBand(
+            band_id=f"px-face-{band.threshold.minimum:g}", legend_id=legend.id, rank=band.rank,
+            minimum_px_per_face=band.threshold.minimum, maximum_px_per_face=band.threshold.maximum,
+            display_value_px_per_face=band.threshold.minimum, colour_token=band.threshold.token,
+            projected_rings_m=_rings(band.geometry, digits=PROJECTED_DIGITS),
+            wgs84_rings=_rings(wgs84, digits=WGS84_DIGITS), area_m2=round(band.geometry.area, AREA_DIGITS),
+        ))
+    result.valid = bool(result.bands)
+    if not result.valid:
+        result.warnings = ["Camera midpoint domain contains no visible pixel-density band."]
+    return result
+
+
+def aggregate_camera_warnings(camera_results: Sequence[CameraPixelDensityCameraResult]) -> list[str]:
+    return [f"{item.footprint_id}: {warning}" for item in camera_results for warning in item.warnings]
+
+
+def calculate_density_overlaps(camera_results: Sequence[CameraPixelDensityCameraResult]) -> list:
+    # Task 5 replaces this no-overlap seam with deterministic partitioning.
+    return []
+
+
+def validate_camera_pixel_density_result_limits(result: CameraPixelDensityResult) -> None:
+    # Task 5 adds exact overlap, vertex, and compact-byte enforcement.
+    return None
+
+
+def calculate_camera_pixel_density(
+    project: Project,
+    fixtures: FixtureModelCatalog,
+    cameras: CameraEquipmentCatalog,
+    legend: PixelDensityLegendDefinition,
+    *,
+    calculated_at: datetime | None = None,
+) -> CameraPixelDensityResult:
+    if project.projected_crs is None:
+        raise ValueError("Project engineering CRS is required for camera pixel-density calculation.")
+    crs = validate_projected_metre_crs(project.projected_crs)
+    to_projected, to_wgs84 = project_transformers(crs)
+    resolved = resolve_camera_pixel_density_inputs(project, fixtures, cameras)
+    enabled_count = sum(item.enabled for item in resolved)
+    if enabled_count > MAX_ENABLED_CAMERAS:
+        raise ValueError("Camera pixel-density calculation exceeds the 200-enabled-camera safety limit.")
+    camera_results = [
+        calculate_one_camera_density(project, item, legend, to_projected=to_projected, to_wgs84=to_wgs84)
+        for item in resolved
+    ]
+    overlaps = calculate_density_overlaps(camera_results)
+    result = CameraPixelDensityResult(
+        calculated_at=calculated_at or utc_now(), projected_crs=project.projected_crs,
+        calculation_input_sha256=camera_pixel_density_input_sha256(project, fixtures, cameras, legend),
+        profile_snapshot=profile_snapshot(project.camera_pixel_density_profile, legend),
+        camera_results=camera_results, overlap_regions=overlaps,
+        warnings=aggregate_camera_warnings(camera_results), assumptions=PIXEL_DENSITY_ASSUMPTIONS,
+    )
+    validate_camera_pixel_density_result_limits(result)
     return result

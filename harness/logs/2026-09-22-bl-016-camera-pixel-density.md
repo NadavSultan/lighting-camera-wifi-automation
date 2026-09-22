@@ -96,3 +96,15 @@ Task 2 acceptance covered: `BL016-01`, `BL016-02`, `BL016-03`; foundational cont
 | 2026-09-22 Asia/Jerusalem | `.\.venv\Scripts\python.exe -m pytest backend/tests/test_bl016_camera_pixel_density.py -q -p no:cacheprovider` | `6263451d` + working tree | PASS: 45 tests | session output | same two dependency deprecation warnings |
 
 Task 3 establishes the deterministic numerical primitives for `BL016-04`, `BL016-05`, and `BL016-06`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 4 — pinned input resolution, per-camera provenance, and fingerprint
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add pinned/historical revision, disabled-slot, invalid-camera isolation, fingerprint, and 201-camera tests | `e157449a` + working tree | initial run exposed two test/boundary issues | session output | catalog history needed atomic construction; non-finite profile needed controlled service error |
+| 2026-09-22 Asia/Jerusalem | Implement ordered resolution, canonical fingerprint, profile/envelope/band persistence, warnings, and 200-enabled-camera guard | `e157449a` + working tree | GREEN after minimal corrections | session output | Task 5 overlap/serialized-limit seam intentionally remains empty until next task |
+| 2026-09-22 Asia/Jerusalem | `.\.venv\Scripts\python.exe -m pytest backend/tests/test_bl016_camera_pixel_density.py -q -p no:cacheprovider -k "pinned or disabled or invalid_camera or fingerprint or camera_limit or per_camera"` | `e157449a` + working tree | PASS: 5 selected tests | session output | Starlette/httpx and anyio deprecation warnings only |
+| 2026-09-22 Asia/Jerusalem | full BL-016 test file | `e157449a` + working tree | PASS: 50 tests | session output | same dependency deprecations |
+| 2026-09-22 Asia/Jerusalem | Phase 3 regression file | `e157449a` + working tree | 37 pass, 4 stale-version assertions fail | session output | assertions expect retired `2.7.0`; scheduled for full regression update after BL-016 tasks; geometry behavior unaffected |
+
+Task 4 covers the per-camera and fingerprint portions of `BL016-04`, `BL016-06`, `BL016-07`, `BL016-08`, `BL016-10`, `BL016-11`, and `BL016-12`. BL-016 remains unaccepted pending the complete gate.

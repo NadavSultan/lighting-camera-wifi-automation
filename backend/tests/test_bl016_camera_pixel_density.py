@@ -4,6 +4,7 @@ import copy
 import json
 import math
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -29,7 +30,12 @@ from app.services.camera_pixel_density import (
     distance_cap_polygon,
     horizontal_density_px_per_face,
     project_frustum_plane,
+    calculate_camera_pixel_density,
+    camera_pixel_density_input_sha256,
 )
+from app.services.catalogs import CatalogStore
+from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
+from app.services.kml import import_project
 
 
 SUPPORTED_LEGACY_VERSIONS = (
@@ -43,6 +49,27 @@ SUPPORTED_LEGACY_VERSIONS = (
     "2.6.0",
     "2.7.0",
 )
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def bl016_catalogs(tmp_path: Path) -> CatalogStore:
+    return CatalogStore(tmp_path / "catalogs", ROOT / "data" / "phase2")
+
+
+def bl016_configured_project(tmp_path: Path, *, poles: int = 1) -> tuple[Project, CatalogStore]:
+    store = bl016_catalogs(tmp_path)
+    source = ROOT / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+    project = import_project(source.name, source.read_bytes(), "BL-016 test")
+    pole_ids = [pole.id for pole in project.source.poles[:poles]]
+    project = apply_bulk_configuration(
+        project,
+        BulkPoleConfigurationRequest(pole_ids=pole_ids, patch=BulkPoleConfigurationPatch(
+            fixture_model_id="phoenix-1-smart", pole_height_m=10.0, fixture_azimuth_deg=0.0,
+            lens_by_slot={"camera-1": "lens-jl-ln039", "camera-2": "lens-jl-ln039"},
+        )),
+        store.fixtures(), store.cameras(),
+    )
+    return project, store
 
 
 def legacy_project_payload(version: str) -> dict:
@@ -258,3 +285,85 @@ def test_bl016_plane_and_cap_reject_invalid_geometry() -> None:
         distance_cap_polygon(0, 0, 0)
     widest = project_frustum_plane(origin, forward, right, image_up, 87.0, 68.0, 1.25).intersection(distance_cap_polygon(0, 0, 50))
     assert all(math.hypot(x, y) <= 50.0 + 1e-9 for x, y in widest.exterior.coords)
+
+
+def test_bl016_pinned_camera_revision_and_per_camera_provenance(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    fixtures = store.fixtures()
+    cameras = store.cameras()
+    original = cameras.camera_models[0]
+    payload = cameras.model_dump(mode="json")
+    payload["camera_model_history"] = [original.model_dump(mode="json")]
+    payload["camera_models"][0]["revision"] = 2
+    payload["camera_models"][0]["resolution_width_px"] = 999
+    cameras = type(cameras).model_validate(payload)
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+
+    result = calculate_camera_pixel_density(project, fixtures, cameras, legend)
+
+    assert len(result.camera_results) == 2
+    assert all(item.valid and item.bands for item in result.camera_results)
+    assert {item.camera_model_revision for item in result.camera_results} == {1}
+    assert {item.resolution_width_px for item in result.camera_results} == {4056}
+    assert [item.footprint_id for item in result.camera_results] == sorted(item.footprint_id for item in result.camera_results)
+
+
+def test_bl016_disabled_slot_has_no_geometry_or_missing_input_warning(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    pole_id = project.source.poles[0].id
+    config = project.pole_edits[pole_id].fixture_configuration
+    assert config is not None
+    config.camera_overrides["camera-1"].enabled = False
+    config.camera_overrides["camera-1"].camera_model_id = None
+    config.camera_overrides["camera-1"].lens_id = None
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+
+    result = calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+    disabled = next(item for item in result.camera_results if item.camera_slot_id == "camera-1")
+    assert disabled.enabled is False and disabled.valid is False
+    assert disabled.bands == [] and disabled.projection_envelope.projected_rings_m == []
+    assert disabled.warnings == []
+    assert next(item for item in result.camera_results if item.camera_slot_id == "camera-2").valid
+
+
+def test_bl016_invalid_camera_isolated_from_valid_camera(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    pole_id = project.source.poles[0].id
+    config = project.pole_edits[pole_id].fixture_configuration
+    assert config is not None
+    config.camera_overrides["camera-1"].lens_id = "missing-lens"
+    config.camera_overrides["camera-1"].lens_revision = 1
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+
+    result = calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+    invalid = next(item for item in result.camera_results if item.camera_slot_id == "camera-1")
+    valid = next(item for item in result.camera_results if item.camera_slot_id == "camera-2")
+    assert not invalid.valid and not invalid.bands
+    assert "Pinned lens revision does not exist." in invalid.warnings
+    assert valid.valid and valid.bands
+
+
+def test_bl016_fingerprint_includes_engineering_and_excludes_display_state(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    fixtures, cameras = store.fixtures(), store.cameras()
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    baseline = camera_pixel_density_input_sha256(project, fixtures, cameras, legend)
+    display_only = project.model_copy(deep=True)
+    display_only.layer_state.camera_pixel_density = True
+    display_only.pole_edits[project.source.poles[0].id].engineering_notes = "display-only field note"
+    assert camera_pixel_density_input_sha256(display_only, fixtures, cameras, legend) == baseline
+    engineering = project.model_copy(deep=True)
+    engineering.pole_edits[project.source.poles[0].id].height_m = 11.0
+    assert camera_pixel_density_input_sha256(engineering, fixtures, cameras, legend) != baseline
+    non_finite = project.model_copy(deep=True)
+    non_finite.camera_pixel_density_profile = non_finite.camera_pixel_density_profile.model_copy(update={"maximum_visible_distance_m": math.nan})
+    with pytest.raises(ValueError, match="not finite"):
+        camera_pixel_density_input_sha256(non_finite, fixtures, cameras, legend)
+
+
+def test_bl016_camera_limit_rejects_201_before_geometry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    monkeypatch.setattr("app.services.camera_pixel_density.resolve_camera_pixel_density_inputs", lambda *_: [SimpleNamespace(enabled=True)] * 201)
+    with pytest.raises(ValueError, match="exceeds the 200-enabled-camera safety limit"):
+        calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
