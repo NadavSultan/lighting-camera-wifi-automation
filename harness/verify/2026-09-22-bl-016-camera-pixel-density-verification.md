@@ -1,14 +1,14 @@
 # BL-016 camera pixel-density implementation verification
 
-Date: 2026-09-22  
-Scope: BL-016 / WA-09 only  
-Base commit: `05257e87b4d6500146239f62f4ebafa4b2217b67`  
-Verified product tip: `986c6eabc403ed5e5a713f6c0f2d069f310f1677`  
-Final implementation commit: pending the bounded Task 10 evidence commit
+Date: 2026-09-22
+Scope: BL-016 / WA-09 only
+Base commit: `05257e87b4d6500146239f62f4ebafa4b2217b67`
+Verified product tip: `986c6eabc403ed5e5a713f6c0f2d069f310f1677`
+Final implementation commit: `8a271bf12b070c5c9883f2b2942ad54c6ace4f77`
 
 ## Decision
 
-The BL-016 implementation and its current verification evidence are ready to be committed as the implementation candidate. Acceptance is not granted here. `BL016-20` remains pending until the final implementation identity is recorded, the clean readiness manifest passes, and the Independent-QA handoff is committed.
+The BL-016 implementation satisfies the implementation-readiness gate and is handed to Independent QA. Acceptance is not granted here; Independent QA and a separate scoped master PASS remain pending.
 
 ## Current deterministic verification
 
@@ -66,7 +66,7 @@ The browser screenshot proves the production shell, while the complete engineeri
 | `BL016-17` | PASS | backend/frontend persistence and stale/recalculate tests; live retain/hide/replace assertion |
 | `BL016-18` | PASS | report compatibility tests and live Phase 7 package assertion; no new report visualization |
 | `BL016-19` | PASS | Phase 3/full regressions, KML export, existing-pole assertion, Input diff and exact source hash |
-| `BL016-20` | PENDING | deterministic and live evidence pass; final clean readiness PASS and truthful handoff still required |
+| `BL016-20` | PASS | deterministic/live evidence, exact implementation identity, clean readiness manifest, and truthful handoff |
 
 ## Warnings and limitations
 
@@ -77,7 +77,7 @@ The browser screenshot proves the production shell, while the complete engineeri
 
 ## Gate
 
-- Implementation candidate: verified, clean commit pending.
+- Implementation: complete and ready for Independent QA.
 - Independent QA: pending.
 - Scoped master decision: pending.
 - Seal: absent and unauthorized.

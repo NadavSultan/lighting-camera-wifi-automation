@@ -1,6 +1,6 @@
 # Work record — 2026-09-22 — BL-016 Camera Pixel-Density Map
 
-Status: implementation verification complete; clean readiness commit pending
+Status: implementation complete; ready for Independent QA; unaccepted
 
 ## Scope, authority, and non-goals
 
@@ -40,11 +40,11 @@ Product changes do not begin until every row is resolved and all required suppor
 | M6 reporting | Plan Task 7 | Phase 7 compatibility tests | complete — `987a0c7b` |
 | M7 frontend workflow | Plan Task 8 | view/API/panel tests | complete — `129eda85` |
 | M8 map/inspection | Plan Task 9 | GeoJSON/style/safe-popup/render tests | complete — `986c6eab` |
-| M9 final verification | Plan Task 10 | deterministic, live browser, source/hash, readiness evidence | verification complete; readiness manifest and handoff pending final implementation commit |
+| M9 final verification | Plan Task 10 | deterministic, live browser, source/hash, readiness evidence | complete — implementation `8a271bf1`; readiness/handoff evidence committed separately |
 
 ## Acceptance criteria
 
-Acceptance IDs `BL016-01` through `BL016-19` have current objective PASS evidence mapped in `harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md`. `BL016-20` remains pending the clean readiness-manifest PASS and Independent-QA handoff. No acceptance gate has been granted.
+Acceptance IDs `BL016-01` through `BL016-20` have current implementation PASS evidence mapped in `harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md`. This is implementation readiness, not BL-016 acceptance.
 
 ## Changes and evidence
 
@@ -63,13 +63,13 @@ Acceptance IDs `BL016-01` through `BL016-19` have current objective PASS evidenc
 ## Definition of Done
 
 - [x] All product milestones are complete.
-- [ ] Every required acceptance item has objective PASS evidence (`BL016-20` pending readiness/handoff).
+- [x] Every required acceptance item has objective implementation PASS evidence.
 - [x] Every required deterministic command passed on the recorded product commit/worktree.
 - [x] Source, prior-phase behavior, and file-boundary invariants are verified.
 - [x] Completion and rendered evidence reports are present if required.
-- [ ] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree.
-- [ ] Independent QA handoff is recorded; QA itself remains pending.
-- [ ] No later phase has begun.
+- [x] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree.
+- [x] Independent QA handoff is recorded; QA itself remains pending.
+- [x] No later phase has begun.
 
 Independent QA PASS, master PASS, and a seal are later gates and are not implementation-task Definition of Done items.
 
@@ -85,9 +85,9 @@ Follow `AGENTS.md`, `OPERATIONS.md`, and the approved plan Recovery Protocol. Pr
 
 ## Gate state
 
-- Implementation: verification complete; final clean implementation identity pending, unaccepted.
-- Durable goal: active.
-- Implementation-readiness verifier: pending final manifest and clean evidence commit.
+- Implementation: complete at `8a271bf12b070c5c9883f2b2942ad54c6ace4f77`, ready for Independent QA, unaccepted.
+- Durable goal: achieved at clean readiness PASS and handoff.
+- Implementation-readiness verifier: PASS.
 - Independent QA: pending.
 - Master decision: pending.
 - Seal status: absent and unauthorized.
