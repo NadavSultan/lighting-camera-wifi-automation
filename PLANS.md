@@ -4,7 +4,7 @@ This is the execution plan index. Phase 7 requirements, decisions, milestones, v
 
 ## Active plan
 
-**Next action:** Review `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md` against the approved engineering design and choose Native or subagent-driven execution. BL-016 implementation is not yet authorized. Stage 3 P2 remains accepted at `e5023ee`; BL-019/020, merge, push, Phase 8, and seals remain gated.
+**Active plan:** Execute BL-016 Tasks 1–10 sequentially from `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md` against the approved engineering design. Work record: `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`; execution log: `harness/logs/2026-09-22-bl-016-camera-pixel-density.md`. BL-016 is active but unaccepted. Stage 3 P2 remains accepted at `e5023ee`; BL-019/020, merge, push, Phase 8, and seals remain gated.
 
 Post-roadmap item plan (not a numbered phase): `docs/superpowers/plans/2026-09-06-post-roadmap-implementation-plan.md`. Stages 1–7 CONDITIONAL PASS: `docs/post-roadmap-bl-1-7-scoped-master-decision-2026-09-07.md` (commit `02c027ef`). BL-001 CONDITIONAL PASS: `docs/post-roadmap-bl-001-scoped-master-decision-2026-09-07.md`. Stage 1 P1 display CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`. Provider: `docs/post-roadmap-bl-001-provider-authorization-2026-09-07.md`. Stage 0: `harness/phases/2026-09-07-stage-0-prep.md`. Stage 8: `harness/phases/2026-09-07-stage-8-bl-001-gated.md`.
 

@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-09-22. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 architecture and engineering design are committed at `5837f29`; its implementation plan awaits review and execution-method selection.
+Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-09-22. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 implementation is active from approved plan commit `05257e87`; it remains unaccepted.
 
 ## Completed
 
@@ -50,4 +50,4 @@ Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-0
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Next action: review and approve the BL-016 implementation plan.** Plan: `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Approved design: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md`. BL-016 implementation, merge, push, BL-019/020, Phase 8, and any seal remain unauthorized until the plan review gate and execution-method choice are complete.
+**Current action: execute BL-016 Tasks 1–10 sequentially through implementation readiness.** Plan: `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Approved design: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md`. Work record: `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`. BL-016 remains unaccepted; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.
