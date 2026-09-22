@@ -9,7 +9,8 @@ from typing import Sequence
 
 from pyproj import Transformer
 from shapely.geometry import MultiPolygon, Polygon
-from shapely.ops import unary_union
+from shapely.ops import polygonize, unary_union
+from shapely.strtree import STRtree
 
 from app.catalog_models import (
     CameraEquipmentCatalog,
@@ -29,6 +30,7 @@ from app.models import (
     CameraPixelDensityProfileSnapshot,
     CameraPixelDensityProjectionEnvelope,
     CameraPixelDensityResult,
+    CameraPixelDensityOverlapRegion,
     PixelDensityLegendDefinition,
     PixelDensityLegendThreshold,
     PoleCameraOverride,
@@ -47,6 +49,9 @@ WGS84_DIGITS = 10
 AREA_DIGITS = 6
 GEOMETRY_AREA_TOLERANCE_M2 = 1e-8
 MAX_ENABLED_CAMERAS = 200
+MAX_OVERLAP_REGIONS = 20_000
+MAX_PERSISTED_VERTICES = 250_000
+MAX_RESULT_BYTES = 26_214_400
 FIXED_MOUNT_CONTRACT = "fixed-zero-origin-1.0.0"
 PIXEL_DENSITY_ASSUMPTIONS = [
     "Project-selected local projected CRS in metres; WGS84 is display/interchange only.",
@@ -155,13 +160,18 @@ def _signed_area(vertices: Sequence[tuple[float, float]]) -> float:
     )
 
 
-def canonical_ring(vertices: Sequence[tuple[float, float]], *, digits: int = PROJECTED_DIGITS) -> list[tuple[float, float]]:
+def canonical_ring(
+    vertices: Sequence[tuple[float, float]],
+    *,
+    digits: int = PROJECTED_DIGITS,
+    clockwise: bool = False,
+) -> list[tuple[float, float]]:
     rounded = [(round(float(x), digits), round(float(y), digits)) for x, y in vertices]
     if rounded and rounded[0] == rounded[-1]:
         rounded.pop()
     if len(rounded) < 3 or not all(math.isfinite(value) for vertex in rounded for value in vertex):
         raise ValueError("Polygon ring must contain at least three finite vertices.")
-    if _signed_area(rounded) < 0:
+    if (_signed_area(rounded) < 0) != clockwise:
         rounded.reverse()
     start = min(range(len(rounded)), key=lambda index: rounded[index])
     ordered = rounded[start:] + rounded[:start]
@@ -174,10 +184,14 @@ def canonical_polygonal(geometry: Polygon | MultiPolygon) -> Polygon | MultiPoly
     polygons = list(geometry.geoms) if isinstance(geometry, MultiPolygon) else [geometry]
     normalized: list[Polygon] = []
     for polygon in polygons:
-        if not isinstance(polygon, Polygon) or polygon.interiors:
-            raise ValueError("Only simple polygonal camera-density geometry is supported.")
+        if not isinstance(polygon, Polygon):
+            raise ValueError("Only polygonal camera-density geometry is supported.")
         ring = canonical_ring(list(polygon.exterior.coords))
-        candidate = Polygon(ring)
+        holes = sorted(
+            (canonical_ring(list(interior.coords), clockwise=True) for interior in polygon.interiors),
+            key=lambda item: tuple(item),
+        )
+        candidate = Polygon(ring, holes)
         if not candidate.is_valid or candidate.area <= GEOMETRY_AREA_TOLERANCE_M2:
             raise ValueError("Camera-density geometry is invalid or degenerate.")
         normalized.append(candidate)
@@ -471,7 +485,7 @@ def _rings(geometry: Polygon | MultiPolygon, *, digits: int) -> list[list[list[t
     result: list[list[list[tuple[float, float]]]] = []
     for polygon in _polygonal_parts(geometry):
         rings = [canonical_ring(list(polygon.exterior.coords), digits=digits)]
-        rings.extend(canonical_ring(list(interior.coords), digits=digits) for interior in polygon.interiors)
+        rings.extend(canonical_ring(list(interior.coords), digits=digits, clockwise=True) for interior in polygon.interiors)
         result.append(rings)
     return result
 
@@ -594,14 +608,125 @@ def aggregate_camera_warnings(camera_results: Sequence[CameraPixelDensityCameraR
     return [f"{item.footprint_id}: {warning}" for item in camera_results for warning in item.warnings]
 
 
-def calculate_density_overlaps(camera_results: Sequence[CameraPixelDensityCameraResult]) -> list:
-    # Task 5 replaces this no-overlap seam with deterministic partitioning.
-    return []
+def _stored_polygonal(rings: list[list[list[tuple[float, float]]]]) -> Polygon | MultiPolygon:
+    polygons: list[Polygon] = []
+    for polygon_rings in rings:
+        if not polygon_rings:
+            continue
+        polygon = Polygon(polygon_rings[0], polygon_rings[1:])
+        if not polygon.is_valid or polygon.area <= GEOMETRY_AREA_TOLERANCE_M2:
+            raise ValueError("Persisted camera-density geometry is invalid or degenerate.")
+        polygons.append(polygon)
+    if not polygons:
+        return Polygon()
+    return polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
+
+
+def calculate_density_overlaps(
+    camera_results: Sequence[CameraPixelDensityCameraResult],
+    *,
+    to_wgs84: Transformer | None = None,
+) -> list[CameraPixelDensityOverlapRegion]:
+    features: list[tuple[str, int, str, Polygon | MultiPolygon]] = []
+    for camera in sorted(camera_results, key=lambda item: item.footprint_id):
+        if not camera.enabled or not camera.valid:
+            continue
+        for band in camera.bands:
+            geometry = _stored_polygonal(band.projected_rings_m)
+            if not geometry.is_empty:
+                features.append((camera.footprint_id, band.rank, band.band_id, geometry))
+    if len({item[0] for item in features}) < 2:
+        return []
+
+    geometries = [item[3] for item in features]
+    tree = STRtree(geometries)
+    participating: set[int] = set()
+    for index, geometry in enumerate(geometries):
+        for other_index in tree.query(geometry, predicate="intersects"):
+            other = int(other_index)
+            if other == index or features[other][0] == features[index][0]:
+                continue
+            if geometry.intersection(geometries[other]).area > GEOMETRY_AREA_TOLERANCE_M2:
+                participating.update((index, other))
+    if not participating:
+        return []
+
+    boundaries = unary_union([geometries[index].boundary for index in sorted(participating)])
+    cells = sorted(
+        (cell for cell in polygonize(boundaries) if cell.area > GEOMETRY_AREA_TOLERANCE_M2),
+        key=lambda cell: tuple(canonical_ring(list(cell.exterior.coords))),
+    )
+    grouped: dict[tuple[tuple[str, ...], str, str, int], list[Polygon]] = {}
+    for cell in cells:
+        point = cell.representative_point()
+        best_by_camera: dict[str, tuple[int, str]] = {}
+        for index in sorted(participating):
+            footprint_id, rank, band_id, geometry = features[index]
+            if geometry.covers(point):
+                prior = best_by_camera.get(footprint_id)
+                if prior is None or (rank, band_id) > prior:
+                    best_by_camera[footprint_id] = (rank, band_id)
+        contributors = tuple(sorted(best_by_camera))
+        if len(contributors) < 2:
+            continue
+        winning_rank = max(best_by_camera[item][0] for item in contributors)
+        winning_camera = min(item for item in contributors if best_by_camera[item][0] == winning_rank)
+        winning_band = best_by_camera[winning_camera][1]
+        grouped.setdefault((contributors, winning_camera, winning_band, winning_rank), []).append(cell)
+
+    regions: list[CameraPixelDensityOverlapRegion] = []
+    for (contributors, winning_camera, winning_band, winning_rank), group_cells in sorted(grouped.items()):
+        merged_raw = unary_union(group_cells)
+        if not isinstance(merged_raw, (Polygon, MultiPolygon)) or merged_raw.is_empty:
+            raise ValueError("Camera-density overlap partition produced non-polygonal geometry.")
+        merged = canonical_polygonal(merged_raw)
+        projected_rings = _rings(merged, digits=PROJECTED_DIGITS)
+        wgs84_geometry = _transform_polygonal(merged, to_wgs84) if to_wgs84 is not None else merged
+        identifier_payload = {
+            "contributors": contributors,
+            "winner": winning_camera,
+            "winning_band_id": winning_band,
+            "winning_rank": winning_rank,
+            "projected_rings_m": projected_rings,
+        }
+        digest = hashlib.sha256(json.dumps(identifier_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+        regions.append(CameraPixelDensityOverlapRegion(
+            overlap_region_id=f"density-overlap-{digest[:24]}",
+            camera_footprint_ids=list(contributors), multiplicity=len(contributors),
+            winning_camera_footprint_id=winning_camera, winning_band_id=winning_band,
+            winning_band_rank=winning_rank, projected_rings_m=projected_rings,
+            wgs84_rings=_rings(wgs84_geometry, digits=WGS84_DIGITS), area_m2=round(merged.area, AREA_DIGITS),
+        ))
+    return sorted(regions, key=lambda item: item.overlap_region_id)
+
+
+def count_persisted_vertices(result: CameraPixelDensityResult) -> tuple[int, int]:
+    projected = 0
+    wgs84 = 0
+    for camera in result.camera_results:
+        projected += sum(len(ring) for polygon in camera.projection_envelope.projected_rings_m for ring in polygon)
+        wgs84 += sum(len(ring) for polygon in camera.projection_envelope.wgs84_rings for ring in polygon)
+        for band in camera.bands:
+            projected += sum(len(ring) for polygon in band.projected_rings_m for ring in polygon)
+            wgs84 += sum(len(ring) for polygon in band.wgs84_rings for ring in polygon)
+    for region in result.overlap_regions:
+        projected += sum(len(ring) for polygon in region.projected_rings_m for ring in polygon)
+        wgs84 += sum(len(ring) for polygon in region.wgs84_rings for ring in polygon)
+    return projected, wgs84
 
 
 def validate_camera_pixel_density_result_limits(result: CameraPixelDensityResult) -> None:
-    # Task 5 adds exact overlap, vertex, and compact-byte enforcement.
-    return None
+    if len(result.overlap_regions) > MAX_OVERLAP_REGIONS:
+        raise ValueError("Camera pixel-density result exceeds the 20,000-overlap-region safety limit.")
+    projected, wgs84 = count_persisted_vertices(result)
+    if projected > MAX_PERSISTED_VERTICES:
+        raise ValueError("Camera pixel-density result exceeds the 250,000 projected-coordinate safety limit.")
+    if wgs84 > MAX_PERSISTED_VERTICES:
+        raise ValueError("Camera pixel-density result exceeds the 250,000 WGS84-coordinate safety limit.")
+    payload = result.model_dump(mode="json")
+    size_bytes = len(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8"))
+    if size_bytes > MAX_RESULT_BYTES:
+        raise ValueError("Camera pixel-density result exceeds the 25 MiB compact-JSON safety limit.")
 
 
 def calculate_camera_pixel_density(
@@ -624,7 +749,7 @@ def calculate_camera_pixel_density(
         calculate_one_camera_density(project, item, legend, to_projected=to_projected, to_wgs84=to_wgs84)
         for item in resolved
     ]
-    overlaps = calculate_density_overlaps(camera_results)
+    overlaps = calculate_density_overlaps(camera_results, to_wgs84=to_wgs84)
     result = CameraPixelDensityResult(
         calculated_at=calculated_at or utc_now(), projected_crs=project.projected_crs,
         calculation_input_sha256=camera_pixel_density_input_sha256(project, fixtures, cameras, legend),

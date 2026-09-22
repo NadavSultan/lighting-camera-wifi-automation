@@ -108,3 +108,14 @@ Task 3 establishes the deterministic numerical primitives for `BL016-04`, `BL016
 | 2026-09-22 Asia/Jerusalem | Phase 3 regression file | `e157449a` + working tree | 37 pass, 4 stale-version assertions fail | session output | assertions expect retired `2.7.0`; scheduled for full regression update after BL-016 tasks; geometry behavior unaffected |
 
 Task 4 covers the per-camera and fingerprint portions of `BL016-04`, `BL016-06`, `BL016-07`, `BL016-08`, `BL016-10`, `BL016-11`, and `BL016-12`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 5 — deterministic overlap partitioning and output limits
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add analytic two-/three-camera overlap, tie-break, repeat-order, vertex-count, and result-limit tests | `007efba4` | RED: missing `count_persisted_vertices` | session output | expected Task 5 seam |
+| 2026-09-22 Asia/Jerusalem | Implement STRtree candidate discovery, polygonized contributor partitions, rank/tie winner selection, canonical IDs/rings, and exact limits | `007efba4` + working tree | first run found analytic test undercount only | session output | test expected 15 m² but omitted a 3 m² B/C-only strip; corrected to 18 m² |
+| 2026-09-22 Asia/Jerusalem | exact Task 5 focused pytest selector | `007efba4` + working tree | PASS: 3 selected tests | session output | Starlette/httpx and anyio deprecation warnings only |
+| 2026-09-22 Asia/Jerusalem | full BL-016 test file | `007efba4` + working tree | PASS: 53 tests | session output | same dependency deprecations |
+
+Task 5 covers deterministic overlap and safety-limit portions of `BL016-07`, `BL016-08`, `BL016-11`, `BL016-12`, and `BL016-13`. BL-016 remains unaccepted pending the complete gate.

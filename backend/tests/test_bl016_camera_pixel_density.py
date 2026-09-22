@@ -14,6 +14,7 @@ from shapely.geometry import Polygon
 from app.main import create_app
 from app.models import (
     CameraPixelDensityBand,
+    CameraPixelDensityCameraResult,
     CameraPixelDensityProfile,
     CameraPixelDensityState,
     PixelDensityLegendDefinition,
@@ -32,6 +33,9 @@ from app.services.camera_pixel_density import (
     project_frustum_plane,
     calculate_camera_pixel_density,
     camera_pixel_density_input_sha256,
+    calculate_density_overlaps,
+    count_persisted_vertices,
+    validate_camera_pixel_density_result_limits,
 )
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
@@ -367,3 +371,62 @@ def test_bl016_camera_limit_rejects_201_before_geometry(monkeypatch: pytest.Monk
     monkeypatch.setattr("app.services.camera_pixel_density.resolve_camera_pixel_density_inputs", lambda *_: [SimpleNamespace(enabled=True)] * 201)
     with pytest.raises(ValueError, match="exceeds the 200-enabled-camera safety limit"):
         calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+
+
+def bl016_test_band(rank: int, coordinates: list[tuple[float, float]]) -> CameraPixelDensityBand:
+    thresholds = [2, 3, 5, 7, 10, 15, 20, 30, 45, 70]
+    minimum = thresholds[rank - 1]
+    maximum = thresholds[rank] if rank < 10 else None
+    return CameraPixelDensityBand(
+        band_id=f"px-face-{minimum}", legend_id="face-density-0.16m-v1", rank=rank,
+        minimum_px_per_face=minimum, maximum_px_per_face=maximum,
+        display_value_px_per_face=minimum, colour_token=f"face-density-{minimum}",
+        projected_rings_m=[[coordinates]], wgs84_rings=[[coordinates]], area_m2=Polygon(coordinates).area,
+    )
+
+
+def bl016_test_camera(footprint_id: str, rank: int, coordinates: list[tuple[float, float]]) -> CameraPixelDensityCameraResult:
+    pole_id, slot_id = footprint_id.split("/", 1)
+    return CameraPixelDensityCameraResult(
+        footprint_id=footprint_id, pole_id=pole_id, camera_slot_id=slot_id, valid=True,
+        bands=[bl016_test_band(rank, coordinates)],
+    )
+
+
+def test_bl016_two_camera_overlap_winner_and_tie_break() -> None:
+    left = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
+    right = [(2, 0), (6, 0), (6, 4), (2, 4), (2, 0)]
+    regions = calculate_density_overlaps([
+        bl016_test_camera("pole-b/camera-1", 8, right),
+        bl016_test_camera("pole-a/camera-1", 8, left),
+    ])
+    assert len(regions) == 1
+    region = regions[0]
+    assert region.camera_footprint_ids == ["pole-a/camera-1", "pole-b/camera-1"]
+    assert region.multiplicity == 2
+    assert region.winning_band_id == "px-face-30"
+    assert region.winning_camera_footprint_id == "pole-a/camera-1"
+    assert region.area_m2 == pytest.approx(8.0)
+
+
+def test_bl016_three_camera_overlap_is_partitioned_without_double_counting() -> None:
+    cameras = [
+        bl016_test_camera("pole-a/camera-1", 8, [(0, 0), (5, 0), (5, 5), (0, 5), (0, 0)]),
+        bl016_test_camera("pole-b/camera-1", 7, [(2, 0), (7, 0), (7, 5), (2, 5), (2, 0)]),
+        bl016_test_camera("pole-c/camera-1", 6, [(3, 1), (6, 1), (6, 4), (3, 4), (3, 1)]),
+    ]
+    first = calculate_density_overlaps(cameras)
+    second = calculate_density_overlaps(list(reversed(cameras)))
+    assert any(region.multiplicity == 3 for region in first)
+    assert any(region.multiplicity == 2 for region in first)
+    assert [item.model_dump(mode="json") for item in first] == [item.model_dump(mode="json") for item in second]
+    assert sum(item.area_m2 for item in first) == pytest.approx(18.0)
+
+
+def test_bl016_vertex_counter_and_result_limits(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    result = calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+    projected, wgs84 = count_persisted_vertices(result)
+    assert projected > 0 and projected == wgs84
+    validate_camera_pixel_density_result_limits(result)
