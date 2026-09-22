@@ -85,3 +85,14 @@ Use the repository protocol verbatim; failures are logged and repaired without d
 | 2026-09-22 Asia/Jerusalem | `corepack pnpm run typecheck` | `1c141d09` + working tree | PASS after one transient modules-directory lock retry | session output | pnpm verified frozen lock and reran permitted esbuild postinstall; no lock drift |
 
 Task 2 acceptance covered: `BL016-01`, `BL016-02`, `BL016-03`; foundational contracts for `BL016-06`, `BL016-10`, `BL016-11`, `BL016-12`, and `BL016-13` are present. Task 2 remains unaccepted pending the full BL-016 gate.
+
+## Task 3 — deterministic camera-plane geometry and density bands
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add analytic lens, basis, threshold, plane, cap, and band-partition tests before implementation | `6263451d` | RED: missing `app.services.camera_pixel_density` | session output | expected absent Task 3 module |
+| 2026-09-22 Asia/Jerusalem | Implement locked basis, density equation, projection plane, 128-gon cap, depth clipping, and canonical polygon primitives | `6263451d` + working tree | first GREEN attempt found one test-only over-assertion | session output | approved signed image-up convention retained; test narrowed to contracted forward-depth behavior |
+| 2026-09-22 Asia/Jerusalem | `.\.venv\Scripts\python.exe -m pytest backend/tests/test_bl016_camera_pixel_density.py -q -p no:cacheprovider -k "reference_lens or threshold or camera_coordinates or midpoint or cap or band"` | `6263451d` + working tree | PASS: 17 selected tests | session output | Starlette/httpx and anyio deprecation warnings only |
+| 2026-09-22 Asia/Jerusalem | `.\.venv\Scripts\python.exe -m pytest backend/tests/test_bl016_camera_pixel_density.py -q -p no:cacheprovider` | `6263451d` + working tree | PASS: 45 tests | session output | same two dependency deprecation warnings |
+
+Task 3 establishes the deterministic numerical primitives for `BL016-04`, `BL016-05`, and `BL016-06`. BL-016 remains unaccepted pending the complete gate.
