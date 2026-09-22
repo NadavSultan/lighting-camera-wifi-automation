@@ -151,3 +151,13 @@ Task 7 proves Phase 7 packages archive the BL-016 project result while existing 
 | 2026-09-22 Asia/Jerusalem | focused node tests; `pnpm run typecheck`; `pnpm run lint` | `987a0c7b` + working tree | PASS: 25 tests; typecheck/lint exit 0 | session output | none |
 
 Task 8 covers frontend workflow and immediate-staleness portions of `BL016-01`, `BL016-02`, `BL016-03`, `BL016-09`, and `BL016-10`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 9 — map rendering, overlap labels, and safe inspection
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add current/visibility GeoJSON, hole preservation, winner/contributor, and rank/style tests | `129eda85` | RED: missing map helper module | session output | expected Task 9 module seam |
+| 2026-09-22 Asia/Jerusalem | Implement band/overlap helpers, ten ascending fills, generated dot pattern, dashed outline, canvas `2×/3×` labels, and text-only popup | `129eda85` + working tree | GREEN | session output | popup uses `setDOMContent` and project values use `textContent` |
+| 2026-09-22 Asia/Jerusalem | focused tests; full frontend test/typecheck/lint/build | `129eda85` + working tree | PASS: focused 25, full 107, typecheck/lint/build exit 0 | session output | standard build advisory behavior only |
+
+Task 9 covers rendered vector, overlap, label, visibility, and inspection portions of `BL016-04`, `BL016-05`, `BL016-06`, `BL016-07`, `BL016-08`, and `BL016-09`. BL-016 remains unaccepted pending the complete gate.
