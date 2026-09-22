@@ -74,3 +74,14 @@ Use the repository protocol verbatim; failures are logged and repaired without d
 - Durable goal state: active.
 - Implementation-readiness verifier result: not run.
 - Next authorized action: activate indexes and commit Task 1.
+
+## Task 2 — schema 2.8.0, canonical legend, and migration
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add migration/profile/state/band/legend endpoint tests before implementation | `1c141d09` | RED: import error for missing `CameraPixelDensityBand` | session output | expected missing BL-016 models |
+| 2026-09-22 Asia/Jerusalem | Implement strict models, 2.8.0/0.8.0 migration, canonical JSON/schema, endpoint, TypeScript mirrors, validator | `1c141d09` + working tree | GREEN after two minimal corrections | session output | migration initially emitted `{}` defaults; legend schema initially rejected `maximum`; both corrected at source |
+| 2026-09-22 Asia/Jerusalem | backend selected tests + validator + schema export | `1c141d09` + working tree | PASS: 24 tests; 8 catalogs; five generated schema paths | session output | Starlette/httpx and anyio deprecation warnings |
+| 2026-09-22 Asia/Jerusalem | `corepack pnpm run typecheck` | `1c141d09` + working tree | PASS after one transient modules-directory lock retry | session output | pnpm verified frozen lock and reran permitted esbuild postinstall; no lock drift |
+
+Task 2 acceptance covered: `BL016-01`, `BL016-02`, `BL016-03`; foundational contracts for `BL016-06`, `BL016-10`, `BL016-11`, `BL016-12`, and `BL016-13` are present. Task 2 remains unaccepted pending the full BL-016 gate.

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lcwa.local/schemas/camera-pixel-density-legend.schema.json",
+  "title": "Camera pixel-density legend",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "metric", "display_units", "object_width_m", "fill_opacity", "thresholds", "editable"],
+  "properties": {
+    "id": {"const": "face-density-0.16m-v1"},
+    "metric": {"const": "horizontal-pixels-per-object"},
+    "display_units": {"const": "px/face"},
+    "object_width_m": {"const": 0.16},
+    "fill_opacity": {"const": 0.58},
+    "editable": {"const": false},
+    "thresholds": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "prefixItems": [
+        {"$ref": "#/$defs/closedThreshold"}, {"$ref": "#/$defs/closedThreshold"},
+        {"$ref": "#/$defs/closedThreshold"}, {"$ref": "#/$defs/closedThreshold"},
+        {"$ref": "#/$defs/closedThreshold"}, {"$ref": "#/$defs/closedThreshold"},
+        {"$ref": "#/$defs/closedThreshold"}, {"$ref": "#/$defs/closedThreshold"},
+        {"$ref": "#/$defs/closedThreshold"}, {"$ref": "#/$defs/openThreshold"}
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "closedThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum", "colour", "token"],
+      "properties": {
+        "minimum": {"type": "number", "minimum": 0},
+        "maximum": {"type": "number", "exclusiveMinimum": 0},
+        "colour": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
+        "token": {"type": "string", "pattern": "^face-density-[0-9]+$"}
+      }
+    },
+    "openThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum", "colour", "token"],
+      "properties": {
+        "minimum": {"type": "number", "minimum": 0},
+        "maximum": {"type": "null"},
+        "colour": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
+        "token": {"type": "string", "pattern": "^face-density-[0-9]+$"}
+      }
+    }
+  }
+}

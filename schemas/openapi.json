@@ -3,9 +3,27 @@
   "info": {
     "title": "Lighting Camera WiFi Automation API",
     "description": "Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning and Phase 7 reporting.",
-    "version": "0.7.0"
+    "version": "0.8.0"
   },
   "paths": {
+    "/api/reference/camera-pixel-density-legend": {
+      "get": {
+        "summary": "Get Camera Pixel Density Legend",
+        "operationId": "get_camera_pixel_density_legend_api_reference_camera_pixel_density_legend_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PixelDensityLegendDefinition"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -2914,6 +2932,696 @@
         ],
         "title": "CameraOverlapResult"
       },
+      "CameraPixelDensityBand": {
+        "properties": {
+          "band_id": {
+            "type": "string",
+            "title": "Band Id"
+          },
+          "legend_id": {
+            "type": "string",
+            "const": "face-density-0.16m-v1",
+            "title": "Legend Id"
+          },
+          "rank": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "minimum_px_per_face": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minimum Px Per Face"
+          },
+          "maximum_px_per_face": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maximum Px Per Face"
+          },
+          "display_value_px_per_face": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Display Value Px Per Face"
+          },
+          "colour_token": {
+            "type": "string",
+            "pattern": "^face-density-[0-9]+$",
+            "title": "Colour Token"
+          },
+          "projected_rings_m": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Projected Rings M"
+          },
+          "wgs84_rings": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Wgs84 Rings"
+          },
+          "area_m2": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Area M2"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "band_id",
+          "legend_id",
+          "rank",
+          "minimum_px_per_face",
+          "display_value_px_per_face",
+          "colour_token",
+          "area_m2"
+        ],
+        "title": "CameraPixelDensityBand"
+      },
+      "CameraPixelDensityCameraResult": {
+        "properties": {
+          "footprint_id": {
+            "type": "string",
+            "title": "Footprint Id"
+          },
+          "pole_id": {
+            "type": "string",
+            "title": "Pole Id"
+          },
+          "camera_slot_id": {
+            "type": "string",
+            "title": "Camera Slot Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "fixture_model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Model Id"
+          },
+          "fixture_model_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Model Revision"
+          },
+          "mounting_template_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mounting Template Revision"
+          },
+          "geometry_contract_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geometry Contract Version"
+          },
+          "camera_model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Id"
+          },
+          "camera_model_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Model Revision"
+          },
+          "lens_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Id"
+          },
+          "lens_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Revision"
+          },
+          "resolution_width_px": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Width Px"
+          },
+          "resolution_height_px": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Height Px"
+          },
+          "horizontal_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizontal Fov Deg"
+          },
+          "vertical_fov_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vertical Fov Deg"
+          },
+          "fixture_height_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Height M"
+          },
+          "camera_absolute_azimuth_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Absolute Azimuth Deg"
+          },
+          "fixed_downward_tilt_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixed Downward Tilt Deg"
+          },
+          "valid": {
+            "type": "boolean",
+            "title": "Valid",
+            "default": false
+          },
+          "projection_envelope": {
+            "$ref": "#/components/schemas/CameraPixelDensityProjectionEnvelope"
+          },
+          "bands": {
+            "items": {
+              "$ref": "#/components/schemas/CameraPixelDensityBand"
+            },
+            "type": "array",
+            "title": "Bands"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "footprint_id",
+          "pole_id",
+          "camera_slot_id"
+        ],
+        "title": "CameraPixelDensityCameraResult"
+      },
+      "CameraPixelDensityLayer": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/CameraPixelDensityState"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CameraPixelDensityResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CameraPixelDensityLayer"
+      },
+      "CameraPixelDensityOverlapRegion": {
+        "properties": {
+          "overlap_region_id": {
+            "type": "string",
+            "title": "Overlap Region Id"
+          },
+          "camera_footprint_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Camera Footprint Ids"
+          },
+          "multiplicity": {
+            "type": "integer",
+            "minimum": 2.0,
+            "title": "Multiplicity"
+          },
+          "winning_camera_footprint_id": {
+            "type": "string",
+            "title": "Winning Camera Footprint Id"
+          },
+          "winning_band_id": {
+            "type": "string",
+            "title": "Winning Band Id"
+          },
+          "winning_band_rank": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Winning Band Rank"
+          },
+          "projected_rings_m": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Projected Rings M"
+          },
+          "wgs84_rings": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Wgs84 Rings"
+          },
+          "area_m2": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Area M2"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "overlap_region_id",
+          "camera_footprint_ids",
+          "multiplicity",
+          "winning_camera_footprint_id",
+          "winning_band_id",
+          "winning_band_rank",
+          "area_m2"
+        ],
+        "title": "CameraPixelDensityOverlapRegion"
+      },
+      "CameraPixelDensityProfile": {
+        "properties": {
+          "lower_projection_height_m": {
+            "type": "number",
+            "title": "Lower Projection Height M",
+            "default": 0.5
+          },
+          "upper_projection_height_m": {
+            "type": "number",
+            "title": "Upper Projection Height M",
+            "default": 2.0
+          },
+          "measurement_height_mode": {
+            "type": "string",
+            "const": "midpoint",
+            "title": "Measurement Height Mode",
+            "default": "midpoint"
+          },
+          "maximum_visible_distance_m": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Maximum Visible Distance M",
+            "default": 50.0
+          },
+          "legend_id": {
+            "type": "string",
+            "const": "face-density-0.16m-v1",
+            "title": "Legend Id",
+            "default": "face-density-0.16m-v1"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CameraPixelDensityProfile"
+      },
+      "CameraPixelDensityProfileSnapshot": {
+        "properties": {
+          "lower_projection_height_m": {
+            "type": "number",
+            "title": "Lower Projection Height M"
+          },
+          "upper_projection_height_m": {
+            "type": "number",
+            "title": "Upper Projection Height M"
+          },
+          "measurement_height_m": {
+            "type": "number",
+            "title": "Measurement Height M"
+          },
+          "maximum_visible_distance_m": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Maximum Visible Distance M"
+          },
+          "legend_id": {
+            "type": "string",
+            "const": "face-density-0.16m-v1",
+            "title": "Legend Id"
+          },
+          "face_width_m": {
+            "type": "number",
+            "const": 0.16,
+            "title": "Face Width M",
+            "default": 0.16
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "lower_projection_height_m",
+          "upper_projection_height_m",
+          "measurement_height_m",
+          "maximum_visible_distance_m",
+          "legend_id"
+        ],
+        "title": "CameraPixelDensityProfileSnapshot"
+      },
+      "CameraPixelDensityProjectionEnvelope": {
+        "properties": {
+          "projected_rings_m": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Projected Rings M"
+          },
+          "wgs84_rings": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Wgs84 Rings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CameraPixelDensityProjectionEnvelope"
+      },
+      "CameraPixelDensityResult": {
+        "properties": {
+          "model_version": {
+            "type": "string",
+            "const": "camera-face-density-vector-1.0.0",
+            "title": "Model Version",
+            "default": "camera-face-density-vector-1.0.0"
+          },
+          "calculated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Calculated At"
+          },
+          "projected_crs": {
+            "type": "string",
+            "title": "Projected Crs"
+          },
+          "calculation_input_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Calculation Input Sha256"
+          },
+          "profile_snapshot": {
+            "$ref": "#/components/schemas/CameraPixelDensityProfileSnapshot"
+          },
+          "camera_results": {
+            "items": {
+              "$ref": "#/components/schemas/CameraPixelDensityCameraResult"
+            },
+            "type": "array",
+            "title": "Camera Results"
+          },
+          "overlap_regions": {
+            "items": {
+              "$ref": "#/components/schemas/CameraPixelDensityOverlapRegion"
+            },
+            "type": "array",
+            "title": "Overlap Regions"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          },
+          "disclaimer": {
+            "type": "string",
+            "const": "Geometric horizontal pixel density for a front-facing 0.16 m reference face using an ideal pinhole model; not detection, recognition, identification, analytics, occlusion, visibility, or compliance evidence.",
+            "title": "Disclaimer",
+            "default": "Geometric horizontal pixel density for a front-facing 0.16 m reference face using an ideal pinhole model; not detection, recognition, identification, analytics, occlusion, visibility, or compliance evidence."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "calculated_at",
+          "projected_crs",
+          "calculation_input_sha256",
+          "profile_snapshot"
+        ],
+        "title": "CameraPixelDensityResult"
+      },
+      "CameraPixelDensityState": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not-calculated",
+              "current",
+              "stale"
+            ],
+            "title": "Status",
+            "default": "not-calculated"
+          },
+          "calculation_input_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Input Sha256"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CameraPixelDensityState"
+      },
       "CapAssignment": {
         "properties": {
           "node_id": {
@@ -4110,7 +4818,7 @@
           "version": {
             "type": "string",
             "title": "Version",
-            "default": "0.7.0"
+            "default": "0.8.0"
           }
         },
         "additionalProperties": false,
@@ -4489,6 +5197,11 @@
             "type": "boolean",
             "title": "Camera Overlap",
             "default": true
+          },
+          "camera_pixel_density": {
+            "type": "boolean",
+            "title": "Camera Pixel Density",
+            "default": false
           },
           "priority_areas": {
             "type": "boolean",
@@ -5022,6 +5735,101 @@
         ],
         "title": "OperatingMode"
       },
+      "PixelDensityLegendDefinition": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "const": "face-density-0.16m-v1",
+            "title": "Id"
+          },
+          "metric": {
+            "type": "string",
+            "const": "horizontal-pixels-per-object",
+            "title": "Metric"
+          },
+          "display_units": {
+            "type": "string",
+            "const": "px/face",
+            "title": "Display Units"
+          },
+          "object_width_m": {
+            "type": "number",
+            "const": 0.16,
+            "title": "Object Width M"
+          },
+          "fill_opacity": {
+            "type": "number",
+            "const": 0.58,
+            "title": "Fill Opacity"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/PixelDensityLegendThreshold"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 10,
+            "title": "Thresholds"
+          },
+          "editable": {
+            "type": "boolean",
+            "const": false,
+            "title": "Editable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "metric",
+          "display_units",
+          "object_width_m",
+          "fill_opacity",
+          "thresholds",
+          "editable"
+        ],
+        "title": "PixelDensityLegendDefinition"
+      },
+      "PixelDensityLegendThreshold": {
+        "properties": {
+          "minimum": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minimum"
+          },
+          "maximum": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maximum"
+          },
+          "colour": {
+            "type": "string",
+            "pattern": "^#[0-9a-f]{6}$",
+            "title": "Colour"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^face-density-[0-9]+$",
+            "title": "Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "minimum",
+          "maximum",
+          "colour",
+          "token"
+        ],
+        "title": "PixelDensityLegendThreshold"
+      },
       "PixelDensityStatus": {
         "properties": {
           "method": {
@@ -5521,14 +6329,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "const": "2.7.0",
+            "const": "2.8.0",
             "title": "Schema Version",
-            "default": "2.7.0"
+            "default": "2.8.0"
           },
           "software_version": {
             "type": "string",
             "title": "Software Version",
-            "default": "0.7.0"
+            "default": "0.8.0"
           },
           "id": {
             "type": "string",
@@ -5644,6 +6452,12 @@
           },
           "camera_geometry": {
             "$ref": "#/components/schemas/CameraGeometryLayer"
+          },
+          "camera_pixel_density_profile": {
+            "$ref": "#/components/schemas/CameraPixelDensityProfile"
+          },
+          "camera_pixel_density": {
+            "$ref": "#/components/schemas/CameraPixelDensityLayer"
           },
           "assumptions": {
             "items": {

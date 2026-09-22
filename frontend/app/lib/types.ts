@@ -60,8 +60,52 @@ export interface PoleWifiConfiguration {
   legacy_metadata: Record<string, unknown>;
 }
 
+export interface CameraPixelDensityProfile {
+  lower_projection_height_m: number;
+  upper_projection_height_m: number;
+  measurement_height_mode: "midpoint";
+  maximum_visible_distance_m: number;
+  legend_id: "face-density-0.16m-v1";
+}
+export interface PixelDensityLegendThreshold { minimum: number; maximum: number | null; colour: string; token: string }
+export interface PixelDensityLegendDefinition {
+  id: "face-density-0.16m-v1"; metric: "horizontal-pixels-per-object"; display_units: "px/face";
+  object_width_m: 0.16; fill_opacity: 0.58; thresholds: PixelDensityLegendThreshold[]; editable: false;
+}
+export type CameraPixelDensityPolygonRings = Array<Array<Array<[number, number]>>>;
+export interface CameraPixelDensityBand {
+  band_id: string; legend_id: "face-density-0.16m-v1"; rank: number; minimum_px_per_face: number;
+  maximum_px_per_face: number | null; display_value_px_per_face: number; colour_token: string;
+  projected_rings_m: CameraPixelDensityPolygonRings; wgs84_rings: CameraPixelDensityPolygonRings; area_m2: number;
+}
+export interface CameraPixelDensityCameraResult {
+  footprint_id: string; pole_id: string; camera_slot_id: string; enabled: boolean; fixture_model_id: string | null;
+  fixture_model_revision: number | null; mounting_template_revision: number | null; geometry_contract_version: string | null;
+  camera_model_id: string | null; camera_model_revision: number | null; lens_id: string | null; lens_revision: number | null;
+  resolution_width_px: number | null; resolution_height_px: number | null; horizontal_fov_deg: number | null;
+  vertical_fov_deg: number | null; fixture_height_m: number | null; camera_absolute_azimuth_deg: number | null;
+  fixed_downward_tilt_deg: number | null; valid: boolean;
+  projection_envelope: { projected_rings_m: CameraPixelDensityPolygonRings; wgs84_rings: CameraPixelDensityPolygonRings };
+  bands: CameraPixelDensityBand[]; warnings: string[]; assumptions: string[];
+}
+export interface CameraPixelDensityOverlapRegion {
+  overlap_region_id: string; camera_footprint_ids: string[]; multiplicity: number; winning_camera_footprint_id: string;
+  winning_band_id: string; winning_band_rank: number; projected_rings_m: CameraPixelDensityPolygonRings;
+  wgs84_rings: CameraPixelDensityPolygonRings; area_m2: number;
+}
+export interface CameraPixelDensityResult {
+  model_version: "camera-face-density-vector-1.0.0"; calculated_at: string; projected_crs: string;
+  calculation_input_sha256: string; profile_snapshot: CameraPixelDensityProfile & { measurement_height_m: number; face_width_m: 0.16 };
+  camera_results: CameraPixelDensityCameraResult[]; overlap_regions: CameraPixelDensityOverlapRegion[];
+  warnings: string[]; assumptions: string[]; disclaimer: string;
+}
+export interface CameraPixelDensityLayer {
+  state: { status: "not-calculated" | "current" | "stale"; calculation_input_sha256: string | null; message: string | null };
+  result: CameraPixelDensityResult | null;
+}
+
 export interface Project {
-  schema_version: "2.7.0";
+  schema_version: "2.8.0";
   software_version: string;
   id: string;
   name: string;
@@ -98,6 +142,8 @@ export interface Project {
   cap_recommendations: { selected_candidate_ids: string[]; result_sha256: string | null };
   legacy_invalid_priority_areas: Array<Record<string, unknown>>;
   camera_geometry: CameraGeometryLayer;
+  camera_pixel_density_profile: CameraPixelDensityProfile;
+  camera_pixel_density: CameraPixelDensityLayer;
   assumptions: string[];
   calculated_layers: Record<string, unknown>;
   recommended_layers: Record<string, unknown>;

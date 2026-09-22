@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CATALOG_SCHEMAS = {
     "data/fixtures/fixture-types.json": "schemas/fixture-types.schema.json",
     "data/cameras/camera-catalog.json": "schemas/camera-catalog.schema.json",
+    "data/cameras/camera-pixel-density-legend.json": "schemas/camera-pixel-density-legend.schema.json",
     "data/luminaires/luminaire-catalog.json": "schemas/luminaire-catalog.schema.json",
     "data/luminaires/ies-inventory.json": "schemas/ies-inventory.schema.json",
     "data/network/cap-constraints.json": "schemas/cap-constraints.schema.json",
@@ -191,6 +192,27 @@ def validate_camera(catalogs: dict[str, Any]) -> None:
     check(0 <= minimum <= default <= maximum <= 90, "Camera downward-angle convention is inconsistent")
 
 
+def validate_camera_pixel_density_legend(catalogs: dict[str, Any]) -> None:
+    legend = catalogs["data/cameras/camera-pixel-density-legend.json"]
+    expected = [
+        (2, 3, "#c7f9ff", "face-density-2"),
+        (3, 5, "#8fe7f2", "face-density-3"),
+        (5, 7, "#4cc9f0", "face-density-5"),
+        (7, 10, "#3a86ff", "face-density-7"),
+        (10, 15, "#2fb344", "face-density-10"),
+        (15, 20, "#8bc34a", "face-density-15"),
+        (20, 30, "#ffd43b", "face-density-20"),
+        (30, 45, "#ff922b", "face-density-30"),
+        (45, 70, "#f03e3e", "face-density-45"),
+        (70, None, "#d633ff", "face-density-70"),
+    ]
+    actual = [(row["minimum"], row["maximum"], row["colour"], row["token"]) for row in legend["thresholds"]]
+    check(actual == expected, "Camera pixel-density thresholds or approved Option A palette changed")
+    check(legend["object_width_m"] == 0.16, "Camera pixel-density face width must remain 0.16 m")
+    check(legend["fill_opacity"] == 0.58, "Camera pixel-density fill opacity must remain 0.58")
+    check(legend["editable"] is False, "Camera pixel-density legend must remain immutable")
+
+
 def parse_ies(path: Path) -> dict[str, Any]:
     lines = path.read_text(encoding="utf-8-sig").splitlines()
     check(bool(lines), f"Empty IES file: {path}")
@@ -313,6 +335,7 @@ def main() -> int:
         validate_traceability(catalogs)
         validate_fixture_and_wifi(catalogs)
         validate_camera(catalogs)
+        validate_camera_pixel_density_legend(catalogs)
         validate_ies_and_luminaires(catalogs)
         validate_cap(catalogs)
         validate_calculation_areas(catalogs)
@@ -321,7 +344,7 @@ def main() -> int:
         print(f"Engineering data validation FAILED: {error}", file=sys.stderr)
         return 1
     print(
-        "Engineering data validation PASSED: 7 catalogs matched schemas; identifiers, traceability, "
+        "Engineering data validation PASSED: 8 catalogs matched schemas; identifiers, traceability, "
         "units, camera angles/resolution, fixture capabilities, IES parses/references/hashes, CAP unknowns, "
         "calculation areas, and all supplied-source hashes are valid."
     )

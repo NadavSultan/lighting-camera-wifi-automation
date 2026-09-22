@@ -4,6 +4,7 @@ import hashlib
 import json
 from copy import deepcopy
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Body, FastAPI, Header, HTTPException, Response
@@ -21,7 +22,7 @@ from app.catalog_models import (
     IesLibrary,
     LensConfiguration,
 )
-from app.models import CapCandidateSite, CapManualConstraints, CapPlanningInputs, HealthResponse, Project, ProjectSummary, ReportPackageRequest, WifiAnalysisArea, migrate_project_payload
+from app.models import CapCandidateSite, CapManualConstraints, CapPlanningInputs, HealthResponse, PixelDensityLegendDefinition, Project, ProjectSummary, ReportPackageRequest, WifiAnalysisArea, migrate_project_payload
 from app.services.cap_planning import apply_cap_result, calculate_cap_plan, invalidate_stale_cap_results
 from app.services.catalogs import CatalogNotFoundError, CatalogStore
 from app.services.configuration import (
@@ -49,6 +50,16 @@ REPORT_RESPONSE_HEADERS = (
 )
 
 
+@lru_cache(maxsize=1)
+def _cached_camera_pixel_density_legend() -> PixelDensityLegendDefinition:
+    path = Path(__file__).resolve().parents[2] / "data" / "cameras" / "camera-pixel-density-legend.json"
+    return PixelDensityLegendDefinition.model_validate_json(path.read_text(encoding="utf-8"))
+
+
+def load_camera_pixel_density_legend() -> PixelDensityLegendDefinition:
+    return _cached_camera_pixel_density_legend().model_copy(deep=True)
+
+
 def _as_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value.replace(tzinfo=timezone.utc)
@@ -71,7 +82,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     catalogs = catalog_store or CatalogStore()
     app = FastAPI(
         title="Lighting Camera WiFi Automation API",
-        version="0.7.0",
+        version="0.8.0",
         description="Existing-pole engineering workflow with Phase 6 conceptual CAP graph planning and Phase 7 reporting.",
     )
     app.state.project_store = project_store
@@ -85,6 +96,10 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         allow_headers=["*"],
         expose_headers=list(REPORT_RESPONSE_HEADERS),
     )
+
+    @app.get("/api/reference/camera-pixel-density-legend", response_model=PixelDensityLegendDefinition)
+    def get_camera_pixel_density_legend() -> PixelDensityLegendDefinition:
+        return load_camera_pixel_density_legend()
 
     def pin_revisions(project: Project) -> Project:
         return pin_missing_equipment_revisions(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())

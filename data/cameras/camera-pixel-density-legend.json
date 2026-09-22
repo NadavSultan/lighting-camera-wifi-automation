@@ -1,0 +1,20 @@
+{
+  "id": "face-density-0.16m-v1",
+  "metric": "horizontal-pixels-per-object",
+  "display_units": "px/face",
+  "object_width_m": 0.16,
+  "fill_opacity": 0.58,
+  "thresholds": [
+    {"minimum": 2, "maximum": 3, "colour": "#c7f9ff", "token": "face-density-2"},
+    {"minimum": 3, "maximum": 5, "colour": "#8fe7f2", "token": "face-density-3"},
+    {"minimum": 5, "maximum": 7, "colour": "#4cc9f0", "token": "face-density-5"},
+    {"minimum": 7, "maximum": 10, "colour": "#3a86ff", "token": "face-density-7"},
+    {"minimum": 10, "maximum": 15, "colour": "#2fb344", "token": "face-density-10"},
+    {"minimum": 15, "maximum": 20, "colour": "#8bc34a", "token": "face-density-15"},
+    {"minimum": 20, "maximum": 30, "colour": "#ffd43b", "token": "face-density-20"},
+    {"minimum": 30, "maximum": 45, "colour": "#ff922b", "token": "face-density-30"},
+    {"minimum": 45, "maximum": 70, "colour": "#f03e3e", "token": "face-density-45"},
+    {"minimum": 70, "maximum": null, "colour": "#d633ff", "token": "face-density-70"}
+  ],
+  "editable": false
+}

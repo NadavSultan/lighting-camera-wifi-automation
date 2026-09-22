@@ -16,8 +16,8 @@ from shapely.validation import explain_validity
 from app.crs import validate_projected_metre_crs
 
 
-SCHEMA_VERSION = "2.7.0"
-SOFTWARE_VERSION = "0.7.0"
+SCHEMA_VERSION = "2.8.0"
+SOFTWARE_VERSION = "0.8.0"
 REPORT_MODEL_VERSION = "report-package-1.0.0"
 WIFI_MODEL_VERSION = "conceptual-circle-1.0.0"
 MAX_REPORT_PACKAGE_BYTES = 50 * 1024 * 1024
@@ -201,6 +201,7 @@ class LayerState(StrictModel):
     smart_fixtures: bool = True
     camera_fov: bool = True
     camera_overlap: bool = True
+    camera_pixel_density: bool = False
     priority_areas: bool = True
     wifi_coverage: bool = False
     calculation_areas: bool = True
@@ -696,6 +697,184 @@ class CapRecommendations(StrictModel):
     result_sha256: str | None = None
 
 
+CameraPixelDensityStatus = Literal["not-calculated", "current", "stale"]
+CAMERA_PIXEL_DENSITY_DISCLAIMER = "Geometric horizontal pixel density for a front-facing 0.16 m reference face using an ideal pinhole model; not detection, recognition, identification, analytics, occlusion, visibility, or compliance evidence."
+
+
+class CameraPixelDensityProfile(StrictModel):
+    lower_projection_height_m: float = 0.5
+    upper_projection_height_m: float = 2.0
+    measurement_height_mode: Literal["midpoint"] = "midpoint"
+    maximum_visible_distance_m: Annotated[float, Field(gt=0)] = 50.0
+    legend_id: Literal["face-density-0.16m-v1"] = "face-density-0.16m-v1"
+
+    @model_validator(mode="after")
+    def validate_projection_heights(self) -> "CameraPixelDensityProfile":
+        if self.lower_projection_height_m < 0:
+            raise ValueError("lower projection height must be non-negative")
+        if self.lower_projection_height_m >= self.upper_projection_height_m:
+            raise ValueError("lower projection height must be less than upper projection height")
+        return self
+
+    @property
+    def measurement_height_m(self) -> float:
+        return (self.lower_projection_height_m + self.upper_projection_height_m) / 2
+
+
+class CameraPixelDensityState(StrictModel):
+    status: CameraPixelDensityStatus = "not-calculated"
+    calculation_input_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")] = None
+    message: str | None = None
+
+
+class PixelDensityLegendThreshold(StrictModel):
+    minimum: Annotated[float, Field(ge=0)]
+    maximum: Annotated[float | None, Field(gt=0)]
+    colour: Annotated[str, Field(pattern=r"^#[0-9a-f]{6}$")]
+    token: Annotated[str, Field(pattern=r"^face-density-[0-9]+$")]
+
+
+class PixelDensityLegendDefinition(StrictModel):
+    id: Literal["face-density-0.16m-v1"]
+    metric: Literal["horizontal-pixels-per-object"]
+    display_units: Literal["px/face"]
+    object_width_m: Literal[0.16]
+    fill_opacity: Literal[0.58]
+    thresholds: Annotated[list[PixelDensityLegendThreshold], Field(min_length=10, max_length=10)]
+    editable: Literal[False]
+
+    @model_validator(mode="after")
+    def validate_thresholds(self) -> "PixelDensityLegendDefinition":
+        for index, threshold in enumerate(self.thresholds):
+            is_last = index == len(self.thresholds) - 1
+            if is_last != (threshold.maximum is None):
+                raise ValueError("only the final density threshold may be open-ended")
+            if not is_last and threshold.maximum != self.thresholds[index + 1].minimum:
+                raise ValueError("density thresholds must be contiguous and increasing")
+        return self
+
+
+def _validate_density_geometry(collection: list[list[list[tuple[float, float]]]], label: str) -> None:
+    for polygon in collection:
+        if not polygon:
+            raise ValueError(f"{label} polygon requires an exterior ring")
+        for ring in polygon:
+            if len(ring) < 4 or ring[0] != ring[-1]:
+                raise ValueError(f"{label} rings must be closed with at least four coordinates")
+            if len(set(ring[:-1])) < 3:
+                raise ValueError(f"{label} rings require three distinct vertices")
+            if any(not math.isfinite(value) for coordinate in ring for value in coordinate):
+                raise ValueError(f"{label} coordinates must be finite")
+
+
+class CameraPixelDensityProfileSnapshot(StrictModel):
+    lower_projection_height_m: float
+    upper_projection_height_m: float
+    measurement_height_m: float
+    maximum_visible_distance_m: Annotated[float, Field(gt=0)]
+    legend_id: Literal["face-density-0.16m-v1"]
+    face_width_m: Literal[0.16] = 0.16
+
+
+class CameraPixelDensityProjectionEnvelope(StrictModel):
+    projected_rings_m: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+    wgs84_rings: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_rings(self) -> "CameraPixelDensityProjectionEnvelope":
+        _validate_density_geometry(self.projected_rings_m, "projected")
+        _validate_density_geometry(self.wgs84_rings, "WGS84")
+        return self
+
+
+class CameraPixelDensityBand(StrictModel):
+    band_id: str
+    legend_id: Literal["face-density-0.16m-v1"]
+    rank: Annotated[int, Field(ge=1, le=10)]
+    minimum_px_per_face: Annotated[float, Field(ge=0)]
+    maximum_px_per_face: Annotated[float | None, Field(gt=0)] = None
+    display_value_px_per_face: Annotated[float, Field(ge=0)]
+    colour_token: Annotated[str, Field(pattern=r"^face-density-[0-9]+$")]
+    projected_rings_m: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+    wgs84_rings: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+    area_m2: Annotated[float, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def validate_rings(self) -> "CameraPixelDensityBand":
+        _validate_density_geometry(self.projected_rings_m, "projected")
+        _validate_density_geometry(self.wgs84_rings, "WGS84")
+        return self
+
+
+class CameraPixelDensityCameraResult(StrictModel):
+    footprint_id: str
+    pole_id: str
+    camera_slot_id: str
+    enabled: bool = True
+    fixture_model_id: str | None = None
+    fixture_model_revision: int | None = None
+    mounting_template_revision: int | None = None
+    geometry_contract_version: str | None = None
+    camera_model_id: str | None = None
+    camera_model_revision: int | None = None
+    lens_id: str | None = None
+    lens_revision: int | None = None
+    resolution_width_px: int | None = None
+    resolution_height_px: int | None = None
+    horizontal_fov_deg: float | None = None
+    vertical_fov_deg: float | None = None
+    fixture_height_m: float | None = None
+    camera_absolute_azimuth_deg: float | None = None
+    fixed_downward_tilt_deg: float | None = None
+    valid: bool = False
+    projection_envelope: CameraPixelDensityProjectionEnvelope = Field(default_factory=CameraPixelDensityProjectionEnvelope)
+    bands: list[CameraPixelDensityBand] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+
+
+class CameraPixelDensityOverlapRegion(StrictModel):
+    overlap_region_id: str
+    camera_footprint_ids: Annotated[list[str], Field(min_length=2)]
+    multiplicity: Annotated[int, Field(ge=2)]
+    winning_camera_footprint_id: str
+    winning_band_id: str
+    winning_band_rank: Annotated[int, Field(ge=1, le=10)]
+    projected_rings_m: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+    wgs84_rings: list[list[list[tuple[float, float]]]] = Field(default_factory=list)
+    area_m2: Annotated[float, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def validate_overlap(self) -> "CameraPixelDensityOverlapRegion":
+        if self.multiplicity != len(self.camera_footprint_ids):
+            raise ValueError("overlap multiplicity must match contributor count")
+        if self.camera_footprint_ids != sorted(set(self.camera_footprint_ids)):
+            raise ValueError("overlap contributors must be unique and sorted")
+        if self.winning_camera_footprint_id not in self.camera_footprint_ids:
+            raise ValueError("overlap winner must be a contributor")
+        _validate_density_geometry(self.projected_rings_m, "projected")
+        _validate_density_geometry(self.wgs84_rings, "WGS84")
+        return self
+
+
+class CameraPixelDensityResult(StrictModel):
+    model_version: Literal["camera-face-density-vector-1.0.0"] = "camera-face-density-vector-1.0.0"
+    calculated_at: datetime
+    projected_crs: str
+    calculation_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    profile_snapshot: CameraPixelDensityProfileSnapshot
+    camera_results: list[CameraPixelDensityCameraResult] = Field(default_factory=list)
+    overlap_regions: list[CameraPixelDensityOverlapRegion] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    disclaimer: Literal[CAMERA_PIXEL_DENSITY_DISCLAIMER] = CAMERA_PIXEL_DENSITY_DISCLAIMER
+
+
+class CameraPixelDensityLayer(StrictModel):
+    state: CameraPixelDensityState = Field(default_factory=CameraPixelDensityState)
+    result: CameraPixelDensityResult | None = None
+
+
 class ReportSectionSelection(StrictModel):
     project_inventory: bool = True
     poles_fixtures: bool = True
@@ -775,8 +954,8 @@ class ReportMemberIntegrity(StrictModel):
 
 class ReportManifest(StrictModel):
     report_model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
-    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
-    software_version: Literal["0.7.0"] = SOFTWARE_VERSION
+    schema_version: Literal["2.8.0"] = SCHEMA_VERSION
+    software_version: Literal["0.8.0"] = SOFTWARE_VERSION
     generator: Literal["lcwa-report-package"]
     project_id: str
     project_name: str
@@ -851,8 +1030,8 @@ class PresentationModel(StrictModel):
     presentation_generated: Literal[False]
     pptx_supported: Literal[False]
     report_model_version: Literal["report-package-1.0.0"] = REPORT_MODEL_VERSION
-    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
-    software_version: Literal["0.7.0"] = SOFTWARE_VERSION
+    schema_version: Literal["2.8.0"] = SCHEMA_VERSION
+    software_version: Literal["0.8.0"] = SOFTWARE_VERSION
     project_id: str
     project_name: str
     generation_time: str
@@ -867,7 +1046,7 @@ class PresentationModel(StrictModel):
 
 
 class Project(StrictModel):
-    schema_version: Literal["2.7.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.8.0"] = SCHEMA_VERSION
     software_version: str = SOFTWARE_VERSION
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = "Untitled lighting project"
@@ -892,6 +1071,8 @@ class Project(StrictModel):
     cap_recommendations: CapRecommendations = Field(default_factory=CapRecommendations)
     legacy_invalid_priority_areas: list[dict[str, Any]] = Field(default_factory=list)
     camera_geometry: CameraGeometryLayer = Field(default_factory=CameraGeometryLayer)
+    camera_pixel_density_profile: CameraPixelDensityProfile = Field(default_factory=CameraPixelDensityProfile)
+    camera_pixel_density: CameraPixelDensityLayer = Field(default_factory=CameraPixelDensityLayer)
     assumptions: list[str] = Field(default_factory=lambda: [
         "Existing-pole mode is active; no pole locations are generated or optimized.",
         "Customer KML/KMZ coordinates are authoritative and stored in WGS84.",
@@ -968,7 +1149,7 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
     version = payload.get("schema_version", "1.0.0")
     if version == SCHEMA_VERSION:
         return payload
-    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.0"}:
+    if version not in {"1.0.0", "2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.0", "2.7.0"}:
         raise ValueError(f"Unsupported project schema version: {version}")
     migrated = dict(payload)
     migrated["schema_version"] = SCHEMA_VERSION
@@ -997,8 +1178,11 @@ def migrate_project_payload(payload: dict[str, Any]) -> dict[str, Any]:
         migrated["priority_areas"] = valid_areas
         migrated["legacy_invalid_priority_areas"] = legacy_areas
     migrated.setdefault("camera_geometry", {})
+    migrated.setdefault("camera_pixel_density_profile", CameraPixelDensityProfile().model_dump(mode="json"))
+    migrated.setdefault("camera_pixel_density", CameraPixelDensityLayer().model_dump(mode="json"))
     layer_state = dict(migrated.get("layer_state", {}))
     layer_state.setdefault("camera_overlap", True)
+    layer_state.setdefault("camera_pixel_density", False)
     layer_state.setdefault("priority_areas", True)
     layer_state.setdefault("calculation_areas", True)
     layer_state.setdefault("calculation_points", True)
