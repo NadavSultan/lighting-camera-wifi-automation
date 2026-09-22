@@ -36,10 +36,13 @@ from app.services.camera_pixel_density import (
     calculate_density_overlaps,
     count_persisted_vertices,
     validate_camera_pixel_density_result_limits,
+    apply_camera_pixel_density_result,
+    invalidate_stale_camera_pixel_density,
 )
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
 from app.services.kml import import_project
+from app.services.store import ProjectStore
 
 
 SUPPORTED_LEGACY_VERSIONS = (
@@ -430,3 +433,53 @@ def test_bl016_vertex_counter_and_result_limits(tmp_path: Path) -> None:
     projected, wgs84 = count_persisted_vertices(result)
     assert projected > 0 and projected == wgs84
     validate_camera_pixel_density_result_limits(result)
+
+
+def test_bl016_apply_and_stale_lifecycle_retains_result(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    fixtures, cameras = store.fixtures(), store.cameras()
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    result = calculate_camera_pixel_density(project, fixtures, cameras, legend)
+    current = apply_camera_pixel_density_result(project, result)
+    assert current.camera_pixel_density.state.status == "current"
+    assert current.layer_state.camera_pixel_density is True
+    presentation_only = current.model_copy(deep=True)
+    presentation_only.pole_edits[project.source.poles[0].id].engineering_notes = "does not invalidate"
+    assert invalidate_stale_camera_pixel_density(presentation_only, fixtures, cameras, legend) is False
+    significant = current.model_copy(deep=True)
+    original_result = significant.camera_pixel_density.result.model_dump(mode="json")
+    significant.pole_edits[project.source.poles[0].id].height_m = 11.0
+    assert invalidate_stale_camera_pixel_density(significant, fixtures, cameras, legend) is True
+    assert significant.camera_pixel_density.state.status == "stale"
+    assert significant.camera_pixel_density.state.message == "Stale — recalculate required"
+    assert significant.camera_pixel_density.result.model_dump(mode="json") == original_result
+    assert significant.layer_state.camera_pixel_density is False
+
+
+def test_bl016_atomic_api_success_identity_and_failure_preservation(tmp_path: Path) -> None:
+    project, catalogs = bl016_configured_project(tmp_path)
+    projects = ProjectStore(tmp_path / "projects")
+    stored = projects.save(project)
+    client = TestClient(create_app(projects, catalogs))
+    response = client.post(
+        f"/api/projects/{stored.id}/camera-pixel-density/calculate",
+        json=stored.model_dump(mode="json"),
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["camera_pixel_density"]["state"]["status"] == "current"
+    assert body["camera_pixel_density"]["state"]["calculation_input_sha256"] == body["camera_pixel_density"]["result"]["calculation_input_sha256"]
+    assert body["layer_state"]["camera_pixel_density"] is True
+    project_path = projects.root / stored.id / "project.json"
+    before = project_path.read_bytes()
+    invalid = copy.deepcopy(body)
+    invalid["camera_pixel_density_profile"]["lower_projection_height_m"] = 3.0
+    failed = client.post(f"/api/projects/{stored.id}/camera-pixel-density/calculate", json=invalid)
+    assert failed.status_code == 422
+    assert project_path.read_bytes() == before
+    mismatch = client.post("/api/projects/not-the-project/camera-pixel-density/calculate", json=body)
+    assert mismatch.status_code == 409
+    missing = copy.deepcopy(body)
+    missing["id"] = "missing-project"
+    absent = client.post("/api/projects/missing-project/camera-pixel-density/calculate", json=missing)
+    assert absent.status_code == 404

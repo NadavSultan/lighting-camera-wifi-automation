@@ -60,6 +60,16 @@ def test_project_json_open_round_trip(tmp_path: Path) -> None:
     assert opened.json()["name"] == "Local project"
 
 
+def test_camera_pixel_density_calculation_requires_existing_matching_project(tmp_path: Path) -> None:
+    client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
+    project = client.post("/api/projects", json={"name": "Density identity"}).json()
+    mismatch = client.post("/api/projects/different/camera-pixel-density/calculate", json=project)
+    assert mismatch.status_code == 409
+    project["id"] = "absent"
+    absent = client.post("/api/projects/absent/camera-pixel-density/calculate", json=project)
+    assert absent.status_code == 404
+
+
 def test_rejects_unsupported_upload(tmp_path: Path) -> None:
     client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
     response = client.post(

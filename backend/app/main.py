@@ -32,6 +32,11 @@ from app.services.configuration import (
     validate_project_configuration,
 )
 from app.services.camera_geometry import calculate_camera_geometry
+from app.services.camera_pixel_density import (
+    apply_camera_pixel_density_result,
+    calculate_camera_pixel_density,
+    invalidate_stale_camera_pixel_density,
+)
 from app.services.fixture_direction_preview import FixtureDirectionPreviewResponse, preview_fixture_directions
 from app.services.lighting_calculation import calculate_lighting_area, invalidate_stale_lighting_results
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results, validate_wifi_analysis_areas
@@ -108,6 +113,11 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         project.camera_geometry = calculate_camera_geometry(project, catalogs.fixtures(), catalogs.cameras())
         return project
 
+    def invalidate_camera_density(project: Project) -> bool:
+        return invalidate_stale_camera_pixel_density(
+            project, catalogs.fixtures(), catalogs.cameras(), load_camera_pixel_density_legend()
+        )
+
     def project_references(kind: str, item_id: str, fixture_id: str | None = None) -> list[str]:
         references: list[str] = []
         fixture_catalog = catalogs.fixtures()
@@ -159,6 +169,8 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
                 project_store.save(project)
             if invalidate_stale_cap_results(project):
                 project_store.save(project)
+            if invalidate_camera_density(project):
+                project_store.save(project)
             validate_wifi_analysis_areas(project)
             return recalculate(project)
         except ProjectNotFoundError:
@@ -187,6 +199,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             invalidate_stale_lighting_results(project)
             invalidate_stale_wifi_results(project)
             invalidate_stale_cap_results(project)
+            invalidate_camera_density(project)
             validate_wifi_analysis_areas(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -203,6 +216,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             invalidate_stale_lighting_results(project)
             invalidate_stale_wifi_results(project)
             invalidate_stale_cap_results(project)
+            invalidate_camera_density(project)
             validate_wifi_analysis_areas(project)
             errors = validate_project_configuration(project, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -219,6 +233,7 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             invalidate_stale_lighting_results(updated)
             invalidate_stale_wifi_results(updated)
             invalidate_stale_cap_results(updated)
+            invalidate_camera_density(updated)
             validate_wifi_analysis_areas(updated)
             errors = validate_project_configuration(updated, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
             if errors:
@@ -252,6 +267,27 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
                 raise ValueError("; ".join(errors))
             return recalculate(project)
         except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/projects/{project_id}/camera-pixel-density/calculate", response_model=Project)
+    def calculate_project_camera_pixel_density(project_id: str, project: Project) -> Project:
+        if project.id != project_id:
+            raise HTTPException(status_code=409, detail="Project ID does not match request path")
+        try:
+            project_store.load(project_id)
+            candidate = pin_revisions(project)
+            validate_wifi_analysis_areas(candidate)
+            errors = validate_project_configuration(candidate, catalogs.fixtures(), catalogs.cameras(), catalogs.ies())
+            if errors:
+                raise ValueError("; ".join(errors))
+            result = calculate_camera_pixel_density(
+                candidate, catalogs.fixtures(), catalogs.cameras(), load_camera_pixel_density_legend()
+            )
+            updated = apply_camera_pixel_density_result(candidate, result)
+            return project_store.save(recalculate(updated))
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError, ArithmeticError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/api/projects/{project_id}/lighting/calculate/{area_id}", response_model=Project)

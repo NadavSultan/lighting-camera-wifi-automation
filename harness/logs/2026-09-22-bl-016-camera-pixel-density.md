@@ -119,3 +119,15 @@ Task 4 covers the per-camera and fingerprint portions of `BL016-04`, `BL016-06`,
 | 2026-09-22 Asia/Jerusalem | full BL-016 test file | `007efba4` + working tree | PASS: 53 tests | session output | same dependency deprecations |
 
 Task 5 covers deterministic overlap and safety-limit portions of `BL016-07`, `BL016-08`, `BL016-11`, `BL016-12`, and `BL016-13`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 6 — atomic calculation API and freshness lifecycle
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add apply/stale retention, success/identity, missing-project, and byte-preserving invalid-request tests | `6ee9fe73` + working tree | tests added before route verification | session output | none |
+| 2026-09-22 Asia/Jerusalem | Implement apply/invalidate functions, atomic POST route, and ordinary-save/bulk/open invalidation | `6ee9fe73` + working tree | GREEN | session output | calculation completes and validates before the sole save operation |
+| 2026-09-22 Asia/Jerusalem | exact Task 6 two-file pytest command | `6ee9fe73` + working tree | PASS: 62 tests | session output | Starlette/httpx and anyio deprecation warnings only |
+| 2026-09-22 Asia/Jerusalem | full backend pytest before compatibility regeneration | `6ee9fe73` + working tree | behavioral tests pass; stale `2.7.0` assertions and OpenAPI freshness fail | session output | compatibility-only failures routed to Task 7 |
+| 2026-09-22 Asia/Jerusalem | schema export plus full backend pytest with Task 7 compatibility changes present | `6ee9fe73` + working tree | PASS: 100% | session output | generated contracts and version-only assertions remain unstaged for Task 7; dependency deprecations only |
+
+Task 6 covers atomic/current/stale lifecycle portions of `BL016-09`, `BL016-10`, `BL016-11`, `BL016-12`, and `BL016-13`. BL-016 remains unaccepted pending the complete gate.

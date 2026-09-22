@@ -30,6 +30,7 @@ from app.models import (
     CameraPixelDensityProfileSnapshot,
     CameraPixelDensityProjectionEnvelope,
     CameraPixelDensityResult,
+    CameraPixelDensityState,
     CameraPixelDensityOverlapRegion,
     PixelDensityLegendDefinition,
     PixelDensityLegendThreshold,
@@ -727,6 +728,41 @@ def validate_camera_pixel_density_result_limits(result: CameraPixelDensityResult
     size_bytes = len(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8"))
     if size_bytes > MAX_RESULT_BYTES:
         raise ValueError("Camera pixel-density result exceeds the 25 MiB compact-JSON safety limit.")
+
+
+def apply_camera_pixel_density_result(project: Project, result: CameraPixelDensityResult) -> Project:
+    updated = project.model_copy(deep=True)
+    updated.camera_pixel_density.result = result
+    updated.camera_pixel_density.state = CameraPixelDensityState(
+        status="current",
+        calculation_input_sha256=result.calculation_input_sha256,
+        message=None,
+    )
+    updated.layer_state.camera_pixel_density = True
+    updated.updated_at = utc_now()
+    return updated
+
+
+def invalidate_stale_camera_pixel_density(
+    project: Project,
+    fixtures: FixtureModelCatalog,
+    cameras: CameraEquipmentCatalog,
+    legend: PixelDensityLegendDefinition,
+) -> bool:
+    layer = project.camera_pixel_density
+    if layer.result is None or layer.state.status == "not-calculated":
+        return False
+    authoritative = camera_pixel_density_input_sha256(project, fixtures, cameras, legend)
+    if authoritative == layer.result.calculation_input_sha256:
+        return False
+    changed = layer.state.status != "stale" or layer.state.message != "Stale — recalculate required" or project.layer_state.camera_pixel_density
+    layer.state = CameraPixelDensityState(
+        status="stale",
+        calculation_input_sha256=layer.result.calculation_input_sha256,
+        message="Stale — recalculate required",
+    )
+    project.layer_state.camera_pixel_density = False
+    return changed
 
 
 def calculate_camera_pixel_density(
