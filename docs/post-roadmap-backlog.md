@@ -51,13 +51,17 @@ User authorized Stage 2 items BL-012, BL-017, and BL-018 only via `docs/superpow
 
 ## Stage 3 plan — 2026-09-16
 
-Approved design: `docs/superpowers/specs/2026-09-16-stage3-p2-usability-design.md`. Execution plan: `docs/superpowers/plans/2026-09-16-stage3-p2-usability.md`. Items: BL-013 / WA-06, BL-014 / WA-07, BL-015 / WA-08. Independent QA PASS: `../harness/verify/2026-09-16-stage3-p2-usability-independent-qa-review.md`. Focused `S3P2-QA-01` retest PASS: `../harness/verify/2026-09-16-stage3-p2-s3p2-qa-01-retest.md`. Final scoped master PASS: `post-roadmap-stage3-p2-scoped-master-decision-2026-09-16.md`. One bounded implementation/evidence commit is authorized; merge and later items remain gated.
+Approved design: `docs/superpowers/specs/2026-09-16-stage3-p2-usability-design.md`. Execution plan: `docs/superpowers/plans/2026-09-16-stage3-p2-usability.md`. Items: BL-013 / WA-06, BL-014 / WA-07, BL-015 / WA-08. Independent QA PASS: `../harness/verify/2026-09-16-stage3-p2-usability-independent-qa-review.md`. Focused `S3P2-QA-01` retest PASS: `../harness/verify/2026-09-16-stage3-p2-s3p2-qa-01-retest.md`. Final scoped master PASS: `post-roadmap-stage3-p2-scoped-master-decision-2026-09-16.md`. Accepted implementation/evidence commit: `e5023ee`. Merge and later items remain gated.
 
 | ID | Plan status |
 |---|---|
 | BL-013 | Accepted — final scoped master PASS |
 | BL-014 | Accepted — `S3P2-QA-01` corrected and independently retested PASS |
 | BL-015 | Accepted — final scoped master PASS |
+
+## BL-016 planning — 2026-09-22
+
+Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. The plan awaits user review and execution-method selection. Implementation, merge, push, BL-019/020, Phase 8, and seals remain gated.
 
 ## Baseline and accepted gates
 
