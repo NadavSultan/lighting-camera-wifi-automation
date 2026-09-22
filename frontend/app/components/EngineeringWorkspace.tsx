@@ -8,9 +8,10 @@ import { ReportPanel } from "./ReportPanel";
 import WifiMapSummary from "./WifiMapSummary";
 import CapPlanningPanel from "./CapPlanningPanel";
 import LightingResultCard from "./LightingResultCard";
+import { CameraPixelDensityPanel } from "./CameraPixelDensityPanel";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { addCapCandidate, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, previewFixtureDirections, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan, type FixtureDirectionPreview } from "../lib/api";
-import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
+import { addCapCandidate, calculateCameraPixelDensity, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getCameraPixelDensityLegend, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, previewFixtureDirections, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan, type FixtureDirectionPreview } from "../lib/api";
+import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PixelDensityLegendDefinition, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";
 import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";
 import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";
 import { calculateAllLightingAreas, invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";
@@ -26,13 +27,14 @@ import { openAndFocusCapReviewTarget } from "../lib/cap-review-input.mjs";
 import { formatLuxWithUnit } from "../lib/lighting-labels.mjs";
 import { directionSignificantKey } from "../lib/fixture-direction-view.mjs";
 import { USE_STANDARD_MAP_LABEL, backgroundAvailability, readSatelliteConfigFromEnv, requestBackground, sessionBackground, type BackgroundChoice } from "../lib/map-background.mjs";
+import { invalidateCameraPixelDensityIfSignificant } from "../lib/camera-pixel-density-view.mjs";
 
 type MapFocusRequest =
   | { kind: "point"; coordinate: [number, number]; highlightId?: string }
   | { kind: "bounds"; coordinates: Array<[number, number]> };
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
-type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
+type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "camera_pixel_density" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
 const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: number }> = [
   { key: "original_customer_poles", label: "Original customer poles", color: "#8795a4" },
   { key: "lite_fixtures", label: "LITE fixtures", color: "var(--lite)" },
@@ -40,6 +42,7 @@ const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: numbe
   { key: "smart_fixtures", label: "SMART fixtures", color: "var(--smart)" },
   { key: "camera_fov", label: "Camera 1 / Camera 2 FOV", color: "#8b5cf6" },
   { key: "camera_overlap", label: "Camera footprint overlap", color: "#ec4899" },
+  { key: "camera_pixel_density", label: "Camera pixel density", color: "#4cc9f0" },
   { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },
   { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 5 },
   { key: "calculation_areas", label: "Calculation areas", color: "#14b8a6" },
@@ -58,7 +61,7 @@ const LEFT_DISCIPLINES: Array<{ id: LeftDiscipline; label: string }> = [
 ];
 const DISCIPLINE_LAYERS: Record<LeftDiscipline, LayerKey[]> = {
   lighting: ["original_customer_poles", "lite_fixtures", "wifi_fixtures", "smart_fixtures", "calculation_areas", "calculation_points", "lighting_heat_map", "warnings"],
-  camera: ["original_customer_poles", "smart_fixtures", "camera_fov", "camera_overlap", "priority_areas", "warnings"],
+  camera: ["original_customer_poles", "smart_fixtures", "camera_fov", "camera_overlap", "camera_pixel_density", "priority_areas", "warnings"],
   wifi: ["original_customer_poles", "wifi_fixtures", "smart_fixtures", "wifi_coverage", "warnings"],
   cap: ["original_customer_poles", "cap_locations", "cap_connections", "warnings"],
 };
@@ -102,6 +105,8 @@ export function EngineeringWorkspace() {
   const [fixtureCatalog, setFixtureCatalog] = useState<FixtureModelCatalog | null>(null);
   const [cameraCatalog, setCameraCatalog] = useState<CameraEquipmentCatalog | null>(null);
   const [iesLibrary, setIesLibrary] = useState<IesLibrary | null>(null);
+  const [densityLegend, setDensityLegend] = useState<PixelDensityLegendDefinition | null>(null);
+  const [densityLegendOpen, setDensityLegendOpen] = useState(false);
   const [drawingPriorityArea, setDrawingPriorityArea] = useState(false);
   const [priorityDraft, setPriorityDraft] = useState<Array<[number, number]>>([]);
   const [priorityAreaName, setPriorityAreaName] = useState("Priority area");
@@ -250,8 +255,8 @@ export function EngineeringWorkspace() {
   }, [fixtureDirectionKey, project]);
 
   async function refreshCatalogs() {
-    const [fixtures, cameras, ies] = await Promise.all([getFixtureCatalog(), getCameraCatalog(), getIesLibrary()]);
-    setFixtureCatalog(fixtures); setCameraCatalog(cameras); setIesLibrary(ies);
+    const [fixtures, cameras, ies, legend] = await Promise.all([getFixtureCatalog(), getCameraCatalog(), getIesLibrary(), getCameraPixelDensityLegend()]);
+    setFixtureCatalog(fixtures); setCameraCatalog(cameras); setIesLibrary(ies); setDensityLegend(legend);
   }
 
   const effectivePoles = useMemo(() => project?.source.poles.map((pole) => effectivePole(project, pole)) ?? [], [project]);
@@ -270,7 +275,8 @@ export function EngineeringWorkspace() {
     if (recordHistory && project) setPast((items) => [...items.slice(-39), project]);
     if (recordHistory) setFuture([]);
     const wifiSafe = project ? invalidateWifiIfSignificant(project, next) : next;
-    setProject(project ? invalidateCapIfSignificant(project, wifiSafe) : wifiSafe);
+    const capSafe = project ? invalidateCapIfSignificant(project, wifiSafe) : wifiSafe;
+    setProject(project ? invalidateCameraPixelDensityIfSignificant(project, capSafe) : capSafe);
   }
 
   function mutateProject(updater: (draft: Project) => void) {
@@ -278,7 +284,7 @@ export function EngineeringWorkspace() {
     const next = structuredClone(project);
     updater(next);
     next.updated_at = new Date().toISOString();
-    replaceProject(invalidateWifiIfSignificant(project, next));
+    replaceProject(invalidateCameraPixelDensityIfSignificant(project, invalidateWifiIfSignificant(project, next)));
   }
 
   async function runAction(action: () => Promise<void>) {
@@ -436,6 +442,15 @@ export function EngineeringWorkspace() {
   function calculateConceptualWifi() {
     if (!project) return;
     void runAction(async () => { const calculated = await calculateWifiCoverage(project); setProject(calculated); setStatus(`Calculated ${calculated.wifi_coverage.result?.global_statistics.circle_count ?? 0} conceptual Wi-Fi circles`); });
+  }
+  function calculateDensity() {
+    if (!project) return;
+    void runAction(async () => {
+      const calculated = await calculateCameraPixelDensity(project);
+      setProject(calculated);
+      setDensityLegendOpen(true);
+      setStatus("Calculated camera pixel-density map");
+    });
   }
   function runCap(operation: "calculate" | "validate" | "recommend") {
     if (!project) return;
@@ -712,7 +727,7 @@ export function EngineeringWorkspace() {
               </section>
               <section className="section">
                 <div className="section-heading"><h3>Map layers</h3><span className="helper">{LEFT_DISCIPLINES.find((item) => item.id === leftDiscipline)?.label}</span></div>
-                {LAYERS.filter((layer) => DISCIPLINE_LAYERS[leftDiscipline].includes(layer.key)).map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || (layer.key === "wifi_coverage" && !project?.wifi_coverage.result)} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
+                {LAYERS.filter((layer) => DISCIPLINE_LAYERS[leftDiscipline].includes(layer.key)).map((layer) => <label className="layer-row" key={layer.key}><input type="checkbox" checked={Boolean(project?.layer_state[layer.key])} disabled={!project || (layer.key === "wifi_coverage" && !project?.wifi_coverage.result) || (layer.key === "camera_pixel_density" && project?.camera_pixel_density.state.status !== "current")} onChange={(event) => toggleLayer(layer.key, event.target.checked)} /><span className="layer-dot" style={{ "--dot": layer.color } as CSSProperties} /><span>{layer.label}</span>{layer.phase && <span className="phase-tag">P{layer.phase}</span>}</label>)}
               </section>
               <div className="discipline-pane" hidden={leftDiscipline !== "cap"}>
               <CapPlanningPanel
@@ -818,6 +833,15 @@ export function EngineeringWorkspace() {
               </section>
               </div>
               <div className="discipline-pane" hidden={leftDiscipline !== "camera"}>
+              <CameraPixelDensityPanel
+                project={project}
+                legend={densityLegend}
+                legendOpen={densityLegendOpen}
+                busy={busy}
+                onProfileChange={(profile) => mutateProject((draft) => { draft.camera_pixel_density_profile = profile; })}
+                onCalculate={calculateDensity}
+                onToggleLegend={() => setDensityLegendOpen((open) => !open)}
+              />
               <section className="section">
                 <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
                 <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>

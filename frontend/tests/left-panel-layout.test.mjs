@@ -16,6 +16,9 @@ test("left panel uses a four-discipline switcher defaulting to Lighting", async 
   assert.match(workspace, /hidden=\{leftDiscipline !== "lighting"\}/);
   assert.match(workspace, /hidden=\{leftDiscipline !== "camera"\}/);
   assert.match(workspace, /hidden=\{leftDiscipline !== "wifi"\}/);
+  assert.match(workspace, /CameraPixelDensityPanel/);
+  assert.match(workspace, /camera_pixel_density/);
+  assert.match(workspace, /densityLegendOpen/);
   assert.match(workspace, /setLeftDiscipline\("cap"\)/);
   assert.match(workspace, /openReportPackagePanel/);
   assert.match(workspace, /ReportPanel/);

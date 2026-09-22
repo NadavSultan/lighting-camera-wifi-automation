@@ -141,3 +141,13 @@ Task 6 covers atomic/current/stale lifecycle portions of `BL016-09`, `BL016-10`,
 | 2026-09-22 Asia/Jerusalem | schema export; engineering validator; report + engineering tests; `git diff --check` | `6692ab3b` + working tree | PASS: five schema paths, 8 catalogs, 79 tests, clean diff | generated contract evidence | only `schemas/openapi.json` changed for the new route; no report service or density visual output change |
 
 Task 7 proves Phase 7 packages archive the BL-016 project result while existing KMZ/PDF/XLSX/presentation visualization contracts remain unchanged. BL-016 remains unaccepted pending the complete gate.
+
+## Task 8 — frontend state, API, profile panel, and legend
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | Add pure view/current-stale and significant/presentation-only invalidation tests | `987a0c7b` | RED: missing view helper module | session output | expected Task 8 module seam |
+| 2026-09-22 Asia/Jerusalem | Implement view helper/declarations, API methods, profile panel, ten-row legend, session legend state, and layer gating | `987a0c7b` + working tree | first source assertion corrected to inspect helper owning stale copy | session output | no engineering calculation added to frontend |
+| 2026-09-22 Asia/Jerusalem | focused node tests; `pnpm run typecheck`; `pnpm run lint` | `987a0c7b` + working tree | PASS: 25 tests; typecheck/lint exit 0 | session output | none |
+
+Task 8 covers frontend workflow and immediate-staleness portions of `BL016-01`, `BL016-02`, `BL016-03`, `BL016-09`, and `BL016-10`. BL-016 remains unaccepted pending the complete gate.
