@@ -1,11 +1,11 @@
 # Current status
 
-Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-09-22. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 implementation is active from approved plan commit `05257e87`; it remains unaccepted.
+Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-09-22. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 implementation and current verification are complete from approved plan commit `05257e87`; final clean readiness and Independent-QA handoff remain, and BL-016 is unaccepted.
 
 ## Completed
 
 - All Phase 1 KML/KMZ import, source preservation, map, edit-overlay, save/reopen, and KML export workflows remain operational.
-- Project schema `2.7.0` and software/API `0.7.0` migrate `1.0.0` through `2.6.0` JSON without changing coordinates, discarding legacy overrides, inferring Wi-Fi/CAP data, or guessing a Phoenix 1/Solitaire family. Report preferences and last-report metadata are additive only; generated report bytes are never embedded in projects.
+- Project schema `2.8.0` and software/API `0.8.0` migrate `1.0.0` through `2.7.0` JSON without changing coordinates, discarding legacy overrides, inferring Wi-Fi/CAP data, or guessing a Phoenix 1/Solitaire family. BL-016 profile/state/result fields are additive; report preferences and last-report metadata remain additive, and generated report bytes are never embedded in projects.
 - The seven approved Phase 1 engineering catalogs remain unchanged at `1.0.0`.
 - The operational IES contract is `1.2.0` with immutable file history; the camera contract remains `1.1.0`, and the fixture-model contract is `1.2.0` with the immutable fixed-zero-origin template revision.
 - Six required fixture models are seeded with structured family, variant, and capabilities.
@@ -50,4 +50,4 @@ Phase state last changed: 2026-09-22. Documentation consistency reviewed: 2026-0
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Current action: execute BL-016 Tasks 1–10 sequentially through implementation readiness.** Plan: `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Approved design: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md`. Work record: `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`. BL-016 remains unaccepted; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.
+**Current action: record the bounded BL-016 implementation commit, pass the clean readiness verifier, and hand off to Independent QA.** Plan: `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Approved design: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md`. Work record: `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`. Current deterministic and isolated live evidence passes, but BL-016 remains unaccepted; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.

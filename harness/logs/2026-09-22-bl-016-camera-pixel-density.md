@@ -161,3 +161,16 @@ Task 8 covers frontend workflow and immediate-staleness portions of `BL016-01`, 
 | 2026-09-22 Asia/Jerusalem | focused tests; full frontend test/typecheck/lint/build | `129eda85` + working tree | PASS: focused 25, full 107, typecheck/lint/build exit 0 | session output | standard build advisory behavior only |
 
 Task 9 covers rendered vector, overlap, label, visibility, and inspection portions of `BL016-04`, `BL016-05`, `BL016-06`, `BL016-07`, `BL016-08`, and `BL016-09`. BL-016 remains unaccepted pending the complete gate.
+
+## Task 10 — final deterministic and isolated live verification
+
+| UTC/local timestamp | Exact command or action | Commit/worktree | Exit/result | Durable evidence | Warnings / affected files |
+|---|---|---|---|---|---|
+| 2026-09-22 Asia/Jerusalem | full backend suite from `backend/`; validator; schema export | `986c6eab` | PASS: backend reached 100%, 8 catalogs, 5 generated paths | session output and this log | Starlette/httpx and anyio deprecation warnings |
+| 2026-09-22 Asia/Jerusalem | frozen frontend install; full test/typecheck/lint/build | `986c6eab` | PASS: 107 tests; all commands exit 0 | session output and verification summary | >500 KiB chunk, plugin timing, and unknown-route classification advisories |
+| 2026-09-22 Asia/Jerusalem | `git diff --check`; Input/schema diff checks; Miracle Mile SHA-256 | `986c6eab` | PASS; exact expected SHA-256 | verification summary | Windows CRLF conversion warnings only |
+| 2026-09-22 Asia/Jerusalem | initial Chrome production-shell attempt | `986c6eab` | failed exit `2147483651` | superseded session output | isolated-profile/crash-helper recovery required |
+| 2026-09-22 Asia/Jerusalem | live runner attempts on ports `8070`/`3070` | `986c6eab` | one attempt exposed an orphaned frontend listener; no acceptance claim | superseded JSON/session output | exact PID stopped; runner changed to fail closed on ports/process identity and clean up listener PIDs |
+| 2026-09-22 Asia/Jerusalem | `.\.venv\Scripts\python.exe harness\verify\run_bl016_camera_pixel_density_live.py` followed by listener check | `986c6eab` | PASS: all 12 assertions true, Chrome exit 0, clean production logs, no remaining listeners | `harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json` | browser evidence scope is production shell plus real API and deterministic frontend tests; interactive QA remains pending |
+
+Task 10 current evidence covers `BL016-01` through `BL016-19`. `BL016-20` remains pending the bounded implementation commit, clean readiness-manifest PASS, and Independent-QA handoff. No blocker is open and no acceptance decision has been made.

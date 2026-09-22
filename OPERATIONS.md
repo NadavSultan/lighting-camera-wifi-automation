@@ -4,7 +4,7 @@
 
 Read the startup sequence in `AGENTS.md`. Use `docs/current-status.md` for current phase state and the accepted Phase 6 contract for Phase 6 behaviour. Place phase work records in `harness/phases/`, command logs in `harness/logs/`, verification summaries in `harness/verify/`, and only completed gate seals in `harness/seals/`.
 
-BL-016 / WA-09 implementation is active under `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` and its approved plan. The controlling work record is `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`. BL-016 remains unaccepted; merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
+BL-016 / WA-09 implementation and current verification are complete under `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` and its approved plan; the clean readiness commit and Independent-QA handoff remain. The controlling work record is `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`. BL-016 remains unaccepted; merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
 
 Known documentation conflict: `README.md` still describes a Phase 4 application and says Wi-Fi/CAP are not calculated. `docs/current-status.md`, the implementation plan, source tree, and recent Phase 5 gate evidence show Phase 5 is closed. Treat the dated status/gate records as controlling until the README is deliberately refreshed.
 

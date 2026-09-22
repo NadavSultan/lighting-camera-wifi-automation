@@ -16,7 +16,7 @@ The latest exploratory review is [the English web-app review](web-app-review-202
 | BL-013 | WA-06: revisit results across multiple areas | Improvement; P2; disappearance on polygon creation not conclusively reproduced | Scoped UI task; diagnose exact disappearance separately |
 | BL-014 | WA-07: result-first CAP workflow | Improvement; P2; follow-up to BL-008 | Dedicated UI contract preserving Phase 6 prerequisites |
 | BL-015 | WA-08: explain camera projection boundary | Improvement; P2 | Small explanatory UI task |
-| BL-016 | WA-09: camera pixel-density heatmap | Feature; P3 | Dedicated engineering contract, separate authorization |
+| BL-016 | WA-09: camera pixel-density heatmap | Feature; P3 | Implementation verified; clean readiness and Independent QA pending; unaccepted |
 | BL-017 | WA-10: distinguish tiny lux from exact zero | Improvement; P2 | Small numeric-presentation task |
 | BL-018 | WA-11: organize left workflow panel | Improvement; P2 | Scoped UI design/task |
 | BL-019 | WA-12: stale phase/gating UI messages | Content bug; P3 | Small corrective task |
@@ -61,7 +61,7 @@ Approved design: `docs/superpowers/specs/2026-09-16-stage3-p2-usability-design.m
 
 ## BL-016 planning — 2026-09-22
 
-Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. The plan awaits user review and execution-method selection. Implementation, merge, push, BL-019/020, Phase 8, and seals remain gated.
+Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Implementation and current deterministic/live verification completed on 2026-09-22; the bounded implementation identity, clean readiness PASS, and Independent-QA handoff remain. BL-016 is unaccepted. Merge, push, BL-019/020, Phase 8, and seals remain gated.
 
 ## Baseline and accepted gates
 

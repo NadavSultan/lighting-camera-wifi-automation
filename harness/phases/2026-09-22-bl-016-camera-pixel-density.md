@@ -1,6 +1,6 @@
 # Work record — 2026-09-22 — BL-016 Camera Pixel-Density Map
 
-Status: active
+Status: implementation verification complete; clean readiness commit pending
 
 ## Scope, authority, and non-goals
 
@@ -31,20 +31,20 @@ Product changes do not begin until every row is resolved and all required suppor
 
 | Milestone | Contract reference | Expected evidence | Status |
 |---|---|---|---|
-| M0 environment | Plan Task 1 | goal, boundary, clean baseline, command preflight | complete pending activation commit |
-| M1 schema/legend | Plan Task 2 | migration/model/legend/schema tests | not started |
-| M2 geometry | Plan Task 3 | analytic geometry and band tests | not started |
-| M3 camera bands | Plan Task 4 | pinned-input, invalid isolation, fingerprint tests | not started |
-| M4 overlaps/limits | Plan Task 5 | overlap/canonicalization/limit tests | not started |
-| M5 API/freshness | Plan Task 6 | atomic API and lifecycle tests | not started |
-| M6 reporting | Plan Task 7 | Phase 7 compatibility tests | not started |
-| M7 frontend workflow | Plan Task 8 | view/API/panel tests | not started |
-| M8 map/inspection | Plan Task 9 | GeoJSON/style/safe-popup/render tests | not started |
-| M9 final verification | Plan Task 10 | deterministic, live browser, source/hash, readiness evidence | not started |
+| M0 environment | Plan Task 1 | goal, boundary, clean baseline, command preflight | complete — `1c141d09` |
+| M1 schema/legend | Plan Task 2 | migration/model/legend/schema tests | complete — `6263451d` |
+| M2 geometry | Plan Task 3 | analytic geometry and band tests | complete — `e157449a` |
+| M3 camera bands | Plan Task 4 | pinned-input, invalid isolation, fingerprint tests | complete — `007efba4` |
+| M4 overlaps/limits | Plan Task 5 | overlap/canonicalization/limit tests | complete — `6ee9fe73` |
+| M5 API/freshness | Plan Task 6 | atomic API and lifecycle tests | complete — `6692ab3b` |
+| M6 reporting | Plan Task 7 | Phase 7 compatibility tests | complete — `987a0c7b` |
+| M7 frontend workflow | Plan Task 8 | view/API/panel tests | complete — `129eda85` |
+| M8 map/inspection | Plan Task 9 | GeoJSON/style/safe-popup/render tests | complete — `986c6eab` |
+| M9 final verification | Plan Task 10 | deterministic, live browser, source/hash, readiness evidence | verification complete; readiness manifest and handoff pending final implementation commit |
 
 ## Acceptance criteria
 
-Acceptance IDs `BL016-01` through `BL016-20` use the exact verification methods and evidence locations defined by the controlling engineering design section 17 and approved implementation plan. Their dispositions are recorded as each milestone completes; all are currently `NOT_RUN`.
+Acceptance IDs `BL016-01` through `BL016-19` have current objective PASS evidence mapped in `harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md`. `BL016-20` remains pending the clean readiness-manifest PASS and Independent-QA handoff. No acceptance gate has been granted.
 
 ## Changes and evidence
 
@@ -62,11 +62,11 @@ Acceptance IDs `BL016-01` through `BL016-20` use the exact verification methods 
 
 ## Definition of Done
 
-- [ ] All authorized milestones are complete.
-- [ ] Every required acceptance item has objective PASS evidence.
-- [ ] Every required deterministic command passed on the recorded commit/worktree.
-- [ ] Source, prior-phase behavior, and file-boundary invariants are verified.
-- [ ] Completion and rendered evidence reports are present if required.
+- [x] All product milestones are complete.
+- [ ] Every required acceptance item has objective PASS evidence (`BL016-20` pending readiness/handoff).
+- [x] Every required deterministic command passed on the recorded product commit/worktree.
+- [x] Source, prior-phase behavior, and file-boundary invariants are verified.
+- [x] Completion and rendered evidence reports are present if required.
 - [ ] The implementation-readiness manifest passes on the recorded implementation commit and clean worktree.
 - [ ] Independent QA handoff is recorded; QA itself remains pending.
 - [ ] No later phase has begun.
@@ -85,9 +85,9 @@ Follow `AGENTS.md`, `OPERATIONS.md`, and the approved plan Recovery Protocol. Pr
 
 ## Gate state
 
-- Implementation: active, unaccepted.
+- Implementation: verification complete; final clean implementation identity pending, unaccepted.
 - Durable goal: active.
-- Implementation-readiness verifier: not run.
+- Implementation-readiness verifier: pending final manifest and clean evidence commit.
 - Independent QA: pending.
 - Master decision: pending.
 - Seal status: absent and unauthorized.
