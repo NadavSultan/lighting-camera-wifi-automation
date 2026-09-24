@@ -61,7 +61,7 @@ Approved design: `docs/superpowers/specs/2026-09-16-stage3-p2-usability-design.m
 
 ## BL-016 planning — 2026-09-22
 
-Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Implementation `8a271bf12b070c5c9883f2b2942ad54c6ace4f77` and clean readiness completed on 2026-09-22; Independent QA is pending under `../harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md`. BL-016 is unaccepted. Merge, push, BL-019/020, Phase 8, and seals remain gated.
+Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Original implementation/readiness at `8a271bf12b070c5c9883f2b2942ad54c6ace4f77` (2026-09-22) is historical. Master-authorized corrective implementation is `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; current deterministic and live checks pass. The clean readiness verifier is the final action recorded by `../harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md`. Independent QA has not started; BL-016 is unaccepted. Merge, push, BL-019/020, Phase 8, and seals remain gated.
 
 ## Baseline and accepted gates
 

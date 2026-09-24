@@ -1,20 +1,21 @@
 # BL-016 camera pixel-density — Independent QA handoff
 
-Date: 2026-09-22
+Date: 2026-09-24
 
 ## Handoff identity and gate
 
-- Exact implementation commit: `8a271bf12b070c5c9883f2b2942ad54c6ace4f77`.
+- Exact implementation commit: `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`.
 - Base commit: `05257e87b4d6500146239f62f4ebafa4b2217b67`.
 - Controlling specification: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md`.
 - Controlling plan: `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`.
 - Work record: `harness/phases/2026-09-22-bl-016-camera-pixel-density.md`.
 - Execution log: `harness/logs/2026-09-22-bl-016-camera-pixel-density.md`.
 - Verification summary: `harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md`.
-- Live evidence: `harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json`.
+- Corrective live evidence: `harness/verify/2026-09-24-bl-016-corrected-live.json`.
+- Preserved triggering master rerun (historical starting tip `1b3cebfafdfc07a0135f174abaa6da26192e3eea`): `harness/verify/2026-09-24-bl-016-master-rerun-live.json`.
 - Readiness manifest: `harness/verify/2026-09-22-bl-016-camera-pixel-density-readiness.json`.
 
-This handoff records implementation readiness only. BL-016 is unaccepted. Independent QA and a separate scoped master PASS remain required. No seal exists or is authorized.
+This handoff records implementation readiness only. The clean readiness verifier passed after the evidence-only handoff commit. BL-016 is unaccepted; Independent QA has not started, and Independent QA plus a separate scoped master PASS remain required. No seal exists or is authorized.
 
 ## Implementation verification to reproduce
 
@@ -38,13 +39,13 @@ Pop-Location
 git diff --check
 git diff --exit-code -- Input
 Get-FileHash Input\Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256
-.\.venv\Scripts\python.exe harness\verify\run_bl016_camera_pixel_density_live.py
+.\.venv\Scripts\python.exe harness\verify\run_bl016_camera_pixel_density_live.py --output harness\verify\2026-09-24-bl-016-qa-rerun.json
 git diff --exit-code -- schemas
 ```
 
 Expected source SHA-256: `2F89F9F2BE306C18221C643C98D5C1A9ABDB6449AAB8A77EA4B76B3694E8E328`.
 
-The implementation run passed the backend suite, 8-catalog validator, five-path schema export/freshness check, frozen frontend install, 107 frontend tests, typecheck, lint, production build, Input diff, exact source hash, and isolated live assertions. The live runner uses a fresh temporary data directory and ports 8070/3070; it records server listener identities and releases both listeners.
+The corrected implementation passed the backend suite, 8-catalog validator, five-path schema export/freshness check, frozen frontend install, 107 frontend tests, typecheck, lint, production build, Input diff, exact source hash, and isolated live assertions. It also fixes inactive-pole fingerprinting/contribution and canonical multipolygon/overlap ordering. The live runner accepts an explicit output path and refuses to overwrite tracked or pre-existing caller-selected output. It uses a fresh temporary data directory and ports 8070/3070, records server listener identities, and releases both listeners.
 
 ## Required independent scope
 
@@ -65,6 +66,7 @@ Implementation live evidence combines real production API workflow assertions, d
 - Known Starlette/httpx and anyio deprecation warnings.
 - Vinext large-chunk, plugin-timing, and unknown-route classification advisories.
 - Windows Git CRLF conversion warnings; `git diff --check` passes.
+- Live output guard diagnostics confirmed refusal for both a tracked historical JSON path and the already-preserved rerun JSON path; neither file was changed.
 - The implementation log preserves a recovered Chrome launch failure and a recovered orphaned test-listener attempt. The final live record has clean production server logs, all assertions true, Chrome exit `0`, and no remaining listeners.
 
 ## Non-goals and authority boundary

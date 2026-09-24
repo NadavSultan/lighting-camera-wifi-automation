@@ -1,18 +1,18 @@
 # BL-016 camera pixel-density implementation verification
 
-Date: 2026-09-22
+Date: 2026-09-24
 Scope: BL-016 / WA-09 only
 Base commit: `05257e87b4d6500146239f62f4ebafa4b2217b67`
-Verified product tip: `986c6eabc403ed5e5a713f6c0f2d069f310f1677`
-Final implementation commit: `8a271bf12b070c5c9883f2b2942ad54c6ace4f77`
+Verified implementation commit: `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`
+Corrective-pass starting evidence tip: `1b3cebfafdfc07a0135f174abaa6da26192e3eea`
 
 ## Decision
 
-The BL-016 implementation satisfies the implementation-readiness gate and is handed to Independent QA. Acceptance is not granted here; Independent QA and a separate scoped master PASS remain pending.
+The master-authorized BL-016 corrective implementation passes its deterministic and isolated live checks. Clean implementation readiness is recorded separately by the readiness verifier. Independent QA has not started; BL-016 remains unaccepted and the separate scoped master decision remains pending.
 
 ## Current deterministic verification
 
-All commands below ran on the BL-016 product tip in this detached linked worktree and exited `0` unless explicitly described as a diagnostic recovery attempt in the execution log.
+The corrective verification commands below ran against exact implementation commit `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170` in this detached linked worktree and exited `0`. The earlier 2026-09-22 evidence remains historical; the 2026-09-24 master rerun that triggered this pass is preserved separately with its actual HEAD and request/process identities.
 
 | Check | Result |
 |---|---|
@@ -31,7 +31,7 @@ Exact commands, recovery attempts, and per-task results are preserved in `harnes
 
 ## Current live evidence
 
-`harness/verify/run_bl016_camera_pixel_density_live.py` used a fresh temporary `LCWA_DATA_DIR`, FastAPI port `8070`, Vinext production port `3070`, and the supplied Miracle Mile KML. The current JSON record is `harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json`.
+`harness/verify/run_bl016_camera_pixel_density_live.py --output harness/verify/2026-09-24-bl-016-corrected-live.json` used a fresh temporary `LCWA_DATA_DIR`, FastAPI port `8070`, Vinext production port `3070`, and the supplied Miracle Mile KML. The current corrected-run record is `harness/verify/2026-09-24-bl-016-corrected-live.json`; it records the exact implementation HEAD, all 12 assertions, clean Chrome/server errors, and no warnings. The previous master rerun is preserved separately at `harness/verify/2026-09-24-bl-016-master-rerun-live.json` and is not presented as evidence for the corrected commit.
 
 - Import proved 74 preserved source poles, `existing-poles`, and `EPSG:32617`.
 - Eight configured camera slots resolved and calculated valid bands; 30 overlap regions were produced.
@@ -41,7 +41,7 @@ Exact commands, recovery attempts, and per-task results are preserved in `harnes
 - KML export and the Phase 7 report package both succeeded.
 - Chrome headless rendered the production shell with exit code `0`; the production server logs contain no startup failure, and both isolated listeners were released.
 
-The browser screenshot proves the production shell, while the complete engineering-state workflow is proved by real production API calls plus deterministic frontend state/map tests. Independent QA must still perform the interactive rendered walkthrough, including both backgrounds, all three supplied lenses, inspection, close/reopen, and cross-layer regression. This boundary is intentional and is not represented as Independent-QA evidence.
+The regression pass also fixes inactive-pole contribution and fingerprinting, area/canonical-coordinate multipolygon ordering (including preserving projected ordering after WGS84 transformation), overlap ordering by contract metadata and geometry sequence, and non-destructive live-runner output selection. The browser screenshot proves the production shell, while the complete engineering-state workflow is proved by real production API calls plus deterministic frontend state/map tests. Independent QA must still perform the interactive rendered walkthrough, including both backgrounds, all three supplied lenses, inspection, close/reopen, and cross-layer regression. This boundary is intentional and is not represented as Independent-QA evidence.
 
 ## Acceptance mapping
 
@@ -57,7 +57,7 @@ The browser screenshot proves the production shell, while the complete engineeri
 | `BL016-08` | PASS | canonical band partition, ordering, rounding, and repeatability tests |
 | `BL016-09` | PASS | analytic two-/three-camera overlap, contributor, winner, and tie tests |
 | `BL016-10` | PASS | exact camera/overlap/vertex/serialized-byte boundary tests |
-| `BL016-11` | PASS | fingerprint inclusion/exclusion and deterministic identity tests |
+| `BL016-11` | PASS | fingerprint inclusion/exclusion, inactive-pole staleness, and deterministic identity tests |
 | `BL016-12` | PASS | stale/current lifecycle tests and live stale/recalculate assertions |
 | `BL016-13` | PASS | atomic API, identity/validation, and byte-preserving failure tests plus live `422` assertion |
 | `BL016-14` | PASS | frontend panel/API/view tests and source-integrated explicit calculate flow |
@@ -66,7 +66,7 @@ The browser screenshot proves the production shell, while the complete engineeri
 | `BL016-17` | PASS | backend/frontend persistence and stale/recalculate tests; live retain/hide/replace assertion |
 | `BL016-18` | PASS | report compatibility tests and live Phase 7 package assertion; no new report visualization |
 | `BL016-19` | PASS | Phase 3/full regressions, KML export, existing-pole assertion, Input diff and exact source hash |
-| `BL016-20` | PASS | deterministic/live evidence, exact implementation identity, clean readiness manifest, and truthful handoff |
+| `BL016-20` | PASS | deterministic/live evidence on exact implementation identity, clean readiness manifest, and truthful handoff |
 
 ## Warnings and limitations
 
@@ -77,7 +77,7 @@ The browser screenshot proves the production shell, while the complete engineeri
 
 ## Gate
 
-- Implementation: complete and ready for Independent QA.
+- Implementation: complete and ready for Independent QA after the clean readiness verifier PASS.
 - Independent QA: pending.
 - Scoped master decision: pending.
 - Seal: absent and unauthorized.

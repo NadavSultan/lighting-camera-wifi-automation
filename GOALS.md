@@ -4,7 +4,7 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-**Current gate:** BL-016 / WA-09 implementation is complete at `8a271bf12b070c5c9883f2b2942ad54c6ace4f77`, the readiness verifier passes, and the work is handed to Independent QA under `harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md`. Durable goal `01a0c847-9997-7f73-9beb-367bd8fcc463` reached its stopping condition. BL-016 remains unaccepted; merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
+**Current gate:** BL-016 / WA-09 corrective implementation is complete at `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; deterministic and isolated live checks pass, and the readiness manifest/handoff are being refreshed for Independent QA. Durable goal `01a0c847-9997-7f73-9beb-367bd8fcc463` remains active until the clean readiness verifier passes. BL-016 remains unaccepted; QA has not started; merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
 
 Post-roadmap item stages 1–7 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit `02c027ef`). BL-001 received scoped master CONDITIONAL PASS on 2026-09-07 (implementation commit authorized; merge not authorized). Stage 1 P1 display (BL-009, BL-005 follow-up, BL-010, BL-011) received scoped master CONDITIONAL PASS on 2026-09-08 (implementation identity later minted; merge not authorized). Stage 2 passed Independent QA and scoped master review on 2026-09-16. OBS-01 is not authorized. No Phase 8 seal.
 

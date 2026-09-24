@@ -6,7 +6,7 @@
     "status": "ACHIEVED",
     "stopping_condition": "Passing BL-016 implementation-readiness manifest and truthful Independent-QA handoff."
   },
-  "implementation_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77",
+  "implementation_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170",
   "allowed_evidence_paths_after_implementation_commit": [
     "harness/",
     "docs/current-status.md",
@@ -26,7 +26,7 @@
     {"id": "M6", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "backend/tests/test_phase7_reporting.py"]},
     {"id": "M7", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "frontend/tests/camera-pixel-density-view.test.mjs"]},
     {"id": "M8", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "frontend/tests/camera-pixel-density-map.test.mjs"]},
-    {"id": "M9", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json"]}
+    {"id": "M9", "status": "PASS", "evidence": ["harness/verify/2026-09-24-bl-016-corrected-live.json", "harness/verify/2026-09-24-bl-016-master-rerun-live.json"]}
   ],
   "expected_acceptance_ids": [
     "BL016-01", "BL016-02", "BL016-03", "BL016-04", "BL016-05",
@@ -45,7 +45,7 @@
     {"id": "BL016-08", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-09", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-10", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "BL016-11", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
+    {"id": "BL016-11", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "backend/tests/test_bl016_camera_pixel_density.py"]},
     {"id": "BL016-12", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-13", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-14", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
@@ -54,23 +54,23 @@
     {"id": "BL016-17", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-18", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "BL016-19", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "BL016-20", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md", "harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md"]}
+    {"id": "BL016-20", "status": "PASS", "evidence": ["harness/verify/2026-09-24-bl-016-corrected-live.json", "harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md"]}
   ],
   "commands": [
-    {"id": "backend-full", "command": "Push-Location backend; ..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
-    {"id": "engineering-validator", "command": ".\\.venv\\Scripts\\python.exe scripts\\validate_engineering_data.py", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "schema-export", "command": "Push-Location backend; ..\\.venv\\Scripts\\python.exe -m scripts.export_schema; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "frontend-gate", "command": "Push-Location frontend; corepack pnpm install --frozen-lockfile; corepack pnpm run test; corepack pnpm run typecheck; corepack pnpm run lint; corepack pnpm run build; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "source-and-diff", "command": "git diff --check; git diff --exit-code -- Input; Get-FileHash Input\\Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
-    {"id": "rendered-live", "command": ".\\.venv\\Scripts\\python.exe harness\\verify\\run_bl016_camera_pixel_density_live.py", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json"]},
-    {"id": "generated-freshness", "command": "git diff --exit-code -- schemas", "ran": true, "exit_code": 0, "tested_commit": "8a271bf12b070c5c9883f2b2942ad54c6ace4f77", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]}
+    {"id": "backend-full", "command": "Push-Location backend; ..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
+    {"id": "engineering-validator", "command": ".\\.venv\\Scripts\\python.exe scripts\\validate_engineering_data.py", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
+    {"id": "schema-export", "command": "Push-Location backend; ..\\.venv\\Scripts\\python.exe -m scripts.export_schema; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
+    {"id": "frontend-gate", "command": "Push-Location frontend; corepack pnpm install --frozen-lockfile; corepack pnpm run test; corepack pnpm run typecheck; corepack pnpm run lint; corepack pnpm run build; Pop-Location", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
+    {"id": "source-and-diff", "command": "git diff --check; git diff --exit-code -- Input; Get-FileHash Input\\Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]},
+    {"id": "rendered-live", "command": ".\\.venv\\Scripts\\python.exe harness\\verify\\run_bl016_camera_pixel_density_live.py --output harness\\verify\\2026-09-24-bl-016-corrected-live.json", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/verify/2026-09-24-bl-016-corrected-live.json"]},
+    {"id": "generated-freshness", "command": "git diff --exit-code -- schemas", "ran": true, "exit_code": 0, "tested_commit": "c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170", "evidence": ["harness/logs/2026-09-22-bl-016-camera-pixel-density.md"]}
   ],
   "required_checks": [
     {"id": "final_verification", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "generated_artifact_freshness", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "source_preservation", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "file_boundary", "status": "PASS", "evidence": ["harness/phases/2026-09-22-bl-016-camera-pixel-density.md"]},
-    {"id": "rendered_workflow", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json", "harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
+    {"id": "rendered_workflow", "status": "PASS", "evidence": ["harness/verify/2026-09-24-bl-016-corrected-live.json", "harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]},
     {"id": "regression", "status": "PASS", "evidence": ["harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md"]}
   ],
   "reports": {
@@ -78,7 +78,7 @@
     "execution_log": "harness/logs/2026-09-22-bl-016-camera-pixel-density.md",
     "verification_summary": "harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md",
     "completion_report": "harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md",
-    "rendered_evidence": "harness/verify/2026-09-22-bl-016-camera-pixel-density-live.json"
+    "rendered_evidence": "harness/verify/2026-09-24-bl-016-corrected-live.json"
   },
   "blockers": [],
   "gate": {
