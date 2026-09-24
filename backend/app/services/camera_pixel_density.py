@@ -77,6 +77,7 @@ class ResolvedCameraDensityInput:
     pole_id: str
     camera_slot_id: str
     sequence_index: int
+    pole_active: bool
     longitude: float
     latitude: float
     enabled: bool
@@ -196,7 +197,7 @@ def canonical_polygonal(geometry: Polygon | MultiPolygon) -> Polygon | MultiPoly
         if not candidate.is_valid or candidate.area <= GEOMETRY_AREA_TOLERANCE_M2:
             raise ValueError("Camera-density geometry is invalid or degenerate.")
         normalized.append(candidate)
-    normalized.sort(key=lambda item: tuple(item.exterior.coords))
+    normalized.sort(key=_canonical_polygon_sort_key)
     return normalized[0] if len(normalized) == 1 else MultiPolygon(normalized)
 
 
@@ -387,6 +388,7 @@ def resolve_camera_pixel_density_inputs(
             continue
         longitude = edit.longitude if edit.longitude is not None else source.longitude
         latitude = edit.latitude if edit.latitude is not None else source.latitude
+        pole_active = edit.active if edit.active is not None else True
         for slot in sorted(reference_template.slots, key=lambda item: item.id):
             override = config.camera_overrides.get(slot.id)
             camera_id = override.camera_model_id if override and override.camera_model_id is not None else slot.camera_model_id
@@ -401,7 +403,8 @@ def resolve_camera_pixel_density_inputs(
                 warnings.append("Pinned mounting template revision does not exist.")
             result.append(ResolvedCameraDensityInput(
                 footprint_id=f"{source.id}/{slot.id}", pole_id=source.id, camera_slot_id=slot.id,
-                sequence_index=source.sequence_index, longitude=longitude, latitude=latitude, enabled=enabled,
+                sequence_index=source.sequence_index, pole_active=pole_active,
+                longitude=longitude, latitude=latitude, enabled=enabled,
                 fixture_model_id=config.fixture_model_id, fixture_model_revision=config.fixture_model_revision,
                 mounting_template_revision=config.mounting_template_revision,
                 fixture_height_m=edit.height_m if edit.height_m is not None else project.defaults.pole_height_m,
@@ -421,6 +424,7 @@ def _resolved_payload(item: ResolvedCameraDensityInput) -> dict[str, object]:
     return {
         "footprint_id": item.footprint_id,
         "sequence_index": item.sequence_index,
+        "pole_active": item.pole_active,
         "longitude": item.longitude,
         "latitude": item.latitude,
         "enabled": item.enabled,
@@ -478,13 +482,31 @@ def _polygonal_parts(geometry: Polygon | MultiPolygon) -> list[Polygon]:
     if isinstance(geometry, Polygon):
         return [geometry]
     if isinstance(geometry, MultiPolygon):
-        return sorted(geometry.geoms, key=lambda polygon: tuple(polygon.exterior.coords))
+        return sorted(geometry.geoms, key=_canonical_polygon_sort_key)
     raise ValueError("Camera-density overlay produced non-polygonal geometry.")
 
 
-def _rings(geometry: Polygon | MultiPolygon, *, digits: int) -> list[list[list[tuple[float, float]]]]:
+def _canonical_polygon_coordinate_sequence(polygon: Polygon) -> tuple[object, ...]:
+    exterior = tuple(canonical_ring(list(polygon.exterior.coords), digits=PROJECTED_DIGITS))
+    interiors = tuple(sorted(
+        tuple(canonical_ring(list(interior.coords), digits=PROJECTED_DIGITS, clockwise=True))
+        for interior in polygon.interiors
+    ))
+    return (exterior, interiors)
+
+
+def _canonical_polygon_sort_key(polygon: Polygon) -> tuple[float, tuple[object, ...]]:
+    return (-round(polygon.area, AREA_DIGITS), _canonical_polygon_coordinate_sequence(polygon))
+
+
+def _rings(
+    geometry: Polygon | MultiPolygon, *, digits: int, sort_parts: bool = True,
+) -> list[list[list[tuple[float, float]]]]:
     result: list[list[list[tuple[float, float]]]] = []
-    for polygon in _polygonal_parts(geometry):
+    polygons = _polygonal_parts(geometry) if sort_parts else (
+        [geometry] if isinstance(geometry, Polygon) else list(geometry.geoms)
+    )
+    for polygon in polygons:
         rings = [canonical_ring(list(polygon.exterior.coords), digits=digits)]
         rings.extend(canonical_ring(list(interior.coords), digits=digits, clockwise=True) for interior in polygon.interiors)
         result.append(rings)
@@ -524,6 +546,9 @@ def calculate_one_camera_density(
         fixture_height_m=item.fixture_height_m, camera_absolute_azimuth_deg=item.absolute_azimuth_deg,
         fixed_downward_tilt_deg=item.slot.downward_tilt_deg, assumptions=PIXEL_DENSITY_ASSUMPTIONS,
     )
+    if not item.pole_active:
+        result.warnings = ["Pole is inactive; camera does not contribute."]
+        return result
     if not item.enabled:
         return result
     warnings = list(item.resolution_warnings)
@@ -588,7 +613,7 @@ def calculate_one_camera_density(
     envelope_wgs84 = _transform_polygonal(envelope, to_wgs84)
     result.projection_envelope = CameraPixelDensityProjectionEnvelope(
         projected_rings_m=_rings(envelope, digits=PROJECTED_DIGITS),
-        wgs84_rings=_rings(envelope_wgs84, digits=WGS84_DIGITS),
+        wgs84_rings=_rings(envelope_wgs84, digits=WGS84_DIGITS, sort_parts=False),
     )
     for band in band_geometries:
         wgs84 = _transform_polygonal(band.geometry, to_wgs84)
@@ -597,7 +622,7 @@ def calculate_one_camera_density(
             minimum_px_per_face=band.threshold.minimum, maximum_px_per_face=band.threshold.maximum,
             display_value_px_per_face=band.threshold.minimum, colour_token=band.threshold.token,
             projected_rings_m=_rings(band.geometry, digits=PROJECTED_DIGITS),
-            wgs84_rings=_rings(wgs84, digits=WGS84_DIGITS), area_m2=round(band.geometry.area, AREA_DIGITS),
+            wgs84_rings=_rings(wgs84, digits=WGS84_DIGITS, sort_parts=False), area_m2=round(band.geometry.area, AREA_DIGITS),
         ))
     result.valid = bool(result.bands)
     if not result.valid:
@@ -696,9 +721,24 @@ def calculate_density_overlaps(
             camera_footprint_ids=list(contributors), multiplicity=len(contributors),
             winning_camera_footprint_id=winning_camera, winning_band_id=winning_band,
             winning_band_rank=winning_rank, projected_rings_m=projected_rings,
-            wgs84_rings=_rings(wgs84_geometry, digits=WGS84_DIGITS), area_m2=round(merged.area, AREA_DIGITS),
+            wgs84_rings=_rings(
+                wgs84_geometry, digits=WGS84_DIGITS, sort_parts=to_wgs84 is None,
+            ), area_m2=round(merged.area, AREA_DIGITS),
         ))
-    return sorted(regions, key=lambda item: item.overlap_region_id)
+    return sorted(regions, key=overlap_region_sort_key)
+
+
+def overlap_region_sort_key(item: CameraPixelDensityOverlapRegion) -> tuple[object, ...]:
+    geometry_sequence = tuple(
+        tuple(tuple((float(x), float(y)) for x, y in ring) for ring in polygon)
+        for polygon in item.projected_rings_m
+    )
+    return (
+        item.multiplicity,
+        tuple(item.camera_footprint_ids),
+        item.winning_band_rank,
+        geometry_sequence,
+    )
 
 
 def count_persisted_vertices(result: CameraPixelDensityResult) -> tuple[int, int]:

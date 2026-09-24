@@ -37,6 +37,7 @@ test("local invalidation retains results and ignores presentation-only edits", (
   for (const mutate of [
     (value) => { value.camera_pixel_density_profile.maximum_visible_distance_m = 60; },
     (value) => { value.pole_edits.p1.height_m = 11; },
+    (value) => { value.pole_edits.p1.active = false; },
     (value) => { value.pole_edits.p1.fixture_configuration.fixture_azimuth_deg = 90; },
     (value) => { value.pole_edits.p1.fixture_configuration.camera_overrides["camera-1"].lens_revision = 2; },
     (value) => { value.pole_edits.p1.fixture_configuration.camera_overrides["camera-1"].enabled = false; },

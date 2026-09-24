@@ -9,12 +9,13 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
-from shapely.geometry import Polygon
+from shapely.geometry import MultiPolygon, Polygon
 
 from app.main import create_app
 from app.models import (
     CameraPixelDensityBand,
     CameraPixelDensityCameraResult,
+    CameraPixelDensityOverlapRegion,
     CameraPixelDensityProfile,
     CameraPixelDensityState,
     PixelDensityLegendDefinition,
@@ -31,6 +32,7 @@ from app.services.camera_pixel_density import (
     distance_cap_polygon,
     horizontal_density_px_per_face,
     project_frustum_plane,
+    canonical_polygonal,
     calculate_camera_pixel_density,
     camera_pixel_density_input_sha256,
     calculate_density_overlaps,
@@ -41,6 +43,7 @@ from app.services.camera_pixel_density import (
 )
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
+from app.services import camera_pixel_density as camera_density_service
 from app.services.kml import import_project
 from app.services.store import ProjectStore
 
@@ -362,6 +365,13 @@ def test_bl016_fingerprint_includes_engineering_and_excludes_display_state(tmp_p
     engineering = project.model_copy(deep=True)
     engineering.pole_edits[project.source.poles[0].id].height_m = 11.0
     assert camera_pixel_density_input_sha256(engineering, fixtures, cameras, legend) != baseline
+    inactive = project.model_copy(deep=True)
+    inactive.pole_edits[project.source.poles[0].id].active = False
+    assert camera_pixel_density_input_sha256(inactive, fixtures, cameras, legend) != baseline
+    inactive_result = calculate_camera_pixel_density(inactive, fixtures, cameras, legend)
+    assert len(inactive_result.camera_results) == 2
+    assert all(not item.valid and item.bands == [] for item in inactive_result.camera_results)
+    assert all("inactive" in item.warnings[0].lower() for item in inactive_result.camera_results)
     non_finite = project.model_copy(deep=True)
     non_finite.camera_pixel_density_profile = non_finite.camera_pixel_density_profile.model_copy(update={"maximum_visible_distance_m": math.nan})
     with pytest.raises(ValueError, match="not finite"):
@@ -396,6 +406,64 @@ def bl016_test_camera(footprint_id: str, rank: int, coordinates: list[tuple[floa
     )
 
 
+def bl016_test_overlap(
+    region_id: str,
+    contributors: list[str],
+    rank: int,
+    coordinates: list[tuple[float, float]],
+) -> CameraPixelDensityOverlapRegion:
+    return CameraPixelDensityOverlapRegion(
+        overlap_region_id=region_id,
+        camera_footprint_ids=contributors,
+        multiplicity=len(contributors),
+        winning_camera_footprint_id=contributors[0],
+        winning_band_id=f"px-face-{rank}",
+        winning_band_rank=rank,
+        projected_rings_m=[[coordinates]],
+        wgs84_rings=[[coordinates]],
+        area_m2=Polygon(coordinates).area,
+    )
+
+
+def test_bl016_multipolygon_parts_sort_by_rounded_area_then_canonical_coordinates() -> None:
+    small_left = Polygon([(0, 0), (2, 0), (2, 1), (0, 1)])
+    large_right = Polygon([(10, 0), (13, 0), (13, 2), (10, 2)])
+    rounded_area_tie_west = Polygon([(15, 0), (16, 0), (16, 1), (15, 1)])
+    tie_left = Polygon([(20, 0), (21, 0), (21, 1), (20, 1)])
+    tie_right = Polygon([(30, 0), (31, 0), (31, 1), (30, 1)])
+    rounded_area_larger_east = Polygon([(40, 0), (41.0000004, 0), (41.0000004, 1), (40, 1)])
+
+    result = canonical_polygonal(MultiPolygon([
+        small_left, tie_right, large_right, tie_left, rounded_area_larger_east, rounded_area_tie_west,
+    ]))
+
+    assert isinstance(result, MultiPolygon)
+    parts = list(result.geoms)
+    assert [round(part.area, 6) for part in parts] == [6.0, 2.0, 1.0, 1.0, 1.0, 1.0]
+    assert [min(part.exterior.coords) for part in parts[2:]] == [
+        (15.0, 0.0), (20.0, 0.0), (30.0, 0.0), (40.0, 0.0),
+    ]
+
+
+def test_bl016_wgs84_rings_preserve_projected_canonical_multipolygon_sequence() -> None:
+    projected = canonical_polygonal(MultiPolygon([
+        Polygon([(100, 0), (102, 0), (102, 1), (100, 1)]),
+        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+    ]))
+    assert isinstance(projected, MultiPolygon)
+
+    class SmallUnitTransformer:
+        @staticmethod
+        def transform(x: float, y: float) -> tuple[float, float]:
+            return x * 0.001, y * 0.001
+
+    transformed = camera_density_service._transform_polygonal(projected, SmallUnitTransformer())
+    rings = camera_density_service._rings(transformed, digits=7, sort_parts=False)
+
+    assert rings[0][0][0][0] == pytest.approx(0.1)
+    assert rings[1][0][0][0] == pytest.approx(0.0)
+
+
 def test_bl016_two_camera_overlap_winner_and_tie_break() -> None:
     left = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
     right = [(2, 0), (6, 0), (6, 4), (2, 4), (2, 0)]
@@ -410,6 +478,55 @@ def test_bl016_two_camera_overlap_winner_and_tie_break() -> None:
     assert region.winning_band_id == "px-face-30"
     assert region.winning_camera_footprint_id == "pole-a/camera-1"
     assert region.area_m2 == pytest.approx(8.0)
+
+
+def test_bl016_overlap_regions_sort_by_contract_fields_before_geometry() -> None:
+    first_low = [(0, 0), (3, 0), (3, 3), (0, 3), (0, 0)]
+    second_low = [(1, 0), (4, 0), (4, 3), (1, 3), (1, 0)]
+    first_high = [(20, 0), (23, 0), (23, 3), (20, 3), (20, 0)]
+    second_high = [(21, 0), (24, 0), (24, 3), (21, 3), (21, 0)]
+    other_pair_a = [(40, 0), (43, 0), (43, 3), (40, 3), (40, 0)]
+    other_pair_b = [(41, 0), (44, 0), (44, 3), (41, 3), (41, 0)]
+    inputs = [
+        bl016_test_camera("pole-b/camera-1", 2, second_low),
+        bl016_test_camera("pole-a/camera-1", 2, first_low),
+        bl016_test_camera("pole-b/camera-1", 8, second_high),
+        bl016_test_camera("pole-a/camera-1", 8, first_high),
+        bl016_test_camera("pole-c/camera-1", 5, other_pair_b),
+        bl016_test_camera("pole-a/camera-1", 4, other_pair_a),
+    ]
+
+    regions = calculate_density_overlaps(inputs)
+
+    assert [(item.multiplicity, tuple(item.camera_footprint_ids), item.winning_band_rank) for item in regions] == [
+        (2, ("pole-a/camera-1", "pole-b/camera-1"), 2),
+        (2, ("pole-a/camera-1", "pole-b/camera-1"), 8),
+        (2, ("pole-a/camera-1", "pole-c/camera-1"), 5),
+    ]
+    sort_key = getattr(camera_density_service, "overlap_region_sort_key", None)
+    assert callable(sort_key), "the contract-defined overlap ordering key must be implemented"
+    assert regions == sorted(regions, key=sort_key)
+
+
+def test_bl016_overlap_sort_uses_canonical_geometry_after_rank_ties() -> None:
+    same_metadata_right = bl016_test_overlap(
+        "hash-a", ["pole-a/camera-1", "pole-b/camera-1"], 6,
+        [(10, 0), (12, 0), (12, 2), (10, 2), (10, 0)],
+    )
+    same_metadata_left = bl016_test_overlap(
+        "hash-z", ["pole-a/camera-1", "pole-b/camera-1"], 6,
+        [(0, 0), (2, 0), (2, 2), (0, 2), (0, 0)],
+    )
+    higher_rank = bl016_test_overlap(
+        "hash-b", ["pole-a/camera-1", "pole-b/camera-1"], 8,
+        [(20, 0), (22, 0), (22, 2), (20, 2), (20, 0)],
+    )
+
+    sort_key = getattr(camera_density_service, "overlap_region_sort_key", None)
+    assert callable(sort_key), "the contract-defined overlap ordering key must be implemented"
+    ordered = sorted([same_metadata_right, higher_rank, same_metadata_left], key=sort_key)
+
+    assert [item.overlap_region_id for item in ordered] == ["hash-z", "hash-a", "hash-b"]
 
 
 def test_bl016_three_camera_overlap_is_partitioned_without_double_counting() -> None:
@@ -483,3 +600,26 @@ def test_bl016_atomic_api_success_identity_and_failure_preservation(tmp_path: Pa
     missing["id"] = "missing-project"
     absent = client.post("/api/projects/missing-project/camera-pixel-density/calculate", json=missing)
     assert absent.status_code == 404
+
+
+def test_bl016_api_marks_result_stale_when_effective_pole_becomes_inactive(tmp_path: Path) -> None:
+    project, catalogs = bl016_configured_project(tmp_path)
+    projects = ProjectStore(tmp_path / "projects")
+    stored = projects.save(project)
+    client = TestClient(create_app(projects, catalogs))
+    calculated = client.post(
+        f"/api/projects/{stored.id}/camera-pixel-density/calculate",
+        json=stored.model_dump(mode="json"),
+    )
+    assert calculated.status_code == 200, calculated.text
+    current = calculated.json()
+    current["pole_edits"][project.source.poles[0].id]["active"] = False
+
+    saved = client.put(f"/api/projects/{stored.id}", json=current)
+
+    assert saved.status_code == 200, saved.text
+    body = saved.json()
+    assert body["camera_pixel_density"]["state"]["status"] == "stale"
+    assert body["camera_pixel_density"]["state"]["message"] == "Stale — recalculate required"
+    assert body["camera_pixel_density"]["result"] == current["camera_pixel_density"]["result"]
+    assert body["layer_state"]["camera_pixel_density"] is False

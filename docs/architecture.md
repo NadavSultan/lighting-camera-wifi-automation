@@ -7,7 +7,7 @@ The application is local-first and split into two processes:
 1. A FastAPI service owns file ingestion, KML/KMZ parsing, validation, project persistence, and export.
 2. A React/TypeScript client owns the map-centred interaction, layer state, selection, editing, undo/redo, and file downloads.
 
-The browser never mutates a source file. A project records source poles and user edits as separate collections. Calculated and recommended layers are separate future collections.
+The browser never mutates a source file. A project records source poles and user edits as separate collections. Calculated and recommended layers remain separate from source and user configuration; camera density, lighting, Wi-Fi, CAP planning, and recommendations occupy their own collections.
 
 ## Application components
 
@@ -23,10 +23,12 @@ The browser never mutates a source file. A project records source poles and user
 - `backend/app/services/cap_planning.py`: strict preflight, projected-distance graph construction, deterministic bounded recommendation/validation, manual constraints, redundancy diagnostics, safety limits, provenance, and CAP fingerprints.
 - `backend/app/services/configuration.py`: exact revision resolution, lifecycle/capability validation, corrective pin migration, and explicit-field bulk configuration.
 - `backend/app/services/camera_geometry.py`: deterministic projected-CRS frustum/ground intersection, overlap unions, priority-area intersections, and complete calculation provenance.
+- `backend/app/services/camera_pixel_density.py`: revision-pinned camera density inputs, deterministic projected density bands, canonical overlaps, freshness fingerprints, and result limits.
 - `frontend/app/components/EngineeringWorkspace.tsx`: toolbar, layer panel, MapLibre map, inspector, and status bar.
 - `frontend/app/components/CatalogManager.tsx`: fixture, IES, camera, and lens management.
 - `frontend/app/components/PoleInspector.tsx`: model-dependent per-pole lighting, Wi-Fi, and SMART camera configuration.
 - `frontend/app/components/EngineeringMap.tsx`: independent camera, lighting, Wi-Fi, CAP candidate/selected/tree, warning, and fixture layers plus the fixture-level azimuth handle; no camera-level direction controls.
+- `frontend/app/lib/camera-pixel-density-map.mjs` and `frontend/app/components/EngineeringMap.tsx`: render backend-produced current density bands and overlap inspection without calculating density in the browser.
 - Enabled-camera calculation warnings appear in the global validation list and a pole-level map indicator controlled by the Warnings layer; disabled slots do not contribute errors.
 - `frontend/app/lib/api.ts`: typed backend transport and local file downloads.
 - `schemas/project.schema.json`: repository-owned machine-readable project schema.
@@ -70,9 +72,13 @@ The frontend retains the bundled Sites/Vinext worker scaffold for local developm
 
 SMART user configuration and immutable pinned catalog/template revisions feed a pure geometry service. The service transforms the authoritative source pole coordinate into the project-selected projected CRS, intersects four pinhole-frustum boundary rays with local Z=0, and stores projected/WGS84 rings plus exact lens FOV and mounting-contract provenance in `camera_geometry`. Overlap and priority-area metrics use Shapely in projected metres. Priority rename and redraw are separate commands, and replacement validates before mutating the saved ring. Recalculation never writes source poles or user assignments.
 
-## Future phase seams
+## BL-016 camera density flow
 
-Pixel density has a revision-aware `not-calculated` result seam. Phase 4 lighting is persisted in `calculation_areas` and `lighting_calculations`, fully separate from camera `priority_areas`. Phase 5 Wi-Fi is persisted in separate `wifi_analysis_areas` and `wifi_coverage` collections. Phase 6 CAP inputs, calculations, and recommendations are separate strict collections. Phase 7 reporting and proposed/automatic pole workflows remain unavailable.
+The pixel-density service resolves effective pole activity and configuration alongside pinned fixture, template, camera, and lens revisions. It fingerprints those inputs, calculates independent midpoint-plane `px/face` bands for active enabled cameras, and derives canonical overlap regions with stored winners and contributor IDs. Results persist in the separate `camera_pixel_density` layer under project schema `2.8.0`; stale results remain auditable and are hidden. The React/MapLibre client requests calculation through the API and renders the persisted result using the application-owned static legend.
+
+## Current calculation and report state
+
+BL-016 camera density uses the separate `camera_pixel_density_profile` and `camera_pixel_density` collections; its initial migrated state is `not-calculated`. Phase 4 lighting is persisted in `calculation_areas` and `lighting_calculations`, fully separate from camera `priority_areas`. Phase 5 Wi-Fi is persisted in separate `wifi_analysis_areas` and `wifi_coverage` collections. Phase 6 CAP inputs, calculations, and recommendations are separate strict collections. Phase 7 deterministic report packages are available. Proposed and automatic pole workflows remain unavailable.
 
 ## Phase 4 calculation flow
 

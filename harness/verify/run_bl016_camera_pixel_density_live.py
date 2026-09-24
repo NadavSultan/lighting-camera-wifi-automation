@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -76,8 +77,39 @@ def terminate_isolated_servers(processes: tuple[subprocess.Popen[bytes] | None, 
             process.kill()
 
 
+def resolve_output_path(raw_output: str | None) -> Path:
+    output = Path(raw_output) if raw_output else Path("harness/tmp/bl016-live-latest.json")
+    if not output.is_absolute():
+        output = ROOT / output
+    output = output.resolve()
+    try:
+        relative = output.relative_to(ROOT.resolve())
+    except ValueError:
+        relative = None
+    if relative is not None:
+        tracked = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", relative.as_posix()],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if tracked.returncode == 0:
+            raise ValueError(f"Refusing to overwrite tracked live evidence: {relative.as_posix()}")
+    if raw_output and output.exists():
+        raise FileExistsError(f"Refusing to overwrite caller-selected output: {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    return output
+
+
 def main() -> int:
-    output = ROOT / "harness" / "verify" / "2026-09-22-bl-016-camera-pixel-density-live.json"
+    parser = argparse.ArgumentParser(description="Run isolated BL-016 live verification.")
+    parser.add_argument(
+        "--output",
+        help="Output JSON path (relative to repository root or absolute); defaults to ignored harness/tmp.",
+    )
+    args = parser.parse_args()
+    output = resolve_output_path(args.output)
     tmp_root = Path(tempfile.mkdtemp(prefix="lcwa-bl016-live-"))
     screenshot_dir = ROOT / "harness" / "tmp"
     screenshot_dir.mkdir(parents=True, exist_ok=True)
