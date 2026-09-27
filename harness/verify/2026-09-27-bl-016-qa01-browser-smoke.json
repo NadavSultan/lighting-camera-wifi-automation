@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-27",
+  "scope": "supervised production-browser QA-01 integration smoke; not the complete BL-016 interactive acceptance walkthrough",
+  "implementation_commit": "f542b164c136e8224e55867ea3f016a6987f7a44",
+  "frontend_origin": "http://127.0.0.1:3070",
+  "backend_origin": "http://127.0.0.1:8070",
+  "production_build": {
+    "environment_set_before_build": "NEXT_PUBLIC_API_URL=http://127.0.0.1:8070",
+    "client_chunk_contains": "http://127.0.0.1:8070",
+    "ssr_chunk_contains": "http://127.0.0.1:8070",
+    "source_bundle_before_correction_contained": "http://127.0.0.1:8000",
+    "tracked_build_output": false
+  },
+  "browser": {
+    "surface": "Codex in-app browser",
+    "opened": "http://127.0.0.1:3070/",
+    "title": "Lighting Camera WiFi Automation",
+    "source_file_uploaded": "Input/Miracle_Mile_Lighting_Poles.kml",
+    "observed_project_name": "Miracle Mile Lighting Poles",
+    "observed_import_line": "Miracle_Mile_Lighting_Poles.kml · 74 source poles",
+    "observed_fixture_counts": {"LITE": 74, "WIFI": 0, "SMART": 0},
+    "observed_projected_crs": "EPSG:32617",
+    "observed_source_crs": "EPSG:4326",
+    "observed_success_message": "Imported 74 authoritative customer poles from Miracle_Mile_Lighting_Poles.kml",
+    "camera_panel_opened": true,
+    "observed_camera_profile": {"lower_m": 0.5, "upper_m": 2.0, "auto_midpoint_m": 1.25, "maximum_visible_distance_m": 50.0},
+    "observed_density_state": "not-calculated",
+    "browser_warning_and_error_logs": [],
+    "screenshot_artifact": null
+  },
+  "backend_requests_from_browser_session": [
+    {"method": "OPTIONS", "path": "/api/projects/import", "status": 200},
+    {"method": "POST", "path": "/api/projects/import", "status": 201},
+    {"method": "OPTIONS", "path": "/api/projects/208251f1-03a6-4d97-a0d5-e63242504931/reports/preview", "status": 200},
+    {"method": "POST", "path": "/api/projects/208251f1-03a6-4d97-a0d5-e63242504931/reports/preview", "status": 200},
+    {"method": "OPTIONS", "path": "/api/fixture-directions/preview", "status": 200},
+    {"method": "POST", "path": "/api/fixture-directions/preview", "status": 200},
+    {"method": "OPTIONS", "path": "/api/projects/208251f1-03a6-4d97-a0d5-e63242504931/camera-geometry/recalculate", "status": 200},
+    {"method": "POST", "path": "/api/projects/208251f1-03a6-4d97-a0d5-e63242504931/camera-geometry/recalculate", "status": 200}
+  ],
+  "backend_log_source": "C:\\Users\\NadavSultan\\AppData\\Local\\Temp\\lcwa-qa01-browser-f542b164\\backend.stdout.log",
+  "frontend_log_source": "C:\\Users\\NadavSultan\\AppData\\Local\\Temp\\lcwa-qa01-browser-f542b164\\frontend.stdout.log",
+  "cors_regression_test": "backend/tests/test_local_production_cors.py",
+  "not_exercised_in_browser": [
+    "all three supplied lens calculations and display",
+    "invalid camera isolation",
+    "standard versus satellite map rendering",
+    "one-camera bands and below-threshold transparency",
+    "two- and three-camera overlap labels and point inspection",
+    "interactive stale retention, save/reopen, and recalculation",
+    "controlled calculation failure through the UI",
+    "interactive prior-layer and export regressions"
+  ]
+}

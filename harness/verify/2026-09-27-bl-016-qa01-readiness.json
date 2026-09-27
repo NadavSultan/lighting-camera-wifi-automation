@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "phase": "16",
+  "goal": {
+    "objective": "Complete the scoped BL-016 QA-01 production browser/API correction and deliver a clean independent-QA re-review handoff without accepting BL-016.",
+    "status": "ACHIEVED",
+    "stopping_condition": "All scoped checks and browser import evidence recorded, corrective evidence committed, clean worktree, and verify_phase_readiness.py PASS."
+  },
+  "implementation_commit": "f542b164c136e8224e55867ea3f016a6987f7a44",
+  "allowed_evidence_paths_after_implementation_commit": ["harness/", "GOALS.md", "PLANS.md", "OPERATIONS.md", "docs/current-status.md"],
+  "expected_milestone_ids": ["M0", "M1", "M2", "M3", "M4", "M5"],
+  "milestones": [
+    {"id": "M0", "status": "PASS", "evidence": ["harness/phases/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "M1", "status": "PASS", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "M2", "status": "PASS", "evidence": ["backend/tests/test_local_production_cors.py", "harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "M3", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md", "harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "M4", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-browser-smoke.json", "harness/verify/2026-09-27-bl016-qa01-live-retry03.json"]},
+    {"id": "M5", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-independent-qa-handoff.md", "harness/verify/2026-09-27-bl-016-qa01-verification.md"]}
+  ],
+  "expected_acceptance_ids": ["QA-01"],
+  "acceptance_criteria": [
+    {"id": "QA-01", "status": "PASS", "evidence": ["backend/tests/test_local_production_cors.py", "harness/verify/2026-09-27-bl-016-qa01-browser-smoke.json", "harness/verify/2026-09-27-bl-016-qa01-verification.md"]}
+  ],
+  "commands": [
+    {"id": "backend-full", "command": "..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider (cwd backend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "engineering-validator", "command": ".\\.venv\\Scripts\\python.exe scripts\\validate_engineering_data.py (cwd repository root)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "schema-export", "command": "..\\.venv\\Scripts\\python.exe -m scripts.export_schema (cwd backend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "frontend-install", "command": "corepack pnpm install --frozen-lockfile (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "frontend-test", "command": "corepack pnpm run test (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "frontend-typecheck", "command": "corepack pnpm run typecheck (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "frontend-lint", "command": "corepack pnpm run lint (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "frontend-build", "command": "$env:NEXT_PUBLIC_API_URL='http://127.0.0.1:8070'; corepack pnpm run build (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/logs/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "schema-freshness", "command": "git diff --exit-code -- schemas", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "source-preservation", "command": "git diff --exit-code -- Input; Get-FileHash Input\\Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "live-retry03", "command": ".\\.venv\\Scripts\\python.exe harness\\verify\\run_bl016_camera_pixel_density_live.py --output harness\\verify\\2026-09-27-bl016-qa01-live-retry03.json", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/verify/2026-09-27-bl016-qa01-live-retry03.json"]},
+    {"id": "production-browser-import", "command": "Open http://127.0.0.1:3070/ in Codex browser; upload Input/Miracle_Mile_Lighting_Poles.kml through file chooser; inspect Camera pane, browser logs, and isolated backend request log", "ran": true, "exit_code": 0, "tested_commit": "f542b164c136e8224e55867ea3f016a6987f7a44", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-browser-smoke.json"]}
+  ],
+  "required_checks": [
+    {"id": "final_verification", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "generated_artifact_freshness", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "source_preservation", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-verification.md"]},
+    {"id": "file_boundary", "status": "PASS", "evidence": ["harness/phases/2026-09-27-bl-016-qa01-cors.md"]},
+    {"id": "rendered_workflow", "status": "PASS", "evidence": ["harness/verify/2026-09-27-bl-016-qa01-browser-smoke.json"]},
+    {"id": "regression", "status": "PASS", "evidence": ["backend/tests/test_local_production_cors.py", "harness/verify/2026-09-27-bl-016-qa01-verification.md"]}
+  ],
+  "reports": {
+    "phase_work_record": "harness/phases/2026-09-27-bl-016-qa01-cors.md",
+    "execution_log": "harness/logs/2026-09-27-bl-016-qa01-cors.md",
+    "verification_summary": "harness/verify/2026-09-27-bl-016-qa01-verification.md",
+    "completion_report": "harness/verify/2026-09-27-bl-016-qa01-independent-qa-handoff.md",
+    "rendered_evidence": "harness/verify/2026-09-27-bl-016-qa01-browser-smoke.json"
+  },
+  "blockers": [],
+  "gate": {"implementation": "IMPLEMENTATION_COMPLETE_AWAITING_QA", "independent_qa": "PENDING", "master": "PENDING", "phase_seal": "ABSENT"}
+}

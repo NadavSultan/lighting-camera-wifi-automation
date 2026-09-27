@@ -102,6 +102,21 @@ def resolve_output_path(raw_output: str | None) -> Path:
     return output
 
 
+def verify_production_client_api_target() -> dict[str, object]:
+    chunks = ROOT / "frontend" / "dist" / "client" / "_next" / "static" / "chunks"
+    expected = f"http://127.0.0.1:{BACKEND_PORT}"
+    matches = [
+        path.relative_to(ROOT).as_posix()
+        for path in chunks.glob("*.js")
+        if expected in path.read_text(encoding="utf-8")
+    ]
+    if not matches:
+        raise RuntimeError(
+            f"Production client does not contain {expected}; build with NEXT_PUBLIC_API_URL={expected} before running live verification"
+        )
+    return {"api_url": expected, "client_chunks": matches}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run isolated BL-016 live verification.")
     parser.add_argument(
@@ -125,6 +140,7 @@ def main() -> int:
         "assertions": {}, "warnings": [], "browser": {},
     }
     try:
+        evidence["production_client_api_target"] = verify_production_client_api_target()
         require_free_port(BACKEND_PORT)
         require_free_port(FRONTEND_PORT)
         backend_env = os.environ.copy()

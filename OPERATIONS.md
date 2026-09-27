@@ -4,9 +4,9 @@
 
 Read the startup sequence in `AGENTS.md`. Use `docs/current-status.md` for current phase state and the accepted Phase 6 contract for Phase 6 behaviour. Place phase work records in `harness/phases/`, command logs in `harness/logs/`, verification summaries in `harness/verify/`, and only completed gate seals in `harness/seals/`.
 
-BL-016 implementation is ready for Independent QA but remains unaccepted. Merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
+BL-016 Independent QA found QA-01 and returned FAIL on 2026-09-27. A narrow correction awaits clean readiness verification and independent re-review; BL-016 remains unaccepted. Merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
 
-The exact corrective implementation commit is `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; the controlling work record is `harness/phases/2026-09-22-bl-016-camera-pixel-density.md` and the QA handoff is `harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md`.
+The original master-authorized corrective implementation was `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; the QA-01 implementation is `f542b164c136e8224e55867ea3f016a6987f7a44`. Its work record is `harness/phases/2026-09-27-bl-016-qa01-cors.md` and the re-review handoff is `harness/verify/2026-09-27-bl-016-qa01-independent-qa-handoff.md`.
 
 Known documentation conflict: `README.md` still describes a Phase 4 application and says Wi-Fi/CAP are not calculated. `docs/current-status.md`, the implementation plan, source tree, and recent Phase 5 gate evidence show Phase 5 is closed. Treat the dated status/gate records as controlling until the README is deliberately refreshed.
 
@@ -124,4 +124,4 @@ Phase 7 accepted implementation is `e24b6a16add314393574257a08e539a27673a505`. E
 
 ## Current post-roadmap evidence
 
-Stage 2 items BL-012, BL-017, and BL-018 are accepted at `eb3a606253d794bf8ef685eb69d6c885368823ea`. Stage 3 P2 items BL-013, BL-014, and BL-015 are accepted and committed at `e5023eec119e0f8fb55425444dde6c57b1fdecae`; controlling decision: `docs/post-roadmap-stage3-p2-scoped-master-decision-2026-09-16.md`. BL-016 architecture and engineering design are committed at `5837f29b65c706ca9db3f2c2491f8234a5a19bde`; original implementation/evidence are preserved in commits `8a271bf12b070c5c9883f2b2942ad54c6ace4f77` and `1b3cebfafdfc07a0135f174abaa6da26192e3eea`, with the master-authorized correction at `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`. BL-016 remains unaccepted and Independent QA has not started. Later backlog work, merge, push, Phase 8, and any seal remain unauthorized.
+Stage 2 items BL-012, BL-017, and BL-018 are accepted at `eb3a606253d794bf8ef685eb69d6c885368823ea`. Stage 3 P2 items BL-013, BL-014, and BL-015 are accepted and committed at `e5023eec119e0f8fb55425444dde6c57b1fdecae`; controlling decision: `docs/post-roadmap-stage3-p2-scoped-master-decision-2026-09-16.md`. BL-016 architecture and engineering design are committed at `5837f29b65c706ca9db3f2c2491f8234a5a19bde`; original implementation/evidence are preserved in commits `8a271bf12b070c5c9883f2b2942ad54c6ace4f77` and `1b3cebfafdfc07a0135f174abaa6da26192e3eea`, with the master-authorized correction at `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`. Independent QA FAIL on 2026-09-27 led to scoped QA-01 correction `f542b164c136e8224e55867ea3f016a6987f7a44`; re-review is pending. Later backlog work, merge, push, Phase 8, and any seal remain unauthorized.

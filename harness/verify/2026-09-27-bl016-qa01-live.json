@@ -1,0 +1,19 @@
+{
+  "assertions": {},
+  "browser": {},
+  "head": "f542b164c136e8224e55867ea3f016a6987f7a44",
+  "logs": {
+    "backend_tail": "",
+    "frontend_tail": ""
+  },
+  "ports": {
+    "backend": 8070,
+    "frontend": 3070
+  },
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "starting_status": [
+    "?? harness/logs/2026-09-27-bl-016-qa01-cors.md",
+    "?? harness/phases/2026-09-27-bl-016-qa01-cors.md"
+  ],
+  "warnings": []
+}

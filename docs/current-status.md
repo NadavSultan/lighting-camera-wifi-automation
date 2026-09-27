@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-24. Documentation consistency reviewed: 2026-09-24. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 corrective implementation is at `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; deterministic/live checks pass and the clean readiness verifier is the final implementation gate. Independent QA has not started; BL-016 is unaccepted.
+Phase state last changed: 2026-09-27. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 Independent QA returned FAIL for QA-01 on 2026-09-27. Scoped QA-01 correction is at `f542b164c136e8224e55867ea3f016a6987f7a44`; deterministic and real production-browser import/API smoke pass. Clean corrective readiness verification and independent re-review are pending; BL-016 is unaccepted.
 
 ## Completed
 
@@ -50,4 +50,4 @@ Phase state last changed: 2026-09-24. Documentation consistency reviewed: 2026-0
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Current gate: implementation handoff for Independent QA, following the clean readiness verifier for corrective implementation `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`.** QA has not started. BL-016 remains unaccepted pending Independent QA and a separate scoped master PASS; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.
+**Current gate: clean QA-01 corrective readiness verification and independent re-review of `f542b164c136e8224e55867ea3f016a6987f7a44`.** The original 2026-09-27 Independent QA verdict remains FAIL until a new reviewer decides otherwise. BL-016 remains unaccepted pending Independent QA and a separate scoped master PASS; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.
