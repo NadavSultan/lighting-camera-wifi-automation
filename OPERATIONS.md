@@ -4,7 +4,7 @@
 
 Read the startup sequence in `AGENTS.md`. Use `docs/current-status.md` for current phase state and the accepted Phase 6 contract for Phase 6 behaviour. Place phase work records in `harness/phases/`, command logs in `harness/logs/`, verification summaries in `harness/verify/`, and only completed gate seals in `harness/seals/`.
 
-BL-016 Independent QA found QA-01 and returned FAIL on 2026-09-27. A narrow correction awaits clean readiness verification and independent re-review; BL-016 remains unaccepted. Merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
+BL-016 Independent QA found QA-01 and returned FAIL on 2026-09-27. The narrow correction passed clean readiness verification at evidence commit `2a68c330`; the final handoff repeats it on the final evidence tip. Independent re-review is next and BL-016 remains unaccepted. Merge, push, later backlog work, Phase 8, and any seal remain unauthorized.
 
 The original master-authorized corrective implementation was `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; the QA-01 implementation is `f542b164c136e8224e55867ea3f016a6987f7a44`. Its work record is `harness/phases/2026-09-27-bl-016-qa01-cors.md` and the re-review handoff is `harness/verify/2026-09-27-bl-016-qa01-independent-qa-handoff.md`.
 
