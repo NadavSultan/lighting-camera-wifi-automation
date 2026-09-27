@@ -94,8 +94,11 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
     app.state.catalog_store = catalogs
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
-        allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
+        allow_origins=[
+            "http://127.0.0.1:3000",
+            "http://localhost:3000",
+            "http://127.0.0.1:3070",
+        ],
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
