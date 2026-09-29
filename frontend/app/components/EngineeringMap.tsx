@@ -13,7 +13,7 @@ import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 import type { FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
-import { attachDensityInspection, densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
+import { attachDensityInspection, densityBandFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
 
 const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
@@ -266,6 +266,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       attachDensityInspection(map, (inspection, lngLat) => {
         densityPopup?.remove();
         const element = document.createElement("div");
+        Object.assign(element.style, densityInspectionStyle());
         const title = document.createElement("strong"); title.textContent = `${inspection.multiplicity}× camera density`; element.appendChild(title);
         const range = inspection.minimumPxPerFace === null ? "range unavailable" : `${inspection.minimumPxPerFace}–${inspection.maximumPxPerFace ?? "∞"} px/face`;
         const band = document.createElement("p"); band.textContent = `Displayed band: ${inspection.winningBandId} · ${range}`; element.appendChild(band);
@@ -273,7 +274,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         const contributors = document.createElement("p"); contributors.textContent = `Contributors: ${inspection.contributors.join(", ")}`; element.appendChild(contributors);
         const freshness = document.createElement("p"); freshness.textContent = "Current camera pixel-density result"; element.appendChild(freshness);
         const disclaimer = document.createElement("p"); disclaimer.textContent = densityResultRef.current?.disclaimer ?? "Geometric density only; not analytics or compliance evidence."; element.appendChild(disclaimer);
-        densityPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: true }).setLngLat(lngLat).setDOMContent(element).addTo(map);
+        densityPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, maxWidth: "340px" }).setLngLat(lngLat).setDOMContent(element).addTo(map);
       }, isDrawing);
       for (const layer of CLICKABLE_LAYERS) {
         map.on("click", layer, (event) => {

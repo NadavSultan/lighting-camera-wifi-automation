@@ -8,4 +8,5 @@ export function densityOverlapFeatures(project: Project): FeatureCollection<Poly
 export function densityOverlapLabelPoints(project: Project): DensityOverlapLabelPoint[];
 export function densityInspectionAt(features: Array<{ properties: unknown }>): DensityInspection | null;
 export function attachDensityInspection(map: MapLibreMap, onInspect: (inspection: DensityInspection, lngLat: LngLat) => void, isDrawing: () => boolean): void;
+export function densityInspectionStyle(): { color: string; maxHeight: string; overflowY: string; overflowWrap: string; width: string };
 export function densityLayerDefinitions(legend: PixelDensityLegendDefinition): Array<{ rank: number; token: string; colour: string; opacity: number }>;

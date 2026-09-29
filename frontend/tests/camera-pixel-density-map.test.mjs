@@ -81,6 +81,16 @@ test("one map click over multiple density bands dispatches exactly one complete 
   assert.equal(shown[0].minimumPxPerFace, 30);
 });
 
+test("dense overlap popup remains legible and scrollable inside the map", () => {
+  assert.deepEqual(densityMap.densityInspectionStyle(), {
+    color: "#17212c",
+    maxHeight: "min(240px, calc(100vh - 160px))",
+    overflowY: "auto",
+    overflowWrap: "anywhere",
+    width: "min(320px, calc(100vw - 88px))",
+  });
+});
+
 test("ten layer definitions are ascending and use canonical colour and opacity", () => {
   const legend = { fill_opacity: 0.58, thresholds: Array.from({ length: 10 }, (_, index) => ({ colour: `#00000${index}`, token: `face-density-${index}` })) };
   const layers = densityLayerDefinitions(legend);

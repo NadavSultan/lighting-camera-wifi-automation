@@ -74,6 +74,16 @@ export function attachDensityInspection(map, onInspect, isDrawing) {
   });
 }
 
+export function densityInspectionStyle() {
+  return {
+    color: "#17212c",
+    maxHeight: "min(240px, calc(100vh - 160px))",
+    overflowY: "auto",
+    overflowWrap: "anywhere",
+    width: "min(320px, calc(100vw - 88px))",
+  };
+}
+
 export function densityLayerDefinitions(legend) {
   return legend.thresholds.map((threshold, index) => ({ rank: index + 1, token: threshold.token, colour: threshold.colour, opacity: legend.fill_opacity }));
 }
