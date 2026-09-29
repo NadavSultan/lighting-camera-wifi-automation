@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import * as densityMap from "../app/lib/camera-pixel-density-map.mjs";
 import { densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints, densityInspectionAt, densityLayerDefinitions } from "../app/lib/camera-pixel-density-map.mjs";
 
 function project(status = "current", visible = true) {
@@ -24,6 +25,60 @@ test("inspection uses stored winner and sorted contributors without HTML", () =>
   assert.deepEqual(inspected.contributors, [...malicious.camera_footprint_ids].sort());
   assert.equal(inspected.winner, malicious.winning_camera_footprint_id);
   assert.equal("html" in inspected, false);
+});
+
+test("overlap features carry the stored winning camera's displayed px/face interval", () => {
+  const overlap = densityOverlapFeatures(project()).features[0];
+  assert.equal(overlap.properties.minimum_px_per_face, 30);
+  assert.equal(overlap.properties.maximum_px_per_face, 45);
+});
+
+test("layered band hits select the overlap winner, complete contributors, and displayed range", () => {
+  const current = project();
+  const overlap = densityOverlapFeatures(current).features[0];
+  const band = densityBandFeatures(current).features[0];
+  const inspected = densityInspectionAt([band, overlap, band]);
+  assert.deepEqual(inspected, {
+    contributors: ["pole-b/\u202ecamera", "pole<script>/camera&1"].sort(),
+    winner: "pole<script>/camera&1",
+    winningBandId: "px-face-30",
+    multiplicity: 2,
+    minimumPxPerFace: 30,
+    maximumPxPerFace: 45,
+  });
+});
+
+test("MapLibre-serialized overlap contributors still outrank a single band hit", () => {
+  const current = project();
+  const overlap = densityOverlapFeatures(current).features[0];
+  const band = densityBandFeatures(current).features[0];
+  const serialized = { properties: { ...overlap.properties, camera_footprint_ids: JSON.stringify(overlap.properties.camera_footprint_ids) } };
+  const inspected = densityInspectionAt([band, serialized]);
+  assert.equal(inspected.multiplicity, 2);
+  assert.deepEqual(inspected.contributors, ["pole-b/\u202ecamera", "pole<script>/camera&1"].sort());
+  assert.equal(inspected.winner, "pole<script>/camera&1");
+});
+
+test("one map click over multiple density bands dispatches exactly one complete inspection", () => {
+  assert.equal(typeof densityMap.attachDensityInspection, "function", "the map must use one click dispatcher");
+  const current = project();
+  const overlap = densityOverlapFeatures(current).features[0];
+  const band = densityBandFeatures(current).features[0];
+  const handlers = [];
+  const shown = [];
+  const map = {
+    on(type, handler) { if (type === "click") handlers.push(handler); },
+    queryRenderedFeatures(_point, { layers }) {
+      return layers.includes("camera-density-overlap-hit") ? [band, overlap, band] : [band, band];
+    },
+  };
+  densityMap.attachDensityInspection(map, (inspection) => shown.push(inspection), () => false);
+  for (const handler of handlers) handler({ point: { x: 20, y: 30 }, lngLat: { lng: -80, lat: 25 } });
+  assert.equal(handlers.length, 1);
+  assert.equal(shown.length, 1);
+  assert.equal(shown[0].multiplicity, 2);
+  assert.equal(shown[0].contributors.length, 2);
+  assert.equal(shown[0].minimumPxPerFace, 30);
 });
 
 test("ten layer definitions are ascending and use canonical colour and opacity", () => {

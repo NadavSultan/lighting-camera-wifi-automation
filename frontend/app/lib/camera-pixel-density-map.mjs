@@ -22,8 +22,13 @@ export function densityBandFeatures(project) {
 export function densityOverlapFeatures(project) {
   const result = visibleResult(project);
   if (!result) return empty();
+  const winningBands = new Map(result.camera_results.flatMap((camera) => camera.bands.map((band) => [`${camera.footprint_id}\0${band.band_id}`, band])));
   return { type: "FeatureCollection", features: result.overlap_regions.flatMap((region) => region.wgs84_rings.map((rings, part) => ({
-    type: "Feature", id: `${region.overlap_region_id}/${part}`, properties: { ...region }, geometry: { type: "Polygon", coordinates: rings },
+    type: "Feature", id: `${region.overlap_region_id}/${part}`, properties: {
+      ...region,
+      minimum_px_per_face: winningBands.get(`${region.winning_camera_footprint_id}\0${region.winning_band_id}`)?.minimum_px_per_face ?? null,
+      maximum_px_per_face: winningBands.get(`${region.winning_camera_footprint_id}\0${region.winning_band_id}`)?.maximum_px_per_face ?? null,
+    }, geometry: { type: "Polygon", coordinates: rings },
   }))) };
 }
 
@@ -36,11 +41,37 @@ export function densityOverlapLabelPoints(project) {
   });
 }
 
+function contributorIds(value) {
+  if (typeof value === "string") {
+    try { value = JSON.parse(value); } catch { return null; }
+  }
+  return Array.isArray(value) && value.length > 1 && value.every((id) => typeof id === "string") ? value : null;
+}
+
 export function densityInspectionAt(features) {
-  const overlap = features.map((feature) => feature.properties).find((properties) => Array.isArray(properties?.camera_footprint_ids));
-  if (overlap) return { contributors: [...overlap.camera_footprint_ids].sort(), winner: overlap.winning_camera_footprint_id, winningBandId: overlap.winning_band_id, multiplicity: overlap.multiplicity };
+  const overlap = features.map((feature) => feature.properties).find((properties) => contributorIds(properties?.camera_footprint_ids));
+  if (overlap) return {
+    contributors: [...contributorIds(overlap.camera_footprint_ids)].sort(),
+    winner: overlap.winning_camera_footprint_id,
+    winningBandId: overlap.winning_band_id,
+    multiplicity: overlap.multiplicity,
+    minimumPxPerFace: overlap.minimum_px_per_face,
+    maximumPxPerFace: overlap.maximum_px_per_face,
+  };
   const band = features.map((feature) => feature.properties).find((properties) => properties?.footprint_id && properties?.band_id);
-  return band ? { contributors: [String(band.footprint_id)], winner: String(band.footprint_id), winningBandId: String(band.band_id), multiplicity: 1 } : null;
+  return band ? {
+    contributors: [String(band.footprint_id)], winner: String(band.footprint_id), winningBandId: String(band.band_id), multiplicity: 1,
+    minimumPxPerFace: band.minimum, maximumPxPerFace: band.maximum,
+  } : null;
+}
+
+export function attachDensityInspection(map, onInspect, isDrawing) {
+  const layers = ["camera-density-overlap-hit", ...Array.from({ length: 10 }, (_, index) => `camera-density-band-${index + 1}`)];
+  map.on("click", (event) => {
+    if (isDrawing()) return;
+    const inspection = densityInspectionAt(map.queryRenderedFeatures(event.point, { layers }));
+    if (inspection) onInspect(inspection, event.lngLat);
+  });
 }
 
 export function densityLayerDefinitions(legend) {

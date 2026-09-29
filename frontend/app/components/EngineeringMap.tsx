@@ -13,7 +13,7 @@ import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 import type { FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
-import { densityBandFeatures, densityInspectionAt, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
+import { attachDensityInspection, densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
 
 const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
@@ -165,10 +165,12 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const onMapReadyRef = useRef(onMapReady);
   const satelliteConfigRef = useRef(satelliteConfig);
   const onSatelliteTileErrorRef = useRef(onSatelliteTileError);
+  const densityResultRef = useRef(project?.camera_pixel_density.result);
 
   useEffect(() => { onMapReadyRef.current = onMapReady; }, [onMapReady]);
   useEffect(() => { satelliteConfigRef.current = satelliteConfig; }, [satelliteConfig]);
   useEffect(() => { onSatelliteTileErrorRef.current = onSatelliteTileError; }, [onSatelliteTileError]);
+  useEffect(() => { densityResultRef.current = project?.camera_pixel_density.result; }, [project]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
   useEffect(() => {
     drawingRef.current = drawingPriorityArea;
@@ -191,6 +193,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     const map = new maplibregl.Map({ container: containerRef.current, style: BASE_STYLE, center: [-80.2586, 25.74955], zoom: 15.7, attributionControl: false });
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    let densityPopup: maplibregl.Popup | null = null;
     map.on("load", () => {
       const satellite = satelliteConfigRef.current;
       if (satellite && backgroundAvailability(satellite).available && !map.getSource("satellite")) {
@@ -233,20 +236,9 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       for (let rank = 1; rank <= 10; rank += 1) map.addLayer({ id: `camera-density-band-${rank}`, type: "fill", source: "camera-density-bands", filter: ["==", ["get", "rank"], rank], paint: { "fill-color": "#4cc9f0", "fill-opacity": .58 } });
       const dots = new Uint8Array(8 * 8 * 4); for (const index of [27, 28, 35, 36]) { dots[index * 4] = 255; dots[index * 4 + 1] = 255; dots[index * 4 + 2] = 255; dots[index * 4 + 3] = 210; }
       map.addImage("camera-density-overlap-dots", { width: 8, height: 8, data: dots });
+      map.addLayer({ id: "camera-density-overlap-hit", type: "fill", source: "camera-density-overlaps", paint: { "fill-color": "#000000", "fill-opacity": 0 } });
       map.addLayer({ id: "camera-density-overlap-dots", type: "fill", source: "camera-density-overlaps", paint: { "fill-pattern": "camera-density-overlap-dots", "fill-opacity": .75 } });
       map.addLayer({ id: "camera-density-overlap-outline", type: "line", source: "camera-density-overlaps", paint: { "line-color": "#ffffff", "line-width": 1.5, "line-dasharray": [2, 2] } });
-      const densityLayers = Array.from({ length: 10 }, (_, index) => `camera-density-band-${index + 1}`);
-      const inspectDensity = (event: maplibregl.MapMouseEvent) => {
-        const inspection = densityInspectionAt(map.queryRenderedFeatures(event.point, { layers: ["camera-density-overlap-dots", ...densityLayers] }));
-        if (!inspection) return;
-        const element = document.createElement("div");
-        const title = document.createElement("strong"); title.textContent = `${inspection.multiplicity}× camera density`; element.appendChild(title);
-        const winner = document.createElement("p"); winner.textContent = `Winner: ${inspection.winner} · ${inspection.winningBandId}`; element.appendChild(winner);
-        const contributors = document.createElement("p"); contributors.textContent = `Contributors: ${inspection.contributors.join(", ")}`; element.appendChild(contributors);
-        new maplibregl.Popup().setLngLat(event.lngLat).setDOMContent(element).addTo(map);
-      };
-      map.on("click", "camera-density-overlap-dots", inspectDensity);
-      for (const layer of densityLayers) map.on("click", layer, inspectDensity);
       map.addLayer({ id: "lighting-heat-points", type: "circle", source: "lighting-points", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2, 19, 7], "circle-color": ["interpolate", ["linear"], ["get", "lux"], 0, "#172554", 1, "#2563eb", 5, "#22d3ee", 15, "#facc15", 30, "#f97316", 60, "#ef4444"], "circle-opacity": .76, "circle-stroke-width": .4, "circle-stroke-color": "#ffffff" } });
       map.addLayer({ id: "lighting-calculation-points", type: "circle", source: "lighting-points", paint: { "circle-radius": 1.4, "circle-color": "#f8fafc", "circle-opacity": .9 } });
       map.addLayer({ id: "poles-original", type: "circle", source: "poles", paint: { "circle-radius": 7, "circle-color": "#7f8d9b", "circle-opacity": .34, "circle-stroke-width": 1, "circle-stroke-color": "#d8e1e9", "circle-stroke-opacity": .42 } });
@@ -271,6 +263,18 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       addDraftSourcesAndLayers(map, "calculation");
       addDraftSourcesAndLayers(map, "wifi");
       const isDrawing = () => drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current;
+      attachDensityInspection(map, (inspection, lngLat) => {
+        densityPopup?.remove();
+        const element = document.createElement("div");
+        const title = document.createElement("strong"); title.textContent = `${inspection.multiplicity}× camera density`; element.appendChild(title);
+        const range = inspection.minimumPxPerFace === null ? "range unavailable" : `${inspection.minimumPxPerFace}–${inspection.maximumPxPerFace ?? "∞"} px/face`;
+        const band = document.createElement("p"); band.textContent = `Displayed band: ${inspection.winningBandId} · ${range}`; element.appendChild(band);
+        const winner = document.createElement("p"); winner.textContent = `Winner: ${inspection.winner}`; element.appendChild(winner);
+        const contributors = document.createElement("p"); contributors.textContent = `Contributors: ${inspection.contributors.join(", ")}`; element.appendChild(contributors);
+        const freshness = document.createElement("p"); freshness.textContent = "Current camera pixel-density result"; element.appendChild(freshness);
+        const disclaimer = document.createElement("p"); disclaimer.textContent = densityResultRef.current?.disclaimer ?? "Geometric density only; not analytics or compliance evidence."; element.appendChild(disclaimer);
+        densityPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: true }).setLngLat(lngLat).setDOMContent(element).addTo(map);
+      }, isDrawing);
       for (const layer of CLICKABLE_LAYERS) {
         map.on("click", layer, (event) => {
           if (isDrawing()) return;
@@ -319,7 +323,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     mapRef.current = map;
     setMapInstance(map);
     onMapReadyRef.current?.(map);
-    return () => { map.remove(); mapRef.current = null; setMapInstance(null); onMapReadyRef.current?.(null); };
+    return () => { densityPopup?.remove(); map.remove(); mapRef.current = null; setMapInstance(null); onMapReadyRef.current?.(null); };
   }, []);
 
   const labelPoints = useMemo(() => lightingLabelPoints(project?.lighting_calculations.results), [project]);
