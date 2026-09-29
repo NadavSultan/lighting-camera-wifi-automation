@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "vinext build",
+    "build": "vinext build && node --test tests/satellite-production-bundle.integration.mjs",
     "start": "vinext start",
     "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit",

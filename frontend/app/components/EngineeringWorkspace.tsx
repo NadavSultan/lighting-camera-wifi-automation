@@ -138,7 +138,13 @@ export function EngineeringWorkspace() {
   const [backgroundChoice, setBackgroundChoice] = useState<BackgroundChoice>("standard");
   const [satelliteTileFailed, setSatelliteTileFailed] = useState(false);
   const [backgroundNotice, setBackgroundNotice] = useState<string | null>(null);
-  const satelliteConfig = useMemo(() => readSatelliteConfigFromEnv(process.env), []);
+  const satelliteConfig = useMemo(() => readSatelliteConfigFromEnv({
+    NEXT_PUBLIC_SATELLITE_TILES: process.env.NEXT_PUBLIC_SATELLITE_TILES,
+    NEXT_PUBLIC_SATELLITE_TILE_SIZE: process.env.NEXT_PUBLIC_SATELLITE_TILE_SIZE,
+    NEXT_PUBLIC_SATELLITE_MIN_ZOOM: process.env.NEXT_PUBLIC_SATELLITE_MIN_ZOOM,
+    NEXT_PUBLIC_SATELLITE_MAX_ZOOM: process.env.NEXT_PUBLIC_SATELLITE_MAX_ZOOM,
+    NEXT_PUBLIC_SATELLITE_ATTRIBUTION: process.env.NEXT_PUBLIC_SATELLITE_ATTRIBUTION,
+  }), []);
   const satelliteAvailability = useMemo(() => backgroundAvailability(satelliteConfig), [satelliteConfig]);
   const backgroundSession = sessionBackground({
     choice: backgroundChoice,
