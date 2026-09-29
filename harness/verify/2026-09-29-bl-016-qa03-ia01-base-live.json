@@ -1,0 +1,59 @@
+{
+  "assertions": {
+    "current_result_visible": true,
+    "default_profile": true,
+    "failed_calculation_atomic": true,
+    "import_74_existing_projected": true,
+    "kml_export": true,
+    "legend_option_a": true,
+    "phase7_report": true,
+    "production_browser_shell": true,
+    "recalculation_restores_current": true,
+    "source_sha256_exact": true,
+    "stale_retained_hidden": true,
+    "valid_camera_bands": true
+  },
+  "browser": {
+    "console_errors": [],
+    "engine": "Chrome headless",
+    "exit_code": 0,
+    "page_errors": [],
+    "scope": "production shell rendering; engineering workflow assertions are API plus deterministic frontend tests",
+    "screenshot": "harness\\tmp\\bl016-production-home.png"
+  },
+  "camera_counts": {
+    "overlaps": 30,
+    "resolved": 8,
+    "valid": 8
+  },
+  "head": "5656da555f9614a2be614738ccf699ce2d58f609",
+  "logs": {
+    "backend_tail": "INFO:     Started server process [13396]\nINFO:     Waiting for application startup.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://127.0.0.1:8070 (Press CTRL+C to quit)\nINFO:     127.0.0.1:62463 - \"GET /api/health HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62465 - \"POST /api/projects/import HTTP/1.1\" 201 Created\nINFO:     127.0.0.1:62466 - \"PATCH /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/poles/bulk HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62467 - \"POST /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/camera-pixel-density/calculate HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62468 - \"GET /api/reference/camera-pixel-density-legend HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62469 - \"POST /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/camera-pixel-density/calculate HTTP/1.1\" 422 Unprocessable Entity\nINFO:     127.0.0.1:62470 - \"PUT /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62471 - \"POST /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/camera-pixel-density/calculate HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62473 - \"GET /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/export/kml HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:62474 - \"POST /api/projects/04c50b7b-5ffa-4391-b990-48a648a371fd/reports/package HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:59774 - \"GET /api/catalogs/fixtures HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:56712 - \"GET /api/catalogs/cameras HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:52427 - \"GET /api/reference/camera-pixel-density-legend HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:64118 - \"GET /api/catalogs/ies HTTP/1.1\" 200 OK\n",
+    "frontend_tail": "\n  vinext start  (port 3070)\n\n[vinext] Production server running at http://0.0.0.0:3070\n"
+  },
+  "pass": true,
+  "ports": {
+    "backend": 8070,
+    "frontend": 3070
+  },
+  "production_client_api_target": {
+    "api_url": "http://127.0.0.1:8070",
+    "client_chunks": [
+      "frontend/dist/client/_next/static/chunks/EngineeringWorkspace-BtDi9CNE.js"
+    ]
+  },
+  "server_identities": {
+    "backend_health": "ok",
+    "frontend_url": "http://127.0.0.1:3070/"
+  },
+  "server_processes": {
+    "backend_listener_pid": 13396,
+    "frontend_listener_pid": 7644
+  },
+  "source_sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+  "starting_status": [
+    "?? harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md",
+    "?? harness/phases/2026-09-29-bl-016-qa03-ia01-overlap.md"
+  ],
+  "warnings": []
+}

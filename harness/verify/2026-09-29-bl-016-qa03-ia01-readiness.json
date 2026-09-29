@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "phase": "16",
+  "goal": {
+    "objective": "Correct the BL-016 QA03-IA-01 overlap inspection finding without accepting BL-016.",
+    "status": "ACHIEVED",
+    "stopping_condition": "One complete legible popup per click on a genuine 74-pole production browser, full final-commit gates, evidence-only handoff, and clean implementation-readiness PASS."
+  },
+  "implementation_commit": "5656da555f9614a2be614738ccf699ce2d58f609",
+  "allowed_evidence_paths_after_implementation_commit": ["harness/"],
+  "expected_milestone_ids": ["M0", "M1", "M2", "M3", "M4", "M5"],
+  "milestones": [
+    {"id": "M0", "status": "PASS", "evidence": ["harness/phases/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "M1", "status": "PASS", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "M2", "status": "PASS", "evidence": ["frontend/tests/camera-pixel-density-map.test.mjs", "harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "M3", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md", "harness/verify/2026-09-29-bl-016-qa03-ia01-base-live.json"]},
+    {"id": "M4", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-browser.json"]},
+    {"id": "M5", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-independent-qa-handoff.md"]}
+  ],
+  "expected_acceptance_ids": ["QA03-IA-01"],
+  "acceptance_criteria": [
+    {"id": "QA03-IA-01", "status": "PASS", "evidence": ["frontend/tests/camera-pixel-density-map.test.mjs", "harness/verify/2026-09-29-bl-016-qa03-ia01-browser.json", "harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]}
+  ],
+  "commands": [
+    {"id": "backend-full", "command": "..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider (cwd backend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "engineering-validator", "command": ".\\.venv\\Scripts\\python.exe scripts\\validate_engineering_data.py (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "schema-export-freshness", "command": "..\\.venv\\Scripts\\python.exe -m scripts.export_schema (cwd backend); git diff --exit-code 5656da55 -- schemas (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "frontend-frozen-install", "command": "corepack pnpm install --frozen-lockfile (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "frontend-tests", "command": "corepack pnpm run test (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "frontend-typecheck", "command": "corepack pnpm run typecheck (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "frontend-lint", "command": "corepack pnpm run lint (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "configured-frontend-build", "command": "Set NEXT_PUBLIC_API_URL=:8070 and five approved NEXT_PUBLIC_SATELLITE_* public values before corepack pnpm run build (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "source-preservation", "command": "git diff --exit-code 5656da55 -- Input frontend/pnpm-lock.yaml; Get-FileHash Input/Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256; git diff --check (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "base-live", "command": ".\\.venv\\Scripts\\python.exe harness\\verify\\run_bl016_camera_pixel_density_live.py --output harness/verify/2026-09-29-bl-016-qa03-ia01-base-live.json (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-base-live.json"]},
+    {"id": "production-browser-overlap", "command": "Codex in-app production browser: import unchanged 74-pole KML, bulk assign 74 SMART cameras, calculate, inspect one overlap on Standard and Satellite, compare persisted region and computed popup presentation", "ran": true, "exit_code": 0, "tested_commit": "5656da555f9614a2be614738ccf699ce2d58f609", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-browser.json"]}
+  ],
+  "required_checks": [
+    {"id": "final_verification", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "generated_artifact_freshness", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "source_preservation", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]},
+    {"id": "file_boundary", "status": "PASS", "evidence": ["harness/phases/2026-09-29-bl-016-qa03-ia01-overlap.md"]},
+    {"id": "rendered_workflow", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-ia01-browser.json"]},
+    {"id": "regression", "status": "PASS", "evidence": ["frontend/tests/camera-pixel-density-map.test.mjs", "harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md"]}
+  ],
+  "reports": {
+    "phase_work_record": "harness/phases/2026-09-29-bl-016-qa03-ia01-overlap.md",
+    "execution_log": "harness/logs/2026-09-29-bl-016-qa03-ia01-overlap.md",
+    "verification_summary": "harness/verify/2026-09-29-bl-016-qa03-ia01-verification.md",
+    "completion_report": "harness/verify/2026-09-29-bl-016-qa03-ia01-independent-qa-handoff.md",
+    "rendered_evidence": "harness/verify/2026-09-29-bl-016-qa03-ia01-browser.json"
+  },
+  "blockers": [],
+  "gate": {"implementation": "IMPLEMENTATION_COMPLETE_AWAITING_QA", "independent_qa": "PENDING", "master": "PENDING", "phase_seal": "ABSENT"}
+}

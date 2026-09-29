@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-29",
+  "scope": "QA03-IA-01 / BL016-16 implementation browser smoke; not independent QA or phase acceptance",
+  "implementation_commit": "5656da555f9614a2be614738ccf699ce2d58f609",
+  "runtime": {
+    "frontend": "configured Vinext production build at http://127.0.0.1:3070/",
+    "backend": "isolated FastAPI at http://127.0.0.1:8070/",
+    "project_id": "88d4bebf-f417-40a5-a44b-ef7edd4dd21f",
+    "data_dir": "harness/tmp/qa03-ia01-final-5656da55/projects",
+    "browser": "Codex in-app browser",
+    "viewport": [1280, 720]
+  },
+  "source": {
+    "file": "Input/Miracle_Mile_Lighting_Poles.kml",
+    "sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+    "imported_poles": 74,
+    "mode": "existing-poles",
+    "bulk_configuration": "74 Phoenix 1 SMART, 10 m, IMX477 with JL-LN037 3.56 mm"
+  },
+  "calculation": {
+    "state": "current",
+    "camera_results": 148,
+    "overlap_regions": 4233
+  },
+  "inspection": {
+    "interaction": "one map click at browser viewport [620,370], repeated once after switching Standard to Satellite",
+    "popup_count_after_each_click": 1,
+    "displayed_title": "7× camera density",
+    "displayed_band": "px-face-15 · 15–20 px/face",
+    "displayed_winner": "pole-f80ddce879ccf3d1/camera-2",
+    "displayed_contributors": [
+      "pole-25e978683dac4999/camera-2",
+      "pole-30d621d18b417403/camera-1",
+      "pole-32befdd83a48781d/camera-2",
+      "pole-73097d4ff000e0ee/camera-1",
+      "pole-97ab5a90f1ab1e0b/camera-1",
+      "pole-aaa77c8a10e3a96e/camera-1",
+      "pole-f80ddce879ccf3d1/camera-2"
+    ],
+    "displayed_freshness": "Current camera pixel-density result",
+    "disclaimer_present": true,
+    "persisted_exact_matching_regions": 1,
+    "persisted_region_id": "density-overlap-65b588cac503a8918fa5bce4",
+    "standard_and_satellite_contents_equal": true,
+    "browser_console_errors_or_warnings": []
+  },
+  "visual_accessibility": {
+    "screenshot_inspected_in_browser": true,
+    "text_rgb": [23, 33, 44],
+    "popup_background_rgb": [255, 255, 255],
+    "popup_top_px": 150,
+    "caption_bottom_px": 141.5,
+    "popup_bottom_px": 360,
+    "map_top_px": 58,
+    "map_bottom_px": 690,
+    "popup_scroll_height_px": 300,
+    "popup_client_height_px": 180,
+    "scroll_to_bottom_observed_px": 120,
+    "full_list_and_disclaimer_scroll_accessible": true
+  },
+  "limits": "In-app screenshots were inspected inline, not saved as a durable image file. This is an implementation smoke, not a replacement for independent QA's complete Task 10 workflow."
+}
