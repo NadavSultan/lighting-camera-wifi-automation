@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "phase": "16",
+  "goal": {"objective": "Correct BL-016 Independent QA finding QA-03 and deliver clean scoped implementation-readiness evidence without accepting BL-016.", "status": "ACHIEVED", "stopping_condition": "Scoped production build, deterministic gates, browser Satellite/density seam, evidence-only closeout, and clean verify_phase_readiness.py PASS."},
+  "implementation_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc",
+  "allowed_evidence_paths_after_implementation_commit": ["harness/", "GOALS.md", "PLANS.md", "OPERATIONS.md", "docs/current-status.md"],
+  "expected_milestone_ids": ["M0", "M1", "M2", "M3", "M4", "M5"],
+  "milestones": [
+    {"id": "M0", "status": "PASS", "evidence": ["harness/phases/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "M1", "status": "PASS", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "M2", "status": "PASS", "evidence": ["frontend/tests/satellite-production-bundle.integration.mjs", "harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "M3", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md", "harness/verify/2026-09-29-bl-016-qa03-base-live-retry01.json"]},
+    {"id": "M4", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-browser.json"]},
+    {"id": "M5", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-independent-qa-handoff.md"]}
+  ],
+  "expected_acceptance_ids": ["QA-03"],
+  "acceptance_criteria": [{"id": "QA-03", "status": "PASS", "evidence": ["frontend/tests/satellite-production-bundle.integration.mjs", "harness/verify/2026-09-29-bl-016-qa03-browser.json", "harness/verify/2026-09-29-bl-016-qa03-verification.md"]}],
+  "commands": [
+    {"id": "backend-full", "command": "..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider (cwd backend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "engineering-validator", "command": ".\\.venv\\Scripts\\python.exe scripts\\validate_engineering_data.py (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "schema-export-freshness", "command": "..\\.venv\\Scripts\\python.exe -m scripts.export_schema (cwd backend); git diff --exit-code -- schemas (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "frontend-frozen-install", "command": "corepack pnpm install --frozen-lockfile (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "frontend-tests", "command": "corepack pnpm run test (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "frontend-typecheck", "command": "corepack pnpm run typecheck (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "frontend-lint", "command": "corepack pnpm run lint (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/logs/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "configured-frontend-build", "command": "Set NEXT_PUBLIC_API_URL=:8070 and all five approved NEXT_PUBLIC_SATELLITE_* values before corepack pnpm run build (cwd frontend)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "source-preservation", "command": "git diff --exit-code -- Input frontend/pnpm-lock.yaml; Get-FileHash Input/Miracle_Mile_Lighting_Poles.kml -Algorithm SHA256; git diff --check (cwd root)", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "live-harness-retry01", "command": ".\\.venv\\Scripts\\python.exe harness\\verify\\run_bl016_camera_pixel_density_live.py --output harness/verify/2026-09-29-bl-016-qa03-base-live-retry01.json", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-base-live-retry01.json"]},
+    {"id": "production-browser-satellite", "command": "Codex in-app production browser: import supplied KML; select Satellite; inspect EOX attribution and observed tile resources; calculate camera density and compare ten legend swatches across backgrounds", "ran": true, "exit_code": 0, "tested_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-browser.json"]}
+  ],
+  "required_checks": [
+    {"id": "final_verification", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "generated_artifact_freshness", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "source_preservation", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-verification.md"]},
+    {"id": "file_boundary", "status": "PASS", "evidence": ["harness/phases/2026-09-29-bl-016-qa03-satellite.md"]},
+    {"id": "rendered_workflow", "status": "PASS", "evidence": ["harness/verify/2026-09-29-bl-016-qa03-browser.json"]},
+    {"id": "regression", "status": "PASS", "evidence": ["frontend/tests/satellite-production-bundle.integration.mjs", "harness/verify/2026-09-29-bl-016-qa03-verification.md"]}
+  ],
+  "reports": {"phase_work_record": "harness/phases/2026-09-29-bl-016-qa03-satellite.md", "execution_log": "harness/logs/2026-09-29-bl-016-qa03-satellite.md", "verification_summary": "harness/verify/2026-09-29-bl-016-qa03-verification.md", "completion_report": "harness/verify/2026-09-29-bl-016-qa03-independent-qa-handoff.md", "rendered_evidence": "harness/verify/2026-09-29-bl-016-qa03-browser.json"},
+  "blockers": [],
+  "gate": {"implementation": "IMPLEMENTATION_COMPLETE_AWAITING_QA", "independent_qa": "PENDING", "master": "PENDING", "phase_seal": "ABSENT"}
+}

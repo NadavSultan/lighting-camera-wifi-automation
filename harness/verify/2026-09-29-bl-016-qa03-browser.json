@@ -1,0 +1,30 @@
+{
+  "implementation_commit": "ca7f46c57a28028bd96b8e40926f50e3e4932edc",
+  "runtime": {"frontend": "http://127.0.0.1:3070/", "backend": "http://127.0.0.1:8070/", "mode": "isolated Vinext production and FastAPI", "browser": "Codex in-app browser"},
+  "source": {"file": "Input/Miracle_Mile_Lighting_Poles.kml", "sha256": "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328", "imported_poles": 74, "mode": "existing-poles"},
+  "satellite": {
+    "public_config_compiled": true,
+    "selected_in_browser": true,
+    "attribution_observed": "EOxCloudless - https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025). Maps: https://maps.eox.at",
+    "not_configured_error_observed": false,
+    "tile_load_error_observed": false,
+    "observed_eox_image_resources": 16,
+    "sample_observed_resource": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/17/55828/36314.jpg",
+    "sample_resource_source": "browser page-asset resource/fetch inventory",
+    "sample_asset_bundle": {"requested": 1, "downloaded": 1, "failed": 0, "content_type": "image/jpeg"},
+    "direct_provider_probe": {"sandbox": "socket access denied by local policy", "escalated_read_only": "HTTP 200 image/jpeg, 14700 bytes"},
+    "standard_attribution_after_switch": "© OpenStreetMap contributors"
+  },
+  "camera_density": {
+    "fixture": "Phoenix 1 SMART, 10 m, JL-LN037 3.56 mm on both cameras",
+    "current_result_on_satellite": true,
+    "current_result_on_standard": true,
+    "layer_checkbox_checked": true,
+    "ten_legend_colours_equal_between_backgrounds": true,
+    "legend_colours_rgb_order": ["199,249,255", "143,231,242", "76,201,240", "58,134,255", "47,179,68", "139,195,74", "255,212,59", "255,146,43", "240,62,62", "214,51,255"],
+    "opacity": "0.58 checked by committed density-layer source and passing frontend tests; direct browser map paint-property access unavailable"
+  },
+  "browser_console_errors_or_warnings": [],
+  "limitations": ["In-app browser screenshot capture returned unavailable; no pixel screenshot claim is made.", "Browser asset inventory proves tile fetch resources were observed and one EOX JPEG could be retrieved; it does not expose per-request HTTP status for all 16 resources.", "This is scoped QA-03 implementation smoke, not Independent QA or complete BL-016 acceptance."],
+  "temporary_servers_stopped": true
+}
