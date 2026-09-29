@@ -77,7 +77,7 @@ export function attachDensityInspection(map, onInspect, isDrawing) {
 export function densityInspectionStyle() {
   return {
     color: "#17212c",
-    maxHeight: "min(240px, calc(100vh - 160px))",
+    maxHeight: "min(180px, calc(100vh - 160px))",
     overflowY: "auto",
     overflowWrap: "anywhere",
     width: "min(320px, calc(100vw - 88px))",
