@@ -10,7 +10,7 @@ This decision applies to product commit `5656da555f9614a2be614738ccf699ce2d58f60
 
 - Approved design and plan: `docs/superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` and `docs/superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`.
 - Original `BL016-01`–`BL016-20` implementation matrix: `harness/verify/2026-09-22-bl-016-camera-pixel-density-verification.md`. The 2026-09-24 master correction, QA-01 CORS correction, QA-03 Satellite correction, and `QA03-IA-01` overlap correction supersede only the affected earlier evidence. Their reports and work records remain in `harness/verify/` and `harness/phases/`.
-- Final correction handoff and clean readiness: `harness/verify/2026-09-29-bl-016-qa03-ia01-independent-qa-handoff.md` and its readiness manifest. The verifier returned `IMPLEMENTATION READINESS: PASS` against product commit `5656da55` on the clean QA branch.
+- Final correction handoff and clean readiness: `harness/verify/2026-09-29-bl-016-qa03-ia01-independent-qa-handoff.md` and its readiness manifest. The verifier returned `IMPLEMENTATION READINESS: PASS` against product commit `5656da55` on the clean pre-gate QA tip `867cd72a`.
 - Independent QA PASS: `harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md` and companion browser JSON. The preserved 2026-09-29 QA FAIL remains historical; its Major `QA03-IA-01` finding is closed by the new retest.
 
 ## Acceptance disposition
@@ -33,8 +33,10 @@ Checks below ran against clean reviewed HEAD `867cd72a407ade4636c3c7aa317346c663
 
 The independent QA browser did not retain a screenshot or standalone console log, and its controlled failure exercised request validation rather than an injected internal exception. The implementation browser record on the exact product commit captured no console warnings/errors; the master live harness captured zero shell errors. Backend tests cover unexpected/atomic failure paths. These evidence limits are recorded rather than represented as direct independent browser observations.
 
+The corrective implementation-readiness manifest is a pre-QA checkpoint with `harness/` as its only permitted post-implementation evidence path and `PENDING` QA/master fields. A diagnostic rerun after the documentation-only master-gate commit reported `non-evidence path changed` for the new decision and updated status indexes. That is the expected scope result for a pre-QA manifest after governance closure, not a new product-test failure or a retroactive invalidation of its recorded clean pre-gate PASS. The manifest is preserved unchanged; no post-gate readiness PASS is claimed.
+
 ## Boundary and next action
 
-The source KML, `Input/`, frozen catalogs, accepted Phase 3 geometry, prior-phase seals, and frontend lockfile are unchanged. The final QA branch contains only evidence commits after the product commit. No merge or push has been performed by this gate.
+The source KML, `Input/`, frozen catalogs, accepted Phase 3 geometry, prior-phase seals, and frontend lockfile are unchanged. The pre-gate QA tip contained only harness evidence after the product commit; this gate adds governance documents and one master live-evidence JSON, not product edits. No merge or push has been performed by this gate.
 
 BL-016 is accepted at this scoped gate. Reconcile the execution indexes to this decision and make one documentation-only gate commit. Integrate or push the approved product/evidence history only after a separate explicit request; keep BL-019/BL-020 and any other post-roadmap work gated. No Phase 8 or BL-016 phase seal exists or is required.
