@@ -1,6 +1,6 @@
 # Work record — 2026-09-22 — BL-016 Camera Pixel-Density Map
 
-Status: corrective implementation and evidence records complete; clean readiness verifier is the final gate; BL-016 unaccepted
+Status: historical implementation work record; final BL-016 Independent QA and scoped master gate passed on 2026-09-30. See `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`.
 
 ## Scope, authority, and non-goals
 
@@ -44,7 +44,7 @@ Product changes do not begin until every row is resolved and all required suppor
 
 ## Acceptance criteria
 
-Original implementation evidence for `BL016-01` through `BL016-20` remains in the verification summary and readiness manifest. Master re-review invalidated readiness for effective pole activity/freshness, canonical geometry ordering, non-mutating live evidence, and current documentation; final dispositions will be re-established on the corrected implementation commit. BL-016 remains unaccepted.
+Historical 2026-09-24 checkpoint: original implementation evidence for `BL016-01` through `BL016-20` remains in the verification summary and readiness manifest. Master re-review then invalidated readiness for effective pole activity/freshness, canonical geometry ordering, non-mutating live evidence, and current documentation. Later corrective passes and the 2026-09-30 scoped master gate supersede this pending disposition.
 
 ## Changes and evidence
 
@@ -99,6 +99,10 @@ Follow `AGENTS.md`, `OPERATIONS.md`, and the approved plan Recovery Protocol. Pr
 - Implementation: corrective implementation complete at `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; readiness evidence is being finalized, unaccepted.
 - Durable goal: closure is conditioned on the clean readiness verifier PASS below and the resulting truthful QA handoff.
 - Implementation-readiness verifier: final clean-worktree command; its exact output is returned with this handoff.
-- Independent QA: pending.
-- Master decision: pending.
+- Independent QA: pending at this 2026-09-24 checkpoint; passed on 2026-09-30.
+- Master decision: pending at this 2026-09-24 checkpoint; scoped PASS on 2026-09-30.
 - Seal status: absent and unauthorized.
+
+## Closure addendum — 2026-09-30
+
+Final accepted product commit: `5656da555f9614a2be614738ccf699ce2d58f609`. Independent QA PASS is `harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md`; scoped master PASS is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`. Intermediate QA failures and corrections remain preserved in their dated work and verification records. No merge, push, Phase 8, or seal was authorized by this item gate.

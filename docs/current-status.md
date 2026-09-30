@@ -1,6 +1,6 @@
 # Current status
 
-Phase state last changed: 2026-09-27. Phases 1-7 are accepted and formally closed. Phase 7 closed on 2026-09-05 after remediation under amended `P7-D08`, Independent QA PASS, master gate PASS, and valid seal `harness/seals/phase-07.md`. No Phase 8. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`. Stage 3 P2 (BL-013, BL-014, BL-015) is accepted and committed at `e5023ee`. BL-016 / WA-09 Independent QA returned FAIL for QA-01 on 2026-09-27. Scoped QA-01 correction is at `f542b164c136e8224e55867ea3f016a6987f7a44`; deterministic and real production-browser import/API smoke pass. Clean corrective readiness verification passed at evidence commit `2a68c330`; final handoff repeats it on the final evidence tip. Independent re-review is pending and BL-016 is unaccepted.
+Status reviewed: 2026-09-30. Phases 1-7 remain accepted and formally closed; Phase 7 retains its 2026-09-05 seal. No Phase 8 exists. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`; Stage 3 P2 (BL-013, BL-014, BL-015) is accepted at `e5023ee`. BL-016 / WA-09 is accepted by the 2026-09-30 scoped master PASS for product commit `5656da55`, after Independent QA PASS at evidence commit `867cd72a`. Earlier QA failures remain preserved as historical records.
 
 ## Completed
 
@@ -25,6 +25,7 @@ Phase state last changed: 2026-09-27. Phases 1-7 are accepted and formally close
 - Missing default lens assignments for SMART camera slots; lens selection remains explicit.
 - Current IES calculation support is limited to LM-63-1995/2002 Type C files with `TILT=NONE` and the approved zero-physical-tilt far-field direct-light model.
 - Terrain/DEM and occlusion remain excluded. Phase 3–6 remain accepted only at their documented limited scopes. Automatic pole placement remains prohibited. Phase 7 reports are engineering-review packages only and do not claim professional, RF, compliance, or installation approval.
+- BL-016 density is geometric horizontal pixels per front-facing 0.16 m reference face under an ideal pinhole model. It is not detection, recognition, identification, analytics, visibility, or compliance evidence, and does not claim exact VideoCAD parity.
 
 ## Phase 6 closure
 
@@ -50,4 +51,4 @@ Phase state last changed: 2026-09-27. Phases 1-7 are accepted and formally close
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Current gate: independent re-review of QA-01 correction `f542b164c136e8224e55867ea3f016a6987f7a44` after final clean-tip readiness recheck.** The original 2026-09-27 Independent QA verdict remains FAIL until a new reviewer decides otherwise. BL-016 remains unaccepted pending Independent QA and a separate scoped master PASS; merge, push, BL-019/020, Phase 8, and any seal remain unauthorized.
+**Current gate: BL-016 accepted, integration not yet authorized.** The controlling scoped master decision is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`; Independent QA PASS is `harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md`. No merge or push was performed by the gate. BL-019/020, other post-roadmap implementation, Phase 8, and any BL-016 phase seal remain unauthorized.

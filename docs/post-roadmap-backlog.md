@@ -16,13 +16,13 @@ The latest exploratory review is [the English web-app review](web-app-review-202
 | BL-013 | WA-06: revisit results across multiple areas | Improvement; P2; disappearance on polygon creation not conclusively reproduced | Scoped UI task; diagnose exact disappearance separately |
 | BL-014 | WA-07: result-first CAP workflow | Improvement; P2; follow-up to BL-008 | Dedicated UI contract preserving Phase 6 prerequisites |
 | BL-015 | WA-08: explain camera projection boundary | Improvement; P2 | Small explanatory UI task |
-| BL-016 | WA-09: camera pixel-density heatmap | Feature; P3 | Implementation ready for Independent QA at `8a271bf1`; unaccepted |
+| BL-016 | WA-09: camera pixel-density heatmap | Feature; P3 | Accepted by scoped master PASS on 2026-09-30; integration not yet authorized |
 | BL-017 | WA-10: distinguish tiny lux from exact zero | Improvement; P2 | Small numeric-presentation task |
 | BL-018 | WA-11: organize left workflow panel | Improvement; P2 | Scoped UI design/task |
 | BL-019 | WA-12: stale phase/gating UI messages | Content bug; P3 | Small corrective task |
 | BL-020 | WA-13: duplicate React warning keys | Technical bug observed in dev-server log; P3 | Small corrective task preserving warnings |
 
-All items remain **recorded, not authorized for implementation by this review**. No Phase 8 is created. Existing BL-001–008 intake and subsequent scoped decisions remain historical context; the live observations above do not rewrite accepted Phase 1–7 contracts.
+At this 2026-09-08 intake, all items were **recorded, not authorized for implementation by that review**. Later item-specific decisions, including the 2026-09-30 BL-016 scoped PASS, supersede the relevant pending status without creating Phase 8. Existing BL-001–008 intake and subsequent scoped decisions remain historical context; the live observations above do not rewrite accepted Phase 1–7 contracts.
 
 ## Cursor handoff readiness
 
@@ -61,7 +61,7 @@ Approved design: `docs/superpowers/specs/2026-09-16-stage3-p2-usability-design.m
 
 ## BL-016 planning — 2026-09-22
 
-Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Original implementation/readiness at `8a271bf12b070c5c9883f2b2942ad54c6ace4f77` (2026-09-22) is historical. Master-authorized corrective implementation is `c6c0869aa9fe0ed2d18d70022fe37a7bf0fad170`; current deterministic and live checks pass. The clean readiness verifier is the final action recorded by `../harness/verify/2026-09-22-bl-016-camera-pixel-density-independent-qa-handoff.md`. Independent QA has not started; BL-016 is unaccepted. Merge, push, BL-019/020, Phase 8, and seals remain gated.
+Architecture/data model: `bl-016-camera-pixel-density-architecture.md`. Approved engineering design: `superpowers/specs/2026-09-22-bl-016-camera-pixel-density-engineering-design.md` (commit `5837f29`). Implementation plan: `superpowers/plans/2026-09-22-bl-016-camera-pixel-density.md`. Original implementation/readiness at `8a271bf1` and intermediate corrective passes remain historical. Final accepted product commit: `5656da55`. Independent QA PASS: `../harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md`. Scoped master PASS: `bl-016-scoped-master-gate-decision-2026-09-30.md`. No merge or push was performed; BL-019/020, Phase 8, and seals remain gated.
 
 ## Baseline and accepted gates
 
