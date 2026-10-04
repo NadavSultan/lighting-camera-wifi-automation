@@ -4,7 +4,7 @@ This is the execution plan index. Phase 7 requirements, decisions, milestones, v
 
 ## Active plan
 
-2026-10-04 camera range/lens/distance UX implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` under separately approved design/plan. Work record `harness/phases/2026-10-04-camera-range-lens-distance.md`; summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`; independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Implementation verified; durable goal remains active through clean readiness PASS. QA/master pending; no merge/push/seal.
+2026-10-04 camera range/lens/distance UX implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` under separately approved design/plan. Work record `harness/phases/2026-10-04-camera-range-lens-distance.md`; summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`; independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Implementation verified; clean readiness PASS at evidence commit 0790f925. Durable objective achieved; final service closure follows clean recheck. QA/master pending; no merge/push/seal.
 
 **Prior accepted gate:** BL-016 / WA-09 received Independent QA PASS and scoped master PASS on 2026-09-30 for product commit `5656da55`. The gate record is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`; the independent report is `harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md`. That earlier accepted product requires no further retest; separately approved camera UX has its own pending independent gate. Stage 3 P2 remains accepted at `e5023ee`. Integration/push and BL-019/020 or other later work require separate authorization; no Phase 8 or seal is created.
 

@@ -4,7 +4,7 @@ This file is an execution index. It does not replace the product, architecture, 
 
 ## Current goal
 
-2026-10-04 camera range/lens/distance UX implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` under separately approved design/plan. Work record `harness/phases/2026-10-04-camera-range-lens-distance.md`; summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`; independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Implementation verified; durable goal remains active through clean readiness PASS. QA/master pending; no merge/push/seal.
+2026-10-04 camera range/lens/distance UX implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` under separately approved design/plan. Work record `harness/phases/2026-10-04-camera-range-lens-distance.md`; summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`; independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Implementation verified; clean readiness PASS at evidence commit 0790f925. Durable objective achieved; final service closure follows clean recheck. QA/master pending; no merge/push/seal.
 
 **Prior accepted gate:** BL-016 / WA-09 was accepted by the scoped master PASS on 2026-09-30. The accepted product commit is `5656da555f9614a2be614738ccf699ce2d58f609`; Independent QA PASS is recorded at `867cd72a407ade4636c3c7aa317346c663bc82a2`. The controlling decision is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`. The earlier QA FAIL findings and corrective passes remain historical evidence. Integration and push have not occurred; BL-019/BL-020, other later work, Phase 8, and any seal remain unauthorized.
 
