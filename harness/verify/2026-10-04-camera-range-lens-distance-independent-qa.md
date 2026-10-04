@@ -46,7 +46,7 @@ Verdict: **PASS** for the separately approved UX correction. This is an independ
 | Chrome production browser runtimes 02/03 | same | PASS | `2026-10-04-camera-ux-independent-browser.json`; copied measurement/preview data; CUA screenshots in session, no saved PNG path from browser tool |
 | Safe runner `analyze`/`preview` on ignored runtime 02 | same | 0; 6/6 and analytic 280 m sample | `2026-10-04-camera-ux-independent-measurement.json`, `2026-10-04-camera-ux-independent-preview.jsonl` |
 | Current generated/source diff, base protected-path comparison, KML SHA | same | clean/no paths/hash matched | Exact commands and outputs in command log |
-| `.\.venv\Scripts\python.exe harness/verify/verify_phase_readiness.py --manifest harness/verify/2026-10-04-camera-range-lens-distance-readiness.json` | QA evidence commit, clean worktree | PASS | Clean rerun transcript appended after evidence commit |
+| `.\.venv\Scripts\python.exe harness/verify/verify_phase_readiness.py --manifest harness/verify/2026-10-04-camera-range-lens-distance-readiness.json` | clean QA evidence commit `0a88c47b3bd2421d734f7d32986851b409f63a53` | 0, IMPLEMENTATION READINESS: PASS | `harness/logs/2026-10-04-camera-ux-independent-qa/readiness-qa-01.txt`; final clean recheck after report packaging follows |
 
 Detailed exact command order, failures, recovery and warning locations: `harness/logs/2026-10-04-camera-ux-independent-qa/command-log.md` and adjacent transcripts. Browser observations: `harness/verify/2026-10-04-camera-ux-independent-browser.json`.
 
