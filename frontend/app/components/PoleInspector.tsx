@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import type { CameraEquipmentCatalog, EffectivePole, FixtureModelCatalog, IesLibrary, PoleEdit, PoleFixtureConfiguration, Project } from "../lib/types";
 import { withoutCameraOverride } from "../lib/phase2-workflows.mjs";
 import { formatEngineeringAzimuth } from "../lib/phase3-workflows.mjs";
+import { resolveCameraSlotSpecifications } from "../lib/camera-slot-specifications.mjs";
 
 const COLORS = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
 
@@ -80,6 +81,7 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
         const enabled = override?.enabled ?? slot.enabled;
         const footprint = project.camera_geometry.footprints.find((item) => item.pole_id === pole.id && item.camera_slot_id === slot.id);
         const hasLegacyOrientation = override?.relative_azimuth_deg != null || override?.downward_tilt_deg != null;
+        const specs = resolveCameraSlotSpecifications(cameraCatalog, slot, override);
         return <div className="camera-slot" key={slot.id}><div className="section-heading"><h3>{slot.display_name}</h3><span className="helper">{override ? "Pole override" : "Catalog default"}</span></div><div className="form-grid">
           <div className="field"><label htmlFor={`${slot.id}-camera`}>Camera</label><select id={`${slot.id}-camera`} value={cameraId} onChange={(event) => { const selectedCamera = cameraCatalog?.camera_models.find((item) => item.id === event.target.value); updateSlot(slot.id, { camera_model_id: selectedCamera?.id ?? null, camera_model_revision: selectedCamera?.revision ?? null }); }}><option value="">Unassigned</option>{cameraCatalog?.camera_models.filter((item) => item.active).map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></div>
           <div className="field"><label htmlFor={`${slot.id}-lens`}>Lens</label><select id={`${slot.id}-lens`} value={lensId} onChange={(event) => { const selectedLens = cameraCatalog?.lenses.find((item) => item.id === event.target.value); updateSlot(slot.id, { lens_id: selectedLens?.id ?? null, lens_revision: selectedLens?.revision ?? null }); }}><option value="">Unassigned</option>{cameraCatalog?.lenses.filter((item) => item.active && (!cameraId || item.compatible_camera_model_ids.includes(cameraId))).map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}</select></div>
@@ -87,6 +89,17 @@ export function PoleInspector({ pole, project, fixtureCatalog, cameraCatalog, ie
           <div className="field"><label htmlFor={`${slot.id}-fixed-tilt`}>Inherited downward tilt</label><input id={`${slot.id}-fixed-tilt`} disabled value={`${slot.downward_tilt_deg}° below horizontal`} /></div>
           <label className="toggle-line"><input type="checkbox" checked={enabled} onChange={(event) => updateSlot(slot.id, { enabled: event.target.checked })} />Camera enabled</label>
         </div><div className="camera-provenance">Template r{template.revision} · {footprint?.geometry_contract_version ?? template.geometry_contract_version ?? "legacy mounting contract"} · origin X/Y/Z {slot.origin_offset_x_m}/{slot.origin_offset_y_m}/{slot.origin_offset_z_m} m<br />Camera {cameraId || "missing"} r{override?.camera_model_revision ?? slot.camera_model_revision ?? "?"} · Lens {lensId || "missing"} r{override?.lens_revision ?? slot.lens_revision ?? "?"} · H/V FOV {footprint?.horizontal_fov_deg ?? "—"}°/{footprint?.vertical_fov_deg ?? "—"}°<br />Absolute azimuth {formatEngineeringAzimuth(footprint?.camera_absolute_azimuth_deg ?? Number.NaN)}° · footprint {footprint?.valid ? `${footprint.footprint_area_m2?.toFixed(1)} m²` : "not calculated"}</div>
+        <div className="camera-specifications" aria-label={`${slot.display_name} pinned specifications`}>
+          <strong>Pinned camera / lens specifications</strong>
+          <dl>
+            <dt>Camera</dt><dd>{specs.camera ? `${specs.camera.display_name} · ${specs.camera.id} r${specs.camera.revision}` : "Unavailable / unassigned"}</dd>
+            <dt>Lens</dt><dd>{specs.lens ? `${specs.lens.display_name} · ${specs.lens.id} r${specs.lens.revision}` : "Unavailable / unassigned"}</dd>
+            <dt>Focal length</dt><dd>{specs.lens?.focal_length_mm == null ? "Unavailable" : `${specs.lens.focal_length_mm} mm`}</dd>
+            <dt>Horizontal / vertical FOV</dt><dd>{specs.lens?.horizontal_fov_deg ?? "Unavailable"}° / {specs.lens?.vertical_fov_deg ?? "Unavailable"}°</dd>
+            <dt>Resolution</dt><dd>{specs.camera?.resolution_width_px ?? "Unavailable"} × {specs.camera?.resolution_height_px ?? "Unavailable"} px</dd>
+          </dl>
+          {specs.warnings.map((warning) => <p className="warning-card" key={warning}>{warning}</p>)}
+        </div>
         {hasLegacyOrientation && <div className="warning-card error">Legacy per-pole direction/tilt bytes are preserved and block FOV calculation.<button type="button" className="quiet-button restore-button" onClick={() => resetLegacyOrientation(slot.id)}>Explicitly reset orientation to immutable template</button></div>}
         {footprint?.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}
         {override && <button type="button" className="quiet-button restore-button" onClick={() => removeSlotOverride(slot.id)}>Remove pole override and restore catalog default</button>}</div>;

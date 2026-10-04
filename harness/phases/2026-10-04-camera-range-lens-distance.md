@@ -49,3 +49,5 @@ Both escalated locked installs exited 0; pip check, backend (367 tests), validat
 M1 complete: m1-full-02 exited 0 (384 tests); 50 m analytic, zero, validation/transform and non-persistence checks pass. Only OpenAPI changed among five schema outputs. Ruling: non-persistence uses stored bytes rather than GET response because existing GET recalculates Phase 3 timestamps; no product change to that established behavior.
 
 M2 complete: focused frontend 15/15, BL-016 backend 66/66, typecheck/lint exit 0. Preview RED missing function then GREEN; 25/50/75 m bounds and Phase 3 byte preservation pass. Geometry engine unchanged. New preview source below raster; raw FOV/overlap sources removed from map; stored metrics retained.
+
+M3 complete: historical pin / missing pin / compatibility tests 3/3; typecheck/lint exit 0. Explicit override IDs require their own revision; null IDs inherit template according to existing assignment semantics. Cards expose pinned name/ID/revision, focal/FOV/resolution without mutation.

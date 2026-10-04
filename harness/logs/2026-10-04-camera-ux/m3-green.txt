@@ -1,0 +1,14 @@
+COMMAND: node --test tests/camera-slot-specifications.test.mjs
+47dcd5888b98dfe2451a90bd43c3ef2051bf84e4
+✔ historical slot specs retain exact pins instead of current or footprint values (1.6829ms)
+✔ explicit override IDs require their own pins; unassigned or missing never guesses (0.2866ms)
+✔ pinned compatibility and nullable fields remain explicit (0.2516ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 181.2997
+EXIT: 0
