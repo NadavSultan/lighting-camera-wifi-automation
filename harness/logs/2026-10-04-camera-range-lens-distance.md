@@ -23,3 +23,5 @@ Use AGENTS.md recovery protocol. Preserve failed outputs/diff, recover safely in
 M0 complete: both escalated installs exited 0. Baseline command evidence in paired files. Baseline build Satellite test skipped unconfigured (not an acceptance PASS); final configured build required. Full test counts: backend 367, frontend 113. Main checkout untouched.
 
 M1 RED: 12 endpoint tests returned 404. First GREEN found test-only assumption: GET /projects recalculates camera geometry; corrected non-persistence assertion to compare stored bytes directly. Failed focused/full outputs retained; m1-green-02 passes. Further nonfinite/transform tests added; full rerun m1-full-02 pending. Git index sandbox denied preflight commit; authorized escalated retry committed ec446ea1. This does not expand product scope.
+
+M4 regression repair: m4-frontend exit 1, sole historical source assertion expected camera_overlap in workspace. This contradicts approved removal of the raw overlap control; updated assertion to current density control. m4-frontend-02 exit 0, 125/125 tests. Checkpoint cde9b73f was committed before that regression repair; not final readiness.

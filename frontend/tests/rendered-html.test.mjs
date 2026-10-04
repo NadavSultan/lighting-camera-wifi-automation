@@ -135,7 +135,7 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(api, /formatApiErrorDetail/);
   assert.match(api, /recalculateCameraGeometry/);
   assert.match(api, /calculateLighting/);
-  assert.match(workspace, /camera_overlap/);
+  assert.match(workspace, /camera_pixel_density/);
   assert.match(workspace, /priority_area_summaries/);
   assert.match(workspace, /startPriorityRename/);
   assert.match(workspace, /startPriorityRedraw/);
