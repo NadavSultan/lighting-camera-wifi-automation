@@ -3,6 +3,32 @@ import assert from "node:assert/strict";
 import * as densityMap from "../app/lib/camera-pixel-density-map.mjs";
 import { densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints, densityInspectionAt, densityLayerDefinitions, densityHeatmapTileTemplate } from "../app/lib/camera-pixel-density-map.mjs";
 
+test("heatmap refresh discards the old raster cache and stale results have no raster source", () => {
+  assert.equal(typeof densityMap.replaceDensityHeatmapSource, "function");
+  const sources = new Map([["camera-density-heatmap", { staleTexture: true }]]);
+  const layers = new Map([["camera-density-heatmap", {}]]);
+  const removed = [];
+  let beforeLayer;
+  const map = {
+    getSource: id => sources.get(id), getLayer: id => layers.get(id),
+    removeLayer(id) { layers.delete(id); removed.push("layer"); },
+    removeSource(id) { assert.equal(layers.has(id), false); sources.delete(id); removed.push("source"); },
+    addSource(id, source) { sources.set(id, source); },
+    addLayer(layer, before) { layers.set(layer.id, layer); beforeLayer = before; },
+  };
+  densityMap.replaceDensityHeatmapSource(map, "new-fingerprint/{z}/{x}/{y}.png");
+  assert.deepEqual(removed, ["layer", "source"]);
+  assert.deepEqual(sources.get("camera-density-heatmap").tiles, ["new-fingerprint/{z}/{x}/{y}.png"]);
+  assert.equal(sources.get("camera-density-heatmap").staleTexture, undefined);
+  assert.equal(beforeLayer, "camera-density-band-1");
+  assert.equal(layers.get("camera-density-heatmap").paint["raster-resampling"], "linear");
+  assert.equal(layers.get("camera-density-heatmap").paint["raster-opacity"], 1);
+  densityMap.replaceDensityHeatmapSource(map, "");
+  assert.equal(sources.size, 0); assert.equal(layers.size, 0);
+  densityMap.replaceDensityHeatmapSource(map, "");
+  assert.equal(sources.size, 0);
+});
+
 function project(status = "current", visible = true) {
   const ring = [[-80,25],[-79.9,25],[-79.9,25.1],[-80,25.1],[-80,25]];
   return { layer_state: { camera_pixel_density: visible }, camera_pixel_density: { state: { status, calculation_input_sha256: "a" }, result: { calculation_input_sha256: "a", camera_results: [{ footprint_id: "pole<script>/camera&1", bands: [{ band_id: "px-face-30", rank: 8, minimum_px_per_face: 30, maximum_px_per_face: 45, colour_token: "face-density-30", wgs84_rings: [[ring, [[-79.98,25.02],[-79.97,25.02],[-79.97,25.03],[-79.98,25.03],[-79.98,25.02]]]] }] }], overlap_regions: [{ overlap_region_id: "o1", camera_footprint_ids: ["pole<script>/camera&1", "pole-b/\u202ecamera"], multiplicity: 2, winning_camera_footprint_id: "pole<script>/camera&1", winning_band_id: "px-face-30", winning_band_rank: 8, wgs84_rings: [[ring]] }] } } };

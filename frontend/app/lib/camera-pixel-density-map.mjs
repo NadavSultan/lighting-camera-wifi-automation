@@ -1,5 +1,16 @@
 const empty = () => ({ type: "FeatureCollection", features: [] });
 
+export function replaceDensityHeatmapSource(map, tileUrl) {
+  const id = "camera-density-heatmap";
+  // Detach the old raster cache before loading another fingerprint. An absent
+  // result has no source; MapLibre requires at least one tile URL for a raster.
+  if (map.getLayer(id)) map.removeLayer(id);
+  if (map.getSource(id)) map.removeSource(id);
+  if (!tileUrl) return;
+  map.addSource(id, { type: "raster", tiles: [tileUrl], tileSize: 256 });
+  map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity": 1, "raster-resampling": "linear" } }, "camera-density-band-1");
+}
+
 export function densityHeatmapTileTemplate(project, apiUrl) {
   const layer = project?.camera_pixel_density;
   const fingerprint = layer?.result?.calculation_input_sha256;

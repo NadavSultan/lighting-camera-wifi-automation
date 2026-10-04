@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type RasterTileSource, type StyleSpecification } from "maplibre-gl";
+import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type StyleSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";
 import type { EffectivePole, FixtureType, Project } from "../lib/types";
 import { effectivePole } from "../lib/types";
@@ -13,7 +13,7 @@ import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 import { cameraDensityHeatmapTiles, measureMapDistance, type FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
-import { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
+import { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints, replaceDensityHeatmapSource } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
 import { MapDistanceControl } from "./MapDistanceControl";
 import { createMeasurementController, initialMeasurementState, mapInteractionBlocked, measurementBlocksMapInteractions, measurementFeatures } from "../lib/map-distance-workflow.mjs";
@@ -218,7 +218,6 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("selection", { type: "geojson", data: EMPTY });
       map.addSource("camera-density-preview", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-density-bands", { type: "geojson", data: EMPTY_GEOMETRY });
-      map.addSource("camera-density-heatmap", { type: "raster", tiles: [], tileSize: 256 });
       map.addSource("camera-density-overlaps", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("calculation-areas", { type: "geojson", data: EMPTY_GEOMETRY });
@@ -239,7 +238,6 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addLayer({ id: "wifi-analysis-area-fill", type: "fill", source: "wifi-analysis-areas", paint: { "fill-color": "#a3e635", "fill-opacity": .04 } });
       map.addLayer({ id: "camera-density-preview-fill", type: "fill", source: "camera-density-preview", paint: { "fill-color": "#94a3b8", "fill-opacity": .09 } });
       map.addLayer({ id: "camera-density-preview-outline", type: "line", source: "camera-density-preview", paint: { "line-color": "#cbd5e1", "line-opacity": .55, "line-width": 1 } });
-      map.addLayer({ id: "camera-density-heatmap", type: "raster", source: "camera-density-heatmap", paint: { "raster-opacity": 1, "raster-resampling": "linear" } });
       // Persisted vector bands stay queryable for inspection, but their flat
       // fills must not obscure the continuous backend-rendered heat map.
       for (let rank = 1; rank <= 10; rank += 1) map.addLayer({ id: `camera-density-band-${rank}`, type: "fill", source: "camera-density-bands", filter: ["==", ["get", "rank"], rank], paint: { "fill-color": "#000000", "fill-opacity": .001 } });
@@ -371,7 +369,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("camera-density-bands") as GeoJSONSource | undefined)?.setData(project ? densityBandFeatures(project) : EMPTY_GEOMETRY);
       const tileUrl = project ? cameraDensityHeatmapTiles(project)[0] ?? "" : "";
       if (tileUrl !== heatmapTileUrlRef.current) {
-        (map.getSource("camera-density-heatmap") as RasterTileSource | undefined)?.setTiles(tileUrl ? [tileUrl] : []);
+        replaceDensityHeatmapSource(map, tileUrl);
         heatmapTileUrlRef.current = tileUrl;
       }
       (map.getSource("camera-density-overlaps") as GeoJSONSource | undefined)?.setData(project ? densityOverlapFeatures(project) : EMPTY_GEOMETRY);
@@ -426,8 +424,11 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         fittedProjectRef.current = project.id;
       }
     };
-    if (map.isStyleLoaded()) update(); else map.once("load", update);
-  }, [project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea, backgroundVisible]);
+    // Sources are usable after initial map load even while raster tiles load.
+    // Do not wait for an already-fired load event during an in-flight refresh.
+    if (map.getSource("poles")) update(); else map.once("load", update);
+    return () => { map.off("load", update); };
+  }, [mapInstance, project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea, backgroundVisible]);
 
   useEffect(() => {
     azimuthMarkerRef.current?.remove();

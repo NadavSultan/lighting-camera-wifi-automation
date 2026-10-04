@@ -6,6 +6,7 @@ export type DensityInspection = { contributors: string[]; winner: string; winnin
 export function densityHeatmapTileTemplate(project: Project | null, apiUrl: string): string | null;
 export function densityBandFeatures(project: Project): FeatureCollection<Polygon>;
 export function densityPreviewFeatures(project: Project): FeatureCollection<Polygon>;
+export function replaceDensityHeatmapSource(map: Pick<MapLibreMap, "getLayer" | "getSource" | "removeLayer" | "removeSource" | "addSource" | "addLayer">, tileUrl: string): void;
 export function densityOverlapFeatures(project: Project): FeatureCollection<Polygon>;
 export function densityOverlapLabelPoints(project: Project): DensityOverlapLabelPoint[];
 export function densityInspectionAt(features: Array<{ properties: unknown }>): DensityInspection | null;
