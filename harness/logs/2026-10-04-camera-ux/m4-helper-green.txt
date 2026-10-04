@@ -1,0 +1,19 @@
+COMMAND: node --test tests/map-distance-workflow.test.mjs
+eb2ae745b447f25201e6250f2e3e8727ad6d1b04
+✔ two clicks measure once; completed/clear/Esc state has no persistence (2.0261ms)
+✔ late response after clear cannot restore old measurement (0.3174ms)
+✔ late response after cancel cannot restore old measurement (0.1655ms)
+✔ late response after replace-project cannot restore old measurement (0.1548ms)
+✔ late response after change-crs cannot restore old measurement (0.1485ms)
+✔ invalid click/request results show errors without a invented numeric value (0.411ms)
+✔ zero-length measurement is valid and yields labelled endpoints/line (0.2812ms)
+✔ shared interaction guard blocks all ordinary map callbacks while measuring or drawing (0.1743ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.7387
+EXIT: 0

@@ -1,0 +1,283 @@
+COMMAND: corepack pnpm run test
+eb2ae745b447f25201e6250f2e3e8727ad6d1b04
+$ node --test tests/*.test.mjs
+✔ bounded preview preserves envelopes including holes below density thresholds (3.2711ms)
+✔ density GeoJSON requires a matching current visible result and preserves holes (0.5664ms)
+✔ heatmap tile source only loads a visible, matching current calculation (0.2146ms)
+✔ inspection uses stored winner and sorted contributors without HTML (0.3536ms)
+✔ overlap features carry the stored winning camera's displayed px/face interval (0.169ms)
+✔ layered band hits select the overlap winner, complete contributors, and displayed range (0.2141ms)
+✔ MapLibre-serialized overlap contributors still outrank a single band hit (0.2164ms)
+✔ one map click over multiple density bands dispatches exactly one complete inspection (0.388ms)
+✔ dense overlap popup remains legible and scrollable inside the map (0.2458ms)
+✔ ten layer definitions are ascending and use canonical colour and opacity (0.4461ms)
+✔ camera density view distinguishes current, hidden, stale, and invalid results (1.6275ms)
+✔ local invalidation retains results and ignores presentation-only edits (2.2795ms)
+✔ camera explanation uses the approved flat-ground meaning (1.0394ms)
+✔ camera explanation does not claim detection capability or calculated pixel density (0.169ms)
+✔ Camera pane renders the legend beside existing footprint metrics (6.9973ms)
+✔ historical slot specs retain exact pins instead of current or footprint values (1.7942ms)
+✔ explicit override IDs require their own pins; unassigned or missing never guesses (0.2873ms)
+✔ pinned compatibility and nullable fields remain explicit (0.2819ms)
+✔ primary action is recommend with the approved label (1.0378ms)
+✔ primary action stays recommend and disabled when blockers exist (0.2081ms)
+✔ validate-only mode does not fake recommendation availability (0.2018ms)
+✔ null project does not enable recommendation (0.8028ms)
+✔ product-mapping blocker still maps to the existing field id (0.8644ms)
+✔ product-mapping review opens Required CAP inputs then focuses the field (0.3636ms)
+✔ already-open details can focus immediately without a second wait (2.0965ms)
+✔ workspace reviewCapInput opens owning details before focusing (9.3264ms)
+✔ initial project without calculation is not-calculated (1.5562ms)
+✔ successful current result uses selected recommendation IDs (0.2601ms)
+✔ unresolved nodes mark current-with-unresolved (1.033ms)
+✔ error status is distinct from not-calculated (0.2063ms)
+✔ invalidated result does not keep prior count labeled current (0.1718ms)
+✔ blocker labels and focus targets are readable (0.3468ms)
+✔ screenArrow normalizes cardinal pixel vectors (1.5398ms)
+✔ screenArrow rejects nonfinite and non-positive length (0.1839ms)
+✔ directionSignificantKey ignores pan-only fields and reacts to azimuth (0.3382ms)
+✔ one file shows three simultaneously associated Phoenix models (1.6198ms)
+✔ associations for a different file do not mark this file associated (0.2095ms)
+✔ inactive pairs and duplicate model ids are handled safely (0.1995ms)
+✔ helper does not invent associations from family labels alone (1.0305ms)
+✔ left panel uses a four-discipline switcher defaulting to Lighting (5.758ms)
+✔ CAP required inputs stay available and expandable rather than deleted (1.2863ms)
+✔ CAP pane is result-first with one recommend primary action (1.643ms)
+✔ missing stored result is not-calculated (1.0603ms)
+✔ stored result with calculated or warning status is current (0.1937ms)
+✔ stored result without a current area status is stale (0.1452ms)
+✔ helper does not treat a missing result as current even if status is calculated (0.1196ms)
+✔ Draw Calculation Area clears the selected area so a second polygon is created (5.5504ms)
+✔ Calculate Lighting chains every calculation area onto the previous project (1.0646ms)
+✔ workspace calculates every lighting area from one Calculate Lighting action (1.5758ms)
+✔ Show results opens a stored current result without calculating (2.5473ms)
+✔ only one lighting result card identity exists (1.4806ms)
+✔ creating or cancelling a lighting draft does not discard stored results or sessions (1.4295ms)
+✔ deleting a lighting area removes its session and closes its card (1.3831ms)
+✔ discipline switching does not clear an active lighting polygon draft (1.2646ms)
+✔ clampCard keeps a 280x180 card inside an 800x600 viewport with 8px margin (2.6759ms)
+✔ clampCard lifts negative coordinates to the margin (0.1956ms)
+✔ ringAnchorLngLat uses the final non-closing vertex (0.1997ms)
+✔ lighting result card stays interactive after map-overlay disables pointer events (5.9207ms)
+✔ WA-05 recorded card position matches subtracting the container viewport origin from map.project (0.4168ms)
+✔ cardOffsetFromProjected keeps a 12px offset in map-container coordinates (0.2266ms)
+✔ LightingResultCard does not subtract container viewport origin from map.project (1.5129ms)
+✔ resolveLightingCardSession restores independent dragged positions (0.4078ms)
+✔ resolveLightingCardSession uses the polygon fallback when no session exists (0.2361ms)
+✔ resolveLightingCardSession keeps a stored anchor when dragged position is null (0.3358ms)
+✔ formatLux matches required numeric cases (0.9949ms)
+✔ formatLuxWithUnit distinguishes zero, tiny positives, and unavailable (0.2175ms)
+✔ lightingLabelPoints composites area and point ids (0.3065ms)
+✔ tiny positive lux labels keep stored values and use the threshold policy (0.177ms)
+✔ card and left-panel summaries format lux through formatLuxWithUnit and keep stored ratios (7.6032ms)
+✔ map lux labels sit in a compositor layer above the MapLibre canvas (0.8595ms)
+✔ EngineeringMap draws helper label points for current lighting results (1.1693ms)
+✔ null configuration is unavailable with the required reason (2.5168ms)
+✔ valid configuration is available with its attribution (0.366ms)
+✔ rejects missing placeholders, http tiles, credentials, and bad numeric ranges (0.3056ms)
+✔ blank environment is not configured; complete env parses a config object (0.239ms)
+✔ satellite request with missing config resets to standard (0.1883ms)
+✔ tile failure keeps OSM visible and offers Use standard map (0.2741ms)
+✔ successful satellite session uses provider attribution and hides OSM (0.2807ms)
+✔ isSatelliteTileError ignores other map errors (0.1503ms)
+✔ workspace keeps Standard/Satellite session-only and does not persist a provider (9.0334ms)
+✔ two clicks measure once; completed/clear/Esc state has no persistence (2.0764ms)
+✔ late response after clear cannot restore old measurement (0.3539ms)
+✔ late response after cancel cannot restore old measurement (0.1735ms)
+✔ late response after replace-project cannot restore old measurement (0.1714ms)
+✔ late response after change-crs cannot restore old measurement (0.1612ms)
+✔ invalid click/request results show errors without a invented numeric value (0.4673ms)
+✔ zero-length measurement is valid and yields labelled endpoints/line (0.3041ms)
+✔ shared interaction guard blocks all ordinary map callbacks while measuring or drawing (0.1859ms)
+✔ cancel without clearing the stored id prevents later schedules (WA-02/WA-03 leak) (0.9871ms)
+✔ cancelMapFrame clears the id so a later schedule can draw (0.8572ms)
+✔ schedule coalesces to one frame while a callback is pending (0.1841ms)
+✔ one placed point is visible without inventing a saved edge (1.7123ms)
+✔ zero points yields empty collections and no preview (0.178ms)
+✔ two points create an open edge without fill (0.2577ms)
+✔ three points create fill and mark the last vertex (0.2197ms)
+✔ duplicate cursor on last point suppresses preview (0.1599ms)
+✔ cancel clears preview by omitting cursor (0.1629ms)
+✔ guidance copy advances with vertex count (0.1337ms)
+✔ server-renders the Phase 5 engineering workspace (183.7175ms)
+✖ exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow (29.4127ms)
+✔ Phase 5 workflow helpers preserve safe drafts, inheritance, and precise invalidation (8.4072ms)
+✔ Phase 6 CAP helper keeps unknowns blocker-first and does not compare unrelated digests (1.3194ms)
+✔ Phase 7 report helpers keep disclaimer and presentation-only preference merges (0.7745ms)
+✔ Phase 7 conflict-safe merge keeps engineering fields and history lengths unchanged (1.0243ms)
+✔ Phase 7 post-generate merge keeps sent preferences after metadata apply (1.0835ms)
+✔ Phase 7 ReportPanel remount key is project id only (not updated_at) (6.7729ms)
+✔ Phase 7 report panel posts selections for preview and merges metadata without getProject (9.5056ms)
+✔ Phase 6 CAP invalidation clears results for graph inputs but not presentation notes (2.176ms)
+✔ Phase 5 Wi-Fi drafts reject every invalid ring and preserve both winding directions (725.7433ms)
+✔ Phase 5 Wi-Fi bulk fields revise once only and ignore unchanged fields (0.2769ms)
+✔ QA-01 keeps the exact no-area boundary message in the post-calculation result branch (3.0733ms)
+✔ Phase 4 calculation-area validation and stale-state transitions are explicit (0.8619ms)
+✔ P4-IR-01 immediately invalidates lighting results only for significant pole edits (3.1125ms)
+✔ P4-IR-07 lighting-area validation never uses priority-area wording (0.6405ms)
+✔ NIR-01 refreshes and reports a rejected retained IES record without raw JSON (5.9585ms)
+✔ manual bulk targets and slot reset implement the Phase 2 corrective workflows (0.7397ms)
+✔ Phase 3 fixture rotation and priority-area helpers are deterministic (0.5487ms)
+✔ P3-IR-05 keeps rounded display and map-handle azimuths in the normalized range (3.0675ms)
+✔ null result is not-calculated even when visibility flag is true (1.0298ms)
+✔ zero circles is empty (0.1999ms)
+✔ one circle with layer off is hidden (0.1402ms)
+✔ one circle with layer on is visible (0.1304ms)
+✔ workspace and app shell stay inside the viewport (5.1659ms)
+✔ lighting result card keeps core statistics out of a 220px clip (2.4107ms)
+✔ direction and lux canvases cancel frames through the shared scheduler (3.0955ms)
+ℹ tests 125
+ℹ suites 0
+ℹ pass 124
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1491.2617
+
+✖ failing tests:
+
+test at tests\rendered-html.test.mjs:33:1
+✖ exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow (29.4127ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /camera_overlap/. Input:
+  
+  '"use client";\r\n' +
+    '\r\n' +
+    'import { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useState } from "react";\r\n' +
+    'import { EngineeringMap } from "./EngineeringMap";\r\n' +
+    'import { CatalogManager } from "./CatalogManager";\r\n' +
+    'import { PoleInspector as Phase2PoleInspector } from "./PoleInspector";\r\n' +
+    'import { ReportPanel } from "./ReportPanel";\r\n' +
+    'import WifiMapSummary from "./WifiMapSummary";\r\n' +
+    'import CapPlanningPanel from "./CapPlanningPanel";\r\n' +
+    'import LightingResultCard from "./LightingResultCard";\r\n' +
+    'import { CameraPixelDensityPanel } from "./CameraPixelDensityPanel";\r\n' +
+    'import type { Map as MapLibreMap } from "maplibre-gl";\r\n' +
+    'import { addCapCandidate, calculateCameraPixelDensity, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getCameraPixelDensityLegend, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, previewFixtureDirections, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan, type FixtureDirectionPreview } from "../lib/api";\r\n' +
+    'import { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PixelDensityLegendDefinition, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";\r\n' +
+    'import { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";\r\n' +
+    'import { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";\r\n' +
+    'import { calculateAllLightingAreas, invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";\r\n' +
+    'import { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";\r\n' +
+    'import { capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";\r\n' +
+    'import { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";\r\n' +
+    'import { polygonDraftGuidance } from "../lib/polygon-draft.mjs";\r\n' +
+    'import { capResultSummary } from "../lib/cap-workflow-view.mjs";\r\n' +
+    'import { lightingAreaResultState, lightingAreaShowResultsEnabled } from "../lib/lighting-area-result-state.mjs";\r\n' +
+    'import { resolveLightingCardSession, ringAnchorLngLat } from "../lib/lighting-card-position.mjs";\r\n' +
+    'import { CAMERA_PROJECTION_BOUNDARY_EXPLANATION } from "../lib/camera-projection-legend.mjs";\r\n' +
+    'import { openAndFocusCapReviewTarget } from "../lib/cap-review-input.mjs";\r\n' +
+    'import { formatLuxWithUnit } from "../lib/lighting-labels.mjs";\r\n' +
+    'import { directionSignificantKey } from "../lib/fixture-direction-view.mjs";\r\n' +
+    'import { USE_STANDARD_MAP_LABEL, backgroundAvailability, readSatelliteConfigFromEnv, requestBackground, sessionBackground, type BackgroundChoice } from "../lib/map-background.mjs";\r\n' +
+    'import { invalidateCameraPixelDensityIfSignificant } from "../lib/camera-pixel-density-view.mjs";\r\n' +
+    '\r\n' +
+    'type MapFocusRequest =\r\n' +
+    '  | { kind: "point"; coordinate: [number, number]; highlightId?: string }\r\n' +
+    '  | { kind: "bounds"; coordinates: Array<[number, number]> };\r\n' +
+    '\r\n' +
+    'const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };\r\n' +
+    'type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_pixel_density" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";\r\n' +
+    'const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: number }> = [\r\n' +
+    '  { key: "original_customer_poles", label: "Original customer poles", color: "#8795a4" },\r\n' +
+    '  { key: "lite_fixtures", label: "LITE fixtures", color: "var(--lite)" },\r\n' +
+    '  { key: "wifi_fixtures", label: "WIFI fixtures", color: "var(--wifi)" },\r\n' +
+    '  { key: "smart_fixtures", label: "SMART fixtures", color: "var(--smart)" },\r\n' +
+    '  { key: "camera_pixel_density", label: "Camera pixel density", color: "#4cc9f0" },\r\n' +
+    '  { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },\r\n' +
+    '  { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 5 },\r\n' +
+    '  { key: "calculation_areas", label: "Calculation areas", color: "#14b8a6" },\r\n' +
+    '  { key: "calculation_points", label: "Calculation points", color: "#e2e8f0" },\r\n' +
+    '  { key: "lighting_heat_map", label: "Lighting results", color: "#f97316" },\r\n' +
+    '  { key: "cap_locations", label: "CAP candidate / selected sites", color: "#34d399" },\r\n' +
+    '  { key: "cap_connections", label: "CAP conceptual tree links", color: "#10b981" },\r\n' +
+    '  { key: "warnings", label: "Warnings", color: "var(--warning)" },\r\n' +
+    '];\r\n' +
+    'type LeftDiscipline = "lighting" | "camera" | "wifi" | "cap";\r\n' +
+    'const LEFT_DISCIPLINES: Array<{ id: LeftDiscipline; label: string }> = [\r\n' +
+    '  { id: "lighting", label: "Lighting" },\r\n' +
+    '  { id: "camera", label: "Camera" },\r\n' +
+    '  { id: "wifi", label: "Wi-Fi" },\r\n' +
+    '  { id: "cap", label: "CAP" },\r\n' +
+    '];\r\n' +
+    'const DISCIPLINE_LAYERS: Record<LeftDiscipline, LayerKey[]> = {\r\n' +
+    '  lighting: ["original_customer_poles", "lite_fixtures", "wifi_fixtures", "smart_fixtures", "calculation_areas", "calculation_points", "lighting_heat_map", "warnings"],\r\n' +
+    '  camera: ["original_customer_poles", "smart_fixtures", "camera_pixel_density", "priority_areas", "warnings"],\r\n' +
+    '  wifi: ["original_customer_poles", "wifi_fixtures", "smart_fixtures", "wifi_coverage", "warnings"],\r\n' +
+    '  cap: ["original_customer_poles", "cap_locations", "cap_connections", "warnings"],\r\n' +
+    '};\r\n' +
+    '\r\n' +
+    'function wifiFields(value: PoleFixtureConfiguration | null | undefined) {\r\n' +
+    '  const wifi = value?.wifi_configuration;\r\n' +
+    '  return { radius_override_m: wifi?.radius_override_m ?? null, enabled: wifi?.enabled ?? null, notes: wifi?.notes ?? "" };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function applyWifiRevision(previous: PoleFixtureConfiguration | null | undefined, next: PoleFixtureConfiguration | null | undefined) {\r\n' +
+    '  if (!next?.wifi_configuration || JSON.stringify(wifiFields(previous)) === JSON.stringify(wifiFields(next))) return next;\r\n' +
+    '  const priorRevision = previous?.wifi_configuration?.configuration_revision ?? 0;\r\n' +
+    '  return { ...next, wifi_configuration: { ...next.wifi_configuration, configuration_revision: priorRevision + 1, modified_at: new Date().toISOString() } };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'export function EngineeringWorkspace() {\r\n' +
+    '  const [project, setProject] = useState<Project | null>(null);\r\n' +
+    '  const [measuring, setMeasuring] = useState(false);\r\n' +
+    '  const [mapSessionKey, setMapSessionKey] = useState(0);\r\n' +
+    '  const [selectedId, setSelectedId] = useState<string | null>(null);\r\n' +
+    '  const [leftCollapsed, setLeftCollapsed] = useState(false);\r\n' +
+    '  const [leftDiscipline, setLeftDiscipline] = useState<LeftDiscipline>("lighting");\r\n' +
+    '  const [rightCollapsed, setRightCollapsed] = useState(false);\r\n' +
+    '  const [past, setPast] = useState<Project[]>([]);\r\n' +
+    '  const [future, setFuture] = useState<Project[]>([]);\r\n' +
+    '  const [busy, setBusy] = useState(false);\r\n' +
+    '  const [status, setStatus] = useState("Ready - existing-pole engineering workflow with CAP/JNET1 graph planning and Phase 7 reporting");\r\n' +
+    '  const [error, setError] = useState<string | null>(null);\r\n' +
+    '  const [bulkFolder, setBulkFolder] = useState("all");\r\n' +
+    '  const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");\r\n' +
+    '  const [bulkManualPoleIds, setBulkManualPoleIds] = useState<string[]>([]);\r\n' +
+    '  const [bulkModelId, setBulkModelId] = useState("");\r\n' +
+    '  const [bulkHeight, setBulkHeight] = useState("");\r\n' +
+    '  const [bulkAzimuth, setBulkAzimuth] = useState("");\r\n' +
+    '  const [bulkIesId, setBulkIesId] = useState("");\r\n' +
+    '  const [bulkWifiNotes, setBulkWifiNotes] = useState("");\r\n' +
+    '  const [bulkWifiRadius, setBulkWifiRadius] = useState("");\r\n' +
+    '  const [bulkClearWifiRadius, setBulkClearWifiRadius] = useState(false);\r\n' +
+    '  const [bulkWifiEnabled, setBulkWifiEnabled] = useState<"unchanged" | "inherit" | "enabled" | "disabled">("unchanged");\r\n' +
+    '  const [bulkCameraId, setBulkCameraId] = useState("");\r\n' +
+    '  const [bulkLensId, setBulkLensId] = useState("");\r\n' +
+    '  const [catalogOpen, setCatalogOpen] = useState(false);\r\n' +
+    '  const [fixtureCatalog, setFixtureCatalog] = useState<FixtureModelCatalog | null>(null);\r\n' +
+    '  const [cameraCatalog, setCameraCatalog] = useState<CameraEquipmentCatalog | null>(null);\r\n' +
+    '  const [iesLibrary, setIesLibrary] = useState<IesLibrary | null>(null);\r\n' +
+    '  const [densityLegend, setDensityLegend] = useState<PixelDensityLegendDefinition | null>(null);\r\n' +
+    '  const [densityLegendOpen, setDensityLegendOpen] = useState(false);\r\n' +
+    '  const [drawingPriorityArea, setDrawingPriorityArea] = useState(false);\r\n' +
+    '  const [priorityDraft, setPriorityDraft] = useState<Array<[number, number]>>([]);\r\n' +
+    '  const [priorityAreaName, setPriorityAreaName] = useState("Priority area");\r\n' +
+    '  const [selectedPriorityAreaId, setSelectedPriorityAreaId] = useState<string | null>(null);\r\n' +
+    '  const [renamingPriorityArea, setRenamingPriorityArea] = useState(false);\r\n' +
+    '  const [drawingCalculationArea, setDrawingCalculationArea] = useState(false);\r\n' +
+    '  const [calculationDraft, setCalculationDraft] = useState<Array<[number, number]>>([]);\r\n' +
+    '  const [selectedCalculationAreaId, setSelectedCalculationAreaId] = useState<string | null>(null);\r\n' +
+    '  const [editingCalculationArea, setEditingCalculationArea] = useState(false);\r\n' +
+    '  const [calculationAreaName, setCalculationAreaName] = useState("Calculation area 1");\r\n' +
+    '  const [calculationClassification, setCalculationClassification] = useState<CalculationAreaClassification>("ROAD");\r\n' +
+    '  const [calculationPlane, setCalculationPlane] = useState("0");\r\n' +
+    '  const [calculationSpacing, setCalculationSpacing] = useState("2");\r\n' +
+    '  const [calculationMaintenance, setCalculationMaintenance] = useState("1");\r\n' +
+    '  const [drawingWifiArea, setDrawingWifiArea] = useState(false);\r\n' +
+    '  const [wifiDraft, setWifiDraft] = useState<Array<[number, number]>>([]);\r\n' +
+    '  const [wifiAreaName, setWifiAreaName] = useState("Wi-Fi analysis area");\r\n' +
+    '  const [selectedWifiAreaId, setSelectedWifiAreaId] = use'... 80625 more characters
+  
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/rendered-html.test.mjs:138:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport { type ChangeEvent, type CSSProperties, useEffect, useMemo, useRef, useState } from "react";\r\nimport { EngineeringMap } from "./EngineeringMap";\r\nimport { CatalogManager } from "./CatalogManager";\r\nimport { PoleInspector as Phase2PoleInspector } from "./PoleInspector";\r\nimport { ReportPanel } from "./ReportPanel";\r\nimport WifiMapSummary from "./WifiMapSummary";\r\nimport CapPlanningPanel from "./CapPlanningPanel";\r\nimport LightingResultCard from "./LightingResultCard";\r\nimport { CameraPixelDensityPanel } from "./CameraPixelDensityPanel";\r\nimport type { Map as MapLibreMap } from "maplibre-gl";\r\nimport { addCapCandidate, calculateCameraPixelDensity, calculateCapPlan, calculateLighting, calculateWifiCoverage, createProject, deleteCapCandidate, downloadProjectJson, downloadUpdatedKml, getCameraCatalog, getCameraPixelDensityLegend, getFixtureCatalog, getIesLibrary, importProjectFile, openProject, previewFixtureDirections, recommendCapPlan, recalculateCameraGeometry, replaceCapCandidate, saveProject, validateCapPlan, type FixtureDirectionPreview } from "../lib/api";\r\nimport { effectivePole, type CalculationArea, type CalculationAreaClassification, type CameraEquipmentCatalog, type EffectivePole, type FixtureModelCatalog, type FixtureType, type IesLibrary, type PixelDensityLegendDefinition, type PoleEdit, type PoleFixtureConfiguration, type Project } from "../lib/types";\r\nimport { selectBulkPoleIds } from "../lib/phase2-workflows.mjs";\r\nimport { emptyPriorityRedrawDraft, renamePriorityArea, roundNormalizedFixtureAzimuth, validateAndClosePriorityRing } from "../lib/phase3-workflows.mjs";\r\nimport { calculateAllLightingAreas, invalidateLightingResults, lightingSignificantPoleChange, staleCalculationState, validateCalculationAreaDraft } from "../lib/phase4-workflows.mjs";\r\nimport { applyWifiFields, closeWifiArea, invalidateWifiIfSignificant, wifiBoundaryGapMessage } from "../lib/phase5-workflows.mjs";\r\nimport { capOperationEnabled, invalidateCapIfSignificant } from "../lib/phase6-cap-workflows.mjs";\r\nimport { applyLastReportMetadata } from "../lib/phase7-report-workflows.mjs";\r\nimport { polygonDraftGuidance } from "../lib/polygon-draft.mjs";\r\nimport { capResultSummary } from "../lib/cap-workflow-view.mjs";\r\nimport { lightingAreaResultState, lightingAreaShowResultsEnabled } from "../lib/lighting-area-result-state.mjs";\r\nimport { resolveLightingCardSession, ringAnchorLngLat } from "../lib/lighting-card-position.mjs";\r\nimport { CAMERA_PROJECTION_BOUNDARY_EXPLANATION } from "../lib/camera-projection-legend.mjs";\r\nimport { openAndFocusCapReviewTarget } from "../lib/cap-review-input.mjs";\r\nimport { formatLuxWithUnit } from "../lib/lighting-labels.mjs";\r\nimport { directionSignificantKey } from "../lib/fixture-direction-view.mjs";\r\nimport { USE_STANDARD_MAP_LABEL, backgroundAvailability, readSatelliteConfigFromEnv, requestBackground, sessionBackground, type BackgroundChoice } from "../lib/map-background.mjs";\r\nimport { invalidateCameraPixelDensityIfSignificant } from "../lib/camera-pixel-density-view.mjs";\r\n\r\ntype MapFocusRequest =\r\n  | { kind: "point"; coordinate: [number, number]; highlightId?: string }\r\n  | { kind: "bounds"; coordinates: Array<[number, number]> };\r\n\r\nconst FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };\r\ntype LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_pixel_density" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";\r\nconst LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: number }> = [\r\n  { key: "original_customer_poles", label: "Original customer poles", color: "#8795a4" },\r\n  { key: "lite_fixtures", label: "LITE fixtures", color: "var(--lite)" },\r\n  { key: "wifi_fixtures", label: "WIFI fixtures", color: "var(--wifi)" },\r\n  { key: "smart_fixtures", label: "SMART fixtures", color: "var(--smart)" },\r\n  { key: "camera_pixel_density", label: "Camera pixel density", color: "#4cc9f0" },\r\n  { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },\r\n  { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 5 },\r\n  { key: "calculation_areas", label: "Calculation areas", color: "#14b8a6" },\r\n  { key: "calculation_points", label: "Calculation points", color: "#e2e8f0" },\r\n  { key: "lighting_heat_map", label: "Lighting results", color: "#f97316" },\r\n  { key: "cap_locations", label: "CAP candidate / selected sites", color: "#34d399" },\r\n  { key: "cap_connections", label: "CAP conceptual tree links", color: "#10b981" },\r\n  { key: "warnings", label: "Warnings", color: "var(--warning)" },\r\n];\r\ntype LeftDiscipline = "lighting" | "camera" | "wifi" | "cap";\r\nconst LEFT_DISCIPLINES: Array<{ id: LeftDiscipline; label: string }> = [\r\n  { id: "lighting", label: "Lighting" },\r\n  { id: "camera", label: "Camera" },\r\n  { id: "wifi", label: "Wi-Fi" },\r\n  { id: "cap", label: "CAP" },\r\n];\r\nconst DISCIPLINE_LAYERS: Record<LeftDiscipline, LayerKey[]> = {\r\n  lighting: ["original_customer_poles", "lite_fixtures", "wifi_fixtures", "smart_fixtures", "calculation_areas", "calculation_points", "lighting_heat_map", "warnings"],\r\n  camera: ["original_customer_poles", "smart_fixtures", "camera_pixel_density", "priority_areas", "warnings"],\r\n  wifi: ["original_customer_poles", "wifi_fixtures", "smart_fixtures", "wifi_coverage", "warnings"],\r\n  cap: ["original_customer_poles", "cap_locations", "cap_connections", "warnings"],\r\n};\r\n\r\nfunction wifiFields(value: PoleFixtureConfiguration | null | undefined) {\r\n  const wifi = value?.wifi_configuration;\r\n  return { radius_override_m: wifi?.radius_override_m ?? null, enabled: wifi?.enabled ?? null, notes: wifi?.notes ?? "" };\r\n}\r\n\r\nfunction applyWifiRevision(previous: PoleFixtureConfiguration | null | undefined, next: PoleFixtureConfiguration | null | undefined) {\r\n  if (!next?.wifi_configuration || JSON.stringify(wifiFields(previous)) === JSON.stringify(wifiFields(next))) return next;\r\n  const priorRevision = previous?.wifi_configuration?.configuration_revision ?? 0;\r\n  return { ...next, wifi_configuration: { ...next.wifi_configuration, configuration_revision: priorRevision + 1, modified_at: new Date().toISOString() } };\r\n}\r\n\r\nexport function EngineeringWorkspace() {\r\n  const [project, setProject] = useState<Project | null>(null);\r\n  const [measuring, setMeasuring] = useState(false);\r\n  const [mapSessionKey, setMapSessionKey] = useState(0);\r\n  const [selectedId, setSelectedId] = useState<string | null>(null);\r\n  const [leftCollapsed, setLeftCollapsed] = useState(false);\r\n  const [leftDiscipline, setLeftDiscipline] = useState<LeftDiscipline>("lighting");\r\n  const [rightCollapsed, setRightCollapsed] = useState(false);\r\n  const [past, setPast] = useState<Project[]>([]);\r\n  const [future, setFuture] = useState<Project[]>([]);\r\n  const [busy, setBusy] = useState(false);\r\n  const [status, setStatus] = useState("Ready - existing-pole engineering workflow with CAP/JNET1 graph planning and Phase 7 reporting");\r\n  const [error, setError] = useState<string | null>(null);\r\n  const [bulkFolder, setBulkFolder] = useState("all");\r\n  const [bulkTargetMode, setBulkTargetMode] = useState<"all" | "folder" | "manual">("all");\r\n  const [bulkManualPoleIds, setBulkManualPoleIds] = useState<string[]>([]);\r\n  const [bulkModelId, setBulkModelId] = useState("");\r\n  const [bulkHeight, setBulkHeight] = useState("");\r\n  const [bulkAzimuth, setBulkAzimuth] = useState("");\r\n  const [bulkIesId, setBulkIesId] = useState("");\r\n  const [bulkWifiNotes, setBulkWifiNotes] = useState("");\r\n  const [bulkWifiRadius, setBulkWifiRadius] = useState("");\r\n  const [bulkClearWifiRadius, setBulkClearWifiRadius] = useState(false);\r\n  const [bulkWifiEnabled, setBulkWifiEnabled] = useState<"unchanged" | "inherit" | "enabled" | "disabled">("unchanged");\r\n  const [bulkCameraId, setBulkCameraId] = useState("");\r\n  const [bulkLensId, setBulkLensId] = useState("");\r\n  const [catalogOpen, setCatalogOpen] = useState(false);\r\n  const [fixtureCatalog, setFixtureCatalog] = useState<FixtureModelCatalog | null>(null);\r\n  const [cameraCatalog, setCameraCatalog] = useState<CameraEquipmentCatalog | null>(null);\r\n  const [iesLibrary, setIesLibrary] = useState<IesLibrary | null>(null);\r\n  const [densityLegend, setDensityLegend] = useState<PixelDensityLegendDefinition | null>(null);\r\n  const [densityLegendOpen, setDensityLegendOpen] = useState(false);\r\n  const [drawingPriorityArea, setDrawingPriorityArea] = useState(false);\r\n  const [priorityDraft, setPriorityDraft] = useState<Array<[number, number]>>([]);\r\n  const [priorityAreaName, setPriorityAreaName] = useState("Priority area");\r\n  const [selectedPriorityAreaId, setSelectedPriorityAreaId] = useState<string | null>(null);\r\n  const [renamingPriorityArea, setRenamingPriorityArea] = useState(false);\r\n  const [drawingCalculationArea, setDrawingCalculationArea] = useState(false);\r\n  const [calculationDraft, setCalculationDraft] = useState<Array<[number, number]>>([]);\r\n  const [selectedCalculationAreaId, setSelectedCalculationAreaId] = useState<string | null>(null);\r\n  const [editingCalculationArea, setEditingCalculationArea] = useState(false);\r\n  const [calculationAreaName, setCalculationAreaName] = useState("Calculation area 1");\r\n  const [calculationClassification, setCalculationClassification] = useState<CalculationAreaClassification>("ROAD");\r\n  const [calculationPlane, setCalculationPlane] = useState("0");\r\n  const [calculationSpacing, setCalculationSpacing] = useState("2");\r\n  const [calculationMaintenance, setCalculationMaintenance] = useState("1");\r\n  const [drawingWifiArea, setDrawingWifiArea] = useState(false);\r\n  const [wifiDraft, setWifiDraft] = useState<Array<[number, number]>>([]);\r\n  const [wifiAreaName, setWifiAreaName] = useState("Wi-Fi analysis area");\r\n  const [selectedWifiAreaId, setSelectedWifiAreaId] = use'... 80625 more characters,
+    expected: /camera_overlap/,
+    operator: 'match',
+    diff: 'simple'
+  }
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT: 1

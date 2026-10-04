@@ -77,6 +77,8 @@ function applyWifiRevision(previous: PoleFixtureConfiguration | null | undefined
 
 export function EngineeringWorkspace() {
   const [project, setProject] = useState<Project | null>(null);
+  const [measuring, setMeasuring] = useState(false);
+  const [mapSessionKey, setMapSessionKey] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [leftDiscipline, setLeftDiscipline] = useState<LeftDiscipline>("lighting");
@@ -301,7 +303,7 @@ export function EngineeringWorkspace() {
   async function handleNew() {
     await runAction(async () => {
       const next = await createProject();
-      setProject(next); setPast([]); setFuture([]); setSelectedId(null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
+      setMapSessionKey((key) => key + 1); setMeasuring(false); setProject(next); setPast([]); setFuture([]); setSelectedId(null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
       setStatus("New local project created - import a customer KML or KMZ");
     });
   }
@@ -312,7 +314,7 @@ export function EngineeringWorkspace() {
     if (!file) return;
     await runAction(async () => {
       const next = await importProjectFile(file);
-      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
+      setMapSessionKey((key) => key + 1); setMeasuring(false); setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
       setStatus(`Imported ${next.source.poles.length} authoritative customer poles from ${file.name}`);
     });
   }
@@ -324,7 +326,7 @@ export function EngineeringWorkspace() {
     await runAction(async () => {
       const parsed = JSON.parse(await file.text()) as Project;
       const next = await openProject(parsed);
-      setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
+      setMapSessionKey((key) => key + 1); setMeasuring(false); setProject(next); setPast([]); setFuture([]); setSelectedId(next.source.poles[0]?.id ?? null); setBulkManualPoleIds([]); setLeftDiscipline("lighting");
       setStatus(`Reopened ${next.name} from project JSON`);
     });
   }
@@ -495,12 +497,13 @@ export function EngineeringWorkspace() {
     setWifiDraft([]); setDrawingWifiArea(false); setSelectedWifiAreaId(null); setRenamingWifiArea(false); setStatus("Wi-Fi analysis area saved separately; calculate conceptual Wi-Fi to refresh statistics");
   }
 
-  function startWifiRedraw(areaId: string) { const area = project?.wifi_analysis_areas.find((item) => item.id === areaId); if (!area) return; setSelectedWifiAreaId(area.id); setWifiAreaName(area.name); setWifiDraft([]); setDrawingWifiArea(true); setRenamingWifiArea(false); setStatus("Redrawing Wi-Fi analysis area from an empty draft; saved geometry remains until validation succeeds"); }
+  function startWifiRedraw(areaId: string) { if (measuring) return; const area = project?.wifi_analysis_areas.find((item) => item.id === areaId); if (!area) return; setSelectedWifiAreaId(area.id); setWifiAreaName(area.name); setWifiDraft([]); setDrawingWifiArea(true); setRenamingWifiArea(false); setStatus("Redrawing Wi-Fi analysis area from an empty draft; saved geometry remains until validation succeeds"); }
   function startWifiRename(areaId: string) { const area = project?.wifi_analysis_areas.find((item) => item.id === areaId); if (!area) return; setSelectedWifiAreaId(area.id); setWifiAreaName(area.name); setDrawingWifiArea(false); setRenamingWifiArea(true); }
   function finishWifiRename() { if (!project || !selectedWifiAreaId || !wifiAreaName.trim()) { setError("Wi-Fi analysis-area name is required"); return; } mutateProject((draft) => { const area = draft.wifi_analysis_areas.find((item) => item.id === selectedWifiAreaId); if (area) { area.name = wifiAreaName.trim(); area.modified_at = new Date().toISOString(); } }); setRenamingWifiArea(false); setSelectedWifiAreaId(null); setStatus("Wi-Fi analysis area renamed; its geometry was preserved"); }
   function deleteWifiArea(areaId: string) { mutateProject((draft) => { draft.wifi_analysis_areas = draft.wifi_analysis_areas.filter((item) => item.id !== areaId); }); setSelectedWifiAreaId(null); setStatus("Wi-Fi analysis area deleted; source, camera, and lighting data unchanged"); }
 
   function startPriorityArea() {
+    if (measuring) return;
     setSelectedPriorityAreaId(null);
     setPriorityAreaName(`Priority area ${(project?.priority_areas.length ?? 0) + 1}`);
     setPriorityDraft(emptyPriorityRedrawDraft());
@@ -510,6 +513,7 @@ export function EngineeringWorkspace() {
   }
 
   function startPriorityRedraw(areaId: string) {
+    if (measuring) return;
     const area = project?.priority_areas.find((item) => item.id === areaId);
     if (!area) return;
     setSelectedPriorityAreaId(area.id); setPriorityAreaName(area.name);
@@ -562,12 +566,14 @@ export function EngineeringWorkspace() {
   }
 
   function startCalculationArea() {
+    if (measuring) return;
     setSelectedCalculationAreaId(null);
     loadCalculationForm(null); setCalculationDraft([]); setDrawingCalculationArea(true); setEditingCalculationArea(true);
     setDrawingPriorityArea(false); setStatus("Drawing a new lighting calculation area from an empty draft");
   }
 
   function editCalculationArea(areaId: string, redraw = false) {
+    if (redraw && measuring) return;
     loadCalculationForm(areaId); setCalculationDraft([]); setDrawingCalculationArea(redraw); setEditingCalculationArea(true);
     setDrawingPriorityArea(false); setStatus(redraw ? "Redrawing from an empty draft; the prior valid lighting polygon remains stored until validation succeeds" : "Editing calculation-area settings; source and camera polygons remain unchanged");
   }
@@ -691,9 +697,9 @@ export function EngineeringWorkspace() {
           <button className="tool-button" onClick={redo} disabled={!future.length}>Redo</button>
           <span className="toolbar-divider" />
           <button className="tool-button" onClick={() => setCatalogOpen(true)}>Catalogs</button>
-          <button className="tool-button" onClick={() => startPriorityArea()} disabled={!project || drawingPriorityArea || drawingCalculationArea}>Draw Priority Area</button>
-          <button className="tool-button" onClick={startCalculationArea} disabled={!project || drawingCalculationArea || drawingPriorityArea || drawingWifiArea}>Draw Calculation Area</button>
-          <button className="tool-button" onClick={() => { setDrawingWifiArea(true); setWifiDraft([]); setDrawingPriorityArea(false); setDrawingCalculationArea(false); }} disabled={!project || drawingPriorityArea || drawingCalculationArea}>Draw Wi-Fi analysis area</button>
+          <button className="tool-button" onClick={() => startPriorityArea()} disabled={measuring || !project || drawingPriorityArea || drawingCalculationArea}>Draw Priority Area</button>
+          <button className="tool-button" onClick={startCalculationArea} disabled={measuring || !project || drawingCalculationArea || drawingPriorityArea || drawingWifiArea}>Draw Calculation Area</button>
+          <button className="tool-button" onClick={() => { setDrawingWifiArea(true); setWifiDraft([]); setDrawingPriorityArea(false); setDrawingCalculationArea(false); }} disabled={measuring || !project || drawingPriorityArea || drawingCalculationArea}>Draw Wi-Fi analysis area</button>
           <button className="tool-button primary" onClick={calculateConceptualWifi} disabled={!project || busy}>Calculate conceptual Wi-Fi</button>
           <button className="tool-button primary" onClick={() => void calculateSelectedArea()} disabled={!project || !project.calculation_areas.length || busy}>Calculate Lighting</button>
           <button className="tool-button" onClick={() => runCap("recommend")} disabled={!capOperationEnabled(project, "recommend") || busy}>Recommend CAP</button>
@@ -763,7 +769,7 @@ export function EngineeringWorkspace() {
                 {drawingWifiArea && <div className="warning-card info"><div className="field full"><label htmlFor="wifi-area-name">Analysis-area name</label><input id="wifi-area-name" value={wifiAreaName} onChange={(event) => setWifiAreaName(event.target.value)} /></div><p>Replacement/new area starts empty; {wifiDraft.length} vertices.</p><button className="quiet-button" onClick={finishWifiArea}>Save Wi-Fi area</button><button className="quiet-button" onClick={() => { setDrawingWifiArea(false); setWifiDraft([]); }}>Cancel</button></div>}
                 {renamingWifiArea && <div className="warning-card info"><div className="field full"><label htmlFor="wifi-rename">Area name</label><input id="wifi-rename" value={wifiAreaName} onChange={(event) => setWifiAreaName(event.target.value)} /></div><button className="quiet-button" onClick={finishWifiRename}>Save name</button><button className="quiet-button" onClick={() => { setRenamingWifiArea(false); setSelectedWifiAreaId(null); }}>Cancel</button></div>}
                 {project?.wifi_coverage.result ? <><p>{project.wifi_coverage.result.global_statistics.circle_count} circles · individual {project.wifi_coverage.result.global_statistics.individual_area_m2.toFixed(6)} m² · union {project.wifi_coverage.result.global_statistics.union_covered_area_m2.toFixed(6)} m² · overlap {project.wifi_coverage.result.global_statistics.overlap_area_m2.toFixed(6)} m²</p><p>Aggregate pairwise overlap {project.wifi_coverage.result.global_statistics.pairwise_overlap_area_m2.toFixed(6)} m² · multiply-covered union {project.wifi_coverage.result.global_statistics.multiply_covered_union_area_m2.toFixed(6)} m² · {project.wifi_coverage.result.global_statistics.overlap_pair_count} overlap pairs</p>{wifiBoundaryGapMessage(project.wifi_coverage.result) && <p className="helper">{wifiBoundaryGapMessage(project.wifi_coverage.result)}</p>}{project.wifi_coverage.result.analysis_area_statistics.map((stats) => <div className="calculation-row" key={stats.analysis_area_id}><strong>{stats.analysis_area_name}</strong><span>{stats.covered_area_m2.toFixed(6)} m² covered ({stats.covered_percentage.toFixed(1)}%) · {stats.uncovered_area_m2.toFixed(6)} m² uncovered ({stats.uncovered_percentage.toFixed(1)}%) · boundary {stats.boundary_covered_length_m.toFixed(6)} m ({stats.boundary_covered_percentage.toFixed(1)}%)</span></div>)}<details className="lighting-provenance"><summary>Wi-Fi assumptions and provenance</summary><p>Model {project.wifi_coverage.result.model_version} · CRS {project.wifi_coverage.result.projected_crs} · approximation {project.wifi_coverage.result.approximation_resolution} segments/quarter<br />Fingerprint {project.wifi_coverage.result.calculation_input_sha256}</p>{project.wifi_coverage.result.assumptions.map((assumption) => <p key={assumption}>{assumption}</p>)}{project.wifi_coverage.result.circles.map((circle) => <p key={circle.id}><strong>{circle.pole_id}</strong> · source {circle.source_wgs84_coordinate.join(", ")} · effective {circle.effective_wgs84_coordinate.join(", ")} · radius {circle.effective_radius_m} m · enabled {String(circle.enabled)}</p>)}{project.wifi_coverage.result.warnings.map((warning) => <div className="warning-card" key={warning}>{warning}</div>)}<p>{project.wifi_coverage.result.disclaimer}</p></details></> : <><p className="helper">No result yet. Circles and global metrics are available after calculation.</p><p className="helper">{wifiBoundaryGapMessage(null)}</p></>}
-                {project?.wifi_analysis_areas.map((area) => <div className={`priority-row ${selectedWifiAreaId === area.id ? "selected" : ""}`} key={area.id}><strong>{area.name}</strong><span>{area.wgs84_coordinates.length - 1} vertices · revision {area.polygon_revision}</span><div><button className="quiet-button" onClick={() => setSelectedWifiAreaId(area.id)}>Select</button><button className="quiet-button" onClick={() => startWifiRename(area.id)}>Rename</button><button className="quiet-button" onClick={() => startWifiRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deleteWifiArea(area.id)}>Delete</button></div></div>)}
+                {project?.wifi_analysis_areas.map((area) => <div className={`priority-row ${selectedWifiAreaId === area.id ? "selected" : ""}`} key={area.id}><strong>{area.name}</strong><span>{area.wgs84_coordinates.length - 1} vertices · revision {area.polygon_revision}</span><div><button className="quiet-button" onClick={() => setSelectedWifiAreaId(area.id)}>Select</button><button className="quiet-button" onClick={() => startWifiRename(area.id)}>Rename</button><button className="quiet-button" disabled={measuring} onClick={() => startWifiRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deleteWifiArea(area.id)}>Delete</button></div></div>)}
               </section>
               </div>
               <div className="discipline-pane" hidden={leftDiscipline !== "lighting"}>
@@ -807,7 +813,7 @@ export function EngineeringWorkspace() {
                           Show results
                         </button>
                         <button className="quiet-button" onClick={() => editCalculationArea(area.id)}>Edit</button>
-                        <button className="quiet-button" onClick={() => editCalculationArea(area.id, true)}>Redraw</button>
+                        <button className="quiet-button" disabled={measuring} onClick={() => editCalculationArea(area.id, true)}>Redraw</button>
                         <button className="quiet-button" onClick={() => deleteCalculationArea(area.id)}>Delete</button>
                       </div>
                       {resultState === "current" && result && (
@@ -856,7 +862,7 @@ export function EngineeringWorkspace() {
                 </div>
                 {drawingPriorityArea && <div className="warning-card info"><p>{selectedPriorityAreaId ? "Replacement geometry starts empty. The saved polygon remains unchanged unless this replacement validates." : "New priority area"}</p><p>{priorityDraft.length} vertices. Click the map to add at least three distinct points.</p><button className="quiet-button" onClick={finishPriorityArea}>Save polygon</button><button className="quiet-button" onClick={() => { setDrawingPriorityArea(false); setPriorityDraft([]); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
                 {renamingPriorityArea && <div className="warning-card info"><div className="field full"><label htmlFor="priority-name">Area name</label><input id="priority-name" value={priorityAreaName} onChange={(event) => setPriorityAreaName(event.target.value)} /></div><p>Renaming preserves every saved vertex.</p><button className="quiet-button" onClick={finishPriorityRename}>Save name</button><button className="quiet-button" onClick={() => { setRenamingPriorityArea(false); setSelectedPriorityAreaId(null); }}>Cancel</button></div>}
-                {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityRename(area.id)}>Rename</button><button className="quiet-button" onClick={() => startPriorityRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
+                {project?.priority_areas.map((area) => { const summary = project.camera_geometry.priority_area_summaries.find((item) => item.priority_area_id === area.id); return <div className="priority-row" key={area.id}><strong>{area.name}</strong><span>{summary ? `${summary.covered_area_m2.toFixed(1)} / ${summary.area_m2.toFixed(1)} m² · ${summary.covered_percentage.toFixed(1)}%` : "Awaiting valid geometry"}</span><div><button className="quiet-button" onClick={() => startPriorityRename(area.id)}>Rename</button><button className="quiet-button" disabled={measuring} onClick={() => startPriorityRedraw(area.id)}>Redraw</button><button className="quiet-button" onClick={() => deletePriorityArea(area.id)}>Delete</button></div></div>; })}
                 {!project?.priority_areas.length && <p className="helper">Draw project-specific polygons to summarize geometric camera intersections.</p>}
               </section>
               </div>
@@ -907,7 +913,7 @@ export function EngineeringWorkspace() {
         </aside>
 
         <section className="map-stage" aria-label="Engineering map workspace">
-          <EngineeringMap project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} focusRequest={mapFocusRequest} focusRequestKey={mapFocusKey} onMapReady={setMapInstance} fixtureDirectionPreview={fixtureDirectionPreview} backgroundVisible={backgroundSession.visible} satelliteConfig={satelliteAvailability.available ? satelliteConfig : null} onSatelliteTileError={() => setSatelliteTileFailed(true)} />
+          <EngineeringMap key={`${project?.id ?? "empty"}/${mapSessionKey}`} onMeasurementActiveChange={setMeasuring} project={project} selected={selected} onSelect={setSelectedId} onFixtureAzimuthChange={(azimuth) => selected?.fixtureConfiguration && updatePole(selected.id, { fixture_configuration: { ...selected.fixtureConfiguration, fixture_azimuth_deg: roundNormalizedFixtureAzimuth(azimuth) } })} drawingPriorityArea={drawingPriorityArea} priorityDraft={priorityDraft} onPriorityDraftPoint={(coordinate) => setPriorityDraft((points) => [...points, coordinate])} onSelectPriorityArea={(id) => setSelectedPriorityAreaId(id)} drawingCalculationArea={drawingCalculationArea} calculationDraft={calculationDraft} onCalculationDraftPoint={(coordinate) => setCalculationDraft((points) => [...points, coordinate])} onSelectCalculationArea={setSelectedCalculationAreaId} drawingWifiArea={drawingWifiArea} wifiDraft={wifiDraft} onWifiDraftPoint={(coordinate) => setWifiDraft((points) => [...points, coordinate])} onSelectWifiArea={setSelectedWifiAreaId} resizeSignal={`${leftCollapsed}-${rightCollapsed}`} focusRequest={mapFocusRequest} focusRequestKey={mapFocusKey} onMapReady={setMapInstance} fixtureDirectionPreview={fixtureDirectionPreview} backgroundVisible={backgroundSession.visible} satelliteConfig={satelliteAvailability.available ? satelliteConfig : null} onSatelliteTileError={() => setSatelliteTileFailed(true)} />
           <div className="map-overlay map-caption"><strong>Customer coordinates are locked</strong><span>Phase 4 lighting rotates distributions around unchanged existing-pole origins. No customer location is generated or moved.</span></div>
           <div className="map-overlay map-background-control" role="group" aria-label="Map background">
             <button type="button" aria-pressed={backgroundChoice === "standard"} onClick={() => selectMapBackground("standard")}>Standard</button>

@@ -51,3 +51,5 @@ M1 complete: m1-full-02 exited 0 (384 tests); 50 m analytic, zero, validation/tr
 M2 complete: focused frontend 15/15, BL-016 backend 66/66, typecheck/lint exit 0. Preview RED missing function then GREEN; 25/50/75 m bounds and Phase 3 byte preservation pass. Geometry engine unchanged. New preview source below raster; raw FOV/overlap sources removed from map; stored metrics retained.
 
 M3 complete: historical pin / missing pin / compatibility tests 3/3; typecheck/lint exit 0. Explicit override IDs require their own revision; null IDs inherit template according to existing assignment semantics. Cards expose pinned name/ID/revision, focal/FOV/resolution without mutation.
+
+M4 implemented: workflow RED to GREEN 8/8; typecheck/lint/build exit 0; configured Satellite bundle assertion runs and passes. Full frontend verification recorded in m4-frontend. Ruling: explicit map remount key advances only on New/Import/Open, so reopening the same project ID also clears measurements while ordinary saves/edits retain session state. No persisted schema field added. Request cancellation and shared map guard exercised in unit tests; actual browser pending.

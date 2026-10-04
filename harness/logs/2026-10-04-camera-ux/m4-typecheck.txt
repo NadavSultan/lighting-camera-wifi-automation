@@ -1,0 +1,4 @@
+COMMAND: corepack pnpm run typecheck
+eb2ae745b447f25201e6250f2e3e8727ad6d1b04
+$ tsc --noEmit
+EXIT: 0

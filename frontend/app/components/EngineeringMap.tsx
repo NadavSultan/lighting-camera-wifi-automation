@@ -11,10 +11,12 @@ import LightingPointLabels from "./LightingPointLabels";
 import { lightingLabelPoints } from "../lib/lighting-labels.mjs";
 import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
-import { cameraDensityHeatmapTiles, type FixtureDirectionPreview } from "../lib/api";
+import { cameraDensityHeatmapTiles, measureMapDistance, type FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
 import { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
+import { MapDistanceControl } from "./MapDistanceControl";
+import { createMeasurementController, initialMeasurementState, mapInteractionBlocked, measurementBlocksMapInteractions, measurementFeatures } from "../lib/map-distance-workflow.mjs";
 
 const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
 const BASE_STYLE: StyleSpecification = {
@@ -132,7 +134,18 @@ function clearDraftSources(map: MapLibreMap, tool: DraftTool) {
   setDraftSources(map, tool, [], null);
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null, backgroundVisible = "standard", satelliteConfig = null, onSatelliteTileError }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null; backgroundVisible?: BackgroundChoice; satelliteConfig?: SatelliteRasterConfig | null; onSatelliteTileError?: () => void }) {
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null, backgroundVisible = "standard", satelliteConfig = null, onSatelliteTileError, onMeasurementActiveChange }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null; backgroundVisible?: BackgroundChoice; satelliteConfig?: SatelliteRasterConfig | null; onSatelliteTileError?: () => void; onMeasurementActiveChange?: (active: boolean) => void }) {
+  const [measurementState, setMeasurementState] = useState(initialMeasurementState);
+  const [measurementController] = useState(() => createMeasurementController(measureMapDistance, setMeasurementState));
+  const measurementActive = measurementBlocksMapInteractions(measurementState);
+  const drawing = drawingPriorityArea || drawingCalculationArea || drawingWifiArea;
+  useEffect(() => { measurementController.setContext(project?.id ?? null, project?.projected_crs ?? null); }, [measurementController, project?.id, project?.projected_crs]);
+  useEffect(() => { onMeasurementActiveChange?.(measurementActive); }, [measurementActive, onMeasurementActiveChange]);
+  useEffect(() => {
+    const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") measurementController.cancel(); };
+    window.addEventListener("keydown", cancel);
+    return () => { window.removeEventListener("keydown", cancel); measurementController.cancel(); };
+  }, [measurementController]);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const directionCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -200,6 +213,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.on("error", (event) => {
         if (isSatelliteTileError(event)) onSatelliteTileErrorRef.current?.();
       });
+      map.addSource("measurement", { type: "geojson", data: measurementFeatures(measurementController.getState()) });
       map.addSource("poles", { type: "geojson", data: EMPTY });
       map.addSource("selection", { type: "geojson", data: EMPTY });
       map.addSource("camera-density-preview", { type: "geojson", data: EMPTY_GEOMETRY });
@@ -254,10 +268,12 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       // has no glyph source. The double ring remains visually distinct from a pole site.
       map.addLayer({ id: "cap-manual-candidate-sites", type: "circle", source: "cap-candidates", filter: ["==", ["get", "kind"], "manual_non_pole"], paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 3, "circle-stroke-color": "#ecfdf5" } });
       map.addLayer({ id: "selected-pole", type: "circle", source: "selection", paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 2, "circle-stroke-color": "#5de2c2", "circle-blur": .1 } });
+      map.addLayer({ id: "measurement-line", type: "line", source: "measurement", filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": "#f8fafc", "line-width": 3, "line-dasharray": [2, 1] } });
+      map.addLayer({ id: "measurement-endpoints", type: "circle", source: "measurement", filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": 5, "circle-color": "#f8fafc", "circle-stroke-color": "#0f172a", "circle-stroke-width": 2 } });
       addDraftSourcesAndLayers(map, "priority");
       addDraftSourcesAndLayers(map, "calculation");
       addDraftSourcesAndLayers(map, "wifi");
-      const isDrawing = () => drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current;
+      const isDrawing = () => mapInteractionBlocked(measurementController.getState(), drawingRef.current || drawingCalculationRef.current || drawingWifiRef.current);
       attachDensityInspection(map, (inspection, lngLat) => {
         densityPopup?.remove();
         const element = document.createElement("div");
@@ -296,6 +312,10 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.on("click", "calculation-area-fill", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onCalculationSelectRef.current(id); });
       map.on("click", "wifi-analysis-area-fill", (event) => { if (isDrawing()) return; const id = event.features?.[0]?.properties?.id as string | undefined; if (id) onWifiAreaSelectRef.current(id); });
       map.on("click", (event) => {
+        if (measurementBlocksMapInteractions(measurementController.getState())) {
+          void measurementController.click([event.lngLat.lng, event.lngLat.lat]);
+          return;
+        }
         if (drawingRef.current) onDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
         else if (drawingCalculationRef.current) onCalculationDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
         else if (drawingWifiRef.current) onWifiDraftPointRef.current([event.lngLat.lng, event.lngLat.lat]);
@@ -320,7 +340,22 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     setMapInstance(map);
     onMapReadyRef.current?.(map);
     return () => { densityPopup?.remove(); map.remove(); mapRef.current = null; setMapInstance(null); onMapReadyRef.current?.(null); };
-  }, []);
+  }, [measurementController]);
+
+  useEffect(() => {
+    const map = mapInstance;
+    if (!map) return;
+    const update = () => { (map.getSource("measurement") as GeoJSONSource | undefined)?.setData(measurementFeatures(measurementState)); };
+    update(); map.on("load", update);
+    map.getCanvas().style.cursor = measurementActive ? "crosshair" : drawing ? "crosshair" : "";
+    let marker: Marker | null = null;
+    if (measurementState.status === "complete" && measurementState.end && measurementState.distanceM != null) {
+      const label = document.createElement("div"); label.className = "map-distance-label";
+      label.textContent = `${measurementState.distanceM.toFixed(2)} m`;
+      marker = new maplibregl.Marker({ element: label, anchor: "bottom", offset: [0, -10] }).setLngLat(measurementState.end).addTo(map);
+    }
+    return () => { map.off("load", update); marker?.remove(); };
+  }, [mapInstance, measurementState, measurementActive, drawing]);
 
   const labelPoints = useMemo(() => lightingLabelPoints(project?.lighting_calculations.results), [project]);
   const labelsVisible = project?.layer_state.calculation_points ?? true;
@@ -399,7 +434,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     azimuthMarkerRef.current = null;
     const map = mapRef.current;
     const config = selected?.fixtureConfiguration;
-    if (!map || !selected || selected.fixtureType !== "SMART" || !config) return;
+    if (!map || !selected || selected.fixtureType !== "SMART" || !config || measurementActive || drawing) return;
     const radians = config.fixture_azimuth_deg * Math.PI / 180;
     const latitudeScale = 1 / 111320;
     const longitudeScale = 1 / (111320 * Math.cos(selected.latitude * Math.PI / 180));
@@ -412,7 +447,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     });
     azimuthMarkerRef.current = marker;
     return () => { marker.remove(); if (azimuthMarkerRef.current === marker) azimuthMarkerRef.current = null; };
-  }, [selected, onFixtureAzimuthChange]);
+  }, [selected, onFixtureAzimuthChange, measurementActive, drawing]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => mapRef.current?.resize(), 180);
@@ -593,6 +628,11 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       <div ref={containerRef} className="map-container" aria-label="Interactive pole map" />
       <canvas ref={directionCanvasRef} className="fixture-direction-arrows" aria-hidden="true" />
       <LightingPointLabels map={mapInstance} points={labelPoints} visible={labelsVisible} />
+      <MapDistanceControl state={measurementState}
+        disabledReason={drawing ? "Finish or cancel area drawing before measuring." : !project?.projected_crs ? "Import a project with a projected CRS to measure." : null}
+        onStart={() => measurementController.start(!drawing)}
+        onClear={() => measurementController.clear()}
+        onCancel={() => measurementController.cancel()} />
       <CameraPixelDensityLabels map={mapInstance} points={densityLabels} visible={Boolean(project?.layer_state.camera_pixel_density)} />
     </div>
   );

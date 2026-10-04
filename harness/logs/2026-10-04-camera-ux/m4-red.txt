@@ -1,0 +1,119 @@
+COMMAND: node --test tests/map-distance-workflow.test.mjs
+eb2ae745b447f25201e6250f2e3e8727ad6d1b04
+✖ two clicks measure once; completed/clear/Esc state has no persistence (1.7185ms)
+✖ late response after clear cannot restore old measurement (1.1203ms)
+✖ late response after cancel cannot restore old measurement (0.1676ms)
+✖ late response after replace-project cannot restore old measurement (0.1603ms)
+✖ late response after change-crs cannot restore old measurement (0.1951ms)
+✖ invalid click/request results show errors without a invented numeric value (0.2692ms)
+✖ zero-length measurement is valid and yields labelled endpoints/line (0.1974ms)
+✖ shared interaction guard blocks all ordinary map callbacks while measuring or drawing (0.1466ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 0
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 218.9936
+
+✖ failing tests:
+
+test at tests\map-distance-workflow.test.mjs:5:1
+✖ two clicks measure once; completed/clear/Esc state has no persistence (1.7185ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:6:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\map-distance-workflow.test.mjs:39:3
+✖ late response after clear cannot restore old measurement (1.1203ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:41:33)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at tests\map-distance-workflow.test.mjs:39:3
+✖ late response after cancel cannot restore old measurement (0.1676ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:41:33)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests\map-distance-workflow.test.mjs:39:3
+✖ late response after replace-project cannot restore old measurement (0.1603ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:41:33)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests\map-distance-workflow.test.mjs:39:3
+✖ late response after change-crs cannot restore old measurement (0.1951ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:41:33)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests\map-distance-workflow.test.mjs:62:1
+✖ invalid click/request results show errors without a invented numeric value (0.2692ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:64:33)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests\map-distance-workflow.test.mjs:81:1
+✖ zero-length measurement is valid and yields labelled endpoints/line (0.1974ms)
+  TypeError: workflow.createMeasurementController is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:82:31)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests\map-distance-workflow.test.mjs:91:1
+✖ shared interaction guard blocks all ordinary map callbacks while measuring or drawing (0.1466ms)
+  TypeError: workflow.mapInteractionBlocked is not a function
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/map-distance-workflow.test.mjs:93:27)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+EXIT: 1
