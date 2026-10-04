@@ -1,0 +1,75 @@
+{
+  "head": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+  "runtime": {
+    "head": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+    "root": "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction",
+    "processes": [
+      {
+        "pid": 66360,
+        "kind": "backend",
+        "command": [
+          "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\.venv\\Scripts\\python.exe",
+          "-m",
+          "uvicorn",
+          "run_camera_range_lens_distance_live:observed_app",
+          "--app-dir",
+          "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\verify",
+          "--factory",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "8070"
+        ]
+      },
+      {
+        "pid": 46040,
+        "kind": "frontend",
+        "command": [
+          "node.exe",
+          "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\frontend\\node_modules\\vinext\\dist\\cli.js",
+          "start",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "3070"
+        ]
+      }
+    ]
+  },
+  "assertions": {
+    "import_74": true,
+    "source_hash": true,
+    "range_50_current": true,
+    "range_50_phase3_metrics": true,
+    "range_50_bounded": true,
+    "range_25_current": true,
+    "range_25_phase3_metrics": true,
+    "range_25_bounded": true,
+    "range_75_current": true,
+    "range_75_phase3_metrics": true,
+    "range_75_bounded": true,
+    "failed_calculation_atomic": true,
+    "stale_retained_hidden": true,
+    "recalculation_restores_current": true,
+    "legend_option_a": true,
+    "kml_export": true,
+    "phase7_report": true,
+    "source_poles_unchanged": true,
+    "distance_50m": true,
+    "distance_no_persistence": true
+  },
+  "pass": true,
+  "scope": "API assertions only; separate cua production-browser evidence required",
+  "reference_measurement": {
+    "start_wgs84": [
+      -80.20221167866247,
+      25.76588842953606
+    ],
+    "end_wgs84": [
+      -80.2019101158386,
+      25.766247960460827
+    ],
+    "distance_m": 50
+  },
+  "browser_project_path": "C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-runtime-03\\browser-project.json"
+}

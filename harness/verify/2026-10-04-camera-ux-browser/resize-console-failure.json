@@ -1,0 +1,50 @@
+[
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:27.382Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:27.401Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:27.418Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:28.105Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:28.238Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:28.271Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:28.303Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  },
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of undefined (reading 'bind')\n    at mi (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:48126)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76140\n    at Di.renderLayer (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:76169)\n    at Di.render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:61233)\n    at e.Map._render (http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:209304)\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:688:211280\n    at http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js:1:399300",
+    "timestamp": "2026-10-04T12:11:28.403Z",
+    "url": "http://127.0.0.1:3070/_next/static/chunks/EngineeringWorkspace-DcFTVJ4Y.js"
+  }
+]

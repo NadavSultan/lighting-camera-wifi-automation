@@ -1,6 +1,10 @@
 # Current status
 
-Status reviewed: 2026-09-30. Phases 1-7 remain accepted and formally closed; Phase 7 retains its 2026-09-05 seal. No Phase 8 exists. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`; Stage 3 P2 (BL-013, BL-014, BL-015) is accepted at `e5023ee`. BL-016 / WA-09 is accepted by the 2026-09-30 scoped master PASS for product commit `5656da55`, after Independent QA PASS at evidence commit `867cd72a`. Earlier QA failures remain preserved as historical records.
+Status reviewed: 2026-10-04. Phases 1-7 remain accepted and formally closed; Phase 7 retains its 2026-09-05 seal. No Phase 8 exists. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`; Stage 3 P2 (BL-013, BL-014, BL-015) is accepted at `e5023ee`. BL-016 / WA-09 is accepted by the 2026-09-30 scoped master PASS for product commit `5656da55`, after Independent QA PASS at evidence commit `867cd72a`. Earlier QA failures remain preserved as historical records.
+
+## Camera UX awaiting independent QA
+
+Separately approved 2026-10-04 design/plan implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in isolated BL-016 worktree. Bounded range/preview, pinned specifications and transient projected-metre measurement verified (backend387/frontend126; actual74-pole production browser). Summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`, independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Clean readiness separate from QA/master acceptance. Prior BL-016 and phases1–7 acceptance unchanged; no merge/push/new seal.
 
 ## Completed
 

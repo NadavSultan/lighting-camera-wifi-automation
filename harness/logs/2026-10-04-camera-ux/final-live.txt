@@ -1,0 +1,12 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_bl016_camera_pixel_density_live.py --output harness/tmp/camera-ux-final-bl016-live-01.json
+4862f08f454327b7b36ead28ef7df0d43ace0852
+Traceback (most recent call last):
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_bl016_camera_pixel_density_live.py", line 241, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_bl016_camera_pixel_density_live.py", line 145, in main
+    require_free_port(FRONTEND_PORT)
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_bl016_camera_pixel_density_live.py", line 52, in require_free_port
+    probe.bind(("0.0.0.0", port))
+OSError: [WinError 10048] Only one usage of each socket address (protocol/network address/port) is normally permitted
+EXIT: 1

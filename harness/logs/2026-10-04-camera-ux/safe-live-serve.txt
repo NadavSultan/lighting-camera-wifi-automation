@@ -1,0 +1,4 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py serve
+4862f08f454327b7b36ead28ef7df0d43ace0852
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\tmp\camera-ux-runtime-01\runtime.json
+EXIT: 0

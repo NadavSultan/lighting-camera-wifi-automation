@@ -1,0 +1,9 @@
+COMMAND: .venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py stop --runtime harness/tmp/camera-ux-runtime-03
+fb1c522f2f14e2eebfa638f74af3cbde74920b1e
+SUCCESS: The process with PID 9884 (child process of PID 66360) has been terminated.
+SUCCESS: The process with PID 64780 (child process of PID 66360) has been terminated.
+SUCCESS: The process with PID 66360 (child process of PID 35976) has been terminated.
+SUCCESS: The process with PID 67916 (child process of PID 46040) has been terminated.
+SUCCESS: The process with PID 46040 (child process of PID 35976) has been terminated.
+Only owned process trees stopped; runtime logs/data retained.
+EXIT: 0

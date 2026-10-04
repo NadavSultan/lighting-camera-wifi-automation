@@ -1,0 +1,41 @@
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+root = Path.cwd()
+base = "98ac861e5eb9bc1587604f3f43be61908baabfb2"
+product = {
+    "backend/app/main.py", "backend/app/services/map_distance.py", "backend/tests/test_map_distance.py",
+    "backend/tests/test_bl016_camera_pixel_density.py", "schemas/openapi.json",
+    "frontend/app/components/EngineeringMap.tsx", "frontend/app/components/EngineeringWorkspace.tsx",
+    "frontend/app/components/MapDistanceControl.tsx", "frontend/app/components/PoleInspector.tsx",
+    "frontend/app/globals.css", "frontend/app/lib/api.ts",
+    "frontend/app/lib/camera-pixel-density-map.mjs", "frontend/app/lib/camera-pixel-density-map.d.mts",
+    "frontend/app/lib/camera-slot-specifications.mjs", "frontend/app/lib/camera-slot-specifications.d.mts",
+    "frontend/app/lib/map-distance-workflow.mjs", "frontend/app/lib/map-distance-workflow.d.mts",
+    "frontend/tests/camera-pixel-density-map.test.mjs", "frontend/tests/camera-pixel-density-view.test.mjs",
+    "frontend/tests/camera-projection-legend.test.mjs", "frontend/tests/camera-slot-specifications.test.mjs",
+    "frontend/tests/map-distance-workflow.test.mjs", "frontend/tests/rendered-html.test.mjs",
+}
+evidence = ["harness/phases/2026-10-04-camera", "harness/logs/2026-10-04-camera",
+            "harness/verify/2026-10-04-camera", "harness/verify/run_camera_range_lens_distance_live.py",
+            "docs/superpowers/plans/2026-10-04-camera-range-lens-distance.md",
+            "docs/superpowers/specs/2026-10-04-camera-range-lens-distance-design.md",
+            "GOALS.md", "PLANS.md", "OPERATIONS.md", "docs/current-status.md"]
+git = lambda *args: subprocess.check_output(["git", *args], text=True).strip()
+changed = sorted(set(git("diff", "--name-only", base).splitlines()) | set(git("ls-files", "--others", "--exclude-standard").splitlines()))
+outside = [p for p in changed if p not in product and not any(p.startswith(prefix) for prefix in evidence)]
+protected = [p for p in git("ls-tree", "-r", "--name-only", base).splitlines() if p not in product and not any(p.startswith(prefix) for prefix in evidence)]
+protected_changes = set(git("diff", "--name-only", base).splitlines()) & set(protected)
+source = root / "Input/Miracle_Mile_Lighting_Poles.kml"
+sha = hashlib.sha256(source.read_bytes()).hexdigest()
+checks = {"authorized_file_boundary": not outside, "all_non_boundary_tracked_paths_unchanged": not protected_changes,
+          "source_sha256_exact": sha == "2f89f9f2be306c18221c643c98d5c1a9abdb6449aab8a77ea4b76b3694e8e328",
+          "generated_schema_fresh": not git("diff", "--name-only", "--", "schemas")}
+result = {"head": git("rev-parse", "HEAD"), "base": base, "changed_paths": changed, "out_of_boundary": outside,
+          "protected_path_count": len(protected), "protected_changes": sorted(protected_changes), "source_sha256": sha,
+          "assertions": checks, "pass": all(checks.values())}
+Path("harness/verify/2026-10-04-camera-range-lens-distance-boundary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+print(json.dumps(result, indent=2))
+assert result["pass"]

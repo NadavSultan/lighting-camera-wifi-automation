@@ -1,0 +1,9 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py stop
+a7abe7c665938f38f95c86fc5310c8ee3ddc1e01
+SUCCESS: The process with PID 11044 (child process of PID 68316) has been terminated.
+SUCCESS: The process with PID 31760 (child process of PID 68316) has been terminated.
+SUCCESS: The process with PID 68316 (child process of PID 61060) has been terminated.
+SUCCESS: The process with PID 67500 (child process of PID 32416) has been terminated.
+SUCCESS: The process with PID 32416 (child process of PID 61060) has been terminated.
+Only owned process trees stopped; runtime logs/data retained.
+EXIT: 0

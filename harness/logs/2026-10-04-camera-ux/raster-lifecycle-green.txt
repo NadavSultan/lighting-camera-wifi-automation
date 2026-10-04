@@ -1,0 +1,22 @@
+COMMAND: node --test tests/camera-pixel-density-map.test.mjs
+ac86230910a423e6058f64cf6b73f264df732685
+✔ heatmap refresh discards the old raster cache and stale results have no raster source (4.1322ms)
+✔ bounded preview preserves envelopes including holes below density thresholds (1.9483ms)
+✔ density GeoJSON requires a matching current visible result and preserves holes (0.7697ms)
+✔ heatmap tile source only loads a visible, matching current calculation (0.2296ms)
+✔ inspection uses stored winner and sorted contributors without HTML (0.2695ms)
+✔ overlap features carry the stored winning camera's displayed px/face interval (0.1231ms)
+✔ layered band hits select the overlap winner, complete contributors, and displayed range (0.1898ms)
+✔ MapLibre-serialized overlap contributors still outrank a single band hit (0.1648ms)
+✔ one map click over multiple density bands dispatches exactly one complete inspection (0.3983ms)
+✔ dense overlap popup remains legible and scrollable inside the map (0.2799ms)
+✔ ten layer definitions are ascending and use canonical colour and opacity (0.3556ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 237.0238
+EXIT: 0

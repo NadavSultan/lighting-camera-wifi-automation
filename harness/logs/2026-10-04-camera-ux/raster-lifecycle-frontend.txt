@@ -1,0 +1,278 @@
+COMMAND: corepack pnpm run test
+ac86230910a423e6058f64cf6b73f264df732685
+$ node --test tests/*.test.mjs
+✔ heatmap refresh discards the old raster cache and stale results have no raster source (2.7179ms)
+✔ bounded preview preserves envelopes including holes below density thresholds (0.7638ms)
+✔ density GeoJSON requires a matching current visible result and preserves holes (0.5769ms)
+✔ heatmap tile source only loads a visible, matching current calculation (0.2263ms)
+✔ inspection uses stored winner and sorted contributors without HTML (0.3197ms)
+✔ overlap features carry the stored winning camera's displayed px/face interval (0.1547ms)
+✔ layered band hits select the overlap winner, complete contributors, and displayed range (0.2423ms)
+✔ MapLibre-serialized overlap contributors still outrank a single band hit (0.2347ms)
+✔ one map click over multiple density bands dispatches exactly one complete inspection (0.463ms)
+✔ dense overlap popup remains legible and scrollable inside the map (0.3316ms)
+✔ ten layer definitions are ascending and use canonical colour and opacity (0.3999ms)
+✔ camera density view distinguishes current, hidden, stale, and invalid results (2.5004ms)
+✔ local invalidation retains results and ignores presentation-only edits (2.2529ms)
+✔ camera explanation uses the approved flat-ground meaning (1.1276ms)
+✔ camera explanation does not claim detection capability or calculated pixel density (0.2107ms)
+✔ Camera pane renders the legend beside existing footprint metrics (6.5806ms)
+✔ historical slot specs retain exact pins instead of current or footprint values (2.1818ms)
+✔ explicit override IDs require their own pins; unassigned or missing never guesses (0.5152ms)
+✔ pinned compatibility and nullable fields remain explicit (0.5008ms)
+✔ primary action is recommend with the approved label (1.0648ms)
+✔ primary action stays recommend and disabled when blockers exist (0.2406ms)
+✔ validate-only mode does not fake recommendation availability (0.2236ms)
+✔ null project does not enable recommendation (0.841ms)
+✔ product-mapping blocker still maps to the existing field id (0.9773ms)
+✔ product-mapping review opens Required CAP inputs then focuses the field (0.4246ms)
+✔ already-open details can focus immediately without a second wait (1.1994ms)
+✔ workspace reviewCapInput opens owning details before focusing (6.6106ms)
+✔ initial project without calculation is not-calculated (1.7788ms)
+✔ successful current result uses selected recommendation IDs (0.2165ms)
+✔ unresolved nodes mark current-with-unresolved (1.3327ms)
+✔ error status is distinct from not-calculated (0.2116ms)
+✔ invalidated result does not keep prior count labeled current (0.1781ms)
+✔ blocker labels and focus targets are readable (0.302ms)
+✔ screenArrow normalizes cardinal pixel vectors (1.5901ms)
+✔ screenArrow rejects nonfinite and non-positive length (0.1673ms)
+✔ directionSignificantKey ignores pan-only fields and reacts to azimuth (0.3362ms)
+✔ one file shows three simultaneously associated Phoenix models (1.6244ms)
+✔ associations for a different file do not mark this file associated (0.2034ms)
+✔ inactive pairs and duplicate model ids are handled safely (0.2369ms)
+✔ helper does not invent associations from family labels alone (1.0025ms)
+✔ left panel uses a four-discipline switcher defaulting to Lighting (6.433ms)
+✔ CAP required inputs stay available and expandable rather than deleted (1.4926ms)
+✔ CAP pane is result-first with one recommend primary action (2.5741ms)
+✔ missing stored result is not-calculated (1.0321ms)
+✔ stored result with calculated or warning status is current (0.2046ms)
+✔ stored result without a current area status is stale (0.1403ms)
+✔ helper does not treat a missing result as current even if status is calculated (0.1251ms)
+✔ Draw Calculation Area clears the selected area so a second polygon is created (6.1736ms)
+✔ Calculate Lighting chains every calculation area onto the previous project (1.147ms)
+✔ workspace calculates every lighting area from one Calculate Lighting action (2.5074ms)
+✔ Show results opens a stored current result without calculating (1.4224ms)
+✔ only one lighting result card identity exists (1.5212ms)
+✔ creating or cancelling a lighting draft does not discard stored results or sessions (1.4934ms)
+✔ deleting a lighting area removes its session and closes its card (1.6641ms)
+✔ discipline switching does not clear an active lighting polygon draft (1.5034ms)
+✔ clampCard keeps a 280x180 card inside an 800x600 viewport with 8px margin (2.5857ms)
+✔ clampCard lifts negative coordinates to the margin (0.201ms)
+✔ ringAnchorLngLat uses the final non-closing vertex (0.2054ms)
+✔ lighting result card stays interactive after map-overlay disables pointer events (6.5614ms)
+✔ WA-05 recorded card position matches subtracting the container viewport origin from map.project (0.4722ms)
+✔ cardOffsetFromProjected keeps a 12px offset in map-container coordinates (0.2328ms)
+✔ LightingResultCard does not subtract container viewport origin from map.project (1.5017ms)
+✔ resolveLightingCardSession restores independent dragged positions (0.3244ms)
+✔ resolveLightingCardSession uses the polygon fallback when no session exists (0.1801ms)
+✔ resolveLightingCardSession keeps a stored anchor when dragged position is null (0.2196ms)
+✔ formatLux matches required numeric cases (1.0204ms)
+✔ formatLuxWithUnit distinguishes zero, tiny positives, and unavailable (0.2396ms)
+✔ lightingLabelPoints composites area and point ids (0.3065ms)
+✔ tiny positive lux labels keep stored values and use the threshold policy (0.1773ms)
+✔ card and left-panel summaries format lux through formatLuxWithUnit and keep stored ratios (7.9006ms)
+✔ map lux labels sit in a compositor layer above the MapLibre canvas (1.1581ms)
+✔ EngineeringMap draws helper label points for current lighting results (0.953ms)
+✔ null configuration is unavailable with the required reason (2.5463ms)
+✔ valid configuration is available with its attribution (0.3451ms)
+✔ rejects missing placeholders, http tiles, credentials, and bad numeric ranges (0.3016ms)
+✔ blank environment is not configured; complete env parses a config object (0.2438ms)
+✔ satellite request with missing config resets to standard (0.1938ms)
+✔ tile failure keeps OSM visible and offers Use standard map (0.2789ms)
+✔ successful satellite session uses provider attribution and hides OSM (0.2922ms)
+✔ isSatelliteTileError ignores other map errors (0.1683ms)
+✔ workspace keeps Standard/Satellite session-only and does not persist a provider (10.0917ms)
+✔ two clicks measure once; completed/clear/Esc state has no persistence (2.2067ms)
+✔ late response after clear cannot restore old measurement (0.3585ms)
+✔ late response after cancel cannot restore old measurement (0.2084ms)
+✔ late response after replace-project cannot restore old measurement (0.2008ms)
+✔ late response after change-crs cannot restore old measurement (0.1647ms)
+✔ invalid click/request results show errors without a invented numeric value (0.5084ms)
+✔ zero-length measurement is valid and yields labelled endpoints/line (0.3187ms)
+✔ shared interaction guard blocks all ordinary map callbacks while measuring or drawing (0.1941ms)
+✔ cancel without clearing the stored id prevents later schedules (WA-02/WA-03 leak) (1.077ms)
+✔ cancelMapFrame clears the id so a later schedule can draw (0.8649ms)
+✔ schedule coalesces to one frame while a callback is pending (0.271ms)
+✔ one placed point is visible without inventing a saved edge (1.8593ms)
+✔ zero points yields empty collections and no preview (0.1837ms)
+✔ two points create an open edge without fill (0.2587ms)
+✔ three points create fill and mark the last vertex (0.2171ms)
+✔ duplicate cursor on last point suppresses preview (0.1738ms)
+✔ cancel clears preview by omitting cursor (0.1685ms)
+✔ guidance copy advances with vertex count (0.1396ms)
+✔ server-renders the Phase 5 engineering workspace (1056.1436ms)
+✖ exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow (34.7153ms)
+✔ Phase 5 workflow helpers preserve safe drafts, inheritance, and precise invalidation (4.6174ms)
+✔ Phase 6 CAP helper keeps unknowns blocker-first and does not compare unrelated digests (1.2888ms)
+✔ Phase 7 report helpers keep disclaimer and presentation-only preference merges (0.7638ms)
+✔ Phase 7 conflict-safe merge keeps engineering fields and history lengths unchanged (1.1238ms)
+✔ Phase 7 post-generate merge keeps sent preferences after metadata apply (1.0113ms)
+✔ Phase 7 ReportPanel remount key is project id only (not updated_at) (4.7437ms)
+✔ Phase 7 report panel posts selections for preview and merges metadata without getProject (15.2599ms)
+✔ Phase 6 CAP invalidation clears results for graph inputs but not presentation notes (2.2746ms)
+✔ Phase 5 Wi-Fi drafts reject every invalid ring and preserve both winding directions (704.5269ms)
+✔ Phase 5 Wi-Fi bulk fields revise once only and ignore unchanged fields (0.3238ms)
+✔ QA-01 keeps the exact no-area boundary message in the post-calculation result branch (3.1142ms)
+✔ Phase 4 calculation-area validation and stale-state transitions are explicit (0.7369ms)
+✔ P4-IR-01 immediately invalidates lighting results only for significant pole edits (2.9297ms)
+✔ P4-IR-07 lighting-area validation never uses priority-area wording (1.8497ms)
+✔ NIR-01 refreshes and reports a rejected retained IES record without raw JSON (3.2904ms)
+✔ manual bulk targets and slot reset implement the Phase 2 corrective workflows (0.9701ms)
+✔ Phase 3 fixture rotation and priority-area helpers are deterministic (1.4176ms)
+✔ P3-IR-05 keeps rounded display and map-handle azimuths in the normalized range (3.1402ms)
+✔ null result is not-calculated even when visibility flag is true (0.9132ms)
+✔ zero circles is empty (0.1678ms)
+✔ one circle with layer off is hidden (0.1193ms)
+✔ one circle with layer on is visible (0.133ms)
+✔ workspace and app shell stay inside the viewport (5.229ms)
+✔ lighting result card keeps core statistics out of a 220px clip (2.6112ms)
+✔ direction and lux canvases cancel frames through the shared scheduler (3.0137ms)
+ℹ tests 126
+ℹ suites 0
+ℹ pass 125
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2373.4615
+
+✖ failing tests:
+
+test at tests\rendered-html.test.mjs:33:1
+✖ exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow (34.7153ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /raster-resampling": "linear"/. Input:
+
+  '"use client";\r\n' +
+    '\r\n' +
+    'import { useEffect, useMemo, useRef, useState } from "react";\r\n' +
+    'import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type StyleSpecification } from "maplibre-gl";\r\n' +
+    'import type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";\r\n' +
+    'import type { EffectivePole, FixtureType, Project } from "../lib/types";\r\n' +
+    'import { effectivePole } from "../lib/types";\r\n' +
+    'import { fixtureAzimuthFromHandle } from "../lib/phase3-workflows.mjs";\r\n' +
+    'import { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";\r\n' +
+    'import LightingPointLabels from "./LightingPointLabels";\r\n' +
+    'import { lightingLabelPoints } from "../lib/lighting-labels.mjs";\r\n' +
+    'import { screenArrow } from "../lib/fixture-direction-view.mjs";\r\n' +
+    'import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";\r\n' +
+    'import { cameraDensityHeatmapTiles, measureMapDistance, type FixtureDirectionPreview } from "../lib/api";\r\n' +
+    'import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";\r\n' +
+    'import { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints, replaceDensityHeatmapSource } from "../lib/camera-pixel-density-map.mjs";\r\n' +
+    'import CameraPixelDensityLabels from "./CameraPixelDensityLabels";\r\n' +
+    'import { MapDistanceControl } from "./MapDistanceControl";\r\n' +
+    'import { createMeasurementController, initialMeasurementState, mapInteractionBlocked, measurementBlocksMapInteractions, measurementFeatures } from "../lib/map-distance-workflow.mjs";\r\n' +
+    '\r\n' +
+    'const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };\r\n' +
+    'const BASE_STYLE: StyleSpecification = {\r\n' +
+    '  version: 8,\r\n' +
+    '  sources: {\r\n' +
+    '    osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap contributors" },\r\n' +
+    '  },\r\n' +
+    '  layers: [{ id: "osm", type: "raster", source: "osm" }],\r\n' +
+    '};\r\n' +
+    'const EMPTY: FeatureCollection<Point> = { type: "FeatureCollection", features: [] };\r\n' +
+    'const EMPTY_GEOMETRY: FeatureCollection<Geometry> = { type: "FeatureCollection", features: [] };\r\n' +
+    'const CLICKABLE_LAYERS = ["poles-lite", "poles-wifi", "poles-smart", "poles-original"];\r\n' +
+    '\r\n' +
+    'function features(project: Project | null): FeatureCollection<Point> {\r\n' +
+    '  if (!project) return EMPTY;\r\n' +
+    '  return {\r\n' +
+    '    type: "FeatureCollection",\r\n' +
+    '    features: project.source.poles.map((source): Feature<Point> => {\r\n' +
+    '      const pole = effectivePole(project, source);\r\n' +
+    '      return {\r\n' +
+    '        type: "Feature",\r\n' +
+    '        id: source.id,\r\n' +
+    '        properties: { id: source.id, name: pole.displayName, fixture_type: pole.fixtureType, active: pole.active, modified: pole.modified },\r\n' +
+    '        geometry: { type: "Point", coordinates: [source.longitude, source.latitude] },\r\n' +
+    '      };\r\n' +
+    '    }),\r\n' +
+    '  };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function selectedFeature(pole: EffectivePole | null): FeatureCollection<Point> {\r\n' +
+    '  if (!pole) return EMPTY;\r\n' +
+    '  return { type: "FeatureCollection", features: [{ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } }] };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function priorityFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n' +
+    '  return { type: "FeatureCollection", features: project?.priority_areas.map((area) => ({ type: "Feature", id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon", coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function calculationAreaFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n' +
+    '  return { type: "FeatureCollection", features: project?.calculation_areas.map((area) => ({ type: "Feature", id: area.id, properties: { id: area.id, name: area.name, classification: area.classification, warning: area.calculation_state.warnings.length > 0 }, geometry: { type: "Polygon", coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function calculationPointFeatures(project: Project | null): FeatureCollection<Point> {\r\n' +
+    '  const results = project ? Object.values(project.lighting_calculations.results) : [];\r\n' +
+    '  return { type: "FeatureCollection", features: results.flatMap((result) => result.points.map((point) => ({ type: "Feature" as const, id: point.id, properties: { id: point.id, area_id: result.calculation_area_id, lux: point.maintained_horizontal_illuminance_lux }, geometry: { type: "Point" as const, coordinates: point.wgs84_coordinate } }))) };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function wifiFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n' +
+    '  return { type: "FeatureCollection", features: project?.wifi_coverage.result?.circles.map((circle) => ({ type: "Feature" as const, id: circle.id, properties: { id: circle.id, pole_id: circle.pole_id, radius_m: circle.effective_radius_m, conceptual: true }, geometry: { type: "Polygon" as const, coordinates: [circle.wgs84_ring] } })) ?? [] };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function wifiAreaFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n' +
+    '  return { type: "FeatureCollection", features: project?.wifi_analysis_areas.map((area) => ({ type: "Feature" as const, id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon" as const, coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function cameraWarningFeatures(project: Project | null): FeatureCollection<Point> {\r\n' +
+    '  if (!project) return EMPTY;\r\n' +
+    '  const warningPoleIds = new Set(project.camera_geometry.footprints.filter((item) => item.enabled && item.warnings.length > 0).map((item) => item.pole_id));\r\n' +
+    '  return { type: "FeatureCollection", features: project.source.poles.filter((pole) => warningPoleIds.has(pole.id)).map((pole) => ({ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } })) };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function capCandidateFeatures(project: Project | null): FeatureCollection<Point> {\r\n' +
+    '  if (!project) return EMPTY;\r\n' +
+    '  const selected = new Set(project.cap_recommendations.selected_candidate_ids);\r\n' +
+    '  return { type: "FeatureCollection", features: project.cap_planning_inputs.candidates.flatMap((candidate) => {\r\n' +
+    '    const coordinate = candidate.kind === "existing_pole" ? project.source.poles.find((pole) => pole.id === candidate.pole_id) : null;\r\n' +
+    '    const point = coordinate ? [coordinate.longitude, coordinate.latitude] as [number, number] : candidate.wgs84_coordinate;\r\n' +
+    '    return point ? [{ type: "Feature" as const, id: candidate.id, properties: { id: candidate.id, kind: candidate.kind, selected: selected.has(candidate.id), prohibited: candidate.prohibited, priority: candidate.priority, survey_status: candidate.survey_status, disclaimer: "Distance-qualified conceptual link; not RF-predicted. Manual non-pole sites are not customer lighting poles." }, geometry: { type: "Point" as const, coordinates: point } }] : [];\r\n' +
+    '  }) };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function capTreeFeatures(project: Project | null): FeatureCollection<LineString> {\r\n' +
+    '  const result = project?.cap_calculations.result;\r\n' +
+    '  if (!project || !result) return EMPTY_GEOMETRY as FeatureCollection<LineString>;\r\n' +
+    '  const coordinate = (id: string): [number, number] | null => {\r\n' +
+    '    if (id.startsWith("fixture/")) { const pole = project.source.poles.find((item) => item.id === id.slice(8)); return pole ? [pole.longitude, pole.latitude] : null; }\r\n' +
+    '    if (id.startsWith("gateway/")) { const candidate = project.cap_planning_inputs.candidates.find((item) => item.id === id.slice(8)); if (!candidate) return null; if (candidate.kind === "manual_non_pole") return candidate.wgs84_coordinate; const pole = project.source.poles.find((item) => item.id === candidate.pole_id); return pole ? [pole.longitude, pole.latitude] : null; }\r\n' +
+    '    return null;\r\n' +
+    '  };\r\n' +
+    '  return { type: "FeatureCollection", features: result.assignments.flatMap((assignment) => { const a = coordinate(assignment.node_id), b = coordinate(assignment.parent_id); return a && b ? [{ type: "Feature" as const, id: `${assignment.node_id}/${assignment.parent_id}`, properties: { hop: assignment.hop, distance_m: assignment.distance_m, disclaimer: "distance-qualified conceptual link; not RF-predicted" }, geometry: { type: "LineString" as const, coordinates: [a, b] } }] : []; }) };\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'type DraftTool = "priority" | "calculation" | "wifi";\r\n' +
+    '\r\n' +
+    'const DRAFT_COLORS: Record<DraftTool, { fill: string; edge: string; casing: string; preview: string; vertex: string }> = {\r\n' +
+    '  priority: { fill: "#fb923c", edge: "#fdba74", casing: "#431407", preview: "#fed7aa", vertex: "#fb923c" },\r\n' +
+    '  calculation: { fill: "#14b8a6", edge: "#5eead4", casing: "#042f2e", preview: "#99f6e4", vertex: "#2dd4bf" },\r\n' +
+    '  wifi: { fill: "#06b6d4", edge: "#67e8f9", casing: "#083344", preview: "#a5f3fc", vertex: "#22d3ee" },\r\n' +
+    '};\r\n' +
+    '\r\n' +
+    'function addDraftSourcesAndLayers(map: MapLibreMap, tool: DraftTool) {\r\n' +
+    '  const colors = DRAFT_COLORS[tool];\r\n' +
+    '  const prefix = `${tool}-draft`;\r\n' +
+    '  map.addSource(`${prefix}-fill`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n' +
+    '  map.addSource(`${prefix}-edges`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n' +
+    '  map.addSource(`${prefix}-preview`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n' +
+    '  map.addSource(`${prefix}-vertices`, { type: "geojson", data: EMPTY });\r\n' +
+    '  map.addLayer({ id: `${prefix}-fill`, type: "fill", source: `${prefix}-fill`, paint: { "fill-color": colors.fill, "fill-opacity": .2 } });\r\n' +
+    '  map.addLayer({ id: `${prefix}-edge-casing`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.casing, "line-width": 6, "line-opacity": .9 } });\r\n' +
+    '  map.addLayer({ id: `${prefix}-edge`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.edge, "line-width": 4, "line-opacity": .95 } });\r\n' +
+    '  map.addLayer({ id: `${prefix}-preview`, type: "line", source: `${prefix}-preview`, paint: { "line-color": colors.preview, "line-width": 2, "line-dasharray": [2, 2], "line-opacity": .95 } });\r\n' +
+    '  map.addLayer({ id: `${prefix}-vertices`, type: "circle'... 37754 more characters
+
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/rendered-html.test.mjs:156:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport { useEffect, useMemo, useRef, useState } from "react";\r\nimport maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type StyleSpecification } from "maplibre-gl";\r\nimport type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";\r\nimport type { EffectivePole, FixtureType, Project } from "../lib/types";\r\nimport { effectivePole } from "../lib/types";\r\nimport { fixtureAzimuthFromHandle } from "../lib/phase3-workflows.mjs";\r\nimport { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";\r\nimport LightingPointLabels from "./LightingPointLabels";\r\nimport { lightingLabelPoints } from "../lib/lighting-labels.mjs";\r\nimport { screenArrow } from "../lib/fixture-direction-view.mjs";\r\nimport { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";\r\nimport { cameraDensityHeatmapTiles, measureMapDistance, type FixtureDirectionPreview } from "../lib/api";\r\nimport { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";\r\nimport { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints, replaceDensityHeatmapSource } from "../lib/camera-pixel-density-map.mjs";\r\nimport CameraPixelDensityLabels from "./CameraPixelDensityLabels";\r\nimport { MapDistanceControl } from "./MapDistanceControl";\r\nimport { createMeasurementController, initialMeasurementState, mapInteractionBlocked, measurementBlocksMapInteractions, measurementFeatures } from "../lib/map-distance-workflow.mjs";\r\n\r\nconst FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };\r\nconst BASE_STYLE: StyleSpecification = {\r\n  version: 8,\r\n  sources: {\r\n    osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap contributors" },\r\n  },\r\n  layers: [{ id: "osm", type: "raster", source: "osm" }],\r\n};\r\nconst EMPTY: FeatureCollection<Point> = { type: "FeatureCollection", features: [] };\r\nconst EMPTY_GEOMETRY: FeatureCollection<Geometry> = { type: "FeatureCollection", features: [] };\r\nconst CLICKABLE_LAYERS = ["poles-lite", "poles-wifi", "poles-smart", "poles-original"];\r\n\r\nfunction features(project: Project | null): FeatureCollection<Point> {\r\n  if (!project) return EMPTY;\r\n  return {\r\n    type: "FeatureCollection",\r\n    features: project.source.poles.map((source): Feature<Point> => {\r\n      const pole = effectivePole(project, source);\r\n      return {\r\n        type: "Feature",\r\n        id: source.id,\r\n        properties: { id: source.id, name: pole.displayName, fixture_type: pole.fixtureType, active: pole.active, modified: pole.modified },\r\n        geometry: { type: "Point", coordinates: [source.longitude, source.latitude] },\r\n      };\r\n    }),\r\n  };\r\n}\r\n\r\nfunction selectedFeature(pole: EffectivePole | null): FeatureCollection<Point> {\r\n  if (!pole) return EMPTY;\r\n  return { type: "FeatureCollection", features: [{ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } }] };\r\n}\r\n\r\nfunction priorityFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n  return { type: "FeatureCollection", features: project?.priority_areas.map((area) => ({ type: "Feature", id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon", coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n}\r\n\r\nfunction calculationAreaFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n  return { type: "FeatureCollection", features: project?.calculation_areas.map((area) => ({ type: "Feature", id: area.id, properties: { id: area.id, name: area.name, classification: area.classification, warning: area.calculation_state.warnings.length > 0 }, geometry: { type: "Polygon", coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n}\r\n\r\nfunction calculationPointFeatures(project: Project | null): FeatureCollection<Point> {\r\n  const results = project ? Object.values(project.lighting_calculations.results) : [];\r\n  return { type: "FeatureCollection", features: results.flatMap((result) => result.points.map((point) => ({ type: "Feature" as const, id: point.id, properties: { id: point.id, area_id: result.calculation_area_id, lux: point.maintained_horizontal_illuminance_lux }, geometry: { type: "Point" as const, coordinates: point.wgs84_coordinate } }))) };\r\n}\r\n\r\nfunction wifiFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n  return { type: "FeatureCollection", features: project?.wifi_coverage.result?.circles.map((circle) => ({ type: "Feature" as const, id: circle.id, properties: { id: circle.id, pole_id: circle.pole_id, radius_m: circle.effective_radius_m, conceptual: true }, geometry: { type: "Polygon" as const, coordinates: [circle.wgs84_ring] } })) ?? [] };\r\n}\r\n\r\nfunction wifiAreaFeatures(project: Project | null): FeatureCollection<Polygon> {\r\n  return { type: "FeatureCollection", features: project?.wifi_analysis_areas.map((area) => ({ type: "Feature" as const, id: area.id, properties: { id: area.id, name: area.name }, geometry: { type: "Polygon" as const, coordinates: [area.wgs84_coordinates] } })) ?? [] };\r\n}\r\n\r\nfunction cameraWarningFeatures(project: Project | null): FeatureCollection<Point> {\r\n  if (!project) return EMPTY;\r\n  const warningPoleIds = new Set(project.camera_geometry.footprints.filter((item) => item.enabled && item.warnings.length > 0).map((item) => item.pole_id));\r\n  return { type: "FeatureCollection", features: project.source.poles.filter((pole) => warningPoleIds.has(pole.id)).map((pole) => ({ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } })) };\r\n}\r\n\r\nfunction capCandidateFeatures(project: Project | null): FeatureCollection<Point> {\r\n  if (!project) return EMPTY;\r\n  const selected = new Set(project.cap_recommendations.selected_candidate_ids);\r\n  return { type: "FeatureCollection", features: project.cap_planning_inputs.candidates.flatMap((candidate) => {\r\n    const coordinate = candidate.kind === "existing_pole" ? project.source.poles.find((pole) => pole.id === candidate.pole_id) : null;\r\n    const point = coordinate ? [coordinate.longitude, coordinate.latitude] as [number, number] : candidate.wgs84_coordinate;\r\n    return point ? [{ type: "Feature" as const, id: candidate.id, properties: { id: candidate.id, kind: candidate.kind, selected: selected.has(candidate.id), prohibited: candidate.prohibited, priority: candidate.priority, survey_status: candidate.survey_status, disclaimer: "Distance-qualified conceptual link; not RF-predicted. Manual non-pole sites are not customer lighting poles." }, geometry: { type: "Point" as const, coordinates: point } }] : [];\r\n  }) };\r\n}\r\n\r\nfunction capTreeFeatures(project: Project | null): FeatureCollection<LineString> {\r\n  const result = project?.cap_calculations.result;\r\n  if (!project || !result) return EMPTY_GEOMETRY as FeatureCollection<LineString>;\r\n  const coordinate = (id: string): [number, number] | null => {\r\n    if (id.startsWith("fixture/")) { const pole = project.source.poles.find((item) => item.id === id.slice(8)); return pole ? [pole.longitude, pole.latitude] : null; }\r\n    if (id.startsWith("gateway/")) { const candidate = project.cap_planning_inputs.candidates.find((item) => item.id === id.slice(8)); if (!candidate) return null; if (candidate.kind === "manual_non_pole") return candidate.wgs84_coordinate; const pole = project.source.poles.find((item) => item.id === candidate.pole_id); return pole ? [pole.longitude, pole.latitude] : null; }\r\n    return null;\r\n  };\r\n  return { type: "FeatureCollection", features: result.assignments.flatMap((assignment) => { const a = coordinate(assignment.node_id), b = coordinate(assignment.parent_id); return a && b ? [{ type: "Feature" as const, id: `${assignment.node_id}/${assignment.parent_id}`, properties: { hop: assignment.hop, distance_m: assignment.distance_m, disclaimer: "distance-qualified conceptual link; not RF-predicted" }, geometry: { type: "LineString" as const, coordinates: [a, b] } }] : []; }) };\r\n}\r\n\r\ntype DraftTool = "priority" | "calculation" | "wifi";\r\n\r\nconst DRAFT_COLORS: Record<DraftTool, { fill: string; edge: string; casing: string; preview: string; vertex: string }> = {\r\n  priority: { fill: "#fb923c", edge: "#fdba74", casing: "#431407", preview: "#fed7aa", vertex: "#fb923c" },\r\n  calculation: { fill: "#14b8a6", edge: "#5eead4", casing: "#042f2e", preview: "#99f6e4", vertex: "#2dd4bf" },\r\n  wifi: { fill: "#06b6d4", edge: "#67e8f9", casing: "#083344", preview: "#a5f3fc", vertex: "#22d3ee" },\r\n};\r\n\r\nfunction addDraftSourcesAndLayers(map: MapLibreMap, tool: DraftTool) {\r\n  const colors = DRAFT_COLORS[tool];\r\n  const prefix = `${tool}-draft`;\r\n  map.addSource(`${prefix}-fill`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n  map.addSource(`${prefix}-edges`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n  map.addSource(`${prefix}-preview`, { type: "geojson", data: EMPTY_GEOMETRY });\r\n  map.addSource(`${prefix}-vertices`, { type: "geojson", data: EMPTY });\r\n  map.addLayer({ id: `${prefix}-fill`, type: "fill", source: `${prefix}-fill`, paint: { "fill-color": colors.fill, "fill-opacity": .2 } });\r\n  map.addLayer({ id: `${prefix}-edge-casing`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.casing, "line-width": 6, "line-opacity": .9 } });\r\n  map.addLayer({ id: `${prefix}-edge`, type: "line", source: `${prefix}-edges`, paint: { "line-color": colors.edge, "line-width": 4, "line-opacity": .95 } });\r\n  map.addLayer({ id: `${prefix}-preview`, type: "line", source: `${prefix}-preview`, paint: { "line-color": colors.preview, "line-width": 2, "line-dasharray": [2, 2], "line-opacity": .95 } });\r\n  map.addLayer({ id: `${prefix}-vertices`, type: "circle'... 37754 more characters,
+    expected: /raster-resampling": "linear"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+[ELIFECYCLE] Test failed. See above for more details.
+EXIT: 1

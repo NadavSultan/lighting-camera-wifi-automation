@@ -1,0 +1,3 @@
+COMMAND: git diff --cached --check
+fb1c522f2f14e2eebfa638f74af3cbde74920b1e
+EXIT: 0

@@ -1,0 +1,18 @@
+COMMAND: .venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py stop --runtime harness/tmp/camera-ux-runtime-03
+fb1c522f2f14e2eebfa638f74af3cbde74920b1e
+Get-CimInstance : Access denied
+At line:1 char:2
++ (Get-CimInstance Win32_Process -Filter 'ProcessId=66360').CommandLine
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-CimInstance], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80041003,Microsoft.Management.Infrastructure.CimCmdlets.GetCimInstanceCommand
+
+Get-CimInstance : Access denied
+At line:1 char:2
++ (Get-CimInstance Win32_Process -Filter 'ProcessId=46040').CommandLine
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-CimInstance], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80041003,Microsoft.Management.Infrastructure.CimCmdlets.GetCimInstanceCommand
+
+Only owned process trees stopped; runtime logs/data retained.
+EXIT: 0

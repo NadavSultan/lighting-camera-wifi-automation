@@ -12,6 +12,10 @@ Known documentation conflict: `README.md` still describes a Phase 4 application 
 
 Historical wording in section 16 of the Phase 6 planning contract says its policy decisions alone did not authorize implementation. The later, explicit implementation authorization is recorded by the contract's current status/authorization boundary and `docs/decision-log.md` DL-016. Do not erase that chronology or misread the earlier sentence as the current gate.
 
+## Camera UX handoff — 2026-10-04
+
+Verified product `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in isolated BL-016 worktree. Summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`, handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`, readiness `harness/verify/2026-10-04-camera-range-lens-distance-readiness.json`. Use short unique Windows pytest temp paths. Use ownership-safe live runner; do not repeat legacy port cleanup. Preserve failures and observer limitations. QA/master pending; no merge/push/seal.
+
 ## Repository commands
 
 These commands are the canonical repository checks discovered from `backend/pyproject.toml`, `frontend/package.json`, `README.md`, and the approved Phase 6 implementation prompt. Use the repository's configured Python 3.12 environment; the `.venv` paths below are the documented project form, not evidence that a virtual environment exists in every checkout.

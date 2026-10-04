@@ -1,0 +1,415 @@
+{
+  "schema_version": 1,
+  "phase": "16",
+  "goal": {
+    "objective": "Implement approved camera range/lens/distance UX preserving sources and accepted engines",
+    "status": "ACHIEVED",
+    "stopping_condition": "Full deterministic and actual74-pole production-browser checks, clean readiness PASS and recorded independent-QA handoff; no merge/push/seal"
+  },
+  "implementation_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+  "allowed_evidence_paths_after_implementation_commit": [
+    "harness/phases/2026-10-04-camera",
+    "harness/logs/2026-10-04-camera",
+    "harness/verify/2026-10-04-camera",
+    "harness/verify/run_camera_range_lens_distance_live.py",
+    "docs/superpowers/plans/2026-10-04-camera-range-lens-distance.md",
+    "docs/superpowers/specs/2026-10-04-camera-range-lens-distance-design.md",
+    "GOALS.md",
+    "PLANS.md",
+    "OPERATIONS.md",
+    "docs/current-status.md"
+  ],
+  "expected_milestone_ids": [
+    "M0",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5"
+  ],
+  "milestones": [
+    {
+      "id": "M0",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "M1",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "M2",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "M3",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "M4",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "M5",
+      "status": "PASS",
+      "evidence": [
+        "harness/phases/2026-10-04-camera-range-lens-distance.md",
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    }
+  ],
+  "expected_acceptance_ids": [
+    "UX-01",
+    "UX-02",
+    "UX-03",
+    "UX-04",
+    "UX-05",
+    "UX-06",
+    "UX-07",
+    "UX-08",
+    "UX-09"
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "UX-01",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-02",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-03",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-04",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-05",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-06",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-07",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-08",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    },
+    {
+      "id": "UX-09",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+        "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "id": "final4-backend-before",
+      "command": "..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider --basetemp ../harness/tmp/f4b",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-backend-before.txt"
+      ]
+    },
+    {
+      "id": "final4-validator",
+      "command": ".\\.venv\\Scripts\\python.exe scripts/validate_engineering_data.py",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-validator.txt"
+      ]
+    },
+    {
+      "id": "final4-schema",
+      "command": "..\\.venv\\Scripts\\python.exe -m scripts.export_schema",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-schema.txt"
+      ]
+    },
+    {
+      "id": "final4-typecheck",
+      "command": "corepack pnpm run typecheck",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-typecheck.txt"
+      ]
+    },
+    {
+      "id": "final4-lint",
+      "command": "corepack pnpm run lint",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-lint.txt"
+      ]
+    },
+    {
+      "id": "final4-build",
+      "command": "$env:NEXT_PUBLIC_API_URL = 'http://127.0.0.1:8070'\n$env:NEXT_PUBLIC_SATELLITE_TILES = 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg'\n$env:NEXT_PUBLIC_SATELLITE_ATTRIBUTION = 'Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025)'\n$env:NEXT_PUBLIC_SATELLITE_TILE_SIZE = '256'\n$env:NEXT_PUBLIC_SATELLITE_MIN_ZOOM = '0'\n$env:NEXT_PUBLIC_SATELLITE_MAX_ZOOM = '18'\ncorepack pnpm run build",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-build.txt"
+      ]
+    },
+    {
+      "id": "final4-frontend",
+      "command": "corepack pnpm run test",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-frontend.txt"
+      ]
+    },
+    {
+      "id": "final4-backend-after",
+      "command": "..\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider --basetemp ../harness/tmp/f4a",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-backend-after.txt"
+      ]
+    },
+    {
+      "id": "final4-generated-freshness",
+      "command": "git diff --exit-code -- schemas Input frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final4-generated-freshness.txt"
+      ]
+    },
+    {
+      "id": "safe-live-api-03",
+      "command": ".\\.venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py verify --runtime harness/tmp/camera-ux-runtime-03",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/safe-live-api-03.txt"
+      ]
+    },
+    {
+      "id": "final-browser-preview-50-02",
+      "command": ".\\.venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-browser-preview-50-02.txt"
+      ]
+    },
+    {
+      "id": "final-browser-preview-25",
+      "command": ".\\.venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-browser-preview-25.txt"
+      ]
+    },
+    {
+      "id": "final-browser-preview-75",
+      "command": ".\\.venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-browser-preview-75.txt"
+      ]
+    },
+    {
+      "id": "final-browser-preview-300-height20",
+      "command": ".venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-browser-preview-300-height20.txt"
+      ]
+    },
+    {
+      "id": "final-browser-preview-restored50",
+      "command": ".venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-browser-preview-restored50.txt"
+      ]
+    },
+    {
+      "id": "final-measurement-scoped",
+      "command": ".venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py analyze --runtime harness/tmp/camera-ux-runtime-03 --export 'C:/Users/NadavSultan/Downloads/Miracle-Mile-Lighting-Poles.lighting-project (7).json' --concurrent-project-reopen-event 5",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final-measurement-scoped.txt"
+      ]
+    },
+    {
+      "id": "final5-boundary",
+      "command": ".venv\\Scripts\\python.exe harness/tmp/camera-boundary.py",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final5-boundary.txt"
+      ]
+    },
+    {
+      "id": "final5-whitespace",
+      "command": "git diff --check",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/final5-whitespace.txt"
+      ]
+    },
+    {
+      "id": "safe-live-stop-03-verified",
+      "command": ".venv\\Scripts\\python.exe harness/verify/run_camera_range_lens_distance_live.py stop --runtime harness/tmp/camera-ux-runtime-03",
+      "ran": true,
+      "exit_code": 0,
+      "tested_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+      "evidence": [
+        "harness/logs/2026-10-04-camera-ux/safe-live-stop-03-verified.txt"
+      ]
+    }
+  ],
+  "required_checks": [
+    {
+      "id": "final_verification",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "generated_artifact_freshness",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "source_preservation",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "file_boundary",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "rendered_workflow",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    },
+    {
+      "id": "regression",
+      "status": "PASS",
+      "evidence": [
+        "harness/verify/2026-10-04-camera-range-lens-distance-summary.md"
+      ]
+    }
+  ],
+  "reports": {
+    "phase_work_record": "harness/phases/2026-10-04-camera-range-lens-distance.md",
+    "execution_log": "harness/logs/2026-10-04-camera-range-lens-distance.md",
+    "verification_summary": "harness/verify/2026-10-04-camera-range-lens-distance-summary.md",
+    "completion_report": "harness/verify/2026-10-04-camera-range-lens-distance-completion.md",
+    "rendered_evidence": "harness/verify/2026-10-04-camera-ux-browser/fb1c522f/browser-evidence.json"
+  },
+  "blockers": [],
+  "gate": {
+    "implementation": "IMPLEMENTATION_COMPLETE_AWAITING_QA",
+    "independent_qa": "PENDING",
+    "master": "PENDING",
+    "phase_seal": "ABSENT"
+  }
+}

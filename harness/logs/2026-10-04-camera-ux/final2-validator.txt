@@ -1,0 +1,4 @@
+COMMAND: .\.venv\Scripts\python.exe scripts/validate_engineering_data.py
+a7abe7c665938f38f95c86fc5310c8ee3ddc1e01
+Engineering data validation PASSED: 8 catalogs matched schemas; identifiers, traceability, units, camera angles/resolution, fixture capabilities, IES parses/references/hashes, CAP unknowns, calculation areas, and all supplied-source hashes are valid.
+EXIT: 0

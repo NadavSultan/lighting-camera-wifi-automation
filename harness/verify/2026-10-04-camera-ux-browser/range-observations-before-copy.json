@@ -1,0 +1,22 @@
+[
+  {
+    "step": "import-and-assign",
+    "observed": "74 source poles, 74 edits; both slots pinned camera-imx477 r1 and lens-jl-ln037 r1, 3.56 mm, 87°/68°, 4056×3040 px"
+  },
+  {
+    "step": "50m-current",
+    "snapshot": "\"Map layers\" [level=3]\n    - generic: Camera\n    - checkbox \"Original customer poles\" [checked]\n    - generic: Original customer poles\n    - checkbox \"SMART fixtures\" [checked]\n    - generic: SMART fixtures\n    - checkbox \"Camera pixel density\" [checked]\n    - generic: Camera pixel density\n    - checkbox \"Priority areas\" [checked]\n    - generic: Priority areas\n    - checkbox \"Warnings\" [checked]\n    - generic: Warnings\n    - heading \"Camera pixel density\" [level=3]\n    - generic: px/face\n    - generic: Lower projection plane (m)\n    - spinbutton \"Lower projection plane (m)\": \"0.5\"\n    - generic: Upper projection plane (m)\n    - spinbutton \"Upper projection plane (m)\": \"2\"\n    - generic: AUTO measurement height (m)\n    - textbox \"AUTO measurement height (m)\": \"1.25\"\n    - generic: Maximum visible distance (m)\n    - spinbutton \"Maximum visible distance (m)\": \"50\"\n    - paragraph: Current camera pixel-density result\n    - button \"Calculate camera density\"\n    - button \"Show colour legend\"\n    - generic \"Camera pixel-density colour legend\":\n      - generic: 2–3 px/face\n      - generic: 3–5 px/face\n      - generic: 5–7 px/face\n      - generic: 7–10 px/face\n      - generic: 10–15 px/face\n      - generic: 15–20 px/face\n      - generic: 20–30 px/face\n      - generic: 30–45 px/face\n      - generic: 45–70 px/face\n      - generic: 70–∞ px/face\n    - paragraph: Geometric horizontal pixel density for a front-facing 0.16 m reference face using an ideal pinhole model; not detection, recognition, identification, analytics, occlusion, visibility, or compliance evidence.\n    - paragraph: Calculate camera density to show the distance-bounded preview and heat map together. After changing Maximum visible distance, recalculate to refresh both. Preview outlines below 2 px/face have no density colour.\n    - heading \"Priority areas\" [level=3]\n    - generic: Geometric only\n    - strong: 148 valid footprints\n    - generic: 4953 overlap pairs · 132360531.5 m² summed pairwise overlap\n    - generic: Stored Phase 3 metrics · priority area amber\n    - note:\n      - strong: Projection boundary\n      - paragraph: The displayed boundary is the intersection of the camera field-of-view corner rays "
+  },
+  {
+    "check": "25m-stale-hidden",
+    "observation": "Stale status, disabled unchecked density control, no camera projection or heat colours on stable map screenshot"
+  },
+  {
+    "check": "25m-current",
+    "observation": "Current result; narrow bounded grey/white preview with continuous green/yellow heat; Phase 3 metrics unchanged"
+  },
+  {
+    "check": "75m-current",
+    "observation": "Current result, range75; metrics148/4953/132360531.5 unchanged"
+  }
+]

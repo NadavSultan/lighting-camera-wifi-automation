@@ -1,0 +1,334 @@
+{
+  "head": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+  "events": [
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.20221167866247,
+          25.76588842953606
+        ],
+        "end_wgs84": [
+          -80.2019101158386,
+          25.766247960460827
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99999999958091
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 422,
+      "response": {
+        "detail": "Controlled QA distance failure"
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": true
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": false,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.25996621867112,
+          25.749360418377663
+        ],
+        "end_wgs84": [
+          -80.25972481278498,
+          25.749357289816146
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 24.214500999328646
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.25946603956879,
+          25.749954843583225
+        ],
+        "end_wgs84": [
+          -80.25929236626949,
+          25.74979841618628
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 24.566801992609207
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false
+    }
+  ],
+  "measurements": [
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.20221167866247,
+          25.76588842953606
+        ],
+        "end_wgs84": [
+          -80.2019101158386,
+          25.766247960460827
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99999999958091
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 49.99999999958091,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 49.99288958546626,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 49.99288958546626,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 49.99288958546626,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.26109607960292,
+          25.74842886277392
+        ],
+        "end_wgs84": [
+          -80.26059924233495,
+          25.748392578468355
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 49.99288958546626
+      },
+      "project_catalog_bytes_unchanged": false,
+      "controlled_fault": false,
+      "independent_reference_m": 49.99288958546626,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.25996621867112,
+          25.749360418377663
+        ],
+        "end_wgs84": [
+          -80.25972481278498,
+          25.749357289816146
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 24.214500999328646
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 24.214500999328646,
+      "absolute_error_m": 0.0
+    },
+    {
+      "request": {
+        "projected_crs": "EPSG:32617",
+        "start_wgs84": [
+          -80.25946603956879,
+          25.749954843583225
+        ],
+        "end_wgs84": [
+          -80.25929236626949,
+          25.74979841618628
+        ]
+      },
+      "status": 200,
+      "response": {
+        "projected_crs": "EPSG:32617",
+        "distance_m": 24.566801992609207
+      },
+      "project_catalog_bytes_unchanged": true,
+      "controlled_fault": false,
+      "independent_reference_m": 24.566801992609207,
+      "absolute_error_m": 0.0
+    }
+  ],
+  "export_sha256": "ce4e959dd6169f6036aa84094f298bd8a70036f34bb1def320f37236140fe312",
+  "concurrent_reopen_event_indices": [
+    5
+  ],
+  "observer_limitation": "Whole request-window hashes include concurrent Open Project writes. Explicitly identified reopen events remain raw evidence but cannot establish endpoint non-persistence; uncontended requests and backend tests do.",
+  "assertions": {
+    "all_reference_errors_below_1e_6": true,
+    "browser_50m_click_tolerance": true,
+    "all_uncontended_distance_requests_read_only": true,
+    "controlled_error_recorded": true,
+    "export_has_only_project_model_fields": true,
+    "export_no_measurement_fields": true
+  },
+  "pass": true
+}

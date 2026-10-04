@@ -1,6 +1,6 @@
 # Work record — 2026-10-04 — Camera range/lens/distance UX
 
-Status: active, M0 environment preflight.
+Status: implementation complete awaiting clean readiness check and independent QA.
 
 ## Scope, authority, and non-goals
 
@@ -25,12 +25,12 @@ Status: active, M0 environment preflight.
 
 ## Milestones and acceptance
 
-- M0 preflight: active.
-- M1 distance API: pending; UX-05/08.
-- M2 bounded preview: pending; UX-01/02/03/08.
-- M3 pinned specs: pending; UX-04.
-- M4 transient interaction: pending; UX-06/07/08.
-- M5 final/readiness: pending; UX-09 and full browser acceptance.
+- M0 preflight: PASS.
+- M1 distance API: PASS; UX-05/08.
+- M2 bounded preview: PASS; UX-01/02/03/08.
+- M3 pinned specs: PASS; UX-04.
+- M4 transient interaction: PASS; UX-06/07/08.
+- M5 final verification: PASS; clean readiness result recorded separately; UX-09 and full browser acceptance.
 - Acceptance IDs and verification requirements: approved plan Acceptance Coverage and Final Verification Commands; no duplicated product contract.
 
 ## Changes and evidence
@@ -41,7 +41,7 @@ Status: active, M0 environment preflight.
 
 ## Definition of Done and gate
 
-All milestones and UX acceptance remain pending. QA/master pending; seal absent. Required deterministic/generated/source/browser/boundary checks and clean readiness required before handoff. Follow AGENTS.md recovery protocol; no proven blocker.
+All implementation milestones and UX checks are evidenced in the summary/readiness manifest. Independent QA/master pending; seal absent. Required deterministic/generated/source/browser/boundary checks and clean readiness required before handoff. Follow AGENTS.md recovery protocol; no proven blocker.
 
 ### M0 preflight result
 Both escalated locked installs exited 0; pip check, backend (367 tests), validator, exporter, frontend (113 tests), typecheck, lint and production build exited 0 at base 98ac861e. Schema/lock/workspace diffs empty. Known non-failing Starlette/httpx and anyio deprecations, Vite chunk/plugin/route advisories preserved in transcripts. Satellite bundle test skipped because unconfigured baseline; final production build will set approved EOX configuration and require that test to run. Product boundary confirmed; M0 complete. Baseline browser runtimes/ports available.
@@ -53,3 +53,8 @@ M2 complete: focused frontend 15/15, BL-016 backend 66/66, typecheck/lint exit 0
 M3 complete: historical pin / missing pin / compatibility tests 3/3; typecheck/lint exit 0. Explicit override IDs require their own revision; null IDs inherit template according to existing assignment semantics. Cards expose pinned name/ID/revision, focal/FOV/resolution without mutation.
 
 M4 implemented: workflow RED to GREEN 8/8; typecheck/lint/build exit 0; configured Satellite bundle assertion runs and passes. Full frontend verification recorded in m4-frontend. Ruling: explicit map remount key advances only on New/Import/Open, so reopening the same project ID also clears measurements while ordinary saves/edits retain session state. No persisted schema field added. Request cancellation and shared map guard exercised in unit tests; actual browser pending.
+
+## Final implementation checkpoint
+Product commit `fb1c522f2f14e2eebfa638f74af3cbde74920b1e`; all final4 deterministic checks PASS (387 backend/126 frontend), current production-browser checks PASS. Source/boundary evidence and recovery limitations are in the verification summary. M0�M5 implementation work achieved; actual durable goal remains active until the clean readiness verifier passes and this QA handoff is recorded. Readiness goal status ACHIEVED describes the implemented objective, not an assertion that the final clean check already ran. No merge/push/seal or independent QA performed.
+
+The preflight active/pending bullets above are historical startup observations; the M0 result supersedes them. Exact final paths: `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`, `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`, `harness/verify/2026-10-04-camera-range-lens-distance-readiness.json`.

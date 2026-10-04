@@ -1,0 +1,4 @@
+COMMAND: corepack pnpm run lint
+a7abe7c665938f38f95c86fc5310c8ee3ddc1e01
+$ eslint . --ignore-pattern dist --ignore-pattern .next
+EXIT: 0

@@ -1,0 +1,1230 @@
+COMMAND: ..\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp ../harness/tmp/camera-ux-final2-before-schema
+a7abe7c665938f38f95c86fc5310c8ee3ddc1e01
+F...FFF.............................................................FF.. [ 18%]
+F...............F....................................................... [ 37%]
+F.F.....................................FFFF........F................... [ 55%]
+........................................................................ [ 74%]
+....................F................................................... [ 93%]
+...........................                                              [100%]
+================================== FAILURES ===================================
+_____________________ test_import_save_reopen_and_export ______________________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_import_save_reopen_and_ex0')
+
+    def test_import_save_reopen_and_export(tmp_path: Path) -> None:
+        store = ProjectStore(tmp_path / "projects")
+        client = TestClient(create_app(store))
+        source = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+
+>       imported = client.post(
+            "/api/projects/import",
+            content=source.read_bytes(),
+            headers={"X-Filename": source.name, "Content-Type": "application/octet-stream"},
+        )
+
+tests\test_api.py:19:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_import_save_reopen_and_ex0/projects/216370f3-5566-433d-8676-cd5edc5b32f9/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_import_save_reopen_and_ex0\\projects\\216370f3-5566-433d-8676-cd5edc5b32f9\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+____ test_open_rejects_tampered_source_content_and_preserves_saved_project ____
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_open_rejects_tampered_sou0')
+
+    def test_open_rejects_tampered_source_content_and_preserves_saved_project(tmp_path: Path) -> None:
+        store_root = tmp_path / "projects"
+        client = TestClient(create_app(ProjectStore(store_root)))
+        source = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+>       imported = client.post(
+            "/api/projects/import",
+            content=source.read_bytes(),
+            headers={"X-Filename": source.name, "Content-Type": "application/octet-stream"},
+        )
+
+tests\test_api.py:88:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_open_rejects_tampered_sou0/projects/b1a0285e-d2d0-46c4-97cc-c3589effdb00/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_open_rejects_tampered_sou0\\projects\\b1a0285e-d2d0-46c4-97cc-c3589effdb00\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_______ test_open_rejects_source_integrity_mismatch_and_unsafe_filename _______
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_open_rejects_source_integ0')
+
+    def test_open_rejects_source_integrity_mismatch_and_unsafe_filename(tmp_path: Path) -> None:
+        client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
+        source = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+>       imported = client.post(
+            "/api/projects/import",
+            content=source.read_bytes(),
+            headers={"X-Filename": source.name, "Content-Type": "application/octet-stream"},
+        ).json()
+
+tests\test_api.py:116:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_open_rejects_source_integ0/projects/6b014256-f189-4087-be45-dd0680f15fd5/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_open_rejects_source_integ0\\projects\\6b014256-f189-4087-be45-dd0680f15fd5\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_______ test_open_rejects_source_records_that_do_not_match_embedded_kml _______
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_open_rejects_source_recor0')
+
+    def test_open_rejects_source_records_that_do_not_match_embedded_kml(tmp_path: Path) -> None:
+        client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
+        source = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+>       imported = client.post(
+            "/api/projects/import",
+            content=source.read_bytes(),
+            headers={"X-Filename": source.name, "Content-Type": "application/octet-stream"},
+        ).json()
+
+tests\test_api.py:144:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_open_rejects_source_recor0/projects/378e149a-66a6-4990-8879-4228e2681175/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_open_rejects_source_recor0\\projects\\378e149a-66a6-4990-8879-4228e2681175\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_______ test_bl016_atomic_api_success_identity_and_failure_preservation _______
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_bl016_atomic_api_success_0')
+
+    def test_bl016_atomic_api_success_identity_and_failure_preservation(tmp_path: Path) -> None:
+        project, catalogs = bl016_configured_project(tmp_path)
+        projects = ProjectStore(tmp_path / "projects")
+>       stored = projects.save(project)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bl016_camera_pixel_density.py:632:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_bl016_atomic_api_success_0/projects/d0a3c957-30d5-49f5-9201-1560b3f3f70d/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_bl016_atomic_api_success_0\\projects\\d0a3c957-30d5-49f5-9201-1560b3f3f70d\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+___ test_bl016_api_marks_result_stale_when_effective_pole_becomes_inactive ____
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_bl016_api_marks_result_st0')
+
+    def test_bl016_api_marks_result_stale_when_effective_pole_becomes_inactive(tmp_path: Path) -> None:
+        project, catalogs = bl016_configured_project(tmp_path)
+        projects = ProjectStore(tmp_path / "projects")
+>       stored = projects.save(project)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bl016_camera_pixel_density.py:661:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_bl016_api_marks_result_st0/projects/332260ab-56af-4b23-9192-0904b9e3072c/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_bl016_api_marks_result_st0\\projects\\332260ab-56af-4b23-9192-0904b9e3072c\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+__________ test_bl016_heatmap_tile_api_is_current_only_and_read_only __________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_bl016_heatmap_tile_api_is0')
+
+    def test_bl016_heatmap_tile_api_is_current_only_and_read_only(tmp_path: Path) -> None:
+        project, catalogs = bl016_configured_project(tmp_path)
+        projects = ProjectStore(tmp_path / "projects")
+>       stored = projects.save(project)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bl016_camera_pixel_density.py:720:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_bl016_heatmap_tile_api_is0/projects/3791ac72-f059-4585-a817-5b2171dd55b1/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_bl016_heatmap_tile_api_is0\\projects\\3791ac72-f059-4585-a817-5b2171dd55b1\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_______________ test_preview_api_is_read_only_and_does_not_save _______________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_preview_api_is_read_only_0')
+
+    def test_preview_api_is_read_only_and_does_not_save(tmp_path: Path) -> None:
+        project_store = ProjectStore(tmp_path / "projects")
+        catalog_store = catalogs(tmp_path)
+        client = TestClient(create_app(project_store, catalog_store))
+        project = configure(miracle_project(), catalog_store, [miracle_project().source.poles[0].id], azimuth=90.0)
+>       saved = project_store.save(project)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_fixture_direction_preview.py:186:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_preview_api_is_read_only_0/projects/094119e3-0e43-4527-ab81-09e174f0e6c9/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_preview_api_is_read_only_0\\projects\\094119e3-0e43-4527-ab81-09e174f0e6c9\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+__________ test_phase_two_api_catalog_upload_and_bulk_configuration ___________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_phase_two_api_catalog_upl0')
+
+    def test_phase_two_api_catalog_upload_and_bulk_configuration(tmp_path: Path) -> None:
+        catalogs = store(tmp_path)
+        client = TestClient(create_app(ProjectStore(tmp_path / "projects"), catalogs))
+        fixtures = client.get("/api/catalogs/fixtures")
+        assert fixtures.status_code == 200
+        assert len(fixtures.json()["fixture_models"]) == 6
+
+        ies_path = ROOT / "Input" / "Lighting" / "JLED-SL-100W-PHOENIX1-40-D01.ies"
+        upload = client.post("/api/catalogs/ies/upload", content=ies_path.read_bytes(), headers={"Origin": "http://127.0.0.1:3000", "X-Filename": ies_path.name, "Content-Type": "application/octet-stream"})
+        assert upload.status_code == 201, upload.text
+        assert upload.headers["access-control-allow-origin"] == "http://127.0.0.1:3000"
+        ies_id = upload.json()["id"]
+        for fixture_id in ("phoenix-1-smart", "phoenix-1-wifi"):
+            response = client.put(f"/api/catalogs/ies/{ies_id}/fixtures/{fixture_id}", json={"active": True})
+            assert response.status_code == 200, response.text
+
+        source = ROOT / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+>       imported = client.post("/api/projects/import", content=source.read_bytes(), headers={"X-Filename": source.name, "Content-Type": "application/octet-stream"})
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_phase2_catalogs.py:270:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_phase_two_api_catalog_upl0/projects/b5a0ea41-2536-4c77-8c37-ae75e6783f75/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_phase_two_api_catalog_upl0\\projects\\b5a0ea41-2536-4c77-8c37-ae75e6783f75\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_ test_ir02_inactive_camera_validation_is_safe_and_api_deactivation_conflicts _
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_ir02_inactive_camera_vali0')
+
+    def test_ir02_inactive_camera_validation_is_safe_and_api_deactivation_conflicts(tmp_path: Path) -> None:
+        catalogs = store(tmp_path)
+        projects = ProjectStore(tmp_path / "projects")
+        client = TestClient(create_app(projects, catalogs))
+        project = sample_project()
+        pole_id = project.source.poles[0].id
+        project = apply_bulk_configuration(project, BulkPoleConfigurationRequest(pole_ids=[pole_id], patch=BulkPoleConfigurationPatch(fixture_model_id="phoenix-1-smart", lens_by_slot={"camera-1": "lens-jl-ln039"})), catalogs.fixtures(), catalogs.cameras())
+>       projects.save(project)
+
+tests\test_phase2_catalogs.py:330:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_ir02_inactive_camera_vali0/projects/d029fc5a-3031-40c5-8ccb-606c75a19559/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_ir02_inactive_camera_vali0\\projects\\d029fc5a-3031-40c5-8ccb-606c75a19559\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_ test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[NOT-A-CRS] _
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_unsupported_project_crs_i0')
+invalid_crs = 'NOT-A-CRS'
+
+    @pytest.mark.parametrize("invalid_crs", ["NOT-A-CRS", "EPSG:4326", "EPSG:2263"])
+    def test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state(
+        tmp_path: Path, invalid_crs: str
+    ) -> None:
+        catalog_store = catalogs(tmp_path)
+        project_store = ProjectStore(tmp_path / "projects")
+        project = miracle_project()
+        project = configure(project, catalog_store, [project.source.poles[0].id])
+        to_projected = Transformer.from_crs("EPSG:4326", project.projected_crs, always_xy=True)
+        to_wgs84 = Transformer.from_crs(project.projected_crs, "EPSG:4326", always_xy=True)
+        center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+        project.calculation_areas = [CalculationArea(
+            id="crs-area", name="CRS regression area", classification="OTHER", grid_spacing_m=2,
+            wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+                (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+                (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+                (center_x - 2.1, center_y - 2.1),
+            )],
+        )]
+>       project_store.save(project)
+
+tests\test_phase3_camera_geometry.py:167:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_unsupported_project_crs_i0/projects/0f817b01-1ce0-45d4-a80f-71e5542b46fd/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_unsupported_project_crs_i0\\projects\\0f817b01-1ce0-45d4-a80f-71e5542b46fd\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_ test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[EPSG:4326] _
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_unsupported_project_crs_i1')
+invalid_crs = 'EPSG:4326'
+
+    @pytest.mark.parametrize("invalid_crs", ["NOT-A-CRS", "EPSG:4326", "EPSG:2263"])
+    def test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state(
+        tmp_path: Path, invalid_crs: str
+    ) -> None:
+        catalog_store = catalogs(tmp_path)
+        project_store = ProjectStore(tmp_path / "projects")
+        project = miracle_project()
+        project = configure(project, catalog_store, [project.source.poles[0].id])
+        to_projected = Transformer.from_crs("EPSG:4326", project.projected_crs, always_xy=True)
+        to_wgs84 = Transformer.from_crs(project.projected_crs, "EPSG:4326", always_xy=True)
+        center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+        project.calculation_areas = [CalculationArea(
+            id="crs-area", name="CRS regression area", classification="OTHER", grid_spacing_m=2,
+            wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+                (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+                (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+                (center_x - 2.1, center_y - 2.1),
+            )],
+        )]
+>       project_store.save(project)
+
+tests\test_phase3_camera_geometry.py:167:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_unsupported_project_crs_i1/projects/4620e6cf-ba56-4031-a70b-73b112c2c6e1/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_unsupported_project_crs_i1\\projects\\4620e6cf-ba56-4031-a70b-73b112c2c6e1\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_ test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[EPSG:2263] _
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_unsupported_project_crs_i2')
+invalid_crs = 'EPSG:2263'
+
+    @pytest.mark.parametrize("invalid_crs", ["NOT-A-CRS", "EPSG:4326", "EPSG:2263"])
+    def test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state(
+        tmp_path: Path, invalid_crs: str
+    ) -> None:
+        catalog_store = catalogs(tmp_path)
+        project_store = ProjectStore(tmp_path / "projects")
+        project = miracle_project()
+        project = configure(project, catalog_store, [project.source.poles[0].id])
+        to_projected = Transformer.from_crs("EPSG:4326", project.projected_crs, always_xy=True)
+        to_wgs84 = Transformer.from_crs(project.projected_crs, "EPSG:4326", always_xy=True)
+        center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+        project.calculation_areas = [CalculationArea(
+            id="crs-area", name="CRS regression area", classification="OTHER", grid_spacing_m=2,
+            wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+                (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+                (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+                (center_x - 2.1, center_y - 2.1),
+            )],
+        )]
+>       project_store.save(project)
+
+tests\test_phase3_camera_geometry.py:167:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_unsupported_project_crs_i2/projects/1bcf9ca9-cce1-4173-8846-1b0687b5e025/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_unsupported_project_crs_i2\\projects\\1bcf9ca9-cce1-4173-8846-1b0687b5e025\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+_ test_projected_metre_crs_and_missing_crs_contract_remain_operational_across_shared_paths _
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_projected_metre_crs_and_m0')
+
+    def test_projected_metre_crs_and_missing_crs_contract_remain_operational_across_shared_paths(tmp_path: Path) -> None:
+        catalog_store = catalogs(tmp_path)
+        project_store = ProjectStore(tmp_path / "projects")
+        client = TestClient(create_app(project_store, catalog_store))
+
+        blank = client.post("/api/projects", json={"name": "Blank project without source"})
+        assert blank.status_code == 201 and blank.json()["projected_crs"] is None
+        assert client.get(f"/api/projects/{blank.json()['id']}").status_code == 200
+
+        project = miracle_project()
+        project = configure(project, catalog_store, [project.source.poles[0].id])
+        to_projected = Transformer.from_crs("EPSG:4326", "EPSG:32617", always_xy=True)
+        to_wgs84 = Transformer.from_crs("EPSG:32617", "EPSG:4326", always_xy=True)
+        center_x, center_y = to_projected.transform(project.source.poles[0].longitude, project.source.poles[0].latitude)
+        project.calculation_areas = [CalculationArea(
+            id="valid-area", name="Valid projected-metre area", classification="OTHER", grid_spacing_m=2,
+            wgs84_coordinates=[to_wgs84.transform(x, y) for x, y in (
+                (center_x - 2.1, center_y - 2.1), (center_x + 2.1, center_y - 2.1),
+                (center_x + 2.1, center_y + 2.1), (center_x - 2.1, center_y + 2.1),
+                (center_x - 2.1, center_y - 2.1),
+            )],
+        )]
+>       project_store.save(project)
+
+tests\test_phase3_camera_geometry.py:250:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_projected_metre_crs_and_m0/projects/1cfa5199-26c8-44a6-bdd6-d2c5e78d526a/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_projected_metre_crs_and_m0\\projects\\1cfa5199-26c8-44a6-bdd6-d2c5e78d526a\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+________ test_project_summary_aggregates_enabled_camera_warnings_only _________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_project_summary_aggregate0')
+
+    def test_project_summary_aggregates_enabled_camera_warnings_only(tmp_path: Path) -> None:
+        catalog_store = catalogs(tmp_path)
+        project = configure(miracle_project(), catalog_store, [miracle_project().source.poles[0].id])
+        pole_id = project.source.poles[0].id
+        project.pole_edits[pole_id].height_m = None
+        project.defaults.pole_height_m = None
+        project.pole_edits[pole_id].fixture_configuration.camera_overrides["camera-2"].enabled = False  # type: ignore[union-attr]
+        project.camera_geometry = calculate_camera_geometry(project, catalog_store.fixtures(), catalog_store.cameras())
+        project_store = ProjectStore(tmp_path / "projects")
+>       project_store.save(project)
+
+tests\test_phase3_camera_geometry.py:381:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_project_summary_aggregate0/projects/050d6813-22b2-4fda-8579-279ed8c7b72d/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_project_summary_aggregate0\\projects\\050d6813-22b2-4fda-8579-279ed8c7b72d\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+____________ test_p6_ex_01_kml_export_excludes_cap_candidate_data _____________
+
+tmp_path = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/harness/tmp/camera-ux-final2-before-schema/test_p6_ex_01_kml_export_exclu0')
+
+    def test_p6_ex_01_kml_export_excludes_cap_candidate_data(tmp_path: Path):
+        client = TestClient(create_app(ProjectStore(tmp_path / "projects")))
+        source_path = Path(__file__).resolve().parents[2] / "Input" / "Miracle_Mile_Lighting_Poles.kml"
+>       imported = client.post("/api/projects/import", content=source_path.read_bytes(), headers={"X-Filename": source_path.name, "Content-Type": "application/octet-stream"})
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_phase6_cap_planning.py:632:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\.venv\Lib\site-packages\starlette\testclient.py:556: in post
+    return super().post(
+..\.venv\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+..\.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+..\.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+..\.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+..\.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+..\.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+..\.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+..\.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+..\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+..\.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\routing.py:280: in handle
+    await self.app(scope, receive, send)
+..\.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+..\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+..\.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+..\.venv\Lib\site-packages\fastapi\routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+..\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+app\main.py:201: in import_kml_or_kmz
+    return project_store.save(recalculate(project))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\store.py:45: in save
+    source_target.write_bytes(source_content)
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/ha...test_p6_ex_01_kml_export_exclu0/projects/78cede61-5370-46df-812d-3afa05cec6c6/sources/Miracle_Mile_Lighting_Poles.kml')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\NadavSultan\\Desktop\\Nadav\\lighting-camera-wifi-automation\\.worktrees\\bl016-heatmap-correction\\harness\\tmp\\camera-ux-final2-before-schema\\test_p6_ex_01_kml_export_exclu0\\projects\\78cede61-5370-46df-812d-3afa05cec6c6\\sources\\Miracle_Mile_Lighting_Poles.kml'
+
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_api.py::test_import_save_reopen_and_export - FileNotFoundEr...
+FAILED tests/test_api.py::test_open_rejects_tampered_source_content_and_preserves_saved_project
+FAILED tests/test_api.py::test_open_rejects_source_integrity_mismatch_and_unsafe_filename
+FAILED tests/test_api.py::test_open_rejects_source_records_that_do_not_match_embedded_kml
+FAILED tests/test_bl016_camera_pixel_density.py::test_bl016_atomic_api_success_identity_and_failure_preservation
+FAILED tests/test_bl016_camera_pixel_density.py::test_bl016_api_marks_result_stale_when_effective_pole_becomes_inactive
+FAILED tests/test_bl016_camera_pixel_density.py::test_bl016_heatmap_tile_api_is_current_only_and_read_only
+FAILED tests/test_fixture_direction_preview.py::test_preview_api_is_read_only_and_does_not_save
+FAILED tests/test_phase2_catalogs.py::test_phase_two_api_catalog_upload_and_bulk_configuration
+FAILED tests/test_phase2_catalogs.py::test_ir02_inactive_camera_validation_is_safe_and_api_deactivation_conflicts
+FAILED tests/test_phase3_camera_geometry.py::test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[NOT-A-CRS]
+FAILED tests/test_phase3_camera_geometry.py::test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[EPSG:4326]
+FAILED tests/test_phase3_camera_geometry.py::test_unsupported_project_crs_is_controlled_across_every_shared_api_path_and_preserves_exact_state[EPSG:2263]
+FAILED tests/test_phase3_camera_geometry.py::test_projected_metre_crs_and_missing_crs_contract_remain_operational_across_shared_paths
+FAILED tests/test_phase3_camera_geometry.py::test_project_summary_aggregates_enabled_camera_warnings_only
+FAILED tests/test_phase6_cap_planning.py::test_p6_ex_01_kml_export_excludes_cap_candidate_data
+EXIT: 1

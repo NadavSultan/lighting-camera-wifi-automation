@@ -1,0 +1,11 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-02
+ac86230910a423e6058f64cf6b73f264df732685
+{
+  "head": "ac86230910a423e6058f64cf6b73f264df732685",
+  "range_m": 25.0,
+  "state": "current",
+  "preview_without_density_area_m2": 874.7091176424398,
+  "phase3_geometry_metrics_sha256": "94499ce8cc87ece77de2adc7df4c375234300e986b006afcbaef0db046e4706f",
+  "source_poles_unchanged": true
+}
+EXIT: 0

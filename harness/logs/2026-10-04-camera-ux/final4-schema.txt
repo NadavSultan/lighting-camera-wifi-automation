@@ -1,0 +1,8 @@
+COMMAND: ..\.venv\Scripts\python.exe -m scripts.export_schema
+fb1c522f2f14e2eebfa638f74af3cbde74920b1e
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\schemas\project.schema.json
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\schemas\openapi.json
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\schemas\fixture-model-catalog.schema.json
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\schemas\ies-library.schema.json
+C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\schemas\camera-equipment-catalog.schema.json
+EXIT: 0

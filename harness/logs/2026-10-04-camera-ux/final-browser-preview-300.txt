@@ -1,0 +1,10 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py preview --runtime harness/tmp/camera-ux-runtime-03 --project dfaee5b5-51f0-4a4f-8696-f0641f6870aa
+fb1c522f2f14e2eebfa638f74af3cbde74920b1e
+Traceback (most recent call last):
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_camera_range_lens_distance_live.py", line 296, in <module>
+    preview(args.project)
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_camera_range_lens_distance_live.py", line 267, in preview
+    assert density < 2 and below_threshold_sample["in_preview"] and not below_threshold_sample["in_any_density_band"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+EXIT: 1

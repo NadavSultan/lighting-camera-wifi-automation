@@ -1,0 +1,11 @@
+COMMAND: .\.venv\Scripts\python.exe harness/verify/run_camera_range_lens_distance_live.py analyze --runtime harness/tmp/camera-ux-runtime-02 --export 'C:/Users/NadavSultan/Downloads/Miracle-Mile-Lighting-Poles.lighting-project (6).json'
+ac86230910a423e6058f64cf6b73f264df732685
+{
+  "all_reference_errors_below_1e_6": true,
+  "browser_50m_click_tolerance": true,
+  "all_distance_requests_read_only": true,
+  "controlled_error_recorded": true,
+  "export_has_only_project_model_fields": true,
+  "export_no_measurement_fields": true
+}
+EXIT: 0

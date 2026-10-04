@@ -1,0 +1,64 @@
+{
+  "head": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+  "tab": "1329305638",
+  "url": "http://127.0.0.1:3070/",
+  "browser": "Chrome production preview",
+  "checks": [
+    {
+      "id": "import-default-cards",
+      "pass": true,
+      "detail": "74-pole KML imported in UI; all74 explicitly assignedPhoenixSMART/height10/lens6mm; range50 and both camera/lensr1 cards4056x3040/52x40 verified"
+    },
+    {
+      "id": "range25-75-and-refresh-resize",
+      "pass": true,
+      "detail": "Stale then current25/75, same Phase3hash0893557a, source bytes/poles identical; 600/390/default resize during recalculation yielded no console errors"
+    },
+    {
+      "id": "distance-and-clear-error",
+      "pass": true,
+      "detail": "Measured49.99m and ignored third click; pole/density selection and marker suppressed; controlled422 shows error/no number; Clear removes endpoints; delayed200 after Clear leaves first-point; independentreference/export validationPASS"
+    },
+    {
+      "id": "escape-reopen-drawing",
+      "pass": true,
+      "detail": "PendingEscape resets; exportedJSON reopens with idle measure; allthree area drafts disable Measure, cancel restores it"
+    },
+    {
+      "id": "hide-show-overlap-background",
+      "pass": true,
+      "detail": "Hidden source removes all camera preview/raster; restore permits one2xpopup with storedwinner/two contributors; Satellite/EOX2025 attribution present; Standard preserved"
+    },
+    {
+      "check": "below2-uncoloured-preview",
+      "fixture": "Cobra Head 7 two JL-LN037 lenses, height20m, range300m; other73 narrow10m",
+      "sample": {
+        "wgs84": [
+          -80.25971541760963,
+          25.750061385437462
+        ],
+        "radial_m": 280,
+        "px_per_face": 1.424015746905178,
+        "in_preview": true,
+        "in_any_band": false,
+        "screen": [
+          656,
+          132
+        ]
+      },
+      "observation": "Subdued gray preview; sample click produced no density popup. Independent geometry and density evidence final-browser-preview-300-height20.",
+      "pass": true
+    },
+    {
+      "check": "final-responsive-and-console",
+      "widths": [
+        600,
+        390
+      ],
+      "observation": "Lower-left measurement start controls visible, Cancel usable; viewport reset; final browser warning/error log empty.",
+      "pass": true
+    }
+  ],
+  "console": [],
+  "pass": true
+}

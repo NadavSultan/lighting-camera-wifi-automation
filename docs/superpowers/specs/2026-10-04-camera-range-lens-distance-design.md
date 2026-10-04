@@ -2,7 +2,7 @@
 
 Date: 2026-10-04
 
-Status: design for user review; implementation not yet authorized by this document
+Status: user approved this design, then separately approved the implementation plan on 2026-10-04; scoped implementation authorized, independent QA and master review remain separate gates.
 
 Base: `codex/bl016-heatmap-correction` at `47f4e1805b08e04ef22e02dc73a424d9408bd8d4`
 
