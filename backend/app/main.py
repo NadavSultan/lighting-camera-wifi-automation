@@ -37,6 +37,7 @@ from app.services.camera_pixel_density import (
     calculate_camera_pixel_density,
     invalidate_stale_camera_pixel_density,
 )
+from app.services.camera_density_heatmap import render_heatmap_tile, transparent_tile
 from app.services.fixture_direction_preview import FixtureDirectionPreviewResponse, preview_fixture_directions
 from app.services.lighting_calculation import calculate_lighting_area, invalidate_stale_lighting_results
 from app.services.wifi_coverage import apply_wifi_result, calculate_wifi_coverage, invalidate_stale_wifi_results, validate_wifi_analysis_areas
@@ -288,6 +289,25 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
             )
             updated = apply_camera_pixel_density_result(candidate, result)
             return project_store.save(recalculate(updated))
+        except ProjectNotFoundError:
+            raise HTTPException(status_code=404, detail="Project not found") from None
+        except (ValidationError, ValueError, ArithmeticError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.get("/api/projects/{project_id}/camera-pixel-density/heatmap/{z}/{x}/{y}.png")
+    def camera_pixel_density_heatmap_tile(
+        project_id: str, z: int, x: int, y: int, fingerprint: str,
+    ) -> Response:
+        """Read-only continuous display of the stored, current density calculation."""
+        try:
+            project = pin_revisions(project_store.load(project_id))
+            invalidate_camera_density(project)
+            result = project.camera_pixel_density.result
+            if result is None or result.calculation_input_sha256 != fingerprint:
+                payload = transparent_tile()
+            else:
+                payload = render_heatmap_tile(project, load_camera_pixel_density_legend(), z, x, y)
+            return Response(content=payload, media_type="image/png", headers={"Cache-Control": "no-store"})
         except ProjectNotFoundError:
             raise HTTPException(status_code=404, detail="Project not found") from None
         except (ValidationError, ValueError, ArithmeticError) as exc:

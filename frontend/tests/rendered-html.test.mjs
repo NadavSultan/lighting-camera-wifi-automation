@@ -150,8 +150,10 @@ test("exposes conceptual Wi-Fi and the Phase 6 CAP graph workflow", async () => 
   assert.match(map, /cap-candidate-sites/);
   assert.match(map, /cap-manual-candidate-sites/);
   assert.match(map, /camera-density-band-/);
+  assert.match(map, /camera-density-heatmap/);
   assert.match(map, /camera-density-overlap-dots/);
-  assert.match(map, /fill-opacity": \.58/);
+  assert.match(map, /fill-opacity": \.001/);
+  assert.match(map, /raster-resampling": "linear"/);
   assert.match(map, /setDOMContent\(element\)/);
   assert.match(map, /textContent = `Winner:/);
   assert.match(map, /CameraPixelDensityLabels/);

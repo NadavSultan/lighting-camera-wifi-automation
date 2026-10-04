@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type StyleSpecification } from "maplibre-gl";
+import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker, type RasterSourceSpecification, type RasterTileSource, type StyleSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection, Geometry, LineString, Point, Polygon } from "geojson";
-import type { EffectivePole, FixtureType, PixelDensityLegendDefinition, Project } from "../lib/types";
+import type { EffectivePole, FixtureType, Project } from "../lib/types";
 import { effectivePole } from "../lib/types";
 import { fixtureAzimuthFromHandle } from "../lib/phase3-workflows.mjs";
 import { buildPolygonDraft, type LngLat } from "../lib/polygon-draft.mjs";
@@ -11,7 +11,7 @@ import LightingPointLabels from "./LightingPointLabels";
 import { lightingLabelPoints } from "../lib/lighting-labels.mjs";
 import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
-import type { FixtureDirectionPreview } from "../lib/api";
+import { cameraDensityHeatmapTiles, type FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
 import { attachDensityInspection, densityBandFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
@@ -140,7 +140,7 @@ function clearDraftSources(map: MapLibreMap, tool: DraftTool) {
   setDraftSources(map, tool, [], null);
 }
 
-export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null, backgroundVisible = "standard", satelliteConfig = null, onSatelliteTileError, densityLegend = null }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null; backgroundVisible?: BackgroundChoice; satelliteConfig?: SatelliteRasterConfig | null; onSatelliteTileError?: () => void; densityLegend?: PixelDensityLegendDefinition | null }) {
+export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthChange, drawingPriorityArea, priorityDraft, onPriorityDraftPoint, onSelectPriorityArea, drawingCalculationArea, calculationDraft, onCalculationDraftPoint, onSelectCalculationArea, drawingWifiArea, wifiDraft, onWifiDraftPoint, onSelectWifiArea, resizeSignal, focusRequest = null, focusRequestKey = 0, onMapReady, fixtureDirectionPreview = null, backgroundVisible = "standard", satelliteConfig = null, onSatelliteTileError }: { project: Project | null; selected: EffectivePole | null; onSelect: (id: string) => void; onFixtureAzimuthChange: (azimuth: number) => void; drawingPriorityArea: boolean; priorityDraft: Array<[number, number]>; onPriorityDraftPoint: (coordinate: [number, number]) => void; onSelectPriorityArea: (id: string) => void; drawingCalculationArea: boolean; calculationDraft: Array<[number, number]>; onCalculationDraftPoint: (coordinate: [number, number]) => void; onSelectCalculationArea: (id: string) => void; drawingWifiArea: boolean; wifiDraft: Array<[number, number]>; onWifiDraftPoint: (coordinate: [number, number]) => void; onSelectWifiArea: (id: string) => void; resizeSignal: string; focusRequest?: { kind: "point"; coordinate: [number, number]; highlightId?: string } | { kind: "bounds"; coordinates: Array<[number, number]> } | null; focusRequestKey?: number; onMapReady?: (map: MapLibreMap | null) => void; fixtureDirectionPreview?: FixtureDirectionPreview | null; backgroundVisible?: BackgroundChoice; satelliteConfig?: SatelliteRasterConfig | null; onSatelliteTileError?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const directionCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -166,6 +166,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
   const satelliteConfigRef = useRef(satelliteConfig);
   const onSatelliteTileErrorRef = useRef(onSatelliteTileError);
   const densityResultRef = useRef(project?.camera_pixel_density.result);
+  const heatmapTileUrlRef = useRef("");
 
   useEffect(() => { onMapReadyRef.current = onMapReady; }, [onMapReady]);
   useEffect(() => { satelliteConfigRef.current = satelliteConfig; }, [satelliteConfig]);
@@ -212,6 +213,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addSource("camera-fov", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-overlap", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-density-bands", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("camera-density-heatmap", { type: "raster", tiles: [], tileSize: 256 });
       map.addSource("camera-density-overlaps", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("priority-areas", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("calculation-areas", { type: "geojson", data: EMPTY_GEOMETRY });
@@ -233,7 +235,10 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
       map.addLayer({ id: "camera-2-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-2"], paint: { "fill-color": "#22d3ee", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
       map.addLayer({ id: "camera-overlap-fill", type: "fill", source: "camera-overlap", paint: { "fill-color": "#ec4899", "fill-opacity": .48, "fill-outline-color": "#f9a8d4" } });
-      for (let rank = 1; rank <= 10; rank += 1) map.addLayer({ id: `camera-density-band-${rank}`, type: "fill", source: "camera-density-bands", filter: ["==", ["get", "rank"], rank], paint: { "fill-color": "#4cc9f0", "fill-opacity": .58 } });
+      map.addLayer({ id: "camera-density-heatmap", type: "raster", source: "camera-density-heatmap", paint: { "raster-opacity": 1, "raster-resampling": "linear" } });
+      // Persisted vector bands stay queryable for inspection, but their flat
+      // fills must not obscure the continuous backend-rendered heat map.
+      for (let rank = 1; rank <= 10; rank += 1) map.addLayer({ id: `camera-density-band-${rank}`, type: "fill", source: "camera-density-bands", filter: ["==", ["get", "rank"], rank], paint: { "fill-color": "#000000", "fill-opacity": .001 } });
       const dots = new Uint8Array(8 * 8 * 4); for (const index of [27, 28, 35, 36]) { dots[index * 4] = 255; dots[index * 4 + 1] = 255; dots[index * 4 + 2] = 255; dots[index * 4 + 3] = 210; }
       map.addImage("camera-density-overlap-dots", { width: 8, height: 8, data: dots });
       map.addLayer({ id: "camera-density-overlap-hit", type: "fill", source: "camera-density-overlaps", paint: { "fill-color": "#000000", "fill-opacity": 0 } });
@@ -340,6 +345,11 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       (map.getSource("camera-fov") as GeoJSONSource | undefined)?.setData(cameraFeatures(project));
       (map.getSource("camera-overlap") as GeoJSONSource | undefined)?.setData(overlapFeatures(project));
       (map.getSource("camera-density-bands") as GeoJSONSource | undefined)?.setData(project ? densityBandFeatures(project) : EMPTY_GEOMETRY);
+      const tileUrl = project ? cameraDensityHeatmapTiles(project)[0] ?? "" : "";
+      if (tileUrl !== heatmapTileUrlRef.current) {
+        (map.getSource("camera-density-heatmap") as RasterTileSource | undefined)?.setTiles(tileUrl ? [tileUrl] : []);
+        heatmapTileUrlRef.current = tileUrl;
+      }
       (map.getSource("camera-density-overlaps") as GeoJSONSource | undefined)?.setData(project ? densityOverlapFeatures(project) : EMPTY_GEOMETRY);
       (map.getSource("priority-areas") as GeoJSONSource | undefined)?.setData(priorityFeatures(project));
       (map.getSource("calculation-areas") as GeoJSONSource | undefined)?.setData(calculationAreaFeatures(project));
@@ -363,6 +373,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["camera-1-fov", project?.layer_state.camera_fov ?? true],
         ["camera-2-fov", project?.layer_state.camera_fov ?? true],
         ["camera-overlap-fill", project?.layer_state.camera_overlap ?? true],
+        ["camera-density-heatmap", Boolean(project?.layer_state.camera_pixel_density)],
         ...Array.from({ length: 10 }, (_, index) => [`camera-density-band-${index + 1}`, Boolean(project?.layer_state.camera_pixel_density)] as [string, boolean]),
         ["camera-density-overlap-dots", Boolean(project?.layer_state.camera_pixel_density)],
         ["camera-density-overlap-outline", Boolean(project?.layer_state.camera_pixel_density)],
@@ -394,15 +405,6 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
   }, [project, selected, priorityDraft, calculationDraft, wifiDraft, drawingPriorityArea, drawingCalculationArea, drawingWifiArea, backgroundVisible]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !densityLegend) return;
-    densityLegend.thresholds.forEach((threshold, index) => {
-      const layer = `camera-density-band-${index + 1}`;
-      if (map.getLayer(layer)) map.setPaintProperty(layer, "fill-color", threshold.colour);
-    });
-  }, [densityLegend, mapInstance]);
 
   useEffect(() => {
     azimuthMarkerRef.current?.remove();

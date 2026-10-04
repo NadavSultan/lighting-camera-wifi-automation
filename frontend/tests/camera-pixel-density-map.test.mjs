@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as densityMap from "../app/lib/camera-pixel-density-map.mjs";
-import { densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints, densityInspectionAt, densityLayerDefinitions } from "../app/lib/camera-pixel-density-map.mjs";
+import { densityBandFeatures, densityOverlapFeatures, densityOverlapLabelPoints, densityInspectionAt, densityLayerDefinitions, densityHeatmapTileTemplate } from "../app/lib/camera-pixel-density-map.mjs";
 
 function project(status = "current", visible = true) {
   const ring = [[-80,25],[-79.9,25],[-79.9,25.1],[-80,25.1],[-80,25]];
@@ -17,6 +17,17 @@ test("density GeoJSON requires a matching current visible result and preserves h
   assert.equal(feature.properties.rank, 8);
   assert.equal(densityOverlapFeatures(project()).features[0].properties.multiplicity, 2);
   assert.equal(densityOverlapLabelPoints(project())[0].label, "2×");
+});
+
+test("heatmap tile source only loads a visible, matching current calculation", () => {
+  const current = project();
+  current.id = "project/a";
+  assert.equal(densityHeatmapTileTemplate(current, "http://127.0.0.1:8070"),
+    "http://127.0.0.1:8070/api/projects/project%2Fa/camera-pixel-density/heatmap/{z}/{x}/{y}.png?fingerprint=a");
+  assert.equal(densityHeatmapTileTemplate(project("stale"), "http://127.0.0.1:8070"), null);
+  assert.equal(densityHeatmapTileTemplate(project("current", false), "http://127.0.0.1:8070"), null);
+  current.camera_pixel_density.state.calculation_input_sha256 = "different";
+  assert.equal(densityHeatmapTileTemplate(current, "http://127.0.0.1:8070"), null);
 });
 
 test("inspection uses stored winner and sorted contributors without HTML", () => {

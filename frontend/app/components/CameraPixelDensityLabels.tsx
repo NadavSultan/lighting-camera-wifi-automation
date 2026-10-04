@@ -14,9 +14,22 @@ export default function CameraPixelDensityLabels({ map, points, visible }: { map
       const ctx = canvas.getContext("2d"); if (!ctx) return;
       const width = map.getCanvas().clientWidth, height = map.getCanvas().clientHeight, dpr = window.devicePixelRatio || 1;
       if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) { canvas.width = Math.floor(width * dpr); canvas.height = Math.floor(height * dpr); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height); if (!visible) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
+      // At overview scales the overlapping labels hide the heat map itself.
+      // Keep every overlap inspectable, but show a sparse label sample on screen.
+      if (!visible || map.getZoom() < 17) return;
       ctx.font = "bold 12px ui-sans-serif, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      for (const point of points) { const screen = map.project(point.coordinate); if (screen.x < 0 || screen.y < 0 || screen.x > width || screen.y > height) continue; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(7,16,24,.95)"; ctx.fillStyle = "#fff"; ctx.strokeText(point.label, screen.x, screen.y); ctx.fillText(point.label, screen.x, screen.y); }
+      const occupied = new Set<string>();
+      const spacing = 48;
+      for (const point of points) {
+        const screen = map.project(point.coordinate);
+        if (screen.x < 0 || screen.y < 0 || screen.x > width || screen.y > height) continue;
+        const cell = `${Math.floor(screen.x / spacing)}:${Math.floor(screen.y / spacing)}`;
+        if (occupied.has(cell)) continue;
+        occupied.add(cell);
+        ctx.lineWidth = 4; ctx.strokeStyle = "rgba(7,16,24,.95)"; ctx.fillStyle = "#fff";
+        ctx.strokeText(point.label, screen.x, screen.y); ctx.fillText(point.label, screen.x, screen.y);
+      }
     };
     const schedule = createMapFrameScheduler(frameRef, draw); schedule();
     for (const event of ["move", "resize", "zoom", "rotate", "pitch", "idle"] as const) map.on(event, schedule);

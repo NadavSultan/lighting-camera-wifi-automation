@@ -1,5 +1,6 @@
 import type { CameraEquipmentCatalog, CameraModel, CapCandidateSite, CapPlanningInputs, FixtureModel, FixtureModelCatalog, IesFileRecord, IesLibrary, LastReportMetadata, LensConfiguration, PixelDensityLegendDefinition, Project, ReportPackageDownloadResult, ReportPackageRequest, WifiAnalysisArea } from "./types";
 import { formatApiErrorDetail } from "./phase2-workflows.mjs";
+import { densityHeatmapTileTemplate } from "./camera-pixel-density-map.mjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -60,6 +61,11 @@ export function calculateCameraPixelDensity(project: Project) {
   return api<Project>(`/api/projects/${encodeURIComponent(project.id)}/camera-pixel-density/calculate`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(project),
   });
+}
+
+export function cameraDensityHeatmapTiles(project: Project): string[] {
+  const tile = densityHeatmapTileTemplate(project, API_URL);
+  return tile ? [tile] : [];
 }
 
 export type FixtureDirectionPreview = {

@@ -1,5 +1,13 @@
 const empty = () => ({ type: "FeatureCollection", features: [] });
 
+export function densityHeatmapTileTemplate(project, apiUrl) {
+  const layer = project?.camera_pixel_density;
+  const fingerprint = layer?.result?.calculation_input_sha256;
+  if (!project?.layer_state?.camera_pixel_density || layer?.state?.status !== "current"
+    || !fingerprint || layer.state.calculation_input_sha256 !== fingerprint) return null;
+  return `${apiUrl}/api/projects/${encodeURIComponent(project.id)}/camera-pixel-density/heatmap/{z}/{x}/{y}.png?fingerprint=${fingerprint}`;
+}
+
 function visibleResult(project) {
   const layer = project?.camera_pixel_density;
   return project?.layer_state?.camera_pixel_density

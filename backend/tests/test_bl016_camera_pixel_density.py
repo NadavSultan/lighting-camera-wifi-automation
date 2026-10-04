@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import zlib
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -10,6 +11,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from shapely.geometry import MultiPolygon, Polygon
+import numpy as np
+from pyproj import Transformer
 
 from app.main import create_app
 from app.models import (
@@ -40,6 +43,13 @@ from app.services.camera_pixel_density import (
     validate_camera_pixel_density_result_limits,
     apply_camera_pixel_density_result,
     invalidate_stale_camera_pixel_density,
+)
+from app.services.camera_density_heatmap import (
+    WEB_MERCATOR_HALF_WORLD_M,
+    _tile_density,
+    interpolate_legend_colours,
+    render_heatmap_tile,
+    transparent_tile,
 )
 from app.services.catalogs import CatalogStore
 from app.services.configuration import BulkPoleConfigurationPatch, BulkPoleConfigurationRequest, apply_bulk_configuration
@@ -80,6 +90,28 @@ def bl016_configured_project(tmp_path: Path, *, poles: int = 1) -> tuple[Project
         store.fixtures(), store.cameras(),
     )
     return project, store
+
+
+def _tile_containing(lon: float, lat: float, zoom: int = 19) -> tuple[int, int, int]:
+    mx, my = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True).transform(lon, lat)
+    world = WEB_MERCATOR_HALF_WORLD_M * 2
+    return zoom, int((mx + WEB_MERCATOR_HALF_WORLD_M) / world * (1 << zoom)), int((WEB_MERCATOR_HALF_WORLD_M - my) / world * (1 << zoom))
+
+
+def _png_pixels(payload: bytes) -> np.ndarray:
+    assert payload.startswith(b"\x89PNG\r\n\x1a\n")
+    chunks = []
+    offset = 8
+    while offset < len(payload):
+        length = int.from_bytes(payload[offset:offset + 4], "big")
+        kind = payload[offset + 4:offset + 8]
+        if kind == b"IDAT":
+            chunks.append(payload[offset + 8:offset + 8 + length])
+        offset += 12 + length
+    rows = zlib.decompress(b"".join(chunks))
+    result = np.frombuffer(rows, dtype=np.uint8).reshape(256, 1 + 256 * 4)
+    assert np.all(result[:, 0] == 0)
+    return result[:, 1:].reshape(256, 256, 4)
 
 
 def legacy_project_payload(version: str) -> dict:
@@ -623,3 +655,67 @@ def test_bl016_api_marks_result_stale_when_effective_pole_becomes_inactive(tmp_p
     assert body["camera_pixel_density"]["state"]["message"] == "Stale — recalculate required"
     assert body["camera_pixel_density"]["result"] == current["camera_pixel_density"]["result"]
     assert body["layer_state"]["camera_pixel_density"] is False
+
+
+def test_bl016_heatmap_interpolates_existing_legend_and_caps_70_plus() -> None:
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    colours = interpolate_legend_colours(np.array([2.0, 12.5, 70.0, 100.0]), legend)
+    assert tuple(colours[0]) == (199, 249, 255)
+    assert tuple(colours[2]) == tuple(colours[3]) == (214, 51, 255)
+    assert tuple(colours[1]) not in {tuple(colours[0]), tuple(colours[2])}
+
+
+def test_bl016_heatmap_renders_continuous_density_and_max_not_sum(tmp_path: Path) -> None:
+    project, store = bl016_configured_project(tmp_path)
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    current = apply_camera_pixel_density_result(
+        project, calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+    )
+    first = next(camera for camera in current.camera_pixel_density.result.camera_results if camera.valid)
+    polygon = Polygon(first.bands[0].wgs84_rings[0][0])
+    lon, lat = polygon.representative_point().coords[0]
+    z, x, y = _tile_containing(lon, lat)
+    payload = render_heatmap_tile(current, legend, z, x, y)
+    pixels = _png_pixels(payload)
+    assert pixels.shape == (256, 256, 4)
+    assert np.count_nonzero(pixels[:, :, 3]) > 0
+    assert set(np.unique(pixels[:, :, 3])) <= {0, round(legend.fill_opacity * 255)}
+
+    px, py = Transformer.from_crs("EPSG:4326", current.projected_crs, always_xy=True).transform(lon, lat)
+    base = _tile_density(current, np.array([[px]]), np.array([[py]]))[0, 0]
+    assert base >= 2
+    duplicate = first.model_copy(deep=True)
+    duplicate.footprint_id += "-higher-resolution"
+    duplicate.resolution_width_px *= 2
+    current.camera_pixel_density.result.camera_results.append(duplicate)
+    highest = _tile_density(current, np.array([[px]]), np.array([[py]]))[0, 0]
+    assert highest == pytest.approx(base * 2)
+    assert highest != pytest.approx(base * 3)
+
+
+def test_bl016_heatmap_tile_api_is_current_only_and_read_only(tmp_path: Path) -> None:
+    project, catalogs = bl016_configured_project(tmp_path)
+    projects = ProjectStore(tmp_path / "projects")
+    stored = projects.save(project)
+    client = TestClient(create_app(projects, catalogs))
+    calculated = client.post(
+        f"/api/projects/{stored.id}/camera-pixel-density/calculate",
+        json=stored.model_dump(mode="json"),
+    )
+    assert calculated.status_code == 200, calculated.text
+    body = calculated.json()
+    result = body["camera_pixel_density"]["result"]
+    first = next(camera for camera in result["camera_results"] if camera["valid"])
+    lon, lat = Polygon(first["bands"][0]["wgs84_rings"][0][0]).representative_point().coords[0]
+    z, x, y = _tile_containing(lon, lat)
+    url = f"/api/projects/{stored.id}/camera-pixel-density/heatmap/{z}/{x}/{y}.png"
+    fingerprint = result["calculation_input_sha256"]
+    before = projects.load(stored.id).model_dump(mode="json")
+    tile = client.get(url, params={"fingerprint": fingerprint})
+    assert tile.status_code == 200
+    assert tile.headers["content-type"] == "image/png"
+    assert np.count_nonzero(_png_pixels(tile.content)[:, :, 3]) > 0
+    stale_url = client.get(url, params={"fingerprint": "0" * 64})
+    assert stale_url.status_code == 200 and stale_url.content == transparent_tile()
+    assert client.get(f"/api/projects/{stored.id}/camera-pixel-density/heatmap/23/0/0.png", params={"fingerprint": fingerprint}).status_code == 422
+    assert projects.load(stored.id).model_dump(mode="json") == before
