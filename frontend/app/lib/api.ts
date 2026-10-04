@@ -68,6 +68,15 @@ export function cameraDensityHeatmapTiles(project: Project): string[] {
   return tile ? [tile] : [];
 }
 
+/** Session-only projected measurement; never saves a project. */
+export function measureMapDistance(projectedCrs: string, start: [number, number], end: [number, number], init?: RequestInit) {
+  return api<{ projected_crs: string; distance_m: number }>("/api/map/distance", {
+    ...init,
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ projected_crs: projectedCrs, start_wgs84: start, end_wgs84: end }),
+  });
+}
+
 export type FixtureDirectionPreview = {
   directions: Array<{
     pole_id: string;

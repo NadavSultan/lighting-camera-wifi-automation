@@ -21,3 +21,5 @@ Subsequent exact command transcripts are paired dated files under `harness/logs/
 Use AGENTS.md recovery protocol. Preserve failed outputs/diff, recover safely in scope and continue; no proven blocker. Current milestone M0; readiness not run.
 
 M0 complete: both escalated installs exited 0. Baseline command evidence in paired files. Baseline build Satellite test skipped unconfigured (not an acceptance PASS); final configured build required. Full test counts: backend 367, frontend 113. Main checkout untouched.
+
+M1 RED: 12 endpoint tests returned 404. First GREEN found test-only assumption: GET /projects recalculates camera geometry; corrected non-persistence assertion to compare stored bytes directly. Failed focused/full outputs retained; m1-green-02 passes. Further nonfinite/transform tests added; full rerun m1-full-02 pending. Git index sandbox denied preflight commit; authorized escalated retry committed ec446ea1. This does not expand product scope.

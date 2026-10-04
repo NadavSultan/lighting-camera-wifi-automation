@@ -10,6 +10,7 @@ from pathlib import Path
 from fastapi import Body, FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
+from app.services.map_distance import MapDistanceRequest, MapDistanceResponse, measure_map_distance
 
 from app.catalog_models import (
     CameraEquipmentCatalog,
@@ -105,6 +106,13 @@ def create_app(store: ProjectStore | None = None, catalog_store: CatalogStore | 
         allow_headers=["*"],
         expose_headers=list(REPORT_RESPONSE_HEADERS),
     )
+
+    @app.post("/api/map/distance", response_model=MapDistanceResponse)
+    def map_distance(request: MapDistanceRequest) -> MapDistanceResponse:
+        try:
+            return measure_map_distance(request)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/reference/camera-pixel-density-legend", response_model=PixelDensityLegendDefinition)
     def get_camera_pixel_density_legend() -> PixelDensityLegendDefinition:

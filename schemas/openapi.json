@@ -6,6 +6,44 @@
     "version": "0.8.0"
   },
   "paths": {
+    "/api/map/distance": {
+      "post": {
+        "summary": "Map Distance",
+        "operationId": "map_distance_api_map_distance_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapDistanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapDistanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/reference/camera-pixel-density-legend": {
       "get": {
         "summary": "Get Camera Pixel Density Legend",
@@ -5849,6 +5887,80 @@
           "grid_spacing_m"
         ],
         "title": "LightingStatistics"
+      },
+      "MapDistanceRequest": {
+        "properties": {
+          "projected_crs": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Projected Crs"
+          },
+          "start_wgs84": {
+            "prefixItems": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": -90.0
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Start Wgs84"
+          },
+          "end_wgs84": {
+            "prefixItems": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": -90.0
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "End Wgs84"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "projected_crs",
+          "start_wgs84",
+          "end_wgs84"
+        ],
+        "title": "MapDistanceRequest"
+      },
+      "MapDistanceResponse": {
+        "properties": {
+          "projected_crs": {
+            "type": "string",
+            "title": "Projected Crs"
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Distance M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "projected_crs",
+          "distance_m"
+        ],
+        "title": "MapDistanceResponse"
       },
       "OperatingMode": {
         "type": "string",

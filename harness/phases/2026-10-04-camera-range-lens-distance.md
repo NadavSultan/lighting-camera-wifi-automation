@@ -45,3 +45,5 @@ All milestones and UX acceptance remain pending. QA/master pending; seal absent.
 
 ### M0 preflight result
 Both escalated locked installs exited 0; pip check, backend (367 tests), validator, exporter, frontend (113 tests), typecheck, lint and production build exited 0 at base 98ac861e. Schema/lock/workspace diffs empty. Known non-failing Starlette/httpx and anyio deprecations, Vite chunk/plugin/route advisories preserved in transcripts. Satellite bundle test skipped because unconfigured baseline; final production build will set approved EOX configuration and require that test to run. Product boundary confirmed; M0 complete. Baseline browser runtimes/ports available.
+
+M1 complete: m1-full-02 exited 0 (384 tests); 50 m analytic, zero, validation/transform and non-persistence checks pass. Only OpenAPI changed among five schema outputs. Ruling: non-persistence uses stored bytes rather than GET response because existing GET recalculates Phase 3 timestamps; no product change to that established behavior.
