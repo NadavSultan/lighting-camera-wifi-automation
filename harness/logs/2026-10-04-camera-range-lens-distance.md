@@ -49,4 +49,4 @@ Staged whitespace check found raw tool-output trailing spaces in newly added tra
 
 ## Clean readiness and handoff
 Readiness exit0 PASS at clean evidence commit0790f925 (productfb1c522f), six milestones/nine criteria. QA handoff NOT REVIEWED; master pending; no seal/merge/push. Main remains71d4d524 with original untracked items; port3000 HTTP200. Durable objective achieved; completion follows final clean recheck.
-Work-record startup packaging introduced two cp1255 punctuation bytes in the appended section; UTF8 read failed at checkpoint, corrected those bytes to UTF8 without altering product or evidence output. Final evidence recheck required.
+Work-record startup packaging introduced one cp1255 punctuation byte in the appended section; UTF8 read failed at checkpoint, corrected that byte to UTF8 without altering product or evidence output. Final evidence recheck required.
