@@ -1,0 +1,34 @@
+{
+  "camera": "pole-ef3c45c389de8986/camera-2",
+  "wgs84": [
+    -80.25780968381012,
+    25.75045051126918
+  ],
+  "radial_distance_m": 280,
+  "forward_depth_m": 240.11713058249984,
+  "independent_px_per_face": 1.424015746905178,
+  "in_preview": true,
+  "in_any_density_band": false
+}
+{
+  "verification_version": 2,
+  "head": "e0eef26befa914a714d67fbcfc1d69ba06a25ea2",
+  "range_m": 300.0,
+  "state": "current",
+  "preview_without_density_area_m2": 66587.42559600539,
+  "phase3_geometry_metrics_sha256": "f1369503f16a5cbc031f6b2573adeef7c9cd168a245160899459cea833ae0ec1",
+  "source_poles_unchanged": true,
+  "source_file_bytes_unchanged": true,
+  "below_threshold_sample": {
+    "camera": "pole-ef3c45c389de8986/camera-2",
+    "wgs84": [
+      -80.25780968381012,
+      25.75045051126918
+    ],
+    "radial_distance_m": 280,
+    "forward_depth_m": 240.11713058249984,
+    "independent_px_per_face": 1.424015746905178,
+    "in_preview": true,
+    "in_any_density_band": false
+  }
+}

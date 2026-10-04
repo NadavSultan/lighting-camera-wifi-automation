@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-04",
+  "reviewed_product_commit": "fb1c522f2f14e2eebfa638f74af3cbde74920b1e",
+  "reviewed_tip_before_qa": "e0eef26befa914a714d67fbcfc1d69ba06a25ea2",
+  "browser": "Chrome, production Vinext build, isolated backend 8070 and frontend 3070",
+  "source": "Input/Miracle_Mile_Lighting_Poles.kml",
+  "source_poles": 74,
+  "source_folders": 5,
+  "qa_runtime_dirs": ["harness/tmp/camera-ux-qa-20261004-01", "harness/tmp/camera-ux-qa-20261004-02", "harness/tmp/camera-ux-qa-20261004-03"],
+  "observations": {
+    "range_50_25_75": "Default 50 m and changed 25/75 m all reached current state through the single calculate action. A changed range showed stale state and removed camera fills. Stable map views showed bounded preview and heat colours after recalculation; no raw Phase 3 FOV/overlap fill control appeared.",
+    "below_2": "At 300 m with one 20 m SMART fixture and pinned 3.56 mm lenses, the map showed the broad preview and coloured bands separately. Independent projected sample at 280 m was 1.424015746905178 px/face, inside preview and outside all bands; see preview JSONL.",
+    "pinned_specs": "Both selected SMART slots displayed pinned camera-imx477 r1 and lens-jl-ln039 r1, 6 mm, 52/40 degrees, 4056x3040 px without relying on density calculation. Historical/missing/incompatible cases were reviewed in resolver and rerun frontend tests.",
+    "measurement": "Two map clicks produced 49.94 m against a 50 m placement target; independent PyProj comparison of recorded response was within 1e-6 m. Third click did not change the result. Clear allowed a new measurement; Esc cancelled unfinished measurement. Pole selection stayed unchanged during measurement.",
+    "measurement_failure_and_race": "Controlled 422 displayed an alert and no numeric distance. A delayed response after Clear did not restore the old line or value. Project and CRS late-response cancellation was checked in current workflow tests and code review.",
+    "drawing_exclusion": "Priority, lighting calculation, and Wi-Fi area draft modes disabled Measure distance. Active measurement disabled drawing entry points and removed the selected SMART azimuth drag marker.",
+    "persistence": "Project export while measurement was complete produced a 74-pole JSON file with exactly Project model fields and no measurement keys. Reopening the same project ID reset the control to Measure distance. The download-event observer timed out, so actual file existence, schema validation and reopen are the evidence.",
+    "visibility_and_layout": "Camera layer hide removed preview and heat map; show restored them. At desktop, 600 px and 390 px viewport widths the lower-left control did not overlap attribution or cause horizontal page overflow.",
+    "browser_console": "No warning or error entries after the isolated-API bundle rebuild. The initial default-API bundle showed a Failed to fetch application toast and was superseded by the recorded isolated-API rebuild."
+  },
+  "observer_limitations": [
+    "Whole-request project/catalog hash observations are not endpoint-isolated if another action runs concurrently. No concurrent-reopen event was excluded in this independent run; the copied measurement JSON preserves every raw event and uncontended comparisons.",
+    "Early screenshots during the map's fit/tile transition were inconclusive for raster visibility. Stable views at 50, 25, 75 and 300 m were used for disposition. CUA screenshots were captured in the QA session, but the browser tool did not provide saved screenshot paths in the repository."
+  ],
+  "result": "PASS"
+}

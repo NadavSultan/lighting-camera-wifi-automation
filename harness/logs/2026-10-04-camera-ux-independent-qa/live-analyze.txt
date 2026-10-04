@@ -1,0 +1,8 @@
+{
+  "all_reference_errors_below_1e_6": true,
+  "browser_50m_click_tolerance": true,
+  "all_uncontended_distance_requests_read_only": true,
+  "controlled_error_recorded": true,
+  "export_has_only_project_model_fields": true,
+  "export_no_measurement_fields": true
+}

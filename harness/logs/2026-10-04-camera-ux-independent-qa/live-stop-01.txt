@@ -1,0 +1,19 @@
+Get-CimInstance : Access denied
+At line:1 char:33
++ ... ce='Stop'; (Get-CimInstance Win32_Process -Filter 'ProcessId=20980' - ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-CimInstance], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80041003,Microsoft.Management.Infrastructure.CimCmdlets.GetCimInstanceCommand
+
+Traceback (most recent call last):
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_camera_range_lens_distance_live.py", line 305, in <module>
+    {"serve": serve, "verify": verify, "stop": stop}[args.mode]()
+  File "C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\harness\verify\run_camera_range_lens_distance_live.py", line 196, in stop
+    raw = subprocess.check_output(["powershell", "-NoProfile", "-Command",
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\NadavSultan\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\NadavSultan\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['powershell', '-NoProfile', '-Command', "$ErrorActionPreference='Stop'; (Get-CimInstance Win32_Process -Filter 'ProcessId=20980' -ErrorAction Stop).CommandLine"]' returned non-zero exit status 1.
