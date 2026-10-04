@@ -34,14 +34,12 @@ type MapFocusRequest =
   | { kind: "bounds"; coordinates: Array<[number, number]> };
 
 const FIXTURE_COLORS: Record<FixtureType, string> = { LITE: "var(--lite)", WIFI: "var(--wifi)", SMART: "var(--smart)" };
-type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_fov" | "camera_overlap" | "camera_pixel_density" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
+type LayerKey = "original_customer_poles" | "lite_fixtures" | "wifi_fixtures" | "smart_fixtures" | "camera_pixel_density" | "priority_areas" | "wifi_coverage" | "calculation_areas" | "calculation_points" | "lighting_heat_map" | "cap_locations" | "cap_connections" | "warnings";
 const LAYERS: Array<{ key: LayerKey; label: string; color: string; phase?: number }> = [
   { key: "original_customer_poles", label: "Original customer poles", color: "#8795a4" },
   { key: "lite_fixtures", label: "LITE fixtures", color: "var(--lite)" },
   { key: "wifi_fixtures", label: "WIFI fixtures", color: "var(--wifi)" },
   { key: "smart_fixtures", label: "SMART fixtures", color: "var(--smart)" },
-  { key: "camera_fov", label: "Camera 1 / Camera 2 FOV", color: "#8b5cf6" },
-  { key: "camera_overlap", label: "Camera footprint overlap", color: "#ec4899" },
   { key: "camera_pixel_density", label: "Camera pixel density", color: "#4cc9f0" },
   { key: "priority_areas", label: "Priority areas", color: "#f59e0b" },
   { key: "wifi_coverage", label: "Conceptual Wi-Fi", color: "#22d3ee", phase: 5 },
@@ -61,7 +59,7 @@ const LEFT_DISCIPLINES: Array<{ id: LeftDiscipline; label: string }> = [
 ];
 const DISCIPLINE_LAYERS: Record<LeftDiscipline, LayerKey[]> = {
   lighting: ["original_customer_poles", "lite_fixtures", "wifi_fixtures", "smart_fixtures", "calculation_areas", "calculation_points", "lighting_heat_map", "warnings"],
-  camera: ["original_customer_poles", "smart_fixtures", "camera_fov", "camera_overlap", "camera_pixel_density", "priority_areas", "warnings"],
+  camera: ["original_customer_poles", "smart_fixtures", "camera_pixel_density", "priority_areas", "warnings"],
   wifi: ["original_customer_poles", "wifi_fixtures", "smart_fixtures", "wifi_coverage", "warnings"],
   cap: ["original_customer_poles", "cap_locations", "cap_connections", "warnings"],
 };
@@ -848,9 +846,10 @@ export function EngineeringWorkspace() {
                 onCalculate={calculateDensity}
                 onToggleLegend={() => setDensityLegendOpen((open) => !open)}
               />
+              <p className="helper camera-preview-guidance">Calculate camera density to show the distance-bounded preview and heat map together. After changing Maximum visible distance, recalculate to refresh both. Preview outlines below 2 px/face have no density colour.</p>
               <section className="section">
                 <div className="section-heading"><h3>Priority areas</h3><span className="helper">Geometric only</span></div>
-                <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Camera 1 purple · Camera 2 cyan · overlap pink · priority area amber</small></div>
+                <div className="geometry-metrics"><strong>{project?.camera_geometry.footprints.filter((item) => item.valid).length ?? 0} valid footprints</strong><span>{project?.camera_geometry.overlaps.length ?? 0} overlap pairs · {(project?.camera_geometry.overlaps.reduce((sum, item) => sum + item.intersection_area_m2, 0) ?? 0).toFixed(1)} m² summed pairwise overlap</span><small>Stored Phase 3 metrics · priority area amber</small></div>
                 <div className="camera-projection-legend" role="note">
                   <strong>Projection boundary</strong>
                   <p className="helper">{CAMERA_PROJECTION_BOUNDARY_EXPLANATION}</p>

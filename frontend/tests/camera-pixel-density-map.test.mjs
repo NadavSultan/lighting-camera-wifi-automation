@@ -8,6 +8,37 @@ function project(status = "current", visible = true) {
   return { layer_state: { camera_pixel_density: visible }, camera_pixel_density: { state: { status, calculation_input_sha256: "a" }, result: { calculation_input_sha256: "a", camera_results: [{ footprint_id: "pole<script>/camera&1", bands: [{ band_id: "px-face-30", rank: 8, minimum_px_per_face: 30, maximum_px_per_face: 45, colour_token: "face-density-30", wgs84_rings: [[ring, [[-79.98,25.02],[-79.97,25.02],[-79.97,25.03],[-79.98,25.03],[-79.98,25.02]]]] }] }], overlap_regions: [{ overlap_region_id: "o1", camera_footprint_ids: ["pole<script>/camera&1", "pole-b/\u202ecamera"], multiplicity: 2, winning_camera_footprint_id: "pole<script>/camera&1", winning_band_id: "px-face-30", winning_band_rank: 8, wgs84_rings: [[ring]] }] } } };
 }
 
+test("bounded preview preserves envelopes including holes below density thresholds", () => {
+  assert.equal(typeof densityMap.densityPreviewFeatures, "function");
+  const current = project();
+  const camera = current.camera_pixel_density.result.camera_results[0];
+  const rings = camera.bands[0].wgs84_rings;
+  camera.valid = true; camera.enabled = true;
+  camera.projection_envelope = { wgs84_rings: rings };
+  camera.bands = [];
+  const before = structuredClone(current);
+  const preview = densityMap.densityPreviewFeatures(current);
+  assert.equal(preview.features.length, 1);
+  assert.deepEqual(preview.features[0].geometry.coordinates, rings[0]);
+  assert.equal(preview.features[0].geometry.coordinates.length, 2);
+  assert.deepEqual(current, before);
+  for (const status of ["stale", "invalid", "not-calculated"]) {
+    current.camera_pixel_density.state.status = status;
+    assert.equal(densityMap.densityPreviewFeatures(current).features.length, 0);
+  }
+  current.camera_pixel_density.state.status = "current";
+  current.layer_state.camera_pixel_density = false;
+  assert.equal(densityMap.densityPreviewFeatures(current).features.length, 0);
+  current.layer_state.camera_pixel_density = true;
+  current.camera_pixel_density.state.calculation_input_sha256 = "mismatch";
+  assert.equal(densityMap.densityPreviewFeatures(current).features.length, 0);
+  current.camera_pixel_density.state.calculation_input_sha256 = "a";
+  camera.valid = false;
+  assert.equal(densityMap.densityPreviewFeatures(current).features.length, 0);
+  camera.valid = true; camera.enabled = false;
+  assert.equal(densityMap.densityPreviewFeatures(current).features.length, 0);
+});
+
 test("density GeoJSON requires a matching current visible result and preserves holes", () => {
   assert.equal(densityBandFeatures(project("stale")).features.length, 0);
   assert.equal(densityBandFeatures(project("current", false)).features.length, 0);

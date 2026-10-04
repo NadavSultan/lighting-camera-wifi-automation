@@ -1,0 +1,14 @@
+COMMAND: ..\.venv\Scripts\python.exe -m pytest tests/test_bl016_camera_pixel_density.py -q -p no:cacheprovider --basetemp ../harness/tmp/m2-backend-01
+43404d7779ea506e8029ba7173fbaa8ebf3f42d7
+..................................................................       [100%]
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\NadavSultan\Desktop\Nadav\lighting-camera-wifi-automation\.worktrees\bl016-heatmap-correction\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT: 0

@@ -1,0 +1,26 @@
+COMMAND: node --test tests/camera-pixel-density-map.test.mjs tests/camera-pixel-density-view.test.mjs tests/camera-projection-legend.test.mjs
+43404d7779ea506e8029ba7173fbaa8ebf3f42d7
+✔ bounded preview preserves envelopes including holes below density thresholds (3.0666ms)
+✔ density GeoJSON requires a matching current visible result and preserves holes (0.5884ms)
+✔ heatmap tile source only loads a visible, matching current calculation (0.2078ms)
+✔ inspection uses stored winner and sorted contributors without HTML (0.3057ms)
+✔ overlap features carry the stored winning camera's displayed px/face interval (0.1842ms)
+✔ layered band hits select the overlap winner, complete contributors, and displayed range (0.2035ms)
+✔ MapLibre-serialized overlap contributors still outrank a single band hit (0.2078ms)
+✔ one map click over multiple density bands dispatches exactly one complete inspection (0.3577ms)
+✔ dense overlap popup remains legible and scrollable inside the map (0.19ms)
+✔ ten layer definitions are ascending and use canonical colour and opacity (0.4448ms)
+✔ camera density view distinguishes current, hidden, stale, and invalid results (1.6466ms)
+✔ local invalidation retains results and ignores presentation-only edits (2.5511ms)
+✔ camera explanation uses the approved flat-ground meaning (1.0305ms)
+✔ camera explanation does not claim detection capability or calculated pixel density (0.1785ms)
+✔ Camera pane renders the legend beside existing footprint metrics (13.0353ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 240.7003
+EXIT: 0

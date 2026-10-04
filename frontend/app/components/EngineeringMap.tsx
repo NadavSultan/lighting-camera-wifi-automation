@@ -13,7 +13,7 @@ import { screenArrow } from "../lib/fixture-direction-view.mjs";
 import { cancelMapFrame, createMapFrameScheduler } from "../lib/map-frame-scheduler.mjs";
 import { cameraDensityHeatmapTiles, type FixtureDirectionPreview } from "../lib/api";
 import { backgroundAvailability, backgroundLayerVisibility, isSatelliteTileError, rasterSourceSpec, type BackgroundChoice, type SatelliteRasterConfig } from "../lib/map-background.mjs";
-import { attachDensityInspection, densityBandFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
+import { attachDensityInspection, densityBandFeatures, densityPreviewFeatures, densityInspectionStyle, densityOverlapFeatures, densityOverlapLabelPoints } from "../lib/camera-pixel-density-map.mjs";
 import CameraPixelDensityLabels from "./CameraPixelDensityLabels";
 
 const FIXTURE_ARROW_COLORS: Record<FixtureType, string> = { LITE: "#ef4444", WIFI: "#facc15", SMART: "#3b82f6" };
@@ -47,14 +47,6 @@ function features(project: Project | null): FeatureCollection<Point> {
 function selectedFeature(pole: EffectivePole | null): FeatureCollection<Point> {
   if (!pole) return EMPTY;
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: { id: pole.id }, geometry: { type: "Point", coordinates: [pole.longitude, pole.latitude] } }] };
-}
-
-function cameraFeatures(project: Project | null): FeatureCollection<Polygon> {
-  return { type: "FeatureCollection", features: project?.camera_geometry.footprints.filter((item) => item.valid && item.wgs84_coordinates).map((item) => ({ type: "Feature", properties: { id: `${item.pole_id}/${item.camera_slot_id}`, slot: item.camera_slot_id }, geometry: { type: "Polygon", coordinates: [item.wgs84_coordinates!] } })) ?? [] };
-}
-
-function overlapFeatures(project: Project | null): FeatureCollection<Polygon> {
-  return { type: "FeatureCollection", features: project?.camera_geometry.overlaps.flatMap((item) => item.wgs84_coordinates.map((ring) => ({ type: "Feature" as const, properties: { area_m2: item.intersection_area_m2 }, geometry: { type: "Polygon" as const, coordinates: [ring] } }))) ?? [] };
 }
 
 function priorityFeatures(project: Project | null): FeatureCollection<Polygon> {
@@ -210,8 +202,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       });
       map.addSource("poles", { type: "geojson", data: EMPTY });
       map.addSource("selection", { type: "geojson", data: EMPTY });
-      map.addSource("camera-fov", { type: "geojson", data: EMPTY_GEOMETRY });
-      map.addSource("camera-overlap", { type: "geojson", data: EMPTY_GEOMETRY });
+      map.addSource("camera-density-preview", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-density-bands", { type: "geojson", data: EMPTY_GEOMETRY });
       map.addSource("camera-density-heatmap", { type: "raster", tiles: [], tileSize: 256 });
       map.addSource("camera-density-overlaps", { type: "geojson", data: EMPTY_GEOMETRY });
@@ -232,9 +223,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
       map.addLayer({ id: "wifi-coverage-outline", type: "line", source: "wifi-coverage", paint: { "line-color": "#22d3ee", "line-width": 2.5, "line-opacity": .95 } });
       map.addLayer({ id: "wifi-analysis-area-line", type: "line", source: "wifi-analysis-areas", paint: { "line-color": "#a3e635", "line-width": 2, "line-dasharray": [3, 2] } });
       map.addLayer({ id: "wifi-analysis-area-fill", type: "fill", source: "wifi-analysis-areas", paint: { "fill-color": "#a3e635", "fill-opacity": .04 } });
-      map.addLayer({ id: "camera-1-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-1"], paint: { "fill-color": "#a78bfa", "fill-opacity": .27, "fill-outline-color": "#c4b5fd" } });
-      map.addLayer({ id: "camera-2-fov", type: "fill", source: "camera-fov", filter: ["==", ["get", "slot"], "camera-2"], paint: { "fill-color": "#22d3ee", "fill-opacity": .24, "fill-outline-color": "#67e8f9" } });
-      map.addLayer({ id: "camera-overlap-fill", type: "fill", source: "camera-overlap", paint: { "fill-color": "#ec4899", "fill-opacity": .48, "fill-outline-color": "#f9a8d4" } });
+      map.addLayer({ id: "camera-density-preview-fill", type: "fill", source: "camera-density-preview", paint: { "fill-color": "#94a3b8", "fill-opacity": .09 } });
+      map.addLayer({ id: "camera-density-preview-outline", type: "line", source: "camera-density-preview", paint: { "line-color": "#cbd5e1", "line-opacity": .55, "line-width": 1 } });
       map.addLayer({ id: "camera-density-heatmap", type: "raster", source: "camera-density-heatmap", paint: { "raster-opacity": 1, "raster-resampling": "linear" } });
       // Persisted vector bands stay queryable for inspection, but their flat
       // fills must not obscure the continuous backend-rendered heat map.
@@ -342,8 +332,7 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
     const update = () => {
       (map.getSource("poles") as GeoJSONSource | undefined)?.setData(features(project));
       (map.getSource("selection") as GeoJSONSource | undefined)?.setData(selectedFeature(selected));
-      (map.getSource("camera-fov") as GeoJSONSource | undefined)?.setData(cameraFeatures(project));
-      (map.getSource("camera-overlap") as GeoJSONSource | undefined)?.setData(overlapFeatures(project));
+      (map.getSource("camera-density-preview") as GeoJSONSource | undefined)?.setData(project ? densityPreviewFeatures(project) : EMPTY_GEOMETRY);
       (map.getSource("camera-density-bands") as GeoJSONSource | undefined)?.setData(project ? densityBandFeatures(project) : EMPTY_GEOMETRY);
       const tileUrl = project ? cameraDensityHeatmapTiles(project)[0] ?? "" : "";
       if (tileUrl !== heatmapTileUrlRef.current) {
@@ -370,9 +359,8 @@ export function EngineeringMap({ project, selected, onSelect, onFixtureAzimuthCh
         ["poles-lite", project?.layer_state.lite_fixtures ?? true],
         ["poles-wifi", project?.layer_state.wifi_fixtures ?? true],
         ["poles-smart", project?.layer_state.smart_fixtures ?? true],
-        ["camera-1-fov", project?.layer_state.camera_fov ?? true],
-        ["camera-2-fov", project?.layer_state.camera_fov ?? true],
-        ["camera-overlap-fill", project?.layer_state.camera_overlap ?? true],
+        ["camera-density-preview-fill", Boolean(project?.layer_state.camera_pixel_density)],
+        ["camera-density-preview-outline", Boolean(project?.layer_state.camera_pixel_density)],
         ["camera-density-heatmap", Boolean(project?.layer_state.camera_pixel_density)],
         ...Array.from({ length: 10 }, (_, index) => [`camera-density-band-${index + 1}`, Boolean(project?.layer_state.camera_pixel_density)] as [string, boolean]),
         ["camera-density-overlap-dots", Boolean(project?.layer_state.camera_pixel_density)],

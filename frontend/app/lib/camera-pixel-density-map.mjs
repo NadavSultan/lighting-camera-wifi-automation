@@ -27,6 +27,18 @@ export function densityBandFeatures(project) {
   })))) };
 }
 
+export function densityPreviewFeatures(project) {
+  const result = visibleResult(project);
+  if (!result) return empty();
+  return { type: "FeatureCollection", features: result.camera_results
+    .filter((camera) => camera.valid && camera.enabled)
+    .flatMap((camera) => camera.projection_envelope.wgs84_rings.map((rings, part) => ({
+      type: "Feature", id: `${camera.footprint_id}/preview/${part}`,
+      properties: { footprint_id: camera.footprint_id, slot: camera.camera_slot_id },
+      geometry: { type: "Polygon", coordinates: rings },
+    }))) };
+}
+
 export function densityOverlapFeatures(project) {
   const result = visibleResult(project);
   if (!result) return empty();

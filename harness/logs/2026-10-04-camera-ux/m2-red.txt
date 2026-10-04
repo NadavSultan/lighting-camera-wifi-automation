@@ -1,0 +1,44 @@
+COMMAND: node --test tests/camera-pixel-density-map.test.mjs
+43404d7779ea506e8029ba7173fbaa8ebf3f42d7
+✖ bounded preview preserves envelopes including holes below density thresholds (4.5716ms)
+✔ density GeoJSON requires a matching current visible result and preserves holes (1.8118ms)
+✔ heatmap tile source only loads a visible, matching current calculation (0.5627ms)
+✔ inspection uses stored winner and sorted contributors without HTML (1.1234ms)
+✔ overlap features carry the stored winning camera's displayed px/face interval (0.1809ms)
+✔ layered band hits select the overlap winner, complete contributors, and displayed range (0.205ms)
+✔ MapLibre-serialized overlap contributors still outrank a single band hit (0.1895ms)
+✔ one map click over multiple density bands dispatches exactly one complete inspection (0.3377ms)
+✔ dense overlap popup remains legible and scrollable inside the map (0.1497ms)
+✔ ten layer definitions are ascending and use canonical colour and opacity (0.3851ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 197.7603
+
+✖ failing tests:
+
+test at tests\camera-pixel-density-map.test.mjs:11:1
+✖ bounded preview preserves envelopes including holes below density thresholds (4.5716ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///C:/Users/NadavSultan/Desktop/Nadav/lighting-camera-wifi-automation/.worktrees/bl016-heatmap-correction/frontend/tests/camera-pixel-density-map.test.mjs:12:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+EXIT: 1

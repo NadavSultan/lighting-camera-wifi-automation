@@ -72,6 +72,27 @@ SUPPORTED_LEGACY_VERSIONS = (
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.parametrize("maximum", [50, 25, 75])
+def test_camera_ux_preview_bounds_and_phase3_preservation(tmp_path, maximum):
+    from app.services.camera_geometry import calculate_camera_geometry
+    project, store = bl016_configured_project(tmp_path)
+    project.camera_geometry = calculate_camera_geometry(project, store.fixtures(), store.cameras())
+    before = project.camera_geometry.model_dump_json()
+    assert project.camera_pixel_density_profile.maximum_visible_distance_m == 50
+    project.camera_pixel_density_profile.maximum_visible_distance_m = maximum
+    legend = PixelDensityLegendDefinition.model_validate_json((ROOT / "data/cameras/camera-pixel-density-legend.json").read_text(encoding="utf-8"))
+    result = calculate_camera_pixel_density(project, store.fixtures(), store.cameras(), legend)
+    to_projected = Transformer.from_crs("EPSG:4326", project.projected_crs, always_xy=True)
+    for camera in result.camera_results:
+        assert camera.valid
+        pole = next(p for p in project.source.poles if p.id == camera.pole_id)
+        x, y = to_projected.transform(pole.longitude, pole.latitude)
+        vertices = [point for polygon in camera.projection_envelope.projected_rings_m for ring in polygon for point in ring]
+        assert vertices
+        assert max(math.hypot(px - x, py - y) for px, py in vertices) <= maximum + 1e-7
+    assert project.camera_geometry.model_dump_json() == before
+
+
 def bl016_catalogs(tmp_path: Path) -> CatalogStore:
     return CatalogStore(tmp_path / "catalogs", ROOT / "data" / "phase2")
 

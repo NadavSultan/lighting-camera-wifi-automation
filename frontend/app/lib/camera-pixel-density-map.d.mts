@@ -5,6 +5,7 @@ export type DensityOverlapLabelPoint = { id: string; coordinate: [number, number
 export type DensityInspection = { contributors: string[]; winner: string; winningBandId: string; multiplicity: number; minimumPxPerFace: number | null; maximumPxPerFace: number | null };
 export function densityHeatmapTileTemplate(project: Project | null, apiUrl: string): string | null;
 export function densityBandFeatures(project: Project): FeatureCollection<Polygon>;
+export function densityPreviewFeatures(project: Project): FeatureCollection<Polygon>;
 export function densityOverlapFeatures(project: Project): FeatureCollection<Polygon>;
 export function densityOverlapLabelPoints(project: Project): DensityOverlapLabelPoint[];
 export function densityInspectionAt(features: Array<{ properties: unknown }>): DensityInspection | null;
