@@ -12,9 +12,9 @@ Known documentation conflict: `README.md` still describes a Phase 4 application 
 
 Historical wording in section 16 of the Phase 6 planning contract says its policy decisions alone did not authorize implementation. The later, explicit implementation authorization is recorded by the contract's current status/authorization boundary and `docs/decision-log.md` DL-016. Do not erase that chronology or misread the earlier sentence as the current gate.
 
-## Camera UX handoff — 2026-10-04
+## Camera UX scoped closure — 2026-10-07
 
-Verified product `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in isolated BL-016 worktree. Summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`, handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`, readiness `harness/verify/2026-10-04-camera-range-lens-distance-readiness.json`. Use short unique Windows pytest temp paths. Use ownership-safe live runner; do not repeat legacy port cleanup. Preserve failures and observer limitations. QA/master pending; no merge/push/seal.
+Verified product `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in the isolated BL-016 worktree. Independent QA PASS: `harness/verify/2026-10-04-camera-range-lens-distance-independent-qa.md`; scoped master PASS: `docs/2026-10-07-camera-range-lens-distance-scoped-master-gate.md`. Use short unique Windows pytest temp paths and the ownership-safe live runner; do not repeat legacy port cleanup. Preserve recorded failures and observer limitations. No merge, push, new seal, or Phase 8.
 
 ## Repository commands
 

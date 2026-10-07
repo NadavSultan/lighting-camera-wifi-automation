@@ -1,10 +1,10 @@
 # Current status
 
-Status reviewed: 2026-10-04. Phases 1-7 remain accepted and formally closed; Phase 7 retains its 2026-09-05 seal. No Phase 8 exists. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`; Stage 3 P2 (BL-013, BL-014, BL-015) is accepted at `e5023ee`. BL-016 / WA-09 is accepted by the 2026-09-30 scoped master PASS for product commit `5656da55`, after Independent QA PASS at evidence commit `867cd72a`. Earlier QA failures remain preserved as historical records.
+Status reviewed: 2026-10-07. Phases 1-7 remain accepted and formally closed; Phase 7 retains its 2026-09-05 seal. No Phase 8 exists. Stage 2 (BL-012, BL-017, BL-018) is accepted at `eb3a606`; Stage 3 P2 (BL-013, BL-014, BL-015) is accepted at `e5023ee`. BL-016 / WA-09 is accepted by the 2026-09-30 scoped master PASS for product commit `5656da55`, after Independent QA PASS at evidence commit `867cd72a`. Earlier QA failures remain preserved as historical records.
 
-## Camera UX awaiting independent QA
+## Camera UX scoped gate
 
-Separately approved 2026-10-04 design/plan implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in isolated BL-016 worktree. Bounded range/preview, pinned specifications and transient projected-metre measurement verified (backend387/frontend126; actual74-pole production browser). Summary `harness/verify/2026-10-04-camera-range-lens-distance-summary.md`, independent QA handoff `harness/verify/2026-10-04-camera-range-lens-distance-qa-handoff.md`. Clean readiness separate from QA/master acceptance. Prior BL-016 and phases1–7 acceptance unchanged; no merge/push/new seal.
+Separately approved 2026-10-04 design/plan implemented at `fb1c522f2f14e2eebfa638f74af3cbde74920b1e` in the isolated BL-016 worktree. Bounded range/preview, pinned specifications, and transient projected-metre measurement passed independent QA on 2026-10-04 and the scoped master gate on 2026-10-07. Decision: `docs/2026-10-07-camera-range-lens-distance-scoped-master-gate.md`; QA: `harness/verify/2026-10-04-camera-range-lens-distance-independent-qa.md`. Prior BL-016 and phases 1–7 acceptance is unchanged; no merge, push, Phase 8, or new seal.
 
 ## Completed
 
@@ -55,4 +55,4 @@ Separately approved 2026-10-04 design/plan implemented at `fb1c522f2f14e2eebfa63
 
 Phases 1-7 remain formally closed. Report packages are transient derived artifacts and do not mutate source or engineering results. Item-based Stage 1 P1 CONDITIONAL PASS: `docs/post-roadmap-stage1-p1-scoped-master-decision-2026-09-08.md`.
 
-**Current gate: BL-016 accepted, integration not yet authorized.** The controlling scoped master decision is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`; Independent QA PASS is `harness/verify/2026-09-30-bl-016-qa03-ia01-independent-qa.md`. No merge or push was performed by the gate. BL-019/020, other post-roadmap implementation, Phase 8, and any BL-016 phase seal remain unauthorized.
+**Current gate: BL-016 and the later camera UX correction accepted; integration not yet authorized.** The original BL-016 decision is `docs/bl-016-scoped-master-gate-decision-2026-09-30.md`; the separate camera UX decision is `docs/2026-10-07-camera-range-lens-distance-scoped-master-gate.md`. No merge or push was performed by either gate. BL-019/020, other post-roadmap implementation, Phase 8, and any new phase seal remain unauthorized.
